@@ -1,11 +1,44 @@
 package de.hgu.gsehen;
 
-public class Gsehen {
+import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.stage.Stage;
 
+/**
+ * The GSEHEN main application.
+ */
+public class Gsehen extends Application {
+
+	/**
+	 * Main method.
+	 *
+	 * @param args
+	 *            the command line arguments
+	 */
 	public static void main(String[] args) {
-		System.out.println("Hello world, eine Änderung, schon die zweite");
-		System.out.println("Test");
-		System.out.println("Test2");
+		Application.launch(args);
 	}
 
+	@Override
+	public void start(Stage stage) {
+		stage.setTitle("Hello World");
+		Group root = new Group();
+		Scene scene = new Scene(root, 300, 250);
+		Button btn = new Button();
+		btn.setLayoutX(100);
+		btn.setLayoutY(80);
+		btn.setText("Hello World");
+		btn.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent event) {
+				System.out.println("Hello World");
+			}
+		});
+		root.getChildren().add(btn);
+		stage.setScene(scene);
+		stage.show();
+	}
 }
