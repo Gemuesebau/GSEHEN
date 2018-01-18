@@ -13,32 +13,31 @@ import javafx.stage.Stage;
  */
 public class Gsehen extends Application {
 
-	/**
-	 * Main method.
-	 *
-	 * @param args
-	 *            the command line arguments
-	 */
-	public static void main(String[] args) {
-		Application.launch(args);
-	}
+  /**
+   * Main method.
+   *
+   * @param args the command line arguments
+   */
+  public static void main(String[] args) {
+    Application.launch(args);
+  }
 
-	@Override
-	public void start(Stage stage) {
-		stage.setTitle("Hello World");
-		Group root = new Group();
-		Scene scene = new Scene(root, 300, 250);
-		Button btn = new Button();
-		btn.setLayoutX(100);
-		btn.setLayoutY(80);
-		btn.setText("Hello World");
-		btn.setOnAction(new EventHandler<ActionEvent>() {
-			public void handle(ActionEvent event) {
-				System.out.println("Hello World");
-			}
-		});
-		root.getChildren().add(btn);
-		stage.setScene(scene);
-		stage.show();
-	}
+  @Override
+  public void start(Stage stage) {
+    stage.setTitle("Hello World");
+    Button btn = new Button();
+    btn.setLayoutX(100);
+    btn.setLayoutY(80);
+    btn.setText("Hello World");
+    btn.setOnAction(new EventHandler<ActionEvent>() {
+      public void handle(ActionEvent event) {
+        System.out.println("Hello World");
+      }
+    });
+    Group root = new Group();
+    root.getChildren().add(btn);
+    Scene scene = new Scene(root, 300, 250);
+    stage.setScene(scene);
+    stage.show();
+  }
 }
