@@ -3,6 +3,11 @@ package de.hgu.gsehen.webview;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/**
+ * Companion class to map view (HTML).
+ *
+ * @author AT
+ */
 public class Map {
 
   private static final String MAP_HTML = "map.html";
