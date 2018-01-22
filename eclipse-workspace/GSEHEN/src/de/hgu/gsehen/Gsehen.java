@@ -3,17 +3,19 @@ package de.hgu.gsehen;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.HBox;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 /**
  * The GSEHEN main application.
+ *
+ * @author MO, AT
  */
 public class Gsehen extends Application {
 
+  private static final String WEB_VIEW_ID = "#webView";
   private static final String MAIN_FXML = "main.fxml";
 
   /**
@@ -25,6 +27,9 @@ public class Gsehen extends Application {
     Application.launch(args);
   }
 
+  /* (non-Javadoc)
+   * @see javafx.application.Application#start(javafx.stage.Stage)
+   */
   @Override
   public void start(Stage stage) {
     Parent root;
@@ -38,43 +43,7 @@ public class Gsehen extends Application {
     stage.setScene(scene);
     stage.sizeToScene();
     stage.show();
-    Node node = stage.getScene().getRoot().getChildrenUnmodifiable().get(0);
-    node = node;
-
-    // SplitPane splitPane1 = new SplitPane();
-    // splitPane1.setPrefSize(200, 100);
-    // splitPane1.setOrientation(Orientation.VERTICAL);
-    // final Button l = new Button("Left Button");
-    // final Button r = new Button("Right Button");
-    // splitPane1.getItems().addAll(l, r);
-    // HBox hbox = createHbox();
-    // hbox.getChildren().add(splitPane1);
-    //
-    // Scene scene = new Scene(new Group(hbox), 560, 240);
-    // scene.setFill(Color.GHOSTWHITE);
-    // stage.setScene(scene);
-    // stage.setTitle("SplitPane");
-    // stage.show();
-  }
-  // @Override
-  // public void start(Stage stage) {
-  // stage.setTitle("Hello World");
-  // Button btn = new Button();
-  // btn.setLayoutX(100);
-  // btn.setLayoutY(80);
-  // btn.setText("Hello World");
-  // btn.setOnAction(event -> System.out.println("Hello World")); // TODO: Lambda Schreibweise
-  // Group root = new Group();
-  // root.getChildren().add(btn);
-  // Scene scene = new Scene(root, 300, 250);
-  // stage.setScene(scene);
-  // stage.show();
-  // }
-
-  private HBox createHbox() {
-    HBox hbox = new HBox(20);
-    hbox.setTranslateX(20);
-    hbox.setTranslateY(20);
-    return hbox;
+    WebView webView = (WebView)stage.getScene().lookup(WEB_VIEW_ID);
+    webView.getEngine().load("https://maps.google.de/");
   }
 }
