@@ -1,10 +1,13 @@
 package de.hgu.gsehen;
 
+import de.hgu.gsehen.webview.Map;
 import java.io.IOException;
 import javafx.application.Application;
+import javafx.concurrent.Worker.State;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
@@ -27,23 +30,34 @@ public class Gsehen extends Application {
     Application.launch(args);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see javafx.application.Application#start(javafx.stage.Stage)
    */
+  @SuppressWarnings("checkstyle:rightcurly")
   @Override
   public void start(Stage stage) {
     Parent root;
     try {
       root = FXMLLoader.load(getClass().getResource(MAIN_FXML));
-    } catch (IOException e) {
-      e.printStackTrace();
-      return;
     }
-    Scene scene = new Scene(root);
+    catch (IOException e) {
+      throw new RuntimeException(MAIN_FXML + " couldn't be loaded", e);
+    }
+    Scene scene = new Scene(root, 1280, 768);
     stage.setScene(scene);
     stage.sizeToScene();
     stage.show();
-    WebView webView = (WebView)stage.getScene().lookup(WEB_VIEW_ID);
-    webView.getEngine().load("https://maps.google.de/");
+    WebEngine engine = ((WebView) stage.getScene().lookup(WEB_VIEW_ID)).getEngine();
+    engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
+      if (newState == State.SUCCEEDED) {
+        engine.executeScript("initialize({"
+            + " center: new google.maps.LatLng(52.266344, 10.519835),"
+            + " zoom: 16, fullscreenControl: false"
+            + " }); draw()");
+      }
+    });
+    engine.loadContent(Map.getMapHtml());
   }
 }
