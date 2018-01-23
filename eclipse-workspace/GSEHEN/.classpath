@@ -10,5 +10,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/home/matthias/Dokumente/GSEHEN/Programmcode/GSEHEN/eclipse-workspace/GSEHEN/lib/main/h2-1.4.195.jar"/>
+	<classpathentry kind="lib" path="lib/test/org.junit.jupiter.api_5.0.0.v20170910-2246.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
