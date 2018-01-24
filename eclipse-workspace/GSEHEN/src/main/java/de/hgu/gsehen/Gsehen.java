@@ -10,7 +10,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Properties;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -24,6 +24,7 @@ import javafx.stage.Stage;
  *
  * @author MO, AT
  */
+@SuppressWarnings({"checkstyle:commentsindentation"})
 public class Gsehen extends Application {
 
   private static final String GSEHEN_H2_LOCAL_DB = "gsehen-h2-local.db";
@@ -34,12 +35,23 @@ public class Gsehen extends Application {
   private static final String DEBUG_TEXTAREA_ID = "#debugTA";
   private static final String TAB_PANE_ID = "#tabPane";
 
+  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+
   /**
    * Main method.
    *
    * @param args the command line arguments
    */
+//  @SuppressWarnings({"checkstyle:rightcurly"})
   public static void main(String[] args) {
+//    try {
+//      Server server = Server.createWebServer();
+//      server.start();
+//    }
+//    catch (SQLException e) {
+//      e.printStackTrace();
+//    }
+//    server.stop();
     Application.launch(args);
   }
 
@@ -48,7 +60,7 @@ public class Gsehen extends Application {
    * 
    * @see javafx.application.Application#start(javafx.stage.Stage)
    */
-  @SuppressWarnings({"checkstyle:rightcurly", "checkstyle:commentsindentation"})
+  @SuppressWarnings({"checkstyle:rightcurly"})
   @Override
   public void start(Stage stage) {
     Parent root;
@@ -75,21 +87,19 @@ public class Gsehen extends Application {
     TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
     tabPane.getSelectionModel().select(1);
     TextArea debugTextArea = (TextArea) stage.getScene().lookup(DEBUG_TEXTAREA_ID);
-    
+
     Connection con = null;
-    Properties connectionProps = new Properties();
-//    connectionProps.put("user", this.userName);
-//    connectionProps.put("password", this.password);
     try {
-      con = DriverManager.getConnection(
-        "jdbc:h2:./" + GSEHEN_H2_LOCAL_DB,
-        connectionProps);
+      String jdbcUrl = "jdbc:h2:./" + GSEHEN_H2_LOCAL_DB + ";CIPHER=AES";
+      con = DriverManager.getConnection(jdbcUrl, "", "OCddpvUe ");
+      // PW: space is important! But this is just a test, must be supplied by user or the like
+      LOGGER.info("Opened local H2 database at url " + jdbcUrl);
     }
     catch (SQLException e) {
       throw new RuntimeException(GSEHEN_H2_LOCAL_DB + " couldn't be opened", e);
     }
     // in h2, the DATE column type has no time information!
-    // id: http://www.h2database.com/html/datatypes.html#identity_type
+    //  id: http://www.h2database.com/html/datatypes.html#identity_type
     executeUpdate(con,
         "CREATE TABLE IF NOT EXISTS "
             + DAYDATA_TABLE

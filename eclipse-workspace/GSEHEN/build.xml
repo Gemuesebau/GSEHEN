@@ -21,9 +21,39 @@
       </exec>
     </target>
 
+    <target name="delete-entire-sibling-db-files">
+      <exec executable="cmd" os="Windows 10">
+        <arg value="/c &quot;del gsehen-h2-local.db.mv.db.mv.db&quot;" />
+      </exec>
+      <exec executable="cmd" os="Windows 10">
+        <arg value="/c &quot;del gsehen-h2-local.db.mv.db.trace.db&quot;" />
+      </exec>
+      <exec executable="cmd" os="Windows 10">
+        <arg value="/c &quot;del gsehen-h2-local.db.trace.db&quot;" />
+      </exec>
+    </target>
+
+    <target name="delete-test-db-file">
+      <exec executable="cmd" os="Windows 10">
+      	<arg value="/c &quot;del C:\Users\Alex\test.mv.db&quot;" />
+      </exec>
+    </target>
+
     <target name="list-db-file">
       <exec executable="cmd" os="Windows 10">
       	<arg value="/c &quot;dir gsehen-h2-local.db.mv.db | findstr h2&quot;" />
+      </exec>
+    </target>
+
+    <target name="list-sibling-db-files">
+      <exec executable="cmd" os="Windows 10">
+      	<arg value="/c &quot;dir *.db | findstr h2 | findstr /V gsehen-h2-local.db.mv.db$&quot;" />
+      </exec>
+    </target>
+
+    <target name="list-user-home-db-files">
+      <exec executable="cmd" os="Windows 10">
+      	<arg value="/c &quot;dir /b /s ${user.home} | findstr /V \\AppData\\ | findstr [ve]\.db$&quot;" />
       </exec>
     </target>
 </project>
