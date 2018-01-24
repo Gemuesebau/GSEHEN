@@ -1,6 +1,7 @@
 package de.hgu.gsehen.evapotranspiration;
 
 import static java.lang.Math.PI;
+
 import org.junit.platform.commons.annotation.Testable;
 
 public class EnvCalculator {

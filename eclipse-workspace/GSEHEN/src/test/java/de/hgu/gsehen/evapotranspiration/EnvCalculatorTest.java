@@ -1,9 +1,11 @@
 package de.hgu.gsehen.evapotranspiration;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.Test;
 
 public class EnvCalculatorTest {
+
   @Test
   public void testCalculateEt0() {
     GeoData location = new GeoData(false, 0, 0, 0);
@@ -13,5 +15,4 @@ public class EnvCalculatorTest {
     double calculatedEt0 = today.getEt0();
     assertTrue(currentEt0 == calculatedEt0);
   }
-
 }
