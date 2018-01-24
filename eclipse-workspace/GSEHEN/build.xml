@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== 
+
+     GSEHEN    
+     Cross-platform helpers
+                   
+     @author AT                                                                
+     ====================================================================== -->
+<project name="GSEHEN">
+    <description>
+      Cross-platform helpers
+    </description>
+
+    <target name="echo-os">
+      <echo message="${os.name}" />
+    </target>
+
+    <target name="delete-entire-db-file">
+      <exec executable="cmd" os="Windows 10">
+      	<arg value="/c &quot;del gsehen-h2-local.db.mv.db&quot;" />
+      </exec>
+    </target>
+
+    <target name="list-db-file">
+      <exec executable="cmd" os="Windows 10">
+      	<arg value="/c &quot;dir gsehen-h2-local.db.mv.db | findstr h2&quot;" />
+      </exec>
+    </target>
+</project>
