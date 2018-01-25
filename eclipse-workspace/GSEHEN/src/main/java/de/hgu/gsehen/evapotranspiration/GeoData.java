@@ -46,11 +46,12 @@ public class GeoData {
   }
 
   /**
-   * Constructor GeoData class.
+   * Constructor GeoData class. Typical values for Geisenheim:
+   * geoLen=7.95,geoWid=49.99,heighAbvNn=110
    * 
    * @param mean Calculation only with Temperature mean? TRUE = yes, FALSE = no
-   * @param geoLen Geographical length of the location your are calculating et0 from in rad
-   * @param geoWid Geographical width of the location your are calculating et0 from in rad
+   * @param geoLen Geographical length of the location your are calculating et0 from in degree
+   * @param geoWid Geographical width of the location your are calculating et0 from in degree
    * @param heighAbvNn Height over normal null in m
    */
   public GeoData(boolean mean, double geoLen, double geoWid, double heighAbvNn) {

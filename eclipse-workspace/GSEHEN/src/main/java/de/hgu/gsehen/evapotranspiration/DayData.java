@@ -1,6 +1,6 @@
 package de.hgu.gsehen.evapotranspiration;
 
-import java.sql.Date;
+import java.util.Date;
 
 /**
  * Class to represent the environmental data to calculate the GS water balance.
@@ -13,14 +13,13 @@ public class DayData {
 
   private Date date;
   private double tempMean;
-  private double tempMin;
-  private double tempMax;
+  private Double tempMin;
+  private Double tempMax;
   private double airHumidityRel;
-  private double airHumidityRelMin;
   private double globalRad;
   private double precipitation;
   private double windspeed2m;
-  private double et0;
+  private Double et0;
 
   public Date getDate() {
     return date;
@@ -60,14 +59,6 @@ public class DayData {
 
   public void setAirHumidityRel(double airHumidityRel) {
     this.airHumidityRel = airHumidityRel;
-  }
-
-  public double getAirHumidityRelMin() {
-    return airHumidityRelMin;
-  }
-
-  public void setAirHumidityRelMin(double airHumidityRelMin) {
-    this.airHumidityRelMin = airHumidityRelMin;
   }
 
   public double getGlobalRad() {
@@ -111,21 +102,18 @@ public class DayData {
    * @param tempMin Temperature minimum in °C
    * @param tempMax Temperature maximum in °C
    * @param airHumidityRel Relative air humidity in percent
-   * @param airHumidityRelMin Minimum relative air humidity in percent
    * @param globalRad Global radiation in MJ
    * @param precipitation Rainfall
    * @param windspeed2m Mean windspeed at 2 meters above ground level in m/s
    */
   public DayData(Date date, double tempMean, double tempMin, double tempMax, double airHumidityRel,
-      double airHumidityRelMin, double globalRad, double precipitation, double windspeed2m,
-      double et0) {
+      double globalRad, double precipitation, double windspeed2m, double et0) {
     super();
     this.date = date;
     this.tempMean = tempMean;
     this.tempMin = tempMin;
     this.tempMax = tempMax;
     this.airHumidityRel = airHumidityRel;
-    this.airHumidityRelMin = airHumidityRelMin;
     this.globalRad = globalRad;
     this.precipitation = precipitation;
     this.windspeed2m = windspeed2m;
