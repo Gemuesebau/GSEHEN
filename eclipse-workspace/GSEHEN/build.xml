@@ -19,6 +19,10 @@
       <exec executable="cmd" os="Windows 10">
       	<arg value="/c &quot;del gsehen-h2-local.db.mv.db&quot;" />
       </exec>
+    	<exec executable="/bin/bash" os="Linux">
+      	<arg value="-c"/>
+    	<arg value="rm gsehen-h2-local.db.mv.db"/>
+      </exec>
     </target>
 
     <target name="delete-entire-sibling-db-files">
@@ -43,9 +47,14 @@
       <exec executable="cmd" os="Windows 10">
       	<arg value="/c &quot;dir gsehen-h2-local.db.mv.db | findstr h2&quot;" />
       </exec>
+      <exec executable="/bin/bash" os="Linux">
+      	<arg value="-c"/>
+         <arg value="ls gsehen-h2-local.db.mv.db | grep h2"/>
+      </exec>
     </target>
 
-    <target name="list-sibling-db-files">
+
+	<target name="list-sibling-db-files">
       <exec executable="cmd" os="Windows 10">
       	<arg value="/c &quot;dir *.db | findstr h2 | findstr /V gsehen-h2-local.db.mv.db$&quot;" />
       </exec>
