@@ -1,6 +1,7 @@
 package de.hgu.gsehen.evapotranspiration;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.Test;
 
 public class EnvCalculatorTest {

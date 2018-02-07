@@ -1,6 +1,13 @@
 package de.hgu.gsehen.evapotranspiration;
 
 import static java.lang.Math.PI;
+import static java.lang.Math.acos;
+import static java.lang.Math.cos;
+import static java.lang.Math.exp;
+import static java.lang.Math.pow;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.tan;
 
 import java.util.Calendar;
 
@@ -27,6 +34,33 @@ public class EnvCalculator {
 
     double psi = convertDegToRad(geoData);
     dayData.setEt0(5);
+    double solarRadiation = dayData.getGlobalRad();
+    double u2 = dayData.getWindspeed2m();
+    double latentVaporHeatFlux = calculateLatentVaporHeatFlux(dayData);
+    double slope = calculateSlope(dayData);
+    double distanceSun = calculateDistanceSun(yday);
+    double sunDeclination = calculateSunDeclination(yday);
+    double omegaS = calculateOmegaS(sunDeclination, psi);    
+    double posSunDur = calculatePosSunDur(omegaS);
+    double extRad = calculateExTerRad(dr, omegaS, psi, theta);
+
+    
+  Exts <- Ra(Gsc = Gsc, dr = Relatived, omegas = Wbsu, psi = psi, 
+      theta = DekdS)
+  Gbu <- Rs0(Ra = Exts)
+  Kns <- Rns(Rs = Rs, alpha = alpha)
+  AT <- Tabs(Temp = Temp)
+  Sd <- es(Temp = Temp,Tmin = Tmin, Tmax= Tmax)
+  Ad <- ea(Hum = Hum, es = Sd)
+  LNs <- Rnl(Tabs = AT, ea = Ad, Rs = Rs, Rs0 = Gbu)
+  Strbil <- Rn(Rns = Kns, Rnl = LNs)
+  Bws <- G(Rns = Kns)
+  LuftD <- P(NN = NN)
+  Ldich <- rho(Temp = Temp, P = LuftD)
+  Psy <- gamma(L = Latente, P = LuftD)
+  EtfaomG <- Etfao.f(Rn = Strbil, G = 0, Temp = Temp, u2 = u2, 
+      es = Sd, ea = Ad, s = Steigung, gamma = Psy)
+  FAO56 <- round(digits = 1, EtfaomG)
   }
 
 
@@ -35,89 +69,246 @@ public class EnvCalculator {
    * 
    * @author MO
    * @param geoData An object of the GeoData class
-   * @return double rad
+   * @return double geographical width position in rad aka. psi
    */
   private static double convertDegToRad(GeoData geoData) {
     double psi = geoData.getGeoWid() * PI / 180;
     return (psi);
   }
 
-  private static double calculateRs(double n, double gn, double ra) {
-    double rs = (0.25 + 0.5 * (n / gn)) * ra;
-    return (rs);
+
+  /**
+   * Method to calcualte the latent vapor heat flux from temperature mean.
+   * 
+   * @param dayData DayData class with mean temperature
+   * @return double latent vapor heat flux L
+   */
+  private static double calculateLatentVaporHeatFlux(DayData dayData) {
+    return (2.501 - 0.002361 * dayData.getTempMean());
+  }
+
+  /**
+   * MEthod to calculate the slope of vapor saturation curve.
+   * 
+   * @param dayData DayData class with mean temperature
+   * @return double s or delta
+   */
+  private static double calculateSlope(DayData dayData) {
+    double meanT = dayData.getTempMean();
+    return ((4098 * 0.6108 * exp((17.27 * meanT) / (237.3 + meanT))) / pow((237.3 + meanT), 2));
   }
 
   /*-
-  Rs.f <- function(n, N, Ra) {
-      (0.25 + 0.5 * (n/N)) * Ra
-  }
-  
-  
-  Rs <- Glob
-  windgesch2m <- function(v, HW) {
-      (v * 4.87)/log(67.8 * HW - 5.42)
-  }
-  u2 <- windgesch2m(Wind, HW)
-  
-  L <- function(Temp) {
-      2.501 - 0.002361 * Temp
-  }
   s <- function(Temp) {
       (4098 * 0.6108 * exp((17.27 * Temp)/(237.3 + Temp)))/((237.3 + 
           Temp)^2)
   }
-  dr <- function(J) {
-      1 + 0.033 * cos((2 * pi/365) * J)
+  */
+  /**
+   * Method to calculate the relative distance of the earth to the sun.
+   * 
+   * @param yday double day of the year 1-366
+   * @return double returns the relative distance dr
+   */
+  private static double calculateDistanceSun(double yday) {
+    return (1 + 0.033 * cos((2 * PI / 365) * yday));
   }
-  theta <- function(J) {
-      0.409 * sin((2 * pi/365) * J - 1.39)
+
+  /**
+   * Method to calculate the declination of the sun.
+   * 
+   * @param yday double day of the year 1-366
+   * @return double theta
+   */
+  private static double calculateSunDeclination(double yday) {
+    return (0.409 * sin((2 * PI / 365) * yday - 1.39));
   }
-  omegas <- function(theta, psi) {
-      acos(-tan(psi) * tan(theta))
+
+  /**
+   * Method to calculate hour arc on sunset.
+   * 
+   * @param theta declination of the sun
+   * @param psi geo position in rad
+   * @return
+   */
+  private static double calculateOmegaS(double theta, double psi) {
+    return (acos(-tan(psi) * tan(theta)));
   }
-  N.f <- function(omegas) {
-      24/pi * omegas
+
+  /**
+   * Method to calculate the atronomicla possible sunshine duration.
+   * 
+   * @param omegas hour arc on sunset
+   * @return double sunshine duration
+   */
+  private static double calculatePosSunDur(double omegaS) {
+    return (24 / PI * omegaS);
   }
-  Ra <- function(Gsc, dr, omegas, psi, theta) {
-      (24 * 60/pi) * Gsc * dr * (omegas * sin(psi) * sin(theta) + 
-          cos(psi) * cos(theta) * sin(omegas))
+
+  /**
+   * Method to calculate extra terrestrial radiation.
+   * 
+   * @param GSC constant
+   * @param distanceSun dr relative distance earth to sun
+   * @param omegas hour arc on sunset
+   * @param psi geo postion in rad
+   * @param sunDeclination theta declination of the sun
+   * @return double Ra exTerRad
+   */
+  private static double calculateExTerRad(double distanceSun, double omegaS, double psi,
+      double sunDeclination) {
+    return ((24 * 60 / PI) * GSC * distanceSun
+        * (omegaS * sin(psi) * sin(sunDeclination) + cos(psi) * cos(sunDeclination) * sin(omegaS)));
   }
-  Rs0 <- function(Ra) {
-      0.75 * Ra
+
+  /*
+   * Method to calculate global irradiation by cloudless sky angstroem coeff (0.25 + 0.5)*Ra
+   * 
+   * @param rA extra terestrial radiation
+   * 
+   * @return
+   */
+  private static double calculateRs0(double rA) {
+    return (0.75 * rA);
   }
-  Rns <- function(Rs, alpha) {
-      (1 - alpha) * Rs
+
+  /**
+   * Method to calculate short wave net radiation
+   * 
+   * @param rS
+   * @return short wave net radiation Rns
+   */
+  private static double calculateNetShortRad(double rS) {
+    return ((1 - ALPHA) * rS);
   }
-  Tabs <- function(Temp) {
-      273.16 + Temp
+
+
+  /**
+   * Method to calculate the absolute Temperature in kelvin
+   * 
+   * @param meanTemp Temperature mean
+   * @return absTemp Absolute temperature Tabs
+   */
+  private static double calculateAbsTemp(double meanTemp) {
+    return (273.16 + meanTemp);
   }
-  es <- function(Temp,Tmin,Tmax) {
-      if(!is.na(Tmin)&&is.na(Tmax)||is.na(Tmin)&&!is.na(Tmax)){stop("Tmax and Tmin must be available both !")}
-      e.f <-function(Tinput)0.6108 * exp((17.27 * Tinput)/(237.3 + Tinput))
-      if(is.na(Tmin)&&is.na(Tmax)){return(e.f(Temp))}
-      else{return(((e.f(Tmin)+e.f(Tmax))/2))}
+
+  /**
+   * Method to calculate saturation vapor pressure from meanTemp
+   * 
+   * @param meanTemp Temperature mean
+   * @return
+   */
+  private static double calculateSatVP(double meanTemp) {
+    return (0.6108 * exp((17.27 * meanTemp) / (237.3 + meanTemp)));
   }
-  ea <- function(Hum, es) {
-      es * (Hum/100)
+
+  /**
+   * Method to calculate saturation vapor pressure
+   * 
+   * @param maxTemp Temperature maximum
+   * @param minTemp Temperature minimum
+   * @return es saturation vapor pressure
+   */
+  private static double calculateSatVP(double maxTemp, double minTemp) {
+    double maxVP = 0.6108 * exp((17.27 * maxTemp) / (237.3 + maxTemp));
+    double minVP = 0.6108 * exp((17.27 * maxTemp) / (237.3 + maxTemp));
+    double meanVP = (maxVP + minVP) / 2;
+    return (meanVP);
   }
-  Rnl <- function(Tabs, ea, Rs, Rs0) {
-      4.901e-09 * Tabs^4 * (0.34 - 0.14 * sqrt(ea)) * (1.35 * 
-          (Rs/Rs0) - 0.35)
+
+  /**
+   * Method to calculate the actual vapor pressure
+   * 
+   * @param airHumidityRel
+   * @param satVP
+   * @return actual Vapor pressure ea
+   */
+  private static double caculateActVP(double airHumidityRel, double satVP) {
+    return (satVP * (airHumidityRel / 100));
   }
-  Rn <- function(Rns, Rnl) {
-      Rns - Rnl
+
+
+  /**
+   * Method to calculate long wave net radiation
+   * 
+   * @param absTemp absolute Temperature
+   * @param actVP actual vapor pressure
+   * @param sRad global radiation / is measured
+   * @param sRad0 clear sky global radiation
+   * @return long wave net radiation Rnl
+   */
+  private static double calculateNetLongRad(double absTemp, double actVP, double sRad,
+      double sRad0) {
+    return (4.901e-09 * pow(absTemp, 4) * (0.34 - 0.14 * sqrt(actVP))
+        * (1.35 * (sRad / sRad0) - 0.35));
   }
+
+  /**
+   * Method to calculate net radiation
+   * 
+   * @param netShortRad net short radiation
+   * @param netLongRad net long radiation
+   * @return netRad net radiation Rn
+   */
+  private double calculateNetRad(double netShortRad, double netLongRad) {
+    return (netShortRad - netLongRad);
+  }
+
+  /*-
+  soil heat flux is excluded -not needed
   G <- function(Rns) {
       0.2 * Rns
   }
-  P <- function(NN) {
-      101.3 * ((293 - 0.0065 * NN)/293)^5.26
+  */
+
+  /**
+   * Method to calculate the air pressure for the location
+   * 
+   * @param geoData class containing heighAbvNn location high above normal null
+   * @return AirP air pressure P
+   */
+  private static double calculateAirP(GeoData geoData) {
+
+    return (101.3 * pow(((293 - 0.0065 * geoData.getHeighAbvNn()) / 293), 5.26));
   }
-  rho <- function(Temp, P) {
-      P/(1.01 * (Temp + 273) * 0.287)
+
+
+
+  /**
+   * Method to calculate the air density by constant pressure
+   * 
+   * @param meanTemp
+   * @param airP
+   * @return
+   */
+  private static double calculateRho(double meanTemp, double airP) {
+
+    return (airP / (1.01 * (meanTemp + 273) * 0.287)); // 273 or absTemp 273.16?
   }
-  gamma <- function(L, P) {
-      (0.001013 * P)/(0.622 * L)
+
+  /**
+   * Method to calculate the psychrometric constant
+   * 
+   * @param latentVaporHeatFlux
+   * @param airP
+   * @return gamma psychrometric constant
+   */
+  private static double calculateGamma(double latentVaporHeatFlux, double airP) {
+
+    return ((0.001013 * airP) / (0.622 * latentVaporHeatFlux));
+  }
+
+
+  private static double calculateEtFao(double netRad, double G, double meanTemp, double u2,
+      double satVP, double actVP, double slope, double gamma) {
+    return ((0.408 * slope * (netRad - G) + gamma * (900 / (meanTemp + 273) * u2 * (satVP - actVP)))
+        / (slope + gamma * (1 + 0.34 * u2)));
+  }
+  /*-
+  
+  
+  }
   }
   Etfao.f <- function(Rn, G, Temp, u2, es, ea, s, gamma) {
       (0.408 * s * (Rn - G) + gamma * (900/(Temp + 273) * u2 * 

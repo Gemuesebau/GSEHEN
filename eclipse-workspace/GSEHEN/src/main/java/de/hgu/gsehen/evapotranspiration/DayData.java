@@ -17,7 +17,7 @@ public class DayData {
   private Double tempMax;
   private double airHumidityRel;
   private double globalRad;
-  private double precipitation;
+  private double precipitation; // ausgliedern in ein anders objekt?
   private double windspeed2m;
   private Double et0;
 
