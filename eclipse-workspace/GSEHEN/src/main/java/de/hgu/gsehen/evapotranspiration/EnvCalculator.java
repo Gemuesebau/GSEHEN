@@ -19,6 +19,7 @@ public class EnvCalculator {
   private static final double RS = 70;
   private static final double RA = 208;
   private static final double GSC = 0.082;
+  private static final double G = 0;
 
   /**
    * Main method to calculate the daily reference evapotranspiration as published by Allen et al.
@@ -33,34 +34,29 @@ public class EnvCalculator {
     Integer yday = tellDoy(dayData);
 
     double psi = convertDegToRad(geoData);
-    dayData.setEt0(5);
-    double solarRadiation = dayData.getGlobalRad();
-    double u2 = dayData.getWindspeed2m();
+    double solarRad = dayData.getGlobalRad(); // TODO object
     double latentVaporHeatFlux = calculateLatentVaporHeatFlux(dayData);
     double slope = calculateSlope(dayData);
     double distanceSun = calculateDistanceSun(yday);
     double sunDeclination = calculateSunDeclination(yday);
-    double omegaS = calculateOmegaS(sunDeclination, psi);    
+    double omegaS = calculateOmegaS(sunDeclination, psi);
     double posSunDur = calculatePosSunDur(omegaS);
-    double extRad = calculateExTerRad(dr, omegaS, psi, theta);
+    double exTerRad = calculateExTerRad(distanceSun, omegaS, psi, sunDeclination);
+    double clearSkyRad = calculateClearSkyRad(exTerRad);
+    double netShortRad = calculateNetShortRad(solarRad);
+    double absTemp = calculateAbsTemp(dayData);
+    double satVaP = calculateSatVaP(dayData);
+    double actVaP = calculateActVaP(dayData, satVaP);
+    double netLongRad = calculateNetLongRad(absTemp, actVaP, solarRad, clearSkyRad);
+    double netRad = calculateNetRad(netShortRad, netLongRad);
+    double airP = calculateAirP(geoData);
+    double rho = calculateRho(dayData, airP);
+    double gamma = calculateGamma(latentVaporHeatFlux, airP);
+    double etFao = calculateEtFao(netRad, dayData, satVaP, actVaP, slope, gamma);
 
-    
-  Exts <- Ra(Gsc = Gsc, dr = Relatived, omegas = Wbsu, psi = psi, 
-      theta = DekdS)
-  Gbu <- Rs0(Ra = Exts)
-  Kns <- Rns(Rs = Rs, alpha = alpha)
-  AT <- Tabs(Temp = Temp)
-  Sd <- es(Temp = Temp,Tmin = Tmin, Tmax= Tmax)
-  Ad <- ea(Hum = Hum, es = Sd)
-  LNs <- Rnl(Tabs = AT, ea = Ad, Rs = Rs, Rs0 = Gbu)
-  Strbil <- Rn(Rns = Kns, Rnl = LNs)
-  Bws <- G(Rns = Kns)
-  LuftD <- P(NN = NN)
-  Ldich <- rho(Temp = Temp, P = LuftD)
-  Psy <- gamma(L = Latente, P = LuftD)
-  EtfaomG <- Etfao.f(Rn = Strbil, G = 0, Temp = Temp, u2 = u2, 
-      es = Sd, ea = Ad, s = Steigung, gamma = Psy)
-  FAO56 <- round(digits = 1, EtfaomG)
+    dayData.setEt0(etFao);
+
+
   }
 
 
@@ -164,94 +160,107 @@ public class EnvCalculator {
   /*
    * Method to calculate global irradiation by cloudless sky angstroem coeff (0.25 + 0.5)*Ra
    * 
-   * @param rA extra terestrial radiation
+   * @param exTerRad extra terestrial radiation Ra
    * 
-   * @return
+   * @return cloudless sky global irradiatoin Rs0
    */
-  private static double calculateRs0(double rA) {
-    return (0.75 * rA);
+  private static double calculateClearSkyRad(double exTerRad) {
+    return (0.75 * exTerRad);
   }
 
   /**
-   * Method to calculate short wave net radiation
+   * Method to calculate short wave net radiation.
    * 
-   * @param rS
+   * @param solarRad Rs measured solar radiation / global irritation
    * @return short wave net radiation Rns
    */
-  private static double calculateNetShortRad(double rS) {
-    return ((1 - ALPHA) * rS);
+  private static double calculateNetShortRad(double solarRad) {
+    return ((1 - ALPHA) * solarRad);
   }
 
 
   /**
-   * Method to calculate the absolute Temperature in kelvin
+   * Method to calculate the absolute Temperature in kelvin.
    * 
-   * @param meanTemp Temperature mean
+   * @param DayData class with meanTemp Temperature mean
    * @return absTemp Absolute temperature Tabs
    */
-  private static double calculateAbsTemp(double meanTemp) {
+  private static double calculateAbsTemp(DayData dayData) {
+    double meanTemp = dayData.getTempMean();
     return (273.16 + meanTemp);
   }
 
   /**
-   * Method to calculate saturation vapor pressure from meanTemp
+   * Template method to calculate saturation vapor pressure from Temp.
    * 
-   * @param meanTemp Temperature mean
-   * @return
+   * @see calculateSatVP
+   * @param DayData class with meanTemp Temperature mean
+   * @return satVp
    */
-  private static double calculateSatVP(double meanTemp) {
-    return (0.6108 * exp((17.27 * meanTemp) / (237.3 + meanTemp)));
+  private static double tempCalcSatVP(double temp) {
+
+    return (0.6108 * exp((17.27 * temp) / (237.3 + temp)));
   }
 
   /**
-   * Method to calculate saturation vapor pressure
+   * Method to calculate saturation vapor pressure.
    * 
    * @param maxTemp Temperature maximum
    * @param minTemp Temperature minimum
    * @return es saturation vapor pressure
    */
-  private static double calculateSatVP(double maxTemp, double minTemp) {
-    double maxVP = 0.6108 * exp((17.27 * maxTemp) / (237.3 + maxTemp));
-    double minVP = 0.6108 * exp((17.27 * maxTemp) / (237.3 + maxTemp));
-    double meanVP = (maxVP + minVP) / 2;
-    return (meanVP);
+  private static double calculateSatVaP(DayData dayData) {
+    if (dayData.getTempMax() != 0 && dayData.getTempMax() != 0) { // FIXME this is not fail safe
+                                                                  // b.c.
+                                                                  // sane value
+      double maxTemp = dayData.getTempMax();
+      double minTemp = dayData.getTempMin();
+      double maxVP = tempCalcSatVP(maxTemp);
+      double minVP = tempCalcSatVP(minTemp);
+      double meanVP = (maxVP + minVP) / 2;
+      return (meanVP);
+    } else {
+      double meanTemp = dayData.getTempMean();
+      return (tempCalcSatVP(meanTemp));
+    }
   }
 
   /**
-   * Method to calculate the actual vapor pressure
+   * Method to calculate the actual vapor pressure.
    * 
-   * @param airHumidityRel
-   * @param satVP
+   * @param dayData class containing airHumidityRel relative air humidity
+   * @param satVP saturation vapor pressure @see calculateSatVP
    * @return actual Vapor pressure ea
    */
-  private static double caculateActVP(double airHumidityRel, double satVP) {
+  private static double calculateActVaP(DayData dayData, double satVP) {
+    double airHumidityRel = dayData.getAirHumidityRel();
     return (satVP * (airHumidityRel / 100));
   }
 
 
   /**
-   * Method to calculate long wave net radiation
+   * Method to calculate long wave net radiation.
    * 
    * @param absTemp absolute Temperature
    * @param actVP actual vapor pressure
-   * @param sRad global radiation / is measured
-   * @param sRad0 clear sky global radiation
-   * @return long wave net radiation Rnl
+   * @param solarRad sRad global radiation / is measured
+   * @param clearSkyRad sRad0 clear sky global radiation
+   * @return NetLongRad long wave net radiation Rnl
    */
-  private static double calculateNetLongRad(double absTemp, double actVP, double sRad,
-      double sRad0) {
+  private static double calculateNetLongRad(double absTemp, double actVP, double solarRad,
+      double clearSkyRad) {
     return (4.901e-09 * pow(absTemp, 4) * (0.34 - 0.14 * sqrt(actVP))
-        * (1.35 * (sRad / sRad0) - 0.35));
+        * (1.35 * (solarRad / clearSkyRad) - 0.35));
   }
 
   /**
-   * Method to calculate net radiation
+   * Method to calculate net radiation.
    * 
    * @param netShortRad net short radiation
    * @param netLongRad net long radiation
    * @return netRad net radiation Rn
    */
-  private double calculateNetRad(double netShortRad, double netLongRad) {
+  private static double calculateNetRad(double netShortRad, double netLongRad) {
     return (netShortRad - netLongRad);
   }
 
@@ -263,7 +272,7 @@ public class EnvCalculator {
   */
 
   /**
-   * Method to calculate the air pressure for the location
+   * Method to calculate the air pressure for the location.
    * 
    * @param geoData class containing heighAbvNn location high above normal null
    * @return AirP air pressure P
@@ -276,19 +285,19 @@ public class EnvCalculator {
 
 
   /**
-   * Method to calculate the air density by constant pressure
+   * Method to calculate the air density at constant pressure.
    * 
-   * @param meanTemp
-   * @param airP
-   * @return
+   * @param dayData class containing meanTemp Temperature mean
+   * @param airP @see calculateAirP
+   * @return Rho air density at constant pressure
    */
-  private static double calculateRho(double meanTemp, double airP) {
-
+  private static double calculateRho(DayData dayData, double airP) {
+    double meanTemp = dayData.getTempMean();
     return (airP / (1.01 * (meanTemp + 273) * 0.287)); // 273 or absTemp 273.16?
   }
 
   /**
-   * Method to calculate the psychrometric constant
+   * Method to calculate the psychrometric constant.
    * 
    * @param latentVaporHeatFlux
    * @param airP
@@ -300,8 +309,10 @@ public class EnvCalculator {
   }
 
 
-  private static double calculateEtFao(double netRad, double G, double meanTemp, double u2,
-      double satVP, double actVP, double slope, double gamma) {
+  private static double calculateEtFao(double netRad, DayData dayData, double satVP, double actVP,
+      double slope, double gamma) {
+    double meanTemp = dayData.getTempMean();
+    double u2 = dayData.getWindspeed2m();
     return ((0.408 * slope * (netRad - G) + gamma * (900 / (meanTemp + 273) * u2 * (satVP - actVP)))
         / (slope + gamma * (1 + 0.34 * u2)));
   }
