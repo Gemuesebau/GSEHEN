@@ -15,7 +15,9 @@ public class DayData {
   private double tempMean;
   private Double tempMin;
   private Double tempMax;
-  private double airHumidityRel;
+  private double airHumidityRelMean;
+  private Double airHumidityRelMin;
+  private Double airHumidityRelMax;
   private double globalRad;
   private double precipitation; // ausgliedern in ein anders objekt?
   private double windspeed2m;
@@ -37,28 +39,44 @@ public class DayData {
     this.tempMean = tempMean;
   }
 
-  public double getTempMin() {
+  public Double getTempMin() {
     return tempMin;
   }
 
-  public void setTempMin(double tempMin) {
+  public void setTempMin(Double tempMin) {
     this.tempMin = tempMin;
   }
 
-  public double getTempMax() {
+  public Double getTempMax() {
     return tempMax;
   }
 
-  public void setTempMax(double tempMax) {
+  public void setTempMax(Double tempMax) {
     this.tempMax = tempMax;
   }
 
-  public double getAirHumidityRel() {
-    return airHumidityRel;
+  public double getAirHumidityRelMean() {
+    return airHumidityRelMean;
   }
 
-  public void setAirHumidityRel(double airHumidityRel) {
-    this.airHumidityRel = airHumidityRel;
+  public void setAirHumidityRelMean(Double airHumidityRelMean) {
+    this.airHumidityRelMean = airHumidityRelMean;
+  }
+
+  public Double getAirHumidityRelMin() {
+    return airHumidityRelMin;
+  }
+
+  public void setAirHumidityRelMin(Double airHumidityRelMin) {
+    this.airHumidityRelMin = airHumidityRelMin;
+  }
+
+  public Double getAirHumidityRelMax() {
+    return airHumidityRelMax;
+  }
+
+  public void setAirHumidityRelMax(Double airHumidityRelMax) {
+    this.airHumidityRelMax = airHumidityRelMax;
   }
 
   public double getGlobalRad() {
@@ -101,19 +119,24 @@ public class DayData {
    * @param tempMean Temperature mean in °C
    * @param tempMin Temperature minimum in °C
    * @param tempMax Temperature maximum in °C
-   * @param airHumidityRel Relative air humidity in percent
+   * @param airHumidityRelMean Relative air humidity in percent mean
+   * @param airHumidityRelMin Relative air humidity in percent min
+   * @param airHumidityRelMax Relative air humidity in percent max
    * @param globalRad Global radiation in MJ
    * @param precipitation Rainfall
    * @param windspeed2m Mean windspeed at 2 meters above ground level in m/s
    */
-  public DayData(Date date, double tempMean, double tempMin, double tempMax, double airHumidityRel,
-      double globalRad, double precipitation, double windspeed2m, double et0) {
+  public DayData(Date date, double tempMean, Double tempMin, Double tempMax,
+      double airHumidityRelMean, Double airHumidityRelMin, Double airHumidityRelMax,
+      double globalRad, double precipitation, double windspeed2m, Double et0) {
     super();
     this.date = date;
     this.tempMean = tempMean;
     this.tempMin = tempMin;
     this.tempMax = tempMax;
-    this.airHumidityRel = airHumidityRel;
+    this.airHumidityRelMean = airHumidityRelMean;
+    this.airHumidityRelMin = airHumidityRelMin;
+    this.airHumidityRelMax = airHumidityRelMax;
     this.globalRad = globalRad;
     this.precipitation = precipitation;
     this.windspeed2m = windspeed2m;
