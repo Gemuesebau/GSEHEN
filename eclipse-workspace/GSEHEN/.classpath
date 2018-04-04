@@ -4,11 +4,6 @@
 	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="src" path="src/test/resources"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/main/h2-1.4.195.jar"/>
 	<classpathentry kind="lib" path="lib/test/junit.jar"/>
 	<classpathentry kind="lib" path="lib/test/org.apiguardian_1.0.0.v20170910-2246.jar"/>
@@ -24,5 +19,6 @@
 	<classpathentry kind="lib" path="lib/test/org.junit.vintage.engine_4.12.0.v20170910-2246.jar"/>
 	<classpathentry kind="lib" path="lib/test/org.opentest4j_1.0.0.v20170910-2246.jar"/>
 	<classpathentry kind="lib" path="lib/test/org.junit.jupiter.api_5.0.0.v20170910-2246.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -64,4 +64,14 @@
       <arg value="/c &quot;dir /b /s ${user.home} | findstr /V \\AppData\\ | findstr [ve]\.db$&quot;" />
     </exec>
   </target>
+
+  <target name="empty-bin-folder">
+    <exec executable="cmd" os="Windows 10">
+      <arg value="/c &quot;rd /s /q bin&quot;" />
+    </exec>
+    <mkdir dir="bin" />
+    <exec executable="cmd" os="Windows 10">
+      <arg value="/c &quot;dir bin&quot;" />
+    </exec>
+  </target>
 </project>
