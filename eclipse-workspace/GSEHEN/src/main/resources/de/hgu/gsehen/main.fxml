@@ -1,19 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.web.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-<SplitPane dividerPositions="0.5" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<SplitPane dividerPositions="0.2" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <items>
-      <ScrollPane prefHeight="200.0" prefWidth="200.0">
-        <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
-        </content>
-      </ScrollPane>
-      <TabPane id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+      <AnchorPane prefHeight="200.0" prefWidth="200.0">
+         <children>
+            <Accordion AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+              <panes>
+                <TitledPane animated="false" text="Felder">
+                     <content>
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                           <children>
+                              <Button layoutX="10.0" layoutY="2.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+                              <Button layoutX="10.0" layoutY="27.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+                              <Button layoutX="10.0" layoutY="52.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+                           </children>
+                        </AnchorPane>
+                     </content>
+                </TitledPane>
+                <TitledPane animated="false" text="Wetterstationen">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0">
+                           <children>
+                              <Button mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                              <Button layoutX="95.0" layoutY="25.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </TitledPane>
+                <TitledPane animated="false" text="Einstellungen">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <Button mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                              <Button layoutX="95.0" layoutY="25.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </TitledPane>
+                  <TitledPane animated="false" text="Betrieb/Farm">
+                     <content>
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                           <children>
+                              <Button layoutX="10.0" layoutY="2.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+                              <Button layoutX="10.0" layoutY="27.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+                              <Button layoutX="10.0" layoutY="52.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+                           </children>
+                        </AnchorPane>
+                     </content>
+                  </TitledPane>
+              </panes>
+            </Accordion>
+            <Label layoutY="680.0" text="LOGO" textAlignment="CENTER" textFill="#0000002e">
+               <font>
+                  <Font size="95.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+      <TabPane id="tabPane" prefHeight="398.0" prefWidth="431.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab text="MapView">
             <content>
@@ -32,9 +83,59 @@
                               <Font name="Monospaced Regular" size="12.0" />
                            </font>
                         </TextArea>
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="552.0" layoutY="62.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="297.0" layoutY="62.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="53.0" layoutY="62.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="53.0" layoutY="314.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="304.0" layoutY="314.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
+                        <Button layoutX="255.0" layoutY="699.0" mnemonicParsing="false" text="Bewässerung buchen" />
+                        <Button layoutX="421.0" layoutY="699.0" mnemonicParsing="false" text="Pflanzenstatus buchen" />
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ff5221" height="86.0" layoutX="313.0" layoutY="162.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#b8ff1f" height="86.0" layoutX="397.0" layoutY="162.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#b8ff1f" height="86.0" layoutX="313.0" layoutY="70.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
+                        <Label layoutX="348.0" layoutY="37.0" text="Im alten Grund" />
+                        <Label layoutX="92.0" layoutY="37.0" text="Sonnenrech" />
+                        <Label layoutX="332.0" layoutY="106.0" text="Salat" />
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ffc721" height="86.0" layoutX="397.0" layoutY="70.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
+                        <Label layoutX="410.0" layoutY="106.0" text="Zwiebel" />
+                        <Label layoutX="334.0" layoutY="198.0" text="Salat II" />
+                        <Button layoutX="27.0" layoutY="699.0" mnemonicParsing="false" text="Bewässerungsplan ausgeben" />
                      </children></AnchorPane>
             </content>
           </Tab>
+            <Tab text="Field View">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TextArea id="debugTA" layoutX="48.0" layoutY="57.0" prefHeight="369.0" prefWidth="296.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <font>
+                              <Font name="Monospaced Regular" size="12.0" />
+                           </font>
+                        </TextArea>
+                        <Label layoutX="680.0" layoutY="303.0" text="Salat II" />
+                        <Label layoutX="783.0" layoutY="208.0" text="Zwiebel" />
+                        <Label layoutX="549.0" layoutY="285.0" text="Salat" />
+                        <Label layoutX="709.0" layoutY="97.0" text="Im alten Grund" />
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#b8ff1f" height="86.0" layoutX="809.0" layoutY="231.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ff5221" height="86.0" layoutX="497.0" layoutY="173.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="648.0" layoutY="333.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+            <Tab text="Field Plot View">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TextArea id="debugTA" layoutX="48.0" layoutY="57.0" prefHeight="369.0" prefWidth="296.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <font>
+                              <Font name="Monospaced Regular" size="12.0" />
+                           </font>
+                        </TextArea>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
         </tabs>
       </TabPane>
    </items>
