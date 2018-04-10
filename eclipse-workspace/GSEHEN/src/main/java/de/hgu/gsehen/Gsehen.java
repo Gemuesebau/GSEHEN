@@ -117,6 +117,7 @@ public class Gsehen extends Application {
     Tab canvasTab = new Tab("(programmatisches Canvas-Tab)");
     canvasTab.setContent(canvas);
     TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
+    tabPane.getTabs().remove(4);
     tabPane.getTabs().add(canvasTab);
     tabPane.getSelectionModel().select(tabPane.getTabs().size() - 1);
 
