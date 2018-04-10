@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
+import de.hgu.gsehen.gui.PolygonData;
 import de.hgu.gsehen.webview.Map;
 import javafx.application.Application;
 import javafx.concurrent.Worker.State;
@@ -23,6 +24,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.web.WebEngine;
@@ -97,9 +99,8 @@ public class Gsehen extends Application {
     });
     engine.loadContent(Map.getMapHtml());
 
-    Tab e = new Tab();
-    int width  = 300; // TODO size depending on parent!?
-    int height = 250; // ====
+    int width  = 1000; // TODO size depending on parent!?
+    int height = 600;  // ====
     Canvas canvas = new Canvas(width, height);
     GraphicsContext gc = canvas.getGraphicsContext2D();
     GeoPolygon[] polygons = {
@@ -112,10 +113,11 @@ public class Gsehen extends Application {
     };
     setTransformation(gc, width, height, polygons);
     drawShapes(gc, polygons);
-    e.setContent(canvas);
-    TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
-    tabPane.getTabs().add(e);
 
+    Tab canvasTab = new Tab("(programmatisches Canvas-Tab)");
+    canvasTab.setContent(canvas);
+    TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
+    tabPane.getTabs().add(canvasTab);
     tabPane.getSelectionModel().select(tabPane.getTabs().size() - 1);
 
     //TextArea debugTextArea = (TextArea) stage.getScene().lookup(DEBUG_TEXTAREA_ID);
@@ -123,8 +125,13 @@ public class Gsehen extends Application {
   }
 
   private void drawShapes(GraphicsContext gc, GeoPolygon... polygons) {
-    gc.strokePolygon(new double[]{60, 90, 60, 90},
-        new double[]{210, 210, 240, 240}, 4);
+    gc.setStroke(Color.WHITE);
+    gc.setFill(Color.WHEAT);
+    for (GeoPolygon polygon : polygons) {
+      PolygonData polygonData = polygon.getPolygonData();
+      gc.fillPolygon(polygonData.getPointsX(), polygonData.getPointsY(),
+          polygonData.getPointsCount());
+    }
   }
 
   private void setTransformation(GraphicsContext gc, int widthPx, int heightPx,
