@@ -14,16 +14,16 @@
          <children>
             <MenuBar layoutY="14.0" AnchorPane.bottomAnchor="794.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
               <menus>
-                <Menu mnemonicParsing="false" text="Optionen">
+                <Menu mnemonicParsing="false" text="Datei">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Bla" />
-                        <MenuItem mnemonicParsing="false" text="Blubb" />
+                    <MenuItem mnemonicParsing="false" text="Zurücksetzen" />
+                        <MenuItem mnemonicParsing="false" text="Sichern" />
                   </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Profil">
+                <Menu mnemonicParsing="false" text="Ansicht">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Öffnen" />
-                        <MenuItem mnemonicParsing="false" text="Löschen" />
+                    <MenuItem mnemonicParsing="false" text="Entwickler" />
+                        <MenuItem mnemonicParsing="false" text="MapView-HTML neu laden" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Hilfe">
@@ -97,33 +97,9 @@
                      </children></AnchorPane>
             </content>
           </Tab>
-          <Tab fx:id="farmViewTab" closable="false" text="FarmView">
+          <Tab fx:id="farmViewTab" closable="false" onSelectionChanged="#drawPolygon" text="FarmView">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <TextArea id="debugTA" layoutX="48.0" layoutY="57.0" prefHeight="369.0" prefWidth="296.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <font>
-                              <Font name="Monospaced Regular" size="12.0" />
-                           </font>
-                        </TextArea>
-                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="552.0" layoutY="62.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
-                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="297.0" layoutY="62.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
-                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="53.0" layoutY="62.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
-                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="53.0" layoutY="314.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
-                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="304.0" layoutY="314.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
-                        <Button layoutX="255.0" layoutY="699.0" mnemonicParsing="false" text="Bewässerung buchen" />
-                        <Button layoutX="421.0" layoutY="699.0" mnemonicParsing="false" text="Pflanzenstatus buchen" />
-                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ff5221" height="86.0" layoutX="313.0" layoutY="162.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
-                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#b8ff1f" height="86.0" layoutX="397.0" layoutY="162.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
-                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#b8ff1f" height="86.0" layoutX="313.0" layoutY="70.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
-                        <Label layoutX="348.0" layoutY="37.0" text="Im alten Grund" />
-                        <Label layoutX="92.0" layoutY="37.0" text="Sonnenrech" />
-                        <Label layoutX="332.0" layoutY="106.0" text="Salat" />
-                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ffc721" height="86.0" layoutX="397.0" layoutY="70.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
-                        <Label layoutX="410.0" layoutY="106.0" text="Zwiebel" />
-                        <Label layoutX="334.0" layoutY="198.0" text="Salat II" />
-                        <Button layoutX="27.0" layoutY="699.0" mnemonicParsing="false" text="Bewässerungsplan ausgeben" />
-                     </children></AnchorPane>
+              <AnchorPane fx:id="farmViewAnchor" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
             </content>
           </Tab>
             <Tab fx:id="fieldViewTab" closable="false" text="Field View">
@@ -142,6 +118,9 @@
                         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#b8ff1f" height="86.0" layoutX="809.0" layoutY="231.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
                         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ff5221" height="86.0" layoutX="497.0" layoutY="173.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
                         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="648.0" layoutY="333.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
+                        <Button layoutX="421.0" layoutY="657.0" mnemonicParsing="false" text="Bewässerung buchen" />
+                        <Button layoutX="244.0" layoutY="657.0" mnemonicParsing="false" text="Pflanzenstatus buchen" />
+                        <Button layoutX="35.0" layoutY="657.0" mnemonicParsing="false" text="Bewässerungsplan ausgeben" />
                      </children>
                   </AnchorPane>
                </content>
