@@ -4,6 +4,8 @@ import static de.hgu.gsehen.jdbc.DatabaseUtils.executeQuery;
 import static de.hgu.gsehen.jdbc.DatabaseUtils.executeUpdate;
 import static de.hgu.gsehen.jdbc.DatabaseUtils.parseYmd;
 
+import de.hgu.gsehen.webview.Map;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,12 +13,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Logger;
+
 import javafx.application.Application;
+import javafx.concurrent.Worker.State;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 /**
@@ -31,9 +37,10 @@ public class Gsehen extends Application {
   private static final String DAYDATA_TABLE = "DAYDATA";
 
   private static final String MAIN_FXML = "main.fxml";
-  private static final String WEB_VIEW_ID = "#webView";
-  private static final String DEBUG_TEXTAREA_ID = "#debugTA";
-  private static final String TAB_PANE_ID = "#tabPane";
+
+  public static final String WEB_VIEW_ID = "#webView";
+  public static final String DEBUG_TEXTAREA_ID = "#debugTA";
+  public static final String TAB_PANE_ID = "#tabPane";
 
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
@@ -70,24 +77,30 @@ public class Gsehen extends Application {
     catch (IOException e) {
       throw new RuntimeException(MAIN_FXML + " couldn't be loaded", e);
     }
-    Scene scene = new Scene(root, 1280, 768);
+    Scene scene = new Scene(root, 1280, 800);
     stage.setScene(scene);
     stage.sizeToScene();
     stage.show();
-//    WebEngine engine = ((WebView) stage.getScene().lookup(WEB_VIEW_ID)).getEngine();
-//    engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-//      if (newState == State.SUCCEEDED) {
-//        engine.executeScript("initialize({"
-//            + " center: new google.maps.LatLng(52.266344, 10.519835),"
-//            + " zoom: 16, fullscreenControl: false"
-//            + " }); draw()");
-//      }
-//    });
-//    engine.loadContent(Map.getMapHtml());
-    TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
-    tabPane.getSelectionModel().select(1);
-    TextArea debugTextArea = (TextArea) stage.getScene().lookup(DEBUG_TEXTAREA_ID);
 
+    WebEngine engine = ((WebView) stage.getScene().lookup(WEB_VIEW_ID)).getEngine();
+    engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
+      if (newState == State.SUCCEEDED) {
+        engine.executeScript("initialize({"
+            + " center: new google.maps.LatLng(52.266344, 10.519835),"
+            + " zoom: 16, fullscreenControl: false"
+            + " }); draw()");
+      }
+    });
+    engine.loadContent(Map.getMapHtml());
+    TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
+    tabPane.getSelectionModel().select(0);
+
+    //TextArea debugTextArea = (TextArea) stage.getScene().lookup(DEBUG_TEXTAREA_ID);
+    //testDatabase(debugTextArea);
+  }
+
+  @SuppressWarnings({"unused", "checkstyle:rightcurly"})
+  private void testDatabase(TextArea debugTextArea) {
     Connection con = null;
     try {
       String jdbcUrl = "jdbc:h2:./" + GSEHEN_H2_LOCAL_DB + ";CIPHER=AES";
