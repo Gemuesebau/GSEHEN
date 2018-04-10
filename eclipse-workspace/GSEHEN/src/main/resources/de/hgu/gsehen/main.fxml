@@ -28,7 +28,7 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="Hilfe">
                   <items>
-                    <MenuItem fx:id="contactMenuItem" mnemonicParsing="false" onAction="#hideViews" text="Kontakt" />
+                    <MenuItem fx:id="contactMenuItem" mnemonicParsing="false" onAction="#openContactView" text="Kontakt" />
                         <MenuItem fx:id="aboutUsMenuItem" mnemonicParsing="false" onAction="#about" text="Über uns" />
                   </items>
                 </Menu>
@@ -168,6 +168,7 @@
                               <Font name="Monospaced Regular" size="12.0" />
                            </font>
                         </TextArea>
+                        <Button fx:id="contactBack" cancelButton="true" layoutY="108.0" mnemonicParsing="false" onAction="#backFromContactView" text="Back" AnchorPane.bottomAnchor="639.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="950.0" AnchorPane.topAnchor="105.0" />
                      </children>
                   </AnchorPane>
                </content>
