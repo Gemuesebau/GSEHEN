@@ -14,16 +14,19 @@
          <children>
             <MenuBar layoutY="14.0" AnchorPane.bottomAnchor="794.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
               <menus>
-                <Menu mnemonicParsing="false" text="Optionen">
+                <Menu mnemonicParsing="false" text="Datei">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Bla" />
-                        <MenuItem mnemonicParsing="false" text="Blubb" />
+                    <MenuItem mnemonicParsing="false" text="Zurücksetzen" />
+                        <MenuItem mnemonicParsing="false" text="Sichern" />
                   </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Profil">
+                <Menu mnemonicParsing="false" text="Ansicht">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Öffnen" />
-                        <MenuItem mnemonicParsing="false" text="Löschen" />
+                        <Menu mnemonicParsing="false" text="Entwickler">
+                          <items>
+                          <MenuItem mnemonicParsing="false" text="MapView-HTML neu laden" />
+                          </items>
+                        </Menu>
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Hilfe">

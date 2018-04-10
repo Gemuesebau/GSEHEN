@@ -11,6 +11,11 @@ public class GeoPolygon {
     geoPoints = new ArrayList<>();
   }
   
+  /**
+   * Constructs from a variable amount of GeoPoint instances.
+   *
+   * @param geoPoints the points to be added to this polygon
+   */
   public GeoPolygon(GeoPoint... geoPoints) {
     this();
     for (GeoPoint geoPoint : geoPoints) {
@@ -42,6 +47,11 @@ public class GeoPolygon {
     return new PolygonData(pointsX, pointsY);
   }
 
+  /**
+   * Calculates the minimum x value of all of this polygon's points.
+   *
+   * @return the calculated value
+   */
   public double getMinX() {
     if (geoPoints.isEmpty()) {
       throw new IllegalArgumentException("the polygon must have at least one point");
@@ -56,6 +66,11 @@ public class GeoPolygon {
     return result;
   }
 
+  /**
+   * Calculates the minimum y value of all of this polygon's points.
+   *
+   * @return the calculated value
+   */
   public double getMinY() {
     if (geoPoints.isEmpty()) {
       throw new IllegalArgumentException("the polygon must have at least one point");
@@ -70,6 +85,11 @@ public class GeoPolygon {
     return result;
   }
 
+  /**
+   * Calculates the maximum x value of all of this polygon's points.
+   *
+   * @return the calculated value
+   */
   public double getMaxX() {
     if (geoPoints.isEmpty()) {
       throw new IllegalArgumentException("the polygon must have at least one point");
@@ -84,6 +104,11 @@ public class GeoPolygon {
     return result;
   }
 
+  /**
+   * Calculates the maximum y value of all of this polygon's points.
+   *
+   * @return the calculated value
+   */
   public double getMaxY() {
     if (geoPoints.isEmpty()) {
       throw new IllegalArgumentException("the polygon must have at least one point");
