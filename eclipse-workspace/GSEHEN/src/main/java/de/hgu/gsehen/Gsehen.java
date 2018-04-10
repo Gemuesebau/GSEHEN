@@ -3,6 +3,8 @@ package de.hgu.gsehen;
 import static de.hgu.gsehen.jdbc.DatabaseUtils.executeQuery;
 import static de.hgu.gsehen.jdbc.DatabaseUtils.executeUpdate;
 import static de.hgu.gsehen.jdbc.DatabaseUtils.parseYmd;
+
+import de.hgu.gsehen.webview.Map;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,7 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Logger;
-import de.hgu.gsehen.webview.Map;
 import javafx.application.Application;
 import javafx.concurrent.Worker.State;
 import javafx.fxml.FXMLLoader;

@@ -22,8 +22,11 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="Ansicht">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Entwickler" />
-                        <MenuItem mnemonicParsing="false" text="MapView-HTML neu laden" />
+                        <Menu mnemonicParsing="false" text="Entwickler">
+                          <items>
+                          <MenuItem mnemonicParsing="false" text="MapView-HTML neu laden" />
+                          </items>
+                        </Menu>
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Hilfe">
