@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.web.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+
+<SplitPane dividerPositions="0.20109546165884193" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.MainController_chris">
+   <items>
+      <AnchorPane prefHeight="200.0" prefWidth="200.0">
+         <children>
+            <MenuBar layoutY="14.0" AnchorPane.bottomAnchor="794.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
+              <menus>
+                <Menu mnemonicParsing="false" text="Optionen">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Bla" />
+                        <MenuItem mnemonicParsing="false" text="Blubb" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Profil">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Öffnen" />
+                        <MenuItem mnemonicParsing="false" text="Löschen" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Hilfe">
+                  <items>
+                    <MenuItem fx:id="contactMenuItem" mnemonicParsing="false" text="Kontakt" />
+                        <MenuItem fx:id="aboutUsMenuItem" mnemonicParsing="false" onAction="#about" text="Über uns" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+            <Accordion fx:id="accordion" layoutX="26.0" layoutY="45.0" AnchorPane.bottomAnchor="550.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
+              <panes>
+                <TitledPane animated="false" text="Felder">
+                     <content>
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                           <children>
+                              <Button layoutX="10.0" layoutY="2.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+                              <Button layoutX="10.0" layoutY="27.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+                              <Button layoutX="10.0" layoutY="52.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+                           </children>
+                        </AnchorPane>
+                     </content>
+                </TitledPane>
+                <TitledPane animated="false" text="Wetterstationen">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0">
+                           <children>
+                              <Button mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                              <Button layoutX="95.0" layoutY="25.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </TitledPane>
+                <TitledPane animated="false" text="Einstellungen">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <Button mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                              <Button layoutX="95.0" layoutY="25.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </TitledPane>
+                  <TitledPane animated="false" text="Betrieb/Farm">
+                     <content>
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                           <children>
+                              <Button layoutX="10.0" layoutY="2.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+                              <Button layoutX="10.0" layoutY="27.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+                              <Button layoutX="10.0" layoutY="52.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+                           </children>
+                        </AnchorPane>
+                     </content>
+                  </TitledPane>
+              </panes>
+            </Accordion>
+            <Label layoutY="680.0" text="LOGO" textAlignment="CENTER" textFill="#0000002e">
+               <font>
+                  <Font size="95.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+      <VBox prefHeight="200.0" prefWidth="100.0">
+         <children>
+            <HBox prefHeight="100.0" prefWidth="810.0">
+               <children>
+                  <ToggleButton fx:id="mapView" focusTraversable="false" mnemonicParsing="false" selected="true" text="MapView">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="viewGroup" />
+                     </toggleGroup>
+                  </ToggleButton>
+                  <ToggleButton fx:id="farmView" focusTraversable="false" mnemonicParsing="false" text="FarmView" toggleGroup="$viewGroup">
+                     <HBox.margin>
+                        <Insets left="10.0" />
+                     </HBox.margin>
+                  </ToggleButton>
+                  <ToggleButton fx:id="fieldView" focusTraversable="false" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" text="FieldView" toggleGroup="$viewGroup">
+                     <HBox.margin>
+                        <Insets left="10.0" />
+                     </HBox.margin>
+                  </ToggleButton>
+                  <ToggleButton fx:id="fieldPlotView" focusTraversable="false" layoutX="188.0" layoutY="10.0" mnemonicParsing="false" text="FieldPlotView" toggleGroup="$viewGroup">
+                     <HBox.margin>
+                        <Insets left="10.0" />
+                     </HBox.margin>
+                  </ToggleButton>
+               </children>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" top="10.0" />
+               </padding>
+            </HBox>
+            <WebView id="webView" prefHeight="838.0" prefWidth="1018.0" VBox.vgrow="ALWAYS">
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </WebView>
+            <Pane />
+         </children>
+      </VBox>
+   </items>
+</SplitPane>
