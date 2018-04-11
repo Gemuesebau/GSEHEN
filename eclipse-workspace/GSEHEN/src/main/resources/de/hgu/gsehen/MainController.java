@@ -14,7 +14,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
@@ -45,7 +45,7 @@ public class MainController {
   @FXML
   private Tab contactViewTab;
   @FXML
-  private AnchorPane farmViewAnchor;
+  private Pane farmViewPane;
 
   // Help-Menu
   @FXML
@@ -54,10 +54,6 @@ public class MainController {
   private Button contactBack;
   @FXML
   private MenuItem aboutUsMenuItem;
-
-  public AnchorPane getFarmViewAnchor() {
-    return farmViewAnchor;
-  }
 
   // Hides the Accordion and the tabs in the TabPane.
   @FXML
@@ -90,8 +86,8 @@ public class MainController {
 
   @FXML
   protected void drawPolygon(Event d) {
-    int width = 1000; // TODO size depending on parent!?
-    int height = 600; // ====
+    int width = (int) farmViewPane.getWidth();
+    int height = (int) farmViewPane.getHeight();
     Canvas canvas = new Canvas(width, height);
     GraphicsContext gc = canvas.getGraphicsContext2D();
     GeoPolygon[] polygons = {
@@ -103,10 +99,7 @@ public class MainController {
             new GeoPoint(52.4, 11.1))};
     setTransformation(gc, width, height, polygons);
     drawShapes(gc, polygons);
-    AnchorPane.setTopAnchor(canvas, 40.0);
-    AnchorPane.setLeftAnchor(canvas, 50.0);
-    AnchorPane.setRightAnchor(canvas, 70.0);
-    farmViewAnchor.getChildren().addAll(canvas);
+    farmViewPane.getChildren().addAll(canvas);
   }
 
   private void drawShapes(GraphicsContext gc, GeoPolygon... polygons) {

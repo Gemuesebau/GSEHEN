@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.paint.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
@@ -102,7 +104,32 @@
           </Tab>
           <Tab fx:id="farmViewTab" closable="false" onSelectionChanged="#drawPolygon" text="FarmView">
             <content>
-              <AnchorPane fx:id="farmViewAnchor" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+              <AnchorPane>
+                     <children>
+                        <Pane fx:id="farmViewPane" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="100.0" />
+                        <HBox layoutX="23.0" layoutY="675.0" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="669.0">
+                           <children>
+                              <Button mnemonicParsing="false" styleClass="darkBlueButton" stylesheets="@Style.css" text="Bewässerungsplan ausgeben" textFill="WHITE">
+                                 <HBox.margin>
+                                    <Insets right="50.0" />
+                                 </HBox.margin>
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Button>
+                              <Button mnemonicParsing="false" styleClass="greenButton" stylesheets="@Style.css" text="Pflanzenstatus buchen" textFill="WHITE">
+                                 <HBox.margin>
+                                    <Insets right="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" styleClass="lightBlueButton" stylesheets="@Style.css" text="Bewässerung buchen" textFill="WHITE">
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets top="20.0" />
+                           </padding>
+                        </HBox>
+                     </children></AnchorPane>
             </content>
           </Tab>
             <Tab fx:id="fieldViewTab" closable="false" text="Field View">
@@ -121,9 +148,6 @@
                         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#b8ff1f" height="86.0" layoutX="809.0" layoutY="231.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
                         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ff5221" height="86.0" layoutX="497.0" layoutY="173.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
                         <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="648.0" layoutY="333.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
-                        <Button layoutX="421.0" layoutY="657.0" mnemonicParsing="false" text="Bewässerung buchen" />
-                        <Button layoutX="244.0" layoutY="657.0" mnemonicParsing="false" text="Pflanzenstatus buchen" />
-                        <Button layoutX="35.0" layoutY="657.0" mnemonicParsing="false" text="Bewässerungsplan ausgeben" />
                      </children>
                   </AnchorPane>
                </content>
