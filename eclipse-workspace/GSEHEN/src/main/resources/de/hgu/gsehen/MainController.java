@@ -3,17 +3,22 @@ package de.hgu.gsehen;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.PolygonData;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.chart.PieChart;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -45,7 +50,11 @@ public class MainController {
   @FXML
   private Tab contactViewTab;
   @FXML
+  private HBox farmViewTopHBox;
+  @FXML
   private Pane farmViewPane;
+  @FXML
+  private PieChart farmPieChart;
 
   // Help-Menu
   @FXML
@@ -85,9 +94,9 @@ public class MainController {
   }
 
   @FXML
-  protected void drawPolygon(Event d) {
-    int width = (int) farmViewPane.getWidth();
-    int height = (int) farmViewPane.getHeight();
+  protected void enterFarmView(Event d) {
+    int width = (int) (farmViewPane.getWidth() * 0.95);      // 95% from parent
+    int height = (int) (farmViewPane.getHeight() * 0.95);    // 95% from parent
     Canvas canvas = new Canvas(width, height);
     GraphicsContext gc = canvas.getGraphicsContext2D();
     GeoPolygon[] polygons = {
@@ -100,6 +109,16 @@ public class MainController {
     setTransformation(gc, width, height, polygons);
     drawShapes(gc, polygons);
     farmViewPane.getChildren().addAll(canvas);
+
+    ObservableList<PieChart.Data> pieChartData =
+        FXCollections.observableArrayList(new PieChart.Data("Bananen", 13),
+            new PieChart.Data("Weizen", 25), new PieChart.Data("Kartoffeln", 10),
+            new PieChart.Data("frei", 22), new PieChart.Data("Marihuana", 30));
+    PieChart pieChart = new PieChart(pieChartData);
+    farmPieChart = pieChart;
+    farmPieChart.setTitle("Anbau");
+    farmPieChart.setLegendSide(Side.RIGHT);
+    farmViewTopHBox.getChildren().addAll(farmPieChart);
   }
 
   private void drawShapes(GraphicsContext gc, GeoPolygon... polygons) {

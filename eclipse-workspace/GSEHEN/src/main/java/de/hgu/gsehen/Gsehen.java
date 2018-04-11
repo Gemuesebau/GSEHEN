@@ -77,6 +77,8 @@ public class Gsehen extends Application {
     }
     Scene scene = new Scene(root, 1280, 800);
     stage.setScene(scene);
+    stage.setMinWidth(root.minWidth(-1));
+    stage.setMinHeight(root.minHeight(-1));
     stage.sizeToScene();
     stage.show();
 
