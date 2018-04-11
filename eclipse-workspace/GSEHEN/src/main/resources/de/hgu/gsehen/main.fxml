@@ -113,6 +113,11 @@
                      <top>
                         <HBox fx:id="farmViewTopHBox" prefHeight="275.0" prefWidth="1018.0" BorderPane.alignment="CENTER">
                            <children>
+                              <Label fx:id="farmLabel" prefHeight="200.0" prefWidth="350.0">
+                                 <HBox.margin>
+                                    <Insets top="20.0" />
+                                 </HBox.margin>
+                              </Label>
                               <PieChart fx:id="farmPieChart" legendSide="RIGHT" titleSide="RIGHT" />
                            </children>
                            <padding>

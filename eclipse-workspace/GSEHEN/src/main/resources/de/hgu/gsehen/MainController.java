@@ -15,6 +15,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -55,6 +56,8 @@ public class MainController {
   private Pane farmViewPane;
   @FXML
   private PieChart farmPieChart;
+  @FXML
+  private Label farmLabel;
 
   // Help-Menu
   @FXML
@@ -93,10 +96,11 @@ public class MainController {
     stage.show();
   }
 
+  // TODO Aktuell hardcoded Zeugs (Polygon und PieChart).
   @FXML
   protected void enterFarmView(Event d) {
-    int width = (int) (farmViewPane.getWidth() * 0.95);      // 95% from parent
-    int height = (int) (farmViewPane.getHeight() * 0.95);    // 95% from parent
+    int width = (int) (farmViewPane.getWidth() * 0.95); // 95% from parent
+    int height = (int) (farmViewPane.getHeight() * 0.95); // 95% from parent
     Canvas canvas = new Canvas(width, height);
     GraphicsContext gc = canvas.getGraphicsContext2D();
     GeoPolygon[] polygons = {
@@ -119,6 +123,18 @@ public class MainController {
     farmPieChart.setTitle("Anbau");
     farmPieChart.setLegendSide(Side.RIGHT);
     farmViewTopHBox.getChildren().addAll(farmPieChart);
+
+    // TODO Bislang nur ein kleiner Test!
+    for (GeoPolygon polygon : polygons) {
+      String labelText = "";
+      for (double geoPointX : polygon.getPolygonData().getPointsX()) {
+        for (double geoPointY : polygon.getPolygonData().getPointsY()) {
+          labelText += "PolygonDataX: " + geoPointX + " PolygonDataY: " + geoPointY + "\n";
+        }
+      }
+      farmLabel.setText(labelText);
+    }
+    farmLabel.setWrapText(true);
   }
 
   private void drawShapes(GraphicsContext gc, GeoPolygon... polygons) {
