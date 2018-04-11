@@ -20,5 +20,6 @@
 	<classpathentry kind="lib" path="lib/test/org.opentest4j_1.0.0.v20170910-2246.jar"/>
 	<classpathentry kind="lib" path="lib/test/org.junit.jupiter.api_5.0.0.v20170910-2246.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
