@@ -125,7 +125,7 @@ public class MainController {
     farmPieChart.setLegendSide(Side.RIGHT);
     farmViewTopHBox.getChildren().addAll(farmPieChart);
 
-    // TODO Bislang nur ein kleiner Test! Generell aber nicht verkehrt, wenn man die GeoPoints
+    // TODO Bislang nur ein kleiner Test. Generell aber nicht verkehrt, wenn man die GeoPoints
     // mittels Label anzeigen lassen würde.
     for (GeoPolygon polygon : polygons) {
       String labelText = "";
