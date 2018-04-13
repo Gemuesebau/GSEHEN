@@ -96,7 +96,7 @@ public class MainController {
     stage.show();
   }
 
-  // TODO Aktuell hardcoded Zeugs (Polygon und PieChart).
+  // TODO Aktuell hardcoded Zeugs (Polygon(!) und PieChart(?)).
   @FXML
   protected void enterFarmView(Event d) {
     int width = (int) (farmViewPane.getWidth() * 0.95); // 95% from parent
@@ -114,6 +114,7 @@ public class MainController {
     drawShapes(gc, polygons);
     farmViewPane.getChildren().addAll(canvas);
 
+    // TODO Ist das sinnvoll, oder wird's dadurch zu voll?
     ObservableList<PieChart.Data> pieChartData =
         FXCollections.observableArrayList(new PieChart.Data("Bananen", 13),
             new PieChart.Data("Weizen", 25), new PieChart.Data("Kartoffeln", 10),
@@ -124,13 +125,13 @@ public class MainController {
     farmPieChart.setLegendSide(Side.RIGHT);
     farmViewTopHBox.getChildren().addAll(farmPieChart);
 
-    // TODO Bislang nur ein kleiner Test!
+    // TODO Bislang nur ein kleiner Test! Generell aber nicht verkehrt, wenn man die GeoPoints
+    // mittels Label anzeigen lassen würde.
     for (GeoPolygon polygon : polygons) {
       String labelText = "";
-      for (double geoPointX : polygon.getPolygonData().getPointsX()) {
-        for (double geoPointY : polygon.getPolygonData().getPointsY()) {
-          labelText += "PolygonDataX: " + geoPointX + " PolygonDataY: " + geoPointY + "\n";
-        }
+      for (GeoPoint geoPoint : polygon.getGeoPoints()) {
+        labelText += "GeoPoint Lat: " + geoPoint.getLat() + "; GeoPoint Lng: " + geoPoint.getLng()
+            + "\n" + "\n";
       }
       farmLabel.setText(labelText);
     }
