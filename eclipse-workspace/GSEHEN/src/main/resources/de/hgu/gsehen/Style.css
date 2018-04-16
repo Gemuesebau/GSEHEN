@@ -1,0 +1,98 @@
+.darkBlueButton {
+    -fx-background-color: #000000,
+        linear-gradient(#7ebcea, #2f4b8f),
+        linear-gradient(#426ab7, #263e75),
+        linear-gradient(#395cab, #223768);
+    -fx-background-insets: 0.0,1.0,2.0,3.0;
+    -fx-background-radius: 3.0,2.0,2.0,2.0;
+    -fx-padding: 12.0 30.0 12.0 30.0;
+}
+
+.darkBlueButton:hover {
+    -fx-background-color: #000000,
+        linear-gradient(#2f4b8f, #7ebcea),
+        linear-gradient(#263e75, #426ab7),
+        linear-gradient(#223768, #395cab);
+    -fx-background-insets: 0.0,1.0,2.0,3.0;
+    -fx-background-radius: 3.0,2.0,2.0,2.0;
+    -fx-padding: 12.0 30.0 12.0 30.0;
+    -fx-effect:dropshadow(gaussian,#0994e3,15,0.2,0,0);
+}
+
+.darkBlueButton:pressed {
+    -fx-background-color: #000000,
+        linear-gradient(#2f4b8f, #7ebcea),
+        linear-gradient(#263e75, #426ab7),
+        linear-gradient(#223768, #395cab);
+    -fx-background-insets: 0.0,1.0,2.0,3.0;
+    -fx-background-radius: 3.0,2.0,2.0,2.0;
+    -fx-padding: 12.0 30.0 12.0 30.0;
+    -fx-effect:dropshadow(gaussian,#0994e3,15,0.5,0,0);
+    -fx-rotate: 5;
+}
+
+.greenButton {
+	-fx-background-color:#000000,
+	linear-gradient(#85ea7e, #2e8f35),
+	linear-gradient(#41b74b, #257525),
+	linear-gradient(#39aa51, #226823);
+	-fx-background-insets: 0.0,1.0,2.0,3.0;
+	-fx-background-radius: 3.0,2.0,2.0,2.0;
+	-fx-padding: 12.0 30.0 12.0 30.0;
+}
+
+.greenButton:hover {
+	-fx-background-color:#000000,
+	linear-gradient(#2e8f35, #85ea7e),
+	linear-gradient(#257525, #41b74b),
+	linear-gradient(#226823, #39aa51);
+	-fx-background-insets: 0.0,1.0,2.0,3.0;
+	-fx-background-radius: 3.0,2.0,2.0,2.0;
+	-fx-padding: 12.0 30.0 12.0 30.0;
+	-fx-effect:dropshadow(gaussian,#0ce428,15,0.2,0,0);
+}
+
+.greenButton:pressed {
+	-fx-background-color:#000000,
+	linear-gradient(#2e8f35, #85ea7e),
+	linear-gradient(#257525, #41b74b),
+	linear-gradient(#226823, #39aa51);
+	-fx-background-insets: 0.0,1.0,2.0,3.0;
+	-fx-background-radius: 3.0,2.0,2.0,2.0;
+	-fx-padding: 12.0 30.0 12.0 30.0;
+	-fx-effect:dropshadow(gaussian,#0ce428,15,0.5,0,0);
+	-fx-rotate: 5;
+}
+
+.lightBlueButton {
+	-fx-background-color:#000000,
+	linear-gradient(#89cdff, #49cdff),
+	linear-gradient(#6387ed, #395caf),
+	linear-gradient(#4670ce, #2153a0);
+	-fx-background-insets: 0.0,1.0,2.0,3.0;
+	-fx-background-radius: 3.0,2.0,2.0,2.0;
+	-fx-padding: 12.0 30.0 12.0 30.0;
+}
+
+.lightBlueButton:hover {
+	-fx-background-color:#000000,
+	linear-gradient(#49cdff, #89cdff),
+	linear-gradient(#395caf, #6387ed),
+	linear-gradient(#2153a0, #4670ce);
+	-fx-background-insets: 0.0,1.0,2.0,3.0;
+	-fx-background-radius: 3.0,2.0,2.0,2.0;
+	-fx-padding: 12.0 30.0 12.0 30.0;
+	-fx-effect:dropshadow(gaussian,#0353ff,15,0.2,0,0);
+}
+
+.lightBlueButton:pressed {
+	-fx-background-color:#000000,
+	linear-gradient(#49cdff, #89cdff),
+	linear-gradient(#395caf, #6387ed),
+	linear-gradient(#2153a0, #4670ce);
+	-fx-background-insets: 0.0,1.0,2.0,3.0;
+	-fx-background-radius: 3.0,2.0,2.0,2.0;
+	-fx-padding: 12.0 30.0 12.0 30.0;
+	-fx-effect:dropshadow(gaussian,#0353ff,15,0.5,0,0);
+	-fx-rotate: 5;
+}
