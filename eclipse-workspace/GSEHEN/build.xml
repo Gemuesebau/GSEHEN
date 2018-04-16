@@ -13,6 +13,7 @@
 
   <target name="echo-os">
     <echo message="${os.name}" />
+    <echo message="${java.version}" />
   </target>
 
   <target name="delete-entire-db-file">
