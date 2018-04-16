@@ -17,14 +17,11 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import javafx.application.Application;
-import javafx.concurrent.Worker.State;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 /**
@@ -40,11 +37,11 @@ public class Gsehen extends Application {
 
   private static final String MAIN_FXML = "main.fxml";
 
-  public static final String WEB_VIEW_ID = "#webView";
   public static final String DEBUG_TEXTAREA_ID = "#debugTA";
   public static final String TAB_PANE_ID = "#tabPane";
 
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+  private static Map map;
 
   /**
    * Main method.
@@ -85,15 +82,8 @@ public class Gsehen extends Application {
     stage.sizeToScene();
     stage.show();
 
-    WebEngine engine = ((WebView) stage.getScene().lookup(WEB_VIEW_ID)).getEngine();
-    engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-      if (newState == State.SUCCEEDED) {
-        engine
-            .executeScript("initialize({" + " center: new google.maps.LatLng(52.266344, 10.519835),"
-                + " zoom: 16, fullscreenControl: false" + " }); draw()");
-      }
-    });
-    engine.loadContent(Map.getMapHtml());
+    map = new Map(stage.getScene());
+    map.reload();
 
     TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
     tabPane.getTabs().remove(4);
@@ -102,6 +92,10 @@ public class Gsehen extends Application {
     // testDatabase(debugTextArea);
   }
 
+  public static Map getMap() {
+    return map;
+  }
+  
   @SuppressWarnings({"unused", "checkstyle:rightcurly"})
   private void testDatabase(TextArea debugTextArea) {
     Connection con = null;
