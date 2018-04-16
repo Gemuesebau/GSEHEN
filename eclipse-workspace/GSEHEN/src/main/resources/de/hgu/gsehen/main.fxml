@@ -28,7 +28,7 @@
                   <items>
                         <Menu mnemonicParsing="false" text="Entwickler">
                           <items>
-                          <MenuItem mnemonicParsing="false" text="MapView-HTML neu laden" />
+                          <MenuItem fx:id="reloadMapViewHTMLMenuItem" mnemonicParsing="false" text="MapView-HTML neu laden" />
                           </items>
                         </Menu>
                   </items>
