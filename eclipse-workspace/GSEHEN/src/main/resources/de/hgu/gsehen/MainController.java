@@ -1,4 +1,4 @@
-package de.hgu.gsehen.gui.controller;
+package de.hgu.gsehen;
 
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
@@ -99,10 +99,8 @@ public class MainController {
   // TODO Aktuell hardcoded Zeugs (Polygon(!) und PieChart(?)).
   @FXML
   protected void enterFarmView(Event d) {
-//    int width = (int) (farmViewPane.getWidth() * 0.95); // 95% from parent
-//    int height = (int) (farmViewPane.getHeight() * 0.95); // 95% from parent
-    int width = 300;
-    int height = 300;
+    int width = (int) (farmViewPane.getWidth() * 0.95); // 95% from parent
+    int height = (int) (farmViewPane.getHeight() * 0.95); // 95% from parent
     Canvas canvas = new Canvas(width, height);
     GeoPolygon[] polygons = {
         new GeoPolygon(new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5),
@@ -120,7 +118,7 @@ public class MainController {
     ObservableList<PieChart.Data> pieChartData =
         FXCollections.observableArrayList(new PieChart.Data("Bananen", 13),
             new PieChart.Data("Weizen", 25), new PieChart.Data("Kartoffeln", 10),
-            new PieChart.Data("frei", 22), new PieChart.Data("Marihuana", 30));
+            new PieChart.Data("frei", 22), new PieChart.Data("Mais", 30));
     PieChart pieChart = new PieChart(pieChartData);
     farmPieChart = pieChart;
     farmPieChart.setTitle("Anbau");
@@ -167,7 +165,7 @@ public class MainController {
         minX = compare;
       }
       compare = g.getMaxX();
-      if (compare < maxX) {
+      if (compare > maxX) {
         maxX = compare;
       }
       compare = g.getMinY();
@@ -175,7 +173,7 @@ public class MainController {
         minY = compare;
       }
       compare = g.getMaxY();
-      if (compare < maxX) {
+      if (compare > maxY) {
         maxY = compare;
       }
     }
