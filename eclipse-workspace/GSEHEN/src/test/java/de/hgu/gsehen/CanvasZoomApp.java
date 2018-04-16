@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 
 /**
  * An application with a zoomable and pannable canvas.
+ * Source: https://stackoverflow.com/a/29530135
  */
 public class CanvasZoomApp extends Application {
 
@@ -23,10 +24,8 @@ public class CanvasZoomApp extends Application {
   @Override
   public void start(Stage stage) {
 
-    Group group = new Group();
-
     // create canvas
-    CanvasZoomTest canvas = new CanvasZoomTest();
+    CanvasZoom canvas = new CanvasZoom();
 
     // we don't want the canvas on the top/left in this example => just
     // translate it a bit
@@ -70,6 +69,7 @@ public class CanvasZoomApp extends Application {
 
     canvas.getChildren().addAll(label1, label2, label3, circle1, rect1);
 
+    Group group = new Group();
     group.getChildren().add(canvas);
 
     // create scene which can be dragged and zoomed

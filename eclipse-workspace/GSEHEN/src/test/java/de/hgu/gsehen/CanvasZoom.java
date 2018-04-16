@@ -11,14 +11,14 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
-public class CanvasZoomTest extends Pane {
+public class CanvasZoom extends Pane {
 
   DoubleProperty myScale = new SimpleDoubleProperty(1.0);
 
   /**
    * Test.
    */
-  public CanvasZoomTest() {
+  public CanvasZoom() {
     setPrefSize(600, 600);
     setStyle("-fx-background-color: lightgrey; -fx-border-color: blue;");
 
@@ -94,9 +94,9 @@ class NodeGestures {
 
   private DragContext nodeDragContext = new DragContext();
 
-  CanvasZoomTest canvas;
+  CanvasZoom canvas;
 
-  public NodeGestures(CanvasZoomTest canvas) {
+  public NodeGestures(CanvasZoom canvas) {
     this.canvas = canvas;
 
   }
@@ -164,9 +164,9 @@ class SceneGestures {
 
   private DragContext sceneDragContext = new DragContext();
 
-  CanvasZoomTest canvas;
+  CanvasZoom canvas;
 
-  public SceneGestures(CanvasZoomTest canvas) {
+  public SceneGestures(CanvasZoom canvas) {
     this.canvas = canvas;
   }
 
