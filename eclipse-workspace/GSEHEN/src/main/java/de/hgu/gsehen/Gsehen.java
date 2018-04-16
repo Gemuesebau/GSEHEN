@@ -14,7 +14,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.util.logging.LogManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -49,8 +49,15 @@ public class Gsehen extends Application {
    *
    * @param args the command line arguments
    */
-  // @SuppressWarnings({"checkstyle:rightcurly"})
+  @SuppressWarnings({"checkstyle:rightcurly"})
   public static void main(String[] args) {
+    System.setProperty("java.util.logging.config.class", "de.hgu.gsehen.logging.Configurator");
+    try {
+      LogManager.getLogManager().readConfiguration();
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
     // try {
     // Server server = Server.createWebServer();
     // server.start();
