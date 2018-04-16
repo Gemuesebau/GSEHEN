@@ -4,7 +4,8 @@ import static de.hgu.gsehen.jdbc.DatabaseUtils.executeQuery;
 import static de.hgu.gsehen.jdbc.DatabaseUtils.executeUpdate;
 import static de.hgu.gsehen.jdbc.DatabaseUtils.parseYmd;
 
-import de.hgu.gsehen.webview.Map;
+import de.hgu.gsehen.gui.view.Map;
+import de.hgu.gsehen.logging.HTMLLogger;
 
 import java.io.IOException;
 
@@ -14,14 +15,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import java.util.logging.Logger;
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 /**
@@ -39,8 +39,9 @@ public class Gsehen extends Application {
 
   public static final String DEBUG_TEXTAREA_ID = "#debugTA";
   public static final String TAB_PANE_ID = "#tabPane";
+  private static final String WEB_VIEW_ID = "#webView";
 
-  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+  private static final HTMLLogger LOGGER = new HTMLLogger(Gsehen.class.getName());
   private static Map map;
 
   /**
@@ -82,7 +83,7 @@ public class Gsehen extends Application {
     stage.sizeToScene();
     stage.show();
 
-    map = new Map(stage.getScene());
+    map = new Map((WebView) scene.lookup(WEB_VIEW_ID));
     map.reload();
 
     TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);

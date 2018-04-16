@@ -1,9 +1,11 @@
-package de.hgu.gsehen.webview;
+package de.hgu.gsehen.gui.view;
+
+import de.hgu.gsehen.logging.HTMLLogger;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
 import javafx.concurrent.Worker.State;
-import javafx.scene.Scene;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
@@ -14,12 +16,30 @@ import javafx.scene.web.WebView;
  */
 public class Map {
 
-  private static final String MAP_HTML = "map.html";
-  private static final String WEB_VIEW_ID = "#webView";
-  private Scene scene;
+  private static final HTMLLogger LOGGER = new HTMLLogger(Map.class.getName());
 
-  public Map(Scene scene) {
-    this.scene = scene;
+  private static final String MAP_HTML = "map.html";
+
+  private WebEngine engine;
+  private String loadWorkerSucceededScript;
+
+  /**
+   * Constructs a new map in the given WebView.
+   *
+   * @param webView the WebView where to load the map
+   */
+  public Map(WebView webView) {
+    engine = webView.getEngine();
+    engine.setOnAlert(event -> alert(event.getData()));
+    engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
+      if (newState == State.SUCCEEDED) {
+        engine.executeScript(loadWorkerSucceededScript);
+      }
+    });
+  }
+
+  private void alert(String data) {
+    LOGGER.info(data);
   }
 
   /**
@@ -43,14 +63,9 @@ public class Map {
    * Reload map view HTML, and re-initialize JavaScript.
    */
   public void reload() {
-    WebEngine engine = ((WebView) scene.lookup(WEB_VIEW_ID)).getEngine();
-    engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-      if (newState == State.SUCCEEDED) {
-        engine
-            .executeScript("initialize({" + " center: new google.maps.LatLng(52.266344, 10.519835),"
-                + " zoom: 16, fullscreenControl: false" + " }); draw()");
-      }
-    });
+    loadWorkerSucceededScript = "initialize({"
+        + " center: new google.maps.LatLng(52.266344, 10.519835),"
+        + " zoom: 16, fullscreenControl: false" + " }); draw()";
     engine.loadContent(getMapHtml());
   }
 }
