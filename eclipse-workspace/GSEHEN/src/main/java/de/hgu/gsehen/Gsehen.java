@@ -5,7 +5,6 @@ import static de.hgu.gsehen.jdbc.DatabaseUtils.executeUpdate;
 import static de.hgu.gsehen.jdbc.DatabaseUtils.parseYmd;
 
 import de.hgu.gsehen.gui.view.Map;
-import de.hgu.gsehen.logging.HTMLLogger;
 
 import java.io.IOException;
 
@@ -14,7 +13,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -41,7 +42,7 @@ public class Gsehen extends Application {
   public static final String TAB_PANE_ID = "#tabPane";
   private static final String WEB_VIEW_ID = "#webView";
 
-  private static final HTMLLogger LOGGER = new HTMLLogger(Gsehen.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private static Map map;
 
   /**
@@ -58,6 +59,8 @@ public class Gsehen extends Application {
     catch (Exception e) {
       e.printStackTrace();
     }
+
+    LOGGER.log(Level.INFO, "TEST einer Exception", new RuntimeException("Exception Nachricht"));
     // try {
     // Server server = Server.createWebServer();
     // server.start();

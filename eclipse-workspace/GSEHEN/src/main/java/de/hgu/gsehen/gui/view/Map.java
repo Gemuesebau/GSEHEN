@@ -1,10 +1,8 @@
 package de.hgu.gsehen.gui.view;
 
-import de.hgu.gsehen.logging.HTMLLogger;
-
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
+import java.util.logging.Logger;
 import javafx.concurrent.Worker.State;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -16,7 +14,7 @@ import javafx.scene.web.WebView;
  */
 public class Map {
 
-  private static final HTMLLogger LOGGER = new HTMLLogger(Map.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(Map.class.getName());
 
   private static final String MAP_HTML = "map.html";
 
