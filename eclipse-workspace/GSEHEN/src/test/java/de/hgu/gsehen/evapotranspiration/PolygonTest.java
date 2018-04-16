@@ -31,14 +31,14 @@ class PolygonTest {
     double maxX = g.getMaxX();
     double minY = g.getMinY();
     double maxY = g.getMaxY();
-    for (int i = 1; i < polygons.length; i++) {
+    for (int i = 0; i < polygons.length; i++) {
       g = polygons[i];
       double compare = g.getMinX();
       if (compare < minX) {
         minX = compare;
       }
       compare = g.getMaxX();
-      if (compare < maxX) {
+      if (compare > maxX) {
         maxX = compare;
       }
       compare = g.getMinY();
@@ -46,7 +46,7 @@ class PolygonTest {
         minY = compare;
       }
       compare = g.getMaxY();
-      if (compare < maxX) {
+      if (compare > maxY) {
         maxY = compare;
       }
     }

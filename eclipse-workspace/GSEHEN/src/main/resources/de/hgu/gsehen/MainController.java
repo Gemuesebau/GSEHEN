@@ -1,4 +1,4 @@
-package de.hgu.gsehen.gui.controller;
+package de.hgu.gsehen;
 
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
@@ -165,7 +165,7 @@ public class MainController {
         minX = compare;
       }
       compare = g.getMaxX();
-      if (compare < maxX) {
+      if (compare > maxX) {
         maxX = compare;
       }
       compare = g.getMinY();
@@ -173,7 +173,7 @@ public class MainController {
         minY = compare;
       }
       compare = g.getMaxY();
-      if (compare < maxX) {
+      if (compare > maxY) {
         maxY = compare;
       }
     }
