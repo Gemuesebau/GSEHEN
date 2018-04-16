@@ -26,11 +26,7 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="Ansicht">
                   <items>
-                        <Menu mnemonicParsing="false" text="Entwickler" fx:controller="de.hgu.gsehen.gui.controller.DeveloperController">
-                          <items>
-                          <MenuItem fx:id="reloadMapViewHTMLMenuItem" mnemonicParsing="false" text="MapView-HTML neu laden" onAction="#reloadMapViewHTML" />
-                          </items>
-                        </Menu>
+                        <fx:include source="developerMenu.fxml" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Hilfe">

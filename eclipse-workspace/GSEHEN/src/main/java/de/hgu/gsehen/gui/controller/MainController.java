@@ -1,4 +1,4 @@
-package de.hgu.gsehen;
+package de.hgu.gsehen.gui.controller;
 
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
@@ -126,7 +126,7 @@ public class MainController {
     farmViewTopHBox.getChildren().addAll(farmPieChart);
 
     // TODO Bislang nur ein kleiner Test. Generell aber nicht verkehrt, wenn man die GeoPoints
-    // mittels Label anzeigen lassen würde.
+    // mittels Label anzeigen lassen wï¿½rde.
     for (GeoPolygon polygon : polygons) {
       String labelText = "";
       for (GeoPoint geoPoint : polygon.getGeoPoints()) {
