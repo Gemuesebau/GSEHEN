@@ -1,4 +1,4 @@
-package de.hgu.gsehen;
+package de.hgu.gsehen.zoomtest;
 
 import javafx.application.Application;
 import javafx.scene.Group;

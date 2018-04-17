@@ -3,11 +3,8 @@ package de.hgu.gsehen;
 import static de.hgu.gsehen.jdbc.DatabaseUtils.executeQuery;
 import static de.hgu.gsehen.jdbc.DatabaseUtils.executeUpdate;
 import static de.hgu.gsehen.jdbc.DatabaseUtils.parseYmd;
-
 import de.hgu.gsehen.gui.view.Map;
-
 import java.io.IOException;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -17,9 +14,12 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.web.WebView;
@@ -55,8 +55,7 @@ public class Gsehen extends Application {
     System.setProperty("java.util.logging.config.class", "de.hgu.gsehen.logging.Configurator");
     try {
       LogManager.getLogManager().readConfiguration();
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
 
@@ -106,7 +105,7 @@ public class Gsehen extends Application {
   public static Map getMap() {
     return map;
   }
-  
+
   @SuppressWarnings({"unused", "checkstyle:rightcurly"})
   private void testDatabase(TextArea debugTextArea) {
     Connection con = null;
