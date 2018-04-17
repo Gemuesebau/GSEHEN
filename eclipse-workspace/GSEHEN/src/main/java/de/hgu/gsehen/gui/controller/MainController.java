@@ -1,8 +1,15 @@
 package de.hgu.gsehen.gui.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.PolygonData;
+import de.hgu.gsehen.model.Drawable;
+import de.hgu.gsehen.model.DrawableParent;
+import de.hgu.gsehen.model.Farm;
+import de.hgu.gsehen.model.Field;
+import de.hgu.gsehen.model.Plot;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -102,14 +109,14 @@ public class MainController {
     int width = (int) (farmViewPane.getWidth() * 0.95); // 95% from parent
     int height = (int) (farmViewPane.getHeight() * 0.95); // 95% from parent
     Canvas canvas = new Canvas(width, height);
-    GeoPolygon[] polygons = {
-        new GeoPolygon(new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5),
-            new GeoPoint(52.4, 10.1)),
-        new GeoPolygon(new GeoPoint(53.2, 10.5), new GeoPoint(53.5, 10.5),
-            new GeoPoint(53.4, 10.1)),
-        new GeoPolygon(new GeoPoint(52.2, 11.5), new GeoPoint(52.5, 11.5),
-            new GeoPoint(52.4, 11.1))};
     GraphicsContext gc = canvas.getGraphicsContext2D();
+    GeoPolygon[] polygons = extractPolygons(new Farm("Meine kleine Farm",
+        new Field("Beilagenfeld", new Plot("Kartoffelacker", new GeoPolygon(new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5),
+            new GeoPoint(52.4, 10.1))),
+        new Plot("Pastinakenfleckerl", new GeoPolygon(new GeoPoint(53.2, 10.5), new GeoPoint(53.5, 10.5),
+            new GeoPoint(53.4, 10.1)))),
+        new Field("Buntesfeld", new Plot("Erbsenkamp", new GeoPolygon(new GeoPoint(52.2, 11.5), new GeoPoint(52.5, 11.5),
+            new GeoPoint(52.4, 11.1)))))); 
     setTransformation(gc, width, height, polygons);
     drawShapes(gc, polygons);
     farmViewPane.getChildren().addAll(canvas);
@@ -136,6 +143,23 @@ public class MainController {
       farmLabel.setText(labelText);
     }
     farmLabel.setWrapText(true);
+  }
+
+  private GeoPolygon[] extractPolygons(Drawable... drawables) {
+    List<GeoPolygon> result = new ArrayList<>();
+    extractPolygonsImpl(result, drawables);
+    return result.toArray(new GeoPolygon[0]);
+  }
+
+  private void extractPolygonsImpl(List<GeoPolygon> result, Drawable... drawables) {
+    for (Drawable drawable : drawables) {
+      result.add(drawable.getPolygon());
+      if (drawable instanceof DrawableParent) {
+        ((DrawableParent)drawable).forAllChildDrawables(
+            drawableChild -> extractPolygonsImpl(result, drawableChild)
+        );
+      }
+    }
   }
 
   private void drawShapes(GraphicsContext gc, GeoPolygon... polygons) {
