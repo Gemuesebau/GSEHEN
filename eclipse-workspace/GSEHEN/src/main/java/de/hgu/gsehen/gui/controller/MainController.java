@@ -1,17 +1,21 @@
 package de.hgu.gsehen.gui.controller;
 
-import java.util.ArrayList;
-import java.util.List;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.PolygonData;
+
+import de.hgu.gsehen.gui.view.NodeGestures;
+import de.hgu.gsehen.gui.view.SceneGestures;
+
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
-import de.hgu.gsehen.gui.view.NodeGestures;
-import de.hgu.gsehen.gui.view.SceneGestures;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
@@ -82,10 +86,21 @@ public class MainController {
   private Canvas canvas = new Canvas();
   private DoubleProperty scale;
   private NodeGestures nodeGestures;
-  private GeoPolygon[] polygons = {
+  private GeoPolygon[] polygons = extractPolygons(new Farm("Meine kleine Farm",
       new GeoPolygon(new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5), new GeoPoint(52.4, 10.1)),
-      new GeoPolygon(new GeoPoint(53.2, 10.5), new GeoPoint(53.5, 10.5), new GeoPoint(53.4, 10.1)),
-      new GeoPolygon(new GeoPoint(52.2, 11.5), new GeoPoint(52.5, 11.5), new GeoPoint(52.4, 11.1))};
+      new Field("Beilagenfeld",
+          new GeoPolygon(new GeoPoint(52, 10), new GeoPoint(52, 11), new GeoPoint(54, 10),
+              new GeoPoint(54, 11)),
+          new Plot("Kartoffelacker",
+              new GeoPolygon(new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5),
+                  new GeoPoint(52.4, 10.1))),
+          new Plot("Pastinakenfleckerl",
+              new GeoPolygon(new GeoPoint(53.2, 10.5), new GeoPoint(53.5, 10.5),
+                  new GeoPoint(53.4, 10.1)))),
+      new Field("Buntesfeld",
+          new GeoPolygon(new GeoPoint(52, 11), new GeoPoint(53, 12), new GeoPoint(52, 12)),
+          new Plot("Erbsenkamp", new GeoPolygon(new GeoPoint(52.2, 11.5), new GeoPoint(52.5, 11.5),
+              new GeoPoint(52.4, 11.1))))));
   private GraphicsContext gc;
   private SceneGestures sceneGestures;
   // TODO Ist das sinnvoll, oder wird's dadurch zu voll?
@@ -122,28 +137,12 @@ public class MainController {
     stage.show();
   }
 
-  // TODO Aktuell hardcoded Zeugs (Polygon(!) und PieChart(?)).
+  // TODO Mit den neuen Daten (17.04.) experimentieren.
   @FXML
   protected void enterFarmView() {
     int width = (int) (farmViewPane.getWidth() * 0.95); // 95% from parent
     int height = (int) (farmViewPane.getHeight() * 0.95); // 95% from parent
-    Canvas canvas = new Canvas(width, height);
-    GraphicsContext gc = canvas.getGraphicsContext2D();
-    GeoPolygon[] polygons = extractPolygons(
-        new Farm("Meine kleine Farm",
-            new GeoPolygon(
-                new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5), new GeoPoint(52.4, 10.1)),
-            new Field("Beilagenfeld",
-                new GeoPolygon(
-                    new GeoPoint(52, 10), new GeoPoint(52, 11), new GeoPoint(54, 10), new GeoPoint(54, 11)),
-                new Plot("Kartoffelacker",
-                    new GeoPolygon(new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5), new GeoPoint(52.4, 10.1))),
-                new Plot("Pastinakenfleckerl",
-                    new GeoPolygon(new GeoPoint(53.2, 10.5), new GeoPoint(53.5, 10.5), new GeoPoint(53.4, 10.1)))),
-            new Field("Buntesfeld",
-                new GeoPolygon(new GeoPoint(52, 11), new GeoPoint(53, 12), new GeoPoint(52, 12)),
-                new Plot("Erbsenkamp",
-                    new GeoPolygon(new GeoPoint(52.2, 11.5), new GeoPoint(52.5, 11.5), new GeoPoint(52.4, 11.1)))))); 
+
     canvas.setWidth(width);
     canvas.setHeight(height);
     scale = new SimpleDoubleProperty(1.0);
@@ -203,9 +202,8 @@ public class MainController {
     for (Drawable drawable : drawables) {
       result.add(drawable.getPolygon());
       if (drawable instanceof DrawableParent) {
-        ((DrawableParent)drawable).forAllChildDrawables(
-            drawableChild -> extractPolygonsImpl(result, drawableChild)
-        );
+        ((DrawableParent) drawable)
+            .forAllChildDrawables(drawableChild -> extractPolygonsImpl(result, drawableChild));
       }
     }
   }
