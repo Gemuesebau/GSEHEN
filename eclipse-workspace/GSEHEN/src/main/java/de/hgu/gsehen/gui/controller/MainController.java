@@ -10,10 +10,13 @@ import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.gui.view.NodeGestures;
+import de.hgu.gsehen.gui.view.SceneGestures;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
@@ -26,6 +29,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -74,6 +79,23 @@ public class MainController {
   @FXML
   private MenuItem aboutUsMenuItem;
 
+  private Canvas canvas = new Canvas();
+  private DoubleProperty scale;
+  private NodeGestures nodeGestures;
+  private GeoPolygon[] polygons = {
+      new GeoPolygon(new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5), new GeoPoint(52.4, 10.1)),
+      new GeoPolygon(new GeoPoint(53.2, 10.5), new GeoPoint(53.5, 10.5), new GeoPoint(53.4, 10.1)),
+      new GeoPolygon(new GeoPoint(52.2, 11.5), new GeoPoint(52.5, 11.5), new GeoPoint(52.4, 11.1))};
+  private GraphicsContext gc;
+  private SceneGestures sceneGestures;
+  // TODO Ist das sinnvoll, oder wird's dadurch zu voll?
+  private ObservableList<PieChart.Data> pieChartData =
+      FXCollections.observableArrayList(new PieChart.Data("Bananen", 13),
+          new PieChart.Data("Weizen", 25), new PieChart.Data("Kartoffeln", 10),
+          new PieChart.Data("frei", 22), new PieChart.Data("Mais", 30));
+  private PieChart pieChart = new PieChart(pieChartData);
+  private String labelText;
+
   // Hides the Accordion and the tabs in the TabPane.
   @FXML
   protected void openContactView(ActionEvent o) {
@@ -87,10 +109,7 @@ public class MainController {
   protected void backFromContactView(ActionEvent b) {
     accordion.setVisible(true);
     tabPane.getTabs().clear();
-    tabPane.getTabs().add(mapViewTab);
-    tabPane.getTabs().add(farmViewTab);
-    tabPane.getTabs().add(fieldViewTab);
-    tabPane.getTabs().add(fieldPlotViewTab);
+    tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, fieldPlotViewTab);
   }
 
   // Opens a new Stage.
@@ -105,7 +124,7 @@ public class MainController {
 
   // TODO Aktuell hardcoded Zeugs (Polygon(!) und PieChart(?)).
   @FXML
-  protected void enterFarmView(Event d) {
+  protected void enterFarmView() {
     int width = (int) (farmViewPane.getWidth() * 0.95); // 95% from parent
     int height = (int) (farmViewPane.getHeight() * 0.95); // 95% from parent
     Canvas canvas = new Canvas(width, height);
@@ -125,25 +144,46 @@ public class MainController {
                 new GeoPolygon(new GeoPoint(52, 11), new GeoPoint(53, 12), new GeoPoint(52, 12)),
                 new Plot("Erbsenkamp",
                     new GeoPolygon(new GeoPoint(52.2, 11.5), new GeoPoint(52.5, 11.5), new GeoPoint(52.4, 11.1)))))); 
+    canvas.setWidth(width);
+    canvas.setHeight(height);
+    scale = new SimpleDoubleProperty(1.0);
+    canvas.scaleXProperty().bindBidirectional(scale);
+    canvas.scaleYProperty().bindBidirectional(scale);
+
+    // create sample nodes which can be dragged
+    nodeGestures = new NodeGestures(canvas);
+
+    gc = canvas.getGraphicsContext2D();
     setTransformation(gc, width, height, polygons);
     drawShapes(gc, polygons);
-    farmViewPane.getChildren().addAll(canvas);
 
-    // TODO Ist das sinnvoll, oder wird's dadurch zu voll?
-    ObservableList<PieChart.Data> pieChartData =
-        FXCollections.observableArrayList(new PieChart.Data("Bananen", 13),
-            new PieChart.Data("Weizen", 25), new PieChart.Data("Kartoffeln", 10),
-            new PieChart.Data("frei", 22), new PieChart.Data("Mais", 30));
-    PieChart pieChart = new PieChart(pieChartData);
+    canvas.addEventFilter(MouseEvent.MOUSE_PRESSED, nodeGestures.getOnMousePressedEventHandler());
+    canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, nodeGestures.getOnMouseDraggedEventHandler());
+
+    if (!farmViewPane.getChildren().contains(canvas)) {
+      farmViewPane.getChildren().addAll(canvas);
+    }
+
+    sceneGestures = new SceneGestures(canvas);
+    farmViewPane.addEventFilter(MouseEvent.MOUSE_PRESSED,
+        sceneGestures.getOnMousePressedEventHandler());
+    farmViewPane.addEventFilter(MouseEvent.MOUSE_DRAGGED,
+        sceneGestures.getOnMouseDraggedEventHandler());
+    farmViewPane.addEventFilter(ScrollEvent.ANY, sceneGestures.getOnScrollEventHandler());
+
+    addGrid();
+
     farmPieChart = pieChart;
     farmPieChart.setTitle("Anbau");
     farmPieChart.setLegendSide(Side.RIGHT);
-    farmViewTopHBox.getChildren().addAll(farmPieChart);
+    if (!farmViewTopHBox.getChildren().contains(farmPieChart)) {
+      farmViewTopHBox.getChildren().addAll(farmPieChart);
+    }
 
     // TODO Bislang nur ein kleiner Test. Generell aber nicht verkehrt, wenn man die GeoPoints
     // mittels Label anzeigen lassen w�rde.
     for (GeoPolygon polygon : polygons) {
-      String labelText = "";
+      labelText = "";
       for (GeoPoint geoPoint : polygon.getGeoPoints()) {
         labelText += "GeoPoint Lat: " + geoPoint.getLat() + "; GeoPoint Lng: " + geoPoint.getLng()
             + "\n" + "\n";
@@ -168,6 +208,37 @@ public class MainController {
         );
       }
     }
+  }
+
+  /**
+   * Add a grid to the canvas, send it to back.
+   */
+  public void addGrid() {
+
+    double w = farmViewPane.getBoundsInLocal().getWidth();
+    double h = farmViewPane.getBoundsInLocal().getHeight();
+
+    // add grid
+    Canvas grid = new Canvas(w, h);
+
+    // don't catch mouse events
+    grid.setMouseTransparent(true);
+
+    GraphicsContext gc = grid.getGraphicsContext2D();
+
+    gc.setStroke(Color.GRAY);
+    gc.setLineWidth(1);
+
+    // draw grid lines
+    double offset = 50;
+    for (double i = offset; i < w; i += offset) {
+      gc.strokeLine(i, 0, i, h);
+      gc.strokeLine(0, i, w, i);
+    }
+
+    farmViewPane.getChildren().add(grid);
+
+    grid.toBack();
   }
 
   private void drawShapes(GraphicsContext gc, GeoPolygon... polygons) {
@@ -229,5 +300,4 @@ public class MainController {
     }
     gc.setTransform(affineTransformation);
   }
-
 }
