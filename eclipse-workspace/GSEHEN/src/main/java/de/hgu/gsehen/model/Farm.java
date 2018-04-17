@@ -7,11 +7,12 @@ import de.hgu.gsehen.gui.GeoPolygon;
 
 public class Farm implements Drawable, DrawableParent {
   private String name;
-  private List<Field> fields;
   private GeoPolygon polygon;
+  private List<Field> fields;
   
-  public Farm(String name, Field... fields) {
+  public Farm(String name, GeoPolygon polygon, Field... fields) {
     this.name = name;
+    this.polygon = polygon;
     this.fields = new ArrayList<>();
     for (Field field : fields) {
       this.fields.add(field);

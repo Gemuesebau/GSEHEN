@@ -110,13 +110,21 @@ public class MainController {
     int height = (int) (farmViewPane.getHeight() * 0.95); // 95% from parent
     Canvas canvas = new Canvas(width, height);
     GraphicsContext gc = canvas.getGraphicsContext2D();
-    GeoPolygon[] polygons = extractPolygons(new Farm("Meine kleine Farm",
-        new Field("Beilagenfeld", new Plot("Kartoffelacker", new GeoPolygon(new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5),
-            new GeoPoint(52.4, 10.1))),
-        new Plot("Pastinakenfleckerl", new GeoPolygon(new GeoPoint(53.2, 10.5), new GeoPoint(53.5, 10.5),
-            new GeoPoint(53.4, 10.1)))),
-        new Field("Buntesfeld", new Plot("Erbsenkamp", new GeoPolygon(new GeoPoint(52.2, 11.5), new GeoPoint(52.5, 11.5),
-            new GeoPoint(52.4, 11.1)))))); 
+    GeoPolygon[] polygons = extractPolygons(
+        new Farm("Meine kleine Farm",
+            new GeoPolygon(
+                new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5), new GeoPoint(52.4, 10.1)),
+            new Field("Beilagenfeld",
+                new GeoPolygon(
+                    new GeoPoint(52, 10), new GeoPoint(52, 11), new GeoPoint(54, 10), new GeoPoint(54, 11)),
+                new Plot("Kartoffelacker",
+                    new GeoPolygon(new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5), new GeoPoint(52.4, 10.1))),
+                new Plot("Pastinakenfleckerl",
+                    new GeoPolygon(new GeoPoint(53.2, 10.5), new GeoPoint(53.5, 10.5), new GeoPoint(53.4, 10.1)))),
+            new Field("Buntesfeld",
+                new GeoPolygon(new GeoPoint(52, 11), new GeoPoint(53, 12), new GeoPoint(52, 12)),
+                new Plot("Erbsenkamp",
+                    new GeoPolygon(new GeoPoint(52.2, 11.5), new GeoPoint(52.5, 11.5), new GeoPoint(52.4, 11.1)))))); 
     setTransformation(gc, width, height, polygons);
     drawShapes(gc, polygons);
     farmViewPane.getChildren().addAll(canvas);

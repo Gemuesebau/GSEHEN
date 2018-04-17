@@ -15,8 +15,9 @@ public class Field implements Drawable, DrawableParent {
   private List<Plot>        plots;
   private double            area;
 
-  public Field(String name, Plot... plots) {
+  public Field(String name, GeoPolygon polygon, Plot... plots) {
     this.name = name;
+    this.polygon = polygon;
     this.plots = new ArrayList<>();
     for (Plot plot : plots) {
       this.plots.add(plot);
