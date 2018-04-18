@@ -39,6 +39,20 @@ function draw() {
   });
   drawingManager.setMap(map);
 }
+function captureDrawing() {
+  google.maps.event.addListener(
+    drawingManager,
+    'overlaycomplete',
+    function (polygon) {
+	  var javaPolygon = gsehenGuiViewMap.getEmptyPolygon();
+	  var polygonLatLngArray = polygon.overlay.getPath().getArray();
+	  for (var i=0; i<polygonLatLngArray.length; i++) {
+	    javaPolygon.addGeoPointByCoords(polygonLatLngArray[i].lng(), polygonLatLngArray[i].lat());
+	  }
+      gsehenGuiViewMap.polygonDrawn(javaPolygon);
+    }
+  );
+}
 </script>
 </body>
 </html>

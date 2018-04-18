@@ -34,4 +34,9 @@ public class GeoPoint {
   public void setLng(double lng) {
     this.lng = lng;
   }
+
+  @Override
+  public String toString() {
+    return "" + lng + ", " + lat;
+  }
 }

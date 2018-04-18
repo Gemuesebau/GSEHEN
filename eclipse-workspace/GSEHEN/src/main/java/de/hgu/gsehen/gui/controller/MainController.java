@@ -29,6 +29,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
@@ -304,5 +305,9 @@ public class MainController {
       throw new RuntimeException(e);
     }
     gc.setTransform(affineTransformation);
+  }
+
+  public static void objectAdded(ButtonType result, GeoPolygon polygon) {
+    result.getText(); // ist Farm, Feld, Plot
   }
 }

@@ -6,11 +6,19 @@ import java.util.List;
 public class GeoPolygon {
 
   private List<GeoPoint> geoPoints;
-  
+
   public GeoPolygon() {
     geoPoints = new ArrayList<>();
   }
-  
+
+  public void addGeoPoint(GeoPoint geoPoint) {
+    geoPoints.add(geoPoint);
+  }
+
+  public void addGeoPointByCoords(double lat, double lng) {
+    geoPoints.add(new GeoPoint(lat, lng));
+  }
+
   /**
    * Constructs from a variable amount of GeoPoint instances.
    *
