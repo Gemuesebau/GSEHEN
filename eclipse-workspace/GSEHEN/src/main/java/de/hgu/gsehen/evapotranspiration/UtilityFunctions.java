@@ -5,7 +5,7 @@ import static java.lang.Math.log;
 public class UtilityFunctions {
   /**
    * Method to convert wind speed measurements to a height of 2 m above ground level.
-   * 
+   *
    * @param v Windspeed in m/s
    * @param hw Height of the anemometer in m
    * @return

@@ -36,7 +36,7 @@ public class EnvCalculator {
   /**
    * Main method to calculate the daily reference evapotranspiration as published by Allen et al.
    * All parameters are daily values. method changes object DayData et0
-   * 
+   *
    * @author MO
    * @param dayData An Object of the DayData class
    * @param geoData An Object of the GeoData class
@@ -71,7 +71,7 @@ public class EnvCalculator {
 
   /**
    * Method to convert the geo position degree into rad.
-   * 
+   *
    * @author MO
    * @param geoData An object of the GeoData class
    * @return double geographical width position in rad aka. psi
@@ -84,7 +84,7 @@ public class EnvCalculator {
 
   /**
    * Method to calcualte the latent vapor heat flux from temperature mean.
-   * 
+   *
    * @param dayData DayData class with mean temperature
    * @return double latent vapor heat flux L
    */
@@ -94,7 +94,7 @@ public class EnvCalculator {
 
   /**
    * Method to calculate the slope of vapor saturation curve.
-   * 
+   *
    * @param dayData DayData class with mean temperature
    * @return double s or delta
    */
@@ -105,7 +105,7 @@ public class EnvCalculator {
 
   /**
    * Method to calculate the relative distance of the earth to the sun.
-   * 
+   *
    * @param yday double day of the year 1-366
    * @return double returns the relative distance dr
    */
@@ -115,7 +115,7 @@ public class EnvCalculator {
 
   /**
    * Method to calculate the declination of the sun.
-   * 
+   *
    * @param yday double day of the year 1-366
    * @return double theta
    */
@@ -125,7 +125,7 @@ public class EnvCalculator {
 
   /**
    * Method to calculate hour arc on sunset.
-   * 
+   *
    * @param theta declination of the sun
    * @param psi geo position in rad
    * @return
@@ -137,7 +137,7 @@ public class EnvCalculator {
 
   /**
    * Method to calculate extra terrestrial radiation.
-   * 
+   *
    * @param GSC constant
    * @param distanceSun dr relative distance earth to sun
    * @param omegas hour arc on sunset
@@ -153,9 +153,9 @@ public class EnvCalculator {
 
   /*
    * Method to calculate global irradiation by cloudless sky angstroem coeff (0.25 + 0.5)*Ra
-   * 
+   *
    * @param exTerRad extra terestrial radiation Ra
-   * 
+   *
    * @return cloudless sky global irradiatoin Rs0
    */
   private static double calculateClearSkyRad(double exTerRad, GeoData geoData) {
@@ -169,7 +169,7 @@ public class EnvCalculator {
 
   /**
    * Method to calculate short wave net radiation.
-   * 
+   *
    * @param solarRad Rs measured solar radiation / global irritation
    * @return short wave net radiation Rns
    */
@@ -180,7 +180,7 @@ public class EnvCalculator {
 
   /**
    * Method to calculate the absolute Temperature in kelvin.
-   * 
+   *
    * @param dayData class with meanTemp Temperature mean
    * @return absTemp absolut temperature values of class absTemp as output
    */
@@ -197,7 +197,7 @@ public class EnvCalculator {
 
   /**
    * Template method to calculate saturation vapor pressure from Temp.
-   * 
+   *
    * @see calculateSatVP
    * @param DayData class with meanTemp Temperature mean
    * @return satVp
@@ -209,7 +209,7 @@ public class EnvCalculator {
 
   /**
    * Method to calculate mean saturation vapor pressure.
-   * 
+   *
    * @param maxTemp Temperature maximum
    * @param minTemp Temperature minimum
    * @return es saturation vapor pressure
@@ -232,7 +232,7 @@ public class EnvCalculator {
 
   /**
    * Method to calculate the actual vapor pressure.
-   * 
+   *
    * @param dayData class containing airHumidityRelmean relative air humidity mean. Optional min and
    *        max TODO
    * @param satVP saturation vapor pressure @see calculateSatVP
@@ -254,7 +254,7 @@ public class EnvCalculator {
    * Method to calculate long wave net radiation. Depends on flag OLDRNL. If OLDRNL long wave net
    * radiation is calculated with temperature mean, else it is calculated with temperature minimum
    * and maximum.
-   * 
+   *
    * @param absTemp absolute Temperature
    * @param absTempMax absolute Temperature maximum
    * @param absTempMin absolute Temperature minimum
@@ -276,7 +276,7 @@ public class EnvCalculator {
 
   /**
    * Method to calculate net radiation.
-   * 
+   *
    * @param netShortRad net short radiation
    * @param netLongRad net long radiation
    * @return netRad net radiation Rn
@@ -288,7 +288,7 @@ public class EnvCalculator {
 
   /**
    * Method to calculate the air pressure for the location.
-   * 
+   *
    * @param geoData class containing heighAbvNn location high above normal null
    * @return AirP air pressure P
    */
@@ -301,7 +301,7 @@ public class EnvCalculator {
    * Method to calculate the psychrometric constant. Depends on OLDGAMMA flag. No obvious
    * differences between calculations. If OLDGAMMA then gamma is calculated with
    * latenetVapourHeutFlux otherwise not.
-   * 
+   *
    * @param latentVaporHeatFlux latent vapor heat flux
    * @param airP air pressure
    * @return gamma psychrometric constant
@@ -329,7 +329,7 @@ public class EnvCalculator {
 
   /**
    * Method to extract the day of the year 1-366 from a date from a DayData object.
-   * 
+   *
    * @author MO
    * @param dayData DayData object
    * @return An Integer with the value of day of the year 1-366

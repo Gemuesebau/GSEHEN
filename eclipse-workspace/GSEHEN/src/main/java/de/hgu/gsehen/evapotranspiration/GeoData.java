@@ -2,7 +2,7 @@ package de.hgu.gsehen.evapotranspiration;
 
 /**
  * Class to represent the geographical data needed to calculate the et0.
- * 
+ *
  * @author MO
  *
  */
@@ -48,7 +48,7 @@ public class GeoData {
   /**
    * Constructor GeoData class. Typical values for Geisenheim:
    * geoLen=7.95,geoWid=49.99,heighAbvNn=110
-   * 
+   *
    * @param mean Calculation only with Temperature mean? TRUE = yes, FALSE = no
    * @param geoLen Geographical length of the location your are calculating et0 from in degree
    * @param geoWid Geographical width of the location your are calculating et0 from in degree

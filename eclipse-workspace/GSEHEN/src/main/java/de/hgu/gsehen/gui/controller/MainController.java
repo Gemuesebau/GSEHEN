@@ -1,5 +1,6 @@
 package de.hgu.gsehen.gui.controller;
 
+import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.PolygonData;
@@ -9,9 +10,11 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
+import de.hgu.gsehen.model.NamedPolygonHolder;
 import de.hgu.gsehen.model.Plot;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
@@ -25,7 +28,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
@@ -42,11 +44,16 @@ import javafx.stage.Stage;
 
 /**
  * The GSEHEN Main-Controller.
- * 
+ *
  * @author CWI
  *
  */
 public class MainController {
+  {
+    Gsehen.getInstance().setMainController(this);
+  }
+
+  private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
 
   // Views
   @FXML
@@ -303,7 +310,16 @@ public class MainController {
     gc.setTransform(affineTransformation);
   }
 
-  public static void objectAdded(ButtonType result, GeoPolygon polygon) {
-    result.getText(); // ist Farm, Feld, Plot
+  /**
+   * Called by others to tell an instance of this class that a new object has been created.
+   *
+   * @param object the newly created object, e.g. a Farm, Field, or Plot
+   */
+  public void objectAdded(NamedPolygonHolder object) {
+    object.getName();     // Bsp.
+    object.getPolygons(); // Bsp.
+    LOGGER.info("Neues Objekt: " + object.getClass().getSimpleName()
+        + " '" + object.getName() + "' mit Polygon "
+        + object.getPolygons().get(0).getGeoPoints());
   }
 }

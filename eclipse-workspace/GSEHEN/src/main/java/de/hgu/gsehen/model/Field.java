@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class Field implements Drawable, DrawableParent {
+public class Field implements Drawable, DrawableParent, NamedPolygonHolder {
   private WeatherDataSource weatherDataSource;
   private SoilProfile       soilProfile;
   private Double            rootingZone;
@@ -17,6 +17,9 @@ public class Field implements Drawable, DrawableParent {
   private List<Plot>        plots;
   private double            area;
 
+  public Field() {
+  }
+
   /**
    * Konstruktor für ein Feld, der direkt Name, Umrisse und enthaltene Plots setzt.
    *
@@ -25,12 +28,17 @@ public class Field implements Drawable, DrawableParent {
    * @param plots die enthaltenen Plots
    */
   public Field(String name, GeoPolygon polygon, Plot... plots) {
-    this.name = name;
-    this.polygon = polygon;
+    setNameAndPolygon(name, polygon);
     this.plots = new ArrayList<>();
     for (Plot plot : plots) {
       this.plots.add(plot);
     }
+  }
+
+  @Override
+  public void setNameAndPolygon(String name, GeoPolygon polygon) {
+    this.name = name;
+    this.polygon = polygon;
   }
 
   public WeatherDataSource getWeatherDataSource() {
@@ -48,7 +56,7 @@ public class Field implements Drawable, DrawableParent {
   public void setSoilProfile(SoilProfile soilProfile) {
     this.soilProfile = soilProfile;
   }
-  
+
   public Double getRootingZone() {
     return rootingZone;
   }
@@ -56,7 +64,7 @@ public class Field implements Drawable, DrawableParent {
   public void setRootingZone(Double rootingZone) {
     this.rootingZone = rootingZone;
   }
-  
+
   public Location getLocation() {
     return location;
   }
@@ -77,7 +85,7 @@ public class Field implements Drawable, DrawableParent {
   public void setPolygon(GeoPolygon polygon) {
     this.polygon = polygon;
   }
-  
+
   public String getName() {
     return name;
   }
@@ -93,7 +101,7 @@ public class Field implements Drawable, DrawableParent {
   public void setPlots(List<Plot> plots) {
     this.plots = plots;
   }
-  
+
   public double getArea() {
     return area;
   }

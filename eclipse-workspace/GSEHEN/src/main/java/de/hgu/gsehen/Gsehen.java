@@ -4,6 +4,7 @@ import static de.hgu.gsehen.jdbc.DatabaseUtils.executeQuery;
 import static de.hgu.gsehen.jdbc.DatabaseUtils.executeUpdate;
 import static de.hgu.gsehen.jdbc.DatabaseUtils.parseYmd;
 
+import de.hgu.gsehen.gui.controller.MainController;
 import de.hgu.gsehen.gui.view.Map;
 
 import java.io.IOException;
@@ -42,6 +43,12 @@ public class Gsehen extends Application {
 
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private static Map map;
+  private static Gsehen instance;
+  private MainController mainController;
+
+  {
+    instance = this;
+  }
 
   /**
    * Main method.
@@ -91,7 +98,8 @@ public class Gsehen extends Application {
     stage.sizeToScene();
     stage.show();
 
-    map = new Map((WebView) scene.lookup(WEB_VIEW_ID));
+    map = new Map((WebView)scene.lookup(WEB_VIEW_ID));
+    map.setMainController(mainController);
     map.reload();
 
     TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
@@ -148,5 +156,13 @@ public class Gsehen extends Application {
         throw new RuntimeException("DB connection couldn't be closed", e);
       }
     }
+  }
+
+  public static Gsehen getInstance() {
+    return instance;
+  }
+
+  public void setMainController(MainController mainController) {
+    this.mainController = mainController;
   }
 }
