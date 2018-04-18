@@ -212,7 +212,7 @@ public class MainController {
 
   private void extractPolygonsImpl(List<GeoPolygon> result, Drawable... drawables) {
     for (Drawable drawable : drawables) {
-      result.addAll(drawable.getPolygons());
+      result.add(drawable.getPolygon());
       if (drawable instanceof DrawableParent) {
         ((DrawableParent) drawable)
             .forAllChildDrawables(drawableChild -> extractPolygonsImpl(result, drawableChild));
@@ -317,10 +317,8 @@ public class MainController {
    * @param object the newly created object, e.g. a Farm, Field, or Plot
    */
   public void objectAdded(NamedPolygonHolder object) {
-    object.getName();     // Bsp.
-    object.getPolygons(); // Bsp.
     LOGGER.info("Neues Objekt: " + object.getClass().getSimpleName()
         + " '" + object.getName() + "' mit Polygon "
-        + object.getPolygons().get(0).getGeoPoints());
+        + object.getPolygon().getGeoPoints());
   }
 }

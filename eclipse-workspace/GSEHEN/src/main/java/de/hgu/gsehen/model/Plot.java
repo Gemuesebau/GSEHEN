@@ -2,25 +2,24 @@ package de.hgu.gsehen.model;
 
 import de.hgu.gsehen.gui.GeoPolygon;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Date;
 
 public class Plot implements Drawable, NamedPolygonHolder {
-  private  String name;
-  private  double area;
-  private  GeoPolygon polygon;
-  private  Location location;
-  private  Double scalingFactor;
-  private  WeatherData weatherData;
-  private  Double rootingZone;
-  private  WaterBalance waterBalance;
-  private  String recommendedAction;
-  private  Double soilStartDate;
-  private  Double soilStartValue;
-  private  Boolean calculationPaused;
-  private  Crop crop;
-
-  // cropStart, cropEnd --> unbekannter Typ?!
+  private String name;
+  private double area;
+  private GeoPolygon polygon;
+  private Location location;
+  private Double scalingFactor;
+  private WeatherData weatherData;
+  private Double rootingZone;
+  private WaterBalance waterBalance;
+  private String recommendedAction;
+  private Date soilStartDate;
+  private Double soilStartValue;
+  private Boolean calculationPaused;
+  private Crop crop;
+  private Date cropStart; 
+  private Date cropEnd; 
 
   public Plot() {
   }
@@ -51,13 +50,9 @@ public class Plot implements Drawable, NamedPolygonHolder {
     this.area = area;
   }
 
+  @Override
   public GeoPolygon getPolygon() {
     return polygon;
-  }
-
-  @Override
-  public List<GeoPolygon> getPolygons() {
-    return Arrays.<GeoPolygon>asList(polygon);
   }
 
   public void setPolygon(GeoPolygon polygon) {
@@ -112,11 +107,11 @@ public class Plot implements Drawable, NamedPolygonHolder {
     this.recommendedAction = recommendedAction;
   }
 
-  public Double getSoilStartDate() {
+  public Date getSoilStartDate() {
     return soilStartDate;
   }
 
-  public void setSoilStartDate(Double soilStartDate) {
+  public void setSoilStartDate(Date soilStartDate) {
     this.soilStartDate = soilStartDate;
   }
 
@@ -142,6 +137,22 @@ public class Plot implements Drawable, NamedPolygonHolder {
 
   public void setCrop(Crop crop) {
     this.crop = crop;
+  }
+
+  public Date getCropStart() {
+    return cropStart;
+  }
+
+  public void setCropStart(Date cropStart) {
+    this.cropStart = cropStart;
+  }
+
+  public Date getCropEnd() {
+    return cropEnd;
+  }
+
+  public void setCropEnd(Date cropEnd) {
+    this.cropEnd = cropEnd;
   }
 
   public void visualize(){}

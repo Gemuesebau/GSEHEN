@@ -3,13 +3,12 @@ package de.hgu.gsehen.model;
 import de.hgu.gsehen.gui.GeoPolygon;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class Farm implements Drawable, DrawableParent, NamedPolygonHolder {
   private String name;
-  private List<GeoPolygon> polygons;
+  private GeoPolygon polygon;
   private List<Field> fields;
 
   public Farm() {
@@ -21,20 +20,16 @@ public class Farm implements Drawable, DrawableParent, NamedPolygonHolder {
    *
    * @see de.hgu.gsehen.model.Farm.setFields
    * @param name der Name der Farm
-   * @param polygons die Umrisse der Farm
+   * @param polygon die Umrisse der Hauptgebäudeanlage, nicht der Felder!
    */
-  public Farm(String name, GeoPolygon... polygons) {
-    this.name = name;
-    this.polygons = new ArrayList<>();
-    for (GeoPolygon polygon : polygons) {
-      this.polygons.add(polygon);
-    }
+  public Farm(String name, GeoPolygon polygon) {
+    setNameAndPolygon(name, polygon);
   }
 
   @Override
   public void setNameAndPolygon(String name, GeoPolygon polygon) {
     this.name = name;
-    this.polygons = Arrays.<GeoPolygon>asList(polygon);
+    this.polygon = polygon;
   }
 
   public String getName() {
@@ -71,12 +66,12 @@ public class Farm implements Drawable, DrawableParent, NamedPolygonHolder {
   }
 
   @Override
-  public List<GeoPolygon> getPolygons() {
-    return polygons;
+  public GeoPolygon getPolygon() {
+    return polygon;
   }
 
-  public void setPolygon(List<GeoPolygon> polygons) {
-    this.polygons = polygons;
+  public void setPolygon(GeoPolygon polygon) {
+    this.polygon = polygon;
   }
 
   @Override

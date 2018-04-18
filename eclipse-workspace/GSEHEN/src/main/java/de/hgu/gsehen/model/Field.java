@@ -3,7 +3,6 @@ package de.hgu.gsehen.model;
 import de.hgu.gsehen.gui.GeoPolygon;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -73,13 +72,9 @@ public class Field implements Drawable, DrawableParent, NamedPolygonHolder {
     this.location = location;
   }
 
+  @Override
   public GeoPolygon getPolygon() {
     return polygon;
-  }
-
-  @Override
-  public List<GeoPolygon> getPolygons() {
-    return Arrays.<GeoPolygon>asList(polygon);
   }
 
   public void setPolygon(GeoPolygon polygon) {
