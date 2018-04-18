@@ -4,7 +4,7 @@ import java.util.Date;
 
 /**
  * Class to represent the environmental data to calculate the GS water balance.
- * 
+ *
  * @author MO
  *
  */
@@ -113,9 +113,9 @@ public class DayData {
 
   /**
    * Constructor DayData class.
-   * 
+   *
    * @author MO
-   * 
+   *
    * @param tempMean Temperature mean in °C
    * @param tempMin Temperature minimum in °C
    * @param tempMax Temperature maximum in °C

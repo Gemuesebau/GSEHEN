@@ -2,14 +2,23 @@ package de.hgu.gsehen.gui.view;
 
 import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.controller.MainController;
+import de.hgu.gsehen.model.Farm;
+import de.hgu.gsehen.model.Field;
+import de.hgu.gsehen.model.NamedPolygonHolder;
+import de.hgu.gsehen.model.Plot;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import javafx.concurrent.Worker.State;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
@@ -20,13 +29,15 @@ import netscape.javascript.JSObject;
  * @author AT
  */
 public class Map {
-
+  private static final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
+      Locale.GERMAN);
   private static final Logger LOGGER = Logger.getLogger(Map.class.getName());
 
   private static final String MAP_HTML = "map.html";
 
   private WebEngine engine;
   private String loadWorkerSucceededScript;
+  private MainController mainController;
 
   /**
    * Constructs a new map in the given WebView.
@@ -60,15 +71,55 @@ public class Map {
    *     de.hgu.gsehen.gui.view.Map.getEmptyPolygon() erbaut und dann befüllt
    * @see de.hgu.gsehen.gui.view.Map.getEmptyPolygon
    */
+  @SuppressWarnings("checkstyle:rightcurly")
   public void polygonDrawn(GeoPolygon polygon) {
-    Alert alert = new Alert(AlertType.CONFIRMATION, "Bitte Objekttyp angeben",
-        new ButtonType("Farm"), new ButtonType("Feld"), new ButtonType("Plot"),
-        ButtonType.CANCEL);
+    java.util.Map<String, Class<?>> typesMap =
+        createTypesMap(new Class[] { Farm.class, Field.class, Plot.class });
+    Alert alert = new Alert(AlertType.NONE, null, createButtonTypes(typesMap, ButtonType.CANCEL));
+    alert.setTitle("GSEHEN");
+    alert.setContentText(mainBundle.getString("gui.view.Map.drawableTypeChoiceCaption"));
     alert.showAndWait();
-    if (alert.getResult() != ButtonType.CANCEL) {
-      MainController.objectAdded(alert.getResult(), polygon);
+    ButtonType dialogResult = alert.getResult();
+    if (dialogResult != ButtonType.CANCEL) {
+      TextInputDialog dialog = new TextInputDialog();
+      dialog.setTitle("GSEHEN");
+      dialog.setContentText(mainBundle.getString("gui.view.Map.drawableTypeNameCaption"));
+      dialog.showAndWait();
+      String name = dialog.getResult();
+      try {
+        if (name != null) {
+          NamedPolygonHolder object =
+              (NamedPolygonHolder)typesMap.get(dialogResult.getText()).newInstance();
+          object.setNameAndPolygon(name, polygon);
+          mainController.objectAdded(object);
+        }
+      }
+      catch (Exception exception) {
+        // should not happen, since all input comes from code
+        LOGGER.info(exception.getMessage());
+      }
     }
-    LOGGER.info(String.valueOf(polygon.getGeoPoints()));
+  }
+
+  private ButtonType[] createButtonTypes(java.util.Map<String, Class<?>> typesMap,
+      ButtonType additionalButton) {
+    Set<String> keySet = typesMap.keySet();
+    ButtonType[] result = new ButtonType[keySet.size() + 1];
+    int i = 0;
+    for (String key : keySet) {
+      result[i++] = new ButtonType(key);
+    }
+    result[i] = additionalButton;
+    return result;
+  }
+
+  private java.util.Map<String, Class<?>> createTypesMap(Class<?>[] clazzes) {
+    java.util.Map<String, Class<?>> typesMap = new TreeMap<>();
+    for (Class<?> clazz : clazzes) {
+      typesMap.put(mainBundle.getString("gui.view.Map.drawableType." + clazz.getSimpleName()),
+          clazz);
+    }
+    return typesMap;
   }
 
   /**
@@ -96,5 +147,9 @@ public class Map {
         + " center: new google.maps.LatLng(52.266344, 10.519835),"
         + " zoom: 16, fullscreenControl: false" + " }); draw(); captureDrawing()";
     engine.loadContent(getMapHtml());
+  }
+
+  public void setMainController(MainController mainController) {
+    this.mainController = mainController;
   }
 }

@@ -3,7 +3,7 @@ package de.hgu.gsehen.evapotranspiration;
 public class AbsTemp {
   /**
    * This class combines all absolute Temperatures.
-   * 
+   *
    * @param absTempMean absolute Temperature mean
    * @param absTempMax absolute temperature maximum
    * @param absTempMin absolute temperature minimum

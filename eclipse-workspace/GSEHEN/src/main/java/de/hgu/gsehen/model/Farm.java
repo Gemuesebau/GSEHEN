@@ -3,14 +3,18 @@ package de.hgu.gsehen.model;
 import de.hgu.gsehen.gui.GeoPolygon;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class Farm implements Drawable, DrawableParent {
+public class Farm implements Drawable, DrawableParent, NamedPolygonHolder {
   private String name;
   private List<GeoPolygon> polygons;
   private List<Field> fields;
-  
+
+  public Farm() {
+  }
+
   /**
    * Konstruktor für eine Farm, der direkt den Namen und die Umrisse setzt.
    * Felder werden mit de.hgu.gsehen.model.Farm.setFields(Field...) gesetzt.
@@ -27,6 +31,12 @@ public class Farm implements Drawable, DrawableParent {
     }
   }
 
+  @Override
+  public void setNameAndPolygon(String name, GeoPolygon polygon) {
+    this.name = name;
+    this.polygons = Arrays.<GeoPolygon>asList(polygon);
+  }
+
   public String getName() {
     return name;
   }
@@ -34,7 +44,7 @@ public class Farm implements Drawable, DrawableParent {
   public void setName(String name) {
     this.name = name;
   }
-  
+
   public List<Field> getFields() {
     return fields;
   }

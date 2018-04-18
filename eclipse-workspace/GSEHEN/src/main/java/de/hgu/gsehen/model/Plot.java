@@ -5,7 +5,7 @@ import de.hgu.gsehen.gui.GeoPolygon;
 import java.util.Arrays;
 import java.util.List;
 
-public class Plot implements Drawable {
+public class Plot implements Drawable, NamedPolygonHolder {
   private  String name;
   private  double area;
   private  GeoPolygon polygon;
@@ -22,7 +22,15 @@ public class Plot implements Drawable {
 
   // cropStart, cropEnd --> unbekannter Typ?!
 
+  public Plot() {
+  }
+
   public Plot(String name, GeoPolygon polygon) {
+    setNameAndPolygon(name, polygon);
+  }
+
+  @Override
+  public void setNameAndPolygon(String name, GeoPolygon polygon) {
     this.name = name;
     this.polygon = polygon;
   }
@@ -34,7 +42,7 @@ public class Plot implements Drawable {
   public void setName(String name) {
     this.name = name;
   }
-  
+
   public double getArea() {
     return area;
   }
@@ -55,7 +63,7 @@ public class Plot implements Drawable {
   public void setPolygon(GeoPolygon polygon) {
     this.polygon = polygon;
   }
-  
+
   public Location getLocation() {
     return location;
   }
@@ -63,7 +71,7 @@ public class Plot implements Drawable {
   public void setLocation(Location location) {
     this.location = location;
   }
-  
+
   public Double getScalingFactor() {
     return scalingFactor;
   }
@@ -71,7 +79,7 @@ public class Plot implements Drawable {
   public void setScalingFactor(Double scalingFactor) {
     this.scalingFactor = scalingFactor;
   }
-  
+
   public WeatherData getWeatherData() {
     return weatherData;
   }
@@ -79,7 +87,7 @@ public class Plot implements Drawable {
   public void setWeatherData(WeatherData weatherData) {
     this.weatherData = weatherData;
   }
-  
+
   public Double getRootingZone() {
     return rootingZone;
   }
@@ -87,7 +95,7 @@ public class Plot implements Drawable {
   public void setRootingZone(Double rootingZone) {
     this.rootingZone = rootingZone;
   }
-  
+
   public WaterBalance getWaterBalance() {
     return waterBalance;
   }
@@ -95,7 +103,7 @@ public class Plot implements Drawable {
   public void setWaterBalance(WaterBalance waterBalance) {
     this.waterBalance = waterBalance;
   }
-  
+
   public String getRecommendedAction() {
     return recommendedAction;
   }
@@ -103,7 +111,7 @@ public class Plot implements Drawable {
   public void setRecommendedAction(String recommendedAction) {
     this.recommendedAction = recommendedAction;
   }
-  
+
   public Double getSoilStartDate() {
     return soilStartDate;
   }
@@ -111,7 +119,7 @@ public class Plot implements Drawable {
   public void setSoilStartDate(Double soilStartDate) {
     this.soilStartDate = soilStartDate;
   }
-  
+
   public Double getSoilStartValue() {
     return soilStartValue;
   }
@@ -119,7 +127,7 @@ public class Plot implements Drawable {
   public void setSoilStartValue(Double soilStartValue) {
     this.soilStartValue = soilStartValue;
   }
-  
+
   public Boolean getCalculationPaused() {
     return calculationPaused;
   }

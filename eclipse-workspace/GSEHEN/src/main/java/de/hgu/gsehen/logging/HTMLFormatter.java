@@ -33,13 +33,15 @@ public class HTMLFormatter extends SimpleFormatter {
           + stringWriter.toString());
       record.setThrown(null);
     }
-    record.setMessage(
-        leadingWhitespace.matcher(
-          newline.matcher(
-            record.getMessage()
-          ).replaceAll(NEWLINE_REPLACE)
-        ).replaceAll(LEADING_WHITESPACE_REPLACE)
-    );
+    if (record.getMessage() != null) {
+      record.setMessage(
+          leadingWhitespace.matcher(
+              newline.matcher(
+                  record.getMessage()
+              ).replaceAll(NEWLINE_REPLACE)
+          ).replaceAll(LEADING_WHITESPACE_REPLACE)
+      );
+    }
     StringBuilder resultSB = new StringBuilder();
     resultSB.append(simpleDateFormat.format(new Date(record.getMillis())))
       .append(" ")
