@@ -4,8 +4,8 @@ import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.PolygonData;
+import de.hgu.gsehen.gui.view.AnimatedZoomOperator;
 import de.hgu.gsehen.gui.view.NodeGestures;
-import de.hgu.gsehen.gui.view.SceneGestures;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
@@ -20,6 +20,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
@@ -92,7 +93,6 @@ public class MainController {
   private NodeGestures nodeGestures;
   private GeoPolygon[] polygons = extractPolygons(buildFarm());
   private GraphicsContext gc;
-  private SceneGestures sceneGestures;
   // TODO Ist das sinnvoll, oder wird's dadurch zu voll?
   private ObservableList<PieChart.Data> pieChartData =
       FXCollections.observableArrayList(new PieChart.Data("Bananen", 13),
@@ -127,11 +127,11 @@ public class MainController {
     stage.show();
   }
 
-  // TODO Mit den neuen Daten (17.04.) experimentieren.
+  // TODO Mit den neuen Daten (18.04.) experimentieren.
   @FXML
   protected void enterFarmView() {
-    int width = (int) (farmViewPane.getWidth() * 0.9); // 90% from parent
-    int height = (int) (farmViewPane.getHeight() * 0.9); // 90% from parent
+    int width = (int) (farmViewPane.getWidth() * 0.75); // 75% from parent
+    int height = (int) (farmViewPane.getHeight() * 0.75); // 75% from parent
 
     canvas.setWidth(width);
     canvas.setHeight(height);
@@ -147,21 +147,29 @@ public class MainController {
       farmViewPane.getChildren().addAll(canvas);
     }
 
+    // Create operator
+    AnimatedZoomOperator zoomOperator = new AnimatedZoomOperator();
+
+    // Listen to scroll events
+    farmViewPane.setOnScroll(new EventHandler<ScrollEvent>() {
+      @Override
+      public void handle(ScrollEvent event) {
+        double zoomFactor = 2.0;
+        if (event.getDeltaY() <= 0) {
+          // zoom out
+          zoomFactor = 1 / zoomFactor;
+        }
+        zoomOperator.zoom(farmViewPane, zoomFactor, event.getSceneX(), event.getSceneY());
+      }
+    });
+
     // create sample nodes which can be dragged
     nodeGestures = new NodeGestures(canvas);
-
     canvas.addEventFilter(MouseEvent.MOUSE_PRESSED, nodeGestures.getOnMousePressedEventHandler());
     canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, nodeGestures.getOnMouseDraggedEventHandler());
 
-    sceneGestures = new SceneGestures(canvas);
-    // farmViewPane.addEventFilter(MouseEvent.MOUSE_PRESSED,
-    // sceneGestures.getOnMousePressedEventHandler());
-    // farmViewPane.addEventFilter(MouseEvent.MOUSE_DRAGGED,
-    // sceneGestures.getOnMouseDraggedEventHandler());
-    farmViewPane.addEventFilter(ScrollEvent.ANY, sceneGestures.getOnScrollEventHandler());
+    // TODO: Aktuell noch ein "Hack", damit Canvas hinter'm Rest bleibt.
     farmViewPane.toBack();
-
-    addGrid();
 
     farmPieChart = pieChart;
     farmPieChart.setTitle("Anbau");
@@ -171,7 +179,7 @@ public class MainController {
     }
 
     // TODO Bislang nur ein kleiner Test. Generell aber nicht verkehrt, wenn man die GeoPoints
-    // mittels Label anzeigen lassen wï¿½rde.
+    // mittels Label anzeigen lassen würde.
     for (GeoPolygon polygon : polygons) {
       labelText = "";
       for (GeoPoint geoPoint : polygon.getGeoPoints()) {
@@ -218,37 +226,6 @@ public class MainController {
             .forAllChildDrawables(drawableChild -> extractPolygonsImpl(result, drawableChild));
       }
     }
-  }
-
-  /**
-   * Add a grid to the canvas, send it to back.
-   */
-  public void addGrid() {
-
-    double w = farmViewPane.getBoundsInLocal().getWidth();
-    double h = farmViewPane.getBoundsInLocal().getHeight();
-
-    // add grid
-    Canvas grid = new Canvas(w, h);
-
-    // don't catch mouse events
-    grid.setMouseTransparent(true);
-
-    GraphicsContext gc = grid.getGraphicsContext2D();
-
-    gc.setStroke(Color.GRAY);
-    gc.setLineWidth(1);
-
-    // draw grid lines
-    double offset = 50;
-    for (double i = offset; i < w; i += offset) {
-      gc.strokeLine(i, 0, i, h);
-      gc.strokeLine(0, i, w, i);
-    }
-
-    farmViewPane.getChildren().add(grid);
-
-    grid.toBack();
   }
 
   private void drawShapes(GraphicsContext gc, GeoPolygon... polygons) {
