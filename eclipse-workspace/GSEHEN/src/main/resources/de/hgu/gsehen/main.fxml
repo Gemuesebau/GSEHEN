@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.chart.*?>
 <?import javafx.scene.effect.*?>
@@ -87,7 +88,7 @@
             </Accordion>
          </center>
          <bottom>
-            <ImageView fitHeight="150.0" fitWidth="200.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
+            <ImageView fitHeight="460.0" fitWidth="200.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
          </bottom>
       </BorderPane>
       <TabPane id="tabPane" fx:id="tabPane" prefHeight="398.0" prefWidth="431.0" tabClosingPolicy="UNAVAILABLE">
@@ -102,9 +103,9 @@
           </Tab>
           <Tab fx:id="farmViewTab" closable="false" onSelectionChanged="#enterFarmView" text="FarmView">
                <content>
-                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                  <BorderPane fx:id="farmViewBorderPane" prefHeight="200.0" prefWidth="200.0">
                      <top>
-                        <HBox fx:id="farmViewTopHBox" prefHeight="275.0" prefWidth="1018.0" BorderPane.alignment="CENTER">
+                        <HBox fx:id="farmViewTopHBox" prefHeight="275.0" prefWidth="1006.0" BorderPane.alignment="CENTER">
                            <children>
                               <Label fx:id="farmLabel">
                                  <HBox.margin>
@@ -131,14 +132,8 @@
                            </padding>
                         </HBox>
                      </top>
-                     <center>
-                        <Pane fx:id="farmViewPane" BorderPane.alignment="CENTER_RIGHT">
-                           <padding>
-                              <Insets left="10.0" right="10.0" />
-                           </padding></Pane>
-                     </center>
                      <bottom>
-                        <HBox fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" BorderPane.alignment="CENTER_LEFT">
+                        <HBox fillHeight="false" BorderPane.alignment="CENTER_LEFT">
                            <children>
                               <Button mnemonicParsing="false" styleClass="darkBlueButton" stylesheets="@Style.css" text="Bewässerungsplan ausgeben" textFill="WHITE">
                                  <HBox.margin>
@@ -166,6 +161,9 @@
                            </padding>
                         </HBox>
                      </bottom>
+                     <center>
+                        <Pane fx:id="farmViewPane" prefHeight="435.0" prefWidth="1006.0" BorderPane.alignment="CENTER" />
+                     </center>
                   </BorderPane>
                </content>
           </Tab>

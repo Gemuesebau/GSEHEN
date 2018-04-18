@@ -3,19 +3,15 @@ package de.hgu.gsehen.gui.controller;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.PolygonData;
-
 import de.hgu.gsehen.gui.view.NodeGestures;
 import de.hgu.gsehen.gui.view.SceneGestures;
-
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
@@ -127,8 +123,8 @@ public class MainController {
   // TODO Mit den neuen Daten (17.04.) experimentieren.
   @FXML
   protected void enterFarmView() {
-    int width = (int) (farmViewPane.getWidth() * 0.95); // 95% from parent
-    int height = (int) (farmViewPane.getHeight() * 0.95); // 95% from parent
+    int width = (int) (farmViewPane.getWidth() * 0.9); // 90% from parent
+    int height = (int) (farmViewPane.getHeight() * 0.9); // 90% from parent
 
     canvas.setWidth(width);
     canvas.setHeight(height);
@@ -136,25 +132,25 @@ public class MainController {
     canvas.scaleXProperty().bindBidirectional(scale);
     canvas.scaleYProperty().bindBidirectional(scale);
 
-    // create sample nodes which can be dragged
-    nodeGestures = new NodeGestures(canvas);
-
     gc = canvas.getGraphicsContext2D();
     setTransformation(gc, width, height, polygons);
     drawShapes(gc, polygons);
-
-    canvas.addEventFilter(MouseEvent.MOUSE_PRESSED, nodeGestures.getOnMousePressedEventHandler());
-    canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, nodeGestures.getOnMouseDraggedEventHandler());
 
     if (!farmViewPane.getChildren().contains(canvas)) {
       farmViewPane.getChildren().addAll(canvas);
     }
 
+    // create sample nodes which can be dragged
+    nodeGestures = new NodeGestures(canvas);
+
+    canvas.addEventFilter(MouseEvent.MOUSE_PRESSED, nodeGestures.getOnMousePressedEventHandler());
+    canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, nodeGestures.getOnMouseDraggedEventHandler());
+
     sceneGestures = new SceneGestures(canvas);
-    farmViewPane.addEventFilter(MouseEvent.MOUSE_PRESSED,
-        sceneGestures.getOnMousePressedEventHandler());
-    farmViewPane.addEventFilter(MouseEvent.MOUSE_DRAGGED,
-        sceneGestures.getOnMouseDraggedEventHandler());
+    // farmViewPane.addEventFilter(MouseEvent.MOUSE_PRESSED,
+    // sceneGestures.getOnMousePressedEventHandler());
+    // farmViewPane.addEventFilter(MouseEvent.MOUSE_DRAGGED,
+    // sceneGestures.getOnMouseDraggedEventHandler());
     farmViewPane.addEventFilter(ScrollEvent.ANY, sceneGestures.getOnScrollEventHandler());
 
     addGrid();
@@ -181,8 +177,8 @@ public class MainController {
 
   @SuppressWarnings("checkstyle:linelength")
   private Farm buildFarm() {
-    Farm farm = new Farm("Meine kleine Farm",
-        new GeoPolygon(new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5), new GeoPoint(52.4, 10.1)));
+    Farm farm = new Farm("Meine kleine Farm", new GeoPolygon(new GeoPoint(52.2, 10.5),
+        new GeoPoint(52.5, 10.5), new GeoPoint(52.4, 10.1)));
     farm.setFields(
         new Field("Beilagenfeld",
             new GeoPolygon(new GeoPoint(52, 10), new GeoPoint(52, 11), new GeoPoint(54, 10),
@@ -195,8 +191,8 @@ public class MainController {
                     new GeoPoint(53.4, 10.1)))),
         new Field("Buntesfeld",
             new GeoPolygon(new GeoPoint(52, 11), new GeoPoint(53, 12), new GeoPoint(52, 12)),
-            new Plot("Erbsenkamp", new GeoPolygon(new GeoPoint(52.2, 11.5), new GeoPoint(52.5, 11.5),
-                new GeoPoint(52.4, 11.1)))));
+            new Plot("Erbsenkamp", new GeoPolygon(new GeoPoint(52.2, 11.5),
+                new GeoPoint(52.5, 11.5), new GeoPoint(52.4, 11.1)))));
     return farm;
   }
 

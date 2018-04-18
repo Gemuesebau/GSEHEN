@@ -15,7 +15,7 @@ import javafx.stage.Stage;
  * An application with a zoomable and pannable canvas.
  * Source: https://stackoverflow.com/a/29530135
  */
-public class CanvasZoomApp extends Application {
+public class CanvasZoomDemo extends Application {
 
   public static void main(String[] args) {
     launch(args);
