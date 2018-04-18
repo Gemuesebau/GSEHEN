@@ -2,6 +2,9 @@ package de.hgu.gsehen.model;
 
 import de.hgu.gsehen.gui.GeoPolygon;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Plot implements Drawable {
   private  String name;
   private  double area;
@@ -27,6 +30,7 @@ public class Plot implements Drawable {
   public String getName() {
     return name;
   }
+
   public void setName(String name) {
     this.name = name;
   }
@@ -34,14 +38,20 @@ public class Plot implements Drawable {
   public double getArea() {
     return area;
   }
+
   public void setArea(double area) {
     this.area = area;
   }
 
-  @Override
   public GeoPolygon getPolygon() {
     return polygon;
   }
+
+  @Override
+  public List<GeoPolygon> getPolygons() {
+    return Arrays.<GeoPolygon>asList(polygon);
+  }
+
   public void setPolygon(GeoPolygon polygon) {
     this.polygon = polygon;
   }
@@ -49,6 +59,7 @@ public class Plot implements Drawable {
   public Location getLocation() {
     return location;
   }
+
   public void setLocation(Location location) {
     this.location = location;
   }
@@ -56,6 +67,7 @@ public class Plot implements Drawable {
   public Double getScalingFactor() {
     return scalingFactor;
   }
+
   public void setScalingFactor(Double scalingFactor) {
     this.scalingFactor = scalingFactor;
   }
@@ -63,6 +75,7 @@ public class Plot implements Drawable {
   public WeatherData getWeatherData() {
     return weatherData;
   }
+
   public void setWeatherData(WeatherData weatherData) {
     this.weatherData = weatherData;
   }
@@ -70,6 +83,7 @@ public class Plot implements Drawable {
   public Double getRootingZone() {
     return rootingZone;
   }
+
   public void setRootingZone(Double rootingZone) {
     this.rootingZone = rootingZone;
   }
@@ -77,6 +91,7 @@ public class Plot implements Drawable {
   public WaterBalance getWaterBalance() {
     return waterBalance;
   }
+
   public void setWaterBalance(WaterBalance waterBalance) {
     this.waterBalance = waterBalance;
   }
@@ -84,6 +99,7 @@ public class Plot implements Drawable {
   public String getRecommendedAction() {
     return recommendedAction;
   }
+
   public void setRecommendedAction(String recommendedAction) {
     this.recommendedAction = recommendedAction;
   }
@@ -91,6 +107,7 @@ public class Plot implements Drawable {
   public Double getSoilStartDate() {
     return soilStartDate;
   }
+
   public void setSoilStartDate(Double soilStartDate) {
     this.soilStartDate = soilStartDate;
   }
@@ -98,6 +115,7 @@ public class Plot implements Drawable {
   public Double getSoilStartValue() {
     return soilStartValue;
   }
+
   public void setSoilStartValue(Double soilStartValue) {
     this.soilStartValue = soilStartValue;
   }
@@ -105,6 +123,7 @@ public class Plot implements Drawable {
   public Boolean getCalculationPaused() {
     return calculationPaused;
   }
+
   public void setCalculationPaused(Boolean calculationPaused) {
     this.calculationPaused = calculationPaused;
   }
@@ -112,12 +131,16 @@ public class Plot implements Drawable {
   public Crop getCrop() {
     return crop;
   }
+
   public void setCrop(Crop crop) {
     this.crop = crop;
   }
 
   public void visualize(){}
+
   public void configure(){}
+
   public void modify(){}
+
   public void archive(){}
 }

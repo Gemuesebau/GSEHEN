@@ -2,7 +2,9 @@ package de.hgu.gsehen.model;
 
 import de.hgu.gsehen.gui.GeoPolygon;
 
+import java.util.List;
+
 public interface Drawable {
 
-  public GeoPolygon getPolygon();
+  public List<GeoPolygon> getPolygons();
 }

@@ -12,7 +12,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -57,8 +56,8 @@ public class Gsehen extends Application {
     } catch (Exception e) {
       e.printStackTrace();
     }
+    //LOGGER.log(Level.INFO, "TEST einer Exception", new RuntimeException("Exception Nachricht"));
 
-    LOGGER.log(Level.INFO, "TEST einer Exception", new RuntimeException("Exception Nachricht"));
     // try {
     // Server server = Server.createWebServer();
     // server.start();
@@ -67,6 +66,7 @@ public class Gsehen extends Application {
     // e.printStackTrace();
     // }
     // server.stop();
+
     Application.launch(args);
   }
 

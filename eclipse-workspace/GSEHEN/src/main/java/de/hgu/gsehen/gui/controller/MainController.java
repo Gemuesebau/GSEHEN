@@ -86,21 +86,7 @@ public class MainController {
   private Canvas canvas = new Canvas();
   private DoubleProperty scale;
   private NodeGestures nodeGestures;
-  private GeoPolygon[] polygons = extractPolygons(new Farm("Meine kleine Farm",
-      new GeoPolygon(new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5), new GeoPoint(52.4, 10.1)),
-      new Field("Beilagenfeld",
-          new GeoPolygon(new GeoPoint(52, 10), new GeoPoint(52, 11), new GeoPoint(54, 10),
-              new GeoPoint(54, 11)),
-          new Plot("Kartoffelacker",
-              new GeoPolygon(new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5),
-                  new GeoPoint(52.4, 10.1))),
-          new Plot("Pastinakenfleckerl",
-              new GeoPolygon(new GeoPoint(53.2, 10.5), new GeoPoint(53.5, 10.5),
-                  new GeoPoint(53.4, 10.1)))),
-      new Field("Buntesfeld",
-          new GeoPolygon(new GeoPoint(52, 11), new GeoPoint(53, 12), new GeoPoint(52, 12)),
-          new Plot("Erbsenkamp", new GeoPolygon(new GeoPoint(52.2, 11.5), new GeoPoint(52.5, 11.5),
-              new GeoPoint(52.4, 11.1))))));
+  private GeoPolygon[] polygons = extractPolygons(buildFarm());
   private GraphicsContext gc;
   private SceneGestures sceneGestures;
   // TODO Ist das sinnvoll, oder wird's dadurch zu voll?
@@ -192,6 +178,27 @@ public class MainController {
     farmLabel.setWrapText(true);
   }
 
+  @SuppressWarnings("checkstyle:linelength")
+  private Farm buildFarm() {
+    Farm farm = new Farm("Meine kleine Farm",
+        new GeoPolygon(new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5), new GeoPoint(52.4, 10.1)));
+    farm.setFields(
+        new Field("Beilagenfeld",
+            new GeoPolygon(new GeoPoint(52, 10), new GeoPoint(52, 11), new GeoPoint(54, 10),
+                new GeoPoint(54, 11)),
+            new Plot("Kartoffelacker",
+                new GeoPolygon(new GeoPoint(52.2, 10.5), new GeoPoint(52.5, 10.5),
+                    new GeoPoint(52.4, 10.1))),
+            new Plot("Pastinakenfleckerl",
+                new GeoPolygon(new GeoPoint(53.2, 10.5), new GeoPoint(53.5, 10.5),
+                    new GeoPoint(53.4, 10.1)))),
+        new Field("Buntesfeld",
+            new GeoPolygon(new GeoPoint(52, 11), new GeoPoint(53, 12), new GeoPoint(52, 12)),
+            new Plot("Erbsenkamp", new GeoPolygon(new GeoPoint(52.2, 11.5), new GeoPoint(52.5, 11.5),
+                new GeoPoint(52.4, 11.1)))));
+    return farm;
+  }
+
   private GeoPolygon[] extractPolygons(Drawable... drawables) {
     List<GeoPolygon> result = new ArrayList<>();
     extractPolygonsImpl(result, drawables);
@@ -200,7 +207,7 @@ public class MainController {
 
   private void extractPolygonsImpl(List<GeoPolygon> result, Drawable... drawables) {
     for (Drawable drawable : drawables) {
-      result.add(drawable.getPolygon());
+      result.addAll(drawable.getPolygons());
       if (drawable instanceof DrawableParent) {
         ((DrawableParent) drawable)
             .forAllChildDrawables(drawableChild -> extractPolygonsImpl(result, drawableChild));

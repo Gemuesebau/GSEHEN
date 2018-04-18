@@ -20,11 +20,11 @@ function initialize(mapOptions) {
 function draw() {
   var overlayType = google.maps.drawing.OverlayType;
   drawingManager.setOptions({
-    drawingMode : google.maps.drawing.OverlayType.RECTANGLE,
+    drawingMode : google.maps.drawing.OverlayType.POLYGON,
     drawingControl : true,
     drawingControlOptions : {
       position : google.maps.ControlPosition.TOP_RIGHT,
-      drawingModes : [ overlayType.RECTANGLE, overlayType.POLYGON ]
+      drawingModes : [ overlayType.POLYGON ]
     },
     rectangleOptions : {
       strokeColor : 'red',
@@ -39,7 +39,6 @@ function draw() {
   });
   drawingManager.setMap(map);
 }
-alert("Test");
 </script>
 </body>
 </html>

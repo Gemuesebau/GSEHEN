@@ -1,9 +1,11 @@
 package de.hgu.gsehen.model;
 
+import de.hgu.gsehen.gui.GeoPolygon;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-import de.hgu.gsehen.gui.GeoPolygon;
 
 public class Field implements Drawable, DrawableParent {
   private WeatherDataSource weatherDataSource;
@@ -15,6 +17,13 @@ public class Field implements Drawable, DrawableParent {
   private List<Plot>        plots;
   private double            area;
 
+  /**
+   * Konstruktor für ein Feld, der direkt Name, Umrisse und enthaltene Plots setzt.
+   *
+   * @param name der Name des Feldes
+   * @param polygon die Umrisse des Feldes
+   * @param plots die enthaltenen Plots
+   */
   public Field(String name, GeoPolygon polygon, Plot... plots) {
     this.name = name;
     this.polygon = polygon;
@@ -27,6 +36,7 @@ public class Field implements Drawable, DrawableParent {
   public WeatherDataSource getWeatherDataSource() {
     return weatherDataSource;
   }
+
   public void setWeatherDataSource(WeatherDataSource weatherDataSource) {
     this.weatherDataSource = weatherDataSource;
   }
@@ -34,6 +44,7 @@ public class Field implements Drawable, DrawableParent {
   public SoilProfile getSoilProfile() {
     return soilProfile;
   }
+
   public void setSoilProfile(SoilProfile soilProfile) {
     this.soilProfile = soilProfile;
   }
@@ -41,6 +52,7 @@ public class Field implements Drawable, DrawableParent {
   public Double getRootingZone() {
     return rootingZone;
   }
+
   public void setRootingZone(Double rootingZone) {
     this.rootingZone = rootingZone;
   }
@@ -48,14 +60,20 @@ public class Field implements Drawable, DrawableParent {
   public Location getLocation() {
     return location;
   }
+
   public void setLocation(Location location) {
     this.location = location;
   }
 
-  @Override
   public GeoPolygon getPolygon() {
     return polygon;
   }
+
+  @Override
+  public List<GeoPolygon> getPolygons() {
+    return Arrays.<GeoPolygon>asList(polygon);
+  }
+
   public void setPolygon(GeoPolygon polygon) {
     this.polygon = polygon;
   }
@@ -63,6 +81,7 @@ public class Field implements Drawable, DrawableParent {
   public String getName() {
     return name;
   }
+
   public void setName(String name) {
     this.name = name;
   }
@@ -70,6 +89,7 @@ public class Field implements Drawable, DrawableParent {
   public List<Plot> getPlots() {
     return plots;
   }
+
   public void setPlots(List<Plot> plots) {
     this.plots = plots;
   }
@@ -77,11 +97,13 @@ public class Field implements Drawable, DrawableParent {
   public double getArea() {
     return area;
   }
+
   public void setArea(double area) {
     this.area = area;
   }
 
   public void configure(){}
+
   public void modify(){}
 
   @Override
