@@ -152,6 +152,7 @@ public class MainController {
     // farmViewPane.addEventFilter(MouseEvent.MOUSE_DRAGGED,
     // sceneGestures.getOnMouseDraggedEventHandler());
     farmViewPane.addEventFilter(ScrollEvent.ANY, sceneGestures.getOnScrollEventHandler());
+    farmViewPane.toBack();
 
     addGrid();
 
