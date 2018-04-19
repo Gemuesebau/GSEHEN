@@ -24,6 +24,8 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
+import javafx.scene.SceneAntialiasing;
+import javafx.scene.SubScene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.PieChart;
@@ -35,6 +37,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -72,9 +75,9 @@ public class MainController {
   @FXML
   private Tab contactViewTab;
   @FXML
-  private HBox farmViewTopHBox;
+  private BorderPane farmViewBorderPane;
   @FXML
-  private Pane farmViewPane;
+  private HBox farmViewTopHBox;
   @FXML
   private PieChart farmPieChart;
   @FXML
@@ -100,6 +103,7 @@ public class MainController {
           new PieChart.Data("frei", 22), new PieChart.Data("Mais", 30));
   private PieChart pieChart = new PieChart(pieChartData);
   private String labelText;
+  private SubScene subScene;
 
   // Hides the Accordion and the tabs in the TabPane.
   @FXML
@@ -130,8 +134,14 @@ public class MainController {
   // TODO Mit den neuen Daten (18.04.) experimentieren.
   @FXML
   protected void enterFarmView() {
-    int width = (int) (farmViewPane.getWidth() * 0.75); // 75% from parent
-    int height = (int) (farmViewPane.getHeight() * 0.75); // 75% from parent
+    Pane farmViewPane = new Pane();
+    farmViewPane.setStyle("-fx-background-color: #394c77;"); // nur zur Übersicht.
+
+    subScene = new SubScene(farmViewPane, 950, 400, true, SceneAntialiasing.BALANCED);
+    farmViewBorderPane.setCenter(subScene);
+
+    int width = (int) (subScene.getWidth() * 0.75); // 75% from parent
+    int height = (int) (subScene.getHeight() * 0.75); // 75% from parent
 
     canvas.setWidth(width);
     canvas.setHeight(height);
@@ -144,14 +154,14 @@ public class MainController {
     drawShapes(gc, polygons);
 
     if (!farmViewPane.getChildren().contains(canvas)) {
-      farmViewPane.getChildren().addAll(canvas);
+      farmViewPane.getChildren().add(canvas);
     }
 
     // Create operator
     AnimatedZoomOperator zoomOperator = new AnimatedZoomOperator();
 
     // Listen to scroll events
-    farmViewPane.setOnScroll(new EventHandler<ScrollEvent>() {
+    subScene.setOnScroll(new EventHandler<ScrollEvent>() {
       @Override
       public void handle(ScrollEvent event) {
         double zoomFactor = 2.0;
@@ -159,7 +169,7 @@ public class MainController {
           // zoom out
           zoomFactor = 1 / zoomFactor;
         }
-        zoomOperator.zoom(farmViewPane, zoomFactor, event.getSceneX(), event.getSceneY());
+        zoomOperator.zoom(canvas, zoomFactor, event.getSceneX(), event.getSceneY());
       }
     });
 
@@ -167,9 +177,6 @@ public class MainController {
     nodeGestures = new NodeGestures(canvas);
     canvas.addEventFilter(MouseEvent.MOUSE_PRESSED, nodeGestures.getOnMousePressedEventHandler());
     canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, nodeGestures.getOnMouseDraggedEventHandler());
-
-    // TODO: Aktuell noch ein "Hack", damit Canvas hinter'm Rest bleibt.
-    farmViewPane.toBack();
 
     farmPieChart = pieChart;
     farmPieChart.setTitle("Anbau");
@@ -294,8 +301,7 @@ public class MainController {
    * @param object the newly created object, e.g. a Farm, Field, or Plot
    */
   public void objectAdded(NamedPolygonHolder object) {
-    LOGGER.info("Neues Objekt: " + object.getClass().getSimpleName()
-        + " '" + object.getName() + "' mit Polygon "
-        + object.getPolygon().getGeoPoints());
+    LOGGER.info("Neues Objekt: " + object.getClass().getSimpleName() + " '" + object.getName()
+        + "' mit Polygon " + object.getPolygon().getGeoPoints());
   }
 }

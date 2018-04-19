@@ -13,7 +13,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-<SplitPane dividerPositions="0.2104851330203443" minHeight="800.0" minWidth="1280.0" prefHeight="800.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
+<SplitPane dividerPositions="0.2104851330203443" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="800.0" minWidth="1280.0" prefHeight="800.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
    <items>
       <BorderPane prefHeight="200.0" prefWidth="200.0">
          <top>
@@ -161,9 +161,6 @@
                            </padding>
                         </HBox>
                      </bottom>
-                     <center>
-                        <Pane fx:id="farmViewPane" prefHeight="435.0" prefWidth="1006.0" BorderPane.alignment="CENTER" />
-                     </center>
                   </BorderPane>
                </content>
           </Tab>
