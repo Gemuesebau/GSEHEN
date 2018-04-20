@@ -112,7 +112,7 @@
                                     <Insets />
                                  </HBox.margin>
                                  <padding>
-                                    <Insets left="5.0" top="10.0" />
+                                    <Insets left="10.0" top="10.0" />
                                  </padding>
                                  <contextMenu>
                                     <ContextMenu>
@@ -124,7 +124,7 @@
                               </Label>
                               <PieChart fx:id="farmPieChart" legendSide="RIGHT" titleSide="RIGHT">
                                  <padding>
-                                    <Insets right="5.0" top="10.0" />
+                                    <Insets right="10.0" top="10.0" />
                                  </padding></PieChart>
                            </children>
                            <padding>

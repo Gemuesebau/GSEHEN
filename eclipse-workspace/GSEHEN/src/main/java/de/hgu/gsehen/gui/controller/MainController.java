@@ -12,16 +12,21 @@ import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.NamedPolygonHolder;
 import de.hgu.gsehen.model.Plot;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
@@ -52,7 +57,7 @@ import javafx.stage.Stage;
  * @author CWI
  *
  */
-public class MainController {
+public class MainController implements Initializable, ChangeListener {
   {
     Gsehen.getInstance().setMainController(this);
   }
@@ -132,6 +137,7 @@ public class MainController {
   }
 
   // TODO Mit den neuen Daten (18.04.) experimentieren.
+  @SuppressWarnings("unchecked")
   @FXML
   protected void enterFarmView() {
     Pane farmViewPane = new Pane();
@@ -139,6 +145,8 @@ public class MainController {
 
     subScene = new SubScene(farmViewPane, 950, 400, true, SceneAntialiasing.BALANCED);
     farmViewBorderPane.setCenter(subScene);
+    farmLabel.getScene().widthProperty().addListener(this);
+    farmLabel.getScene().heightProperty().addListener(this);
 
     int width = (int) (subScene.getWidth() * 0.75); // 75% from parent
     int height = (int) (subScene.getHeight() * 0.75); // 75% from parent
@@ -155,6 +163,10 @@ public class MainController {
 
     if (!farmViewPane.getChildren().contains(canvas)) {
       farmViewPane.getChildren().add(canvas);
+      canvas.layoutXProperty()
+          .bind(farmViewPane.widthProperty().subtract(canvas.widthProperty()).divide(2));
+      canvas.layoutYProperty()
+          .bind(farmViewPane.heightProperty().subtract(canvas.heightProperty()).divide(2));
     }
 
     // Create operator
@@ -196,6 +208,22 @@ public class MainController {
       farmLabel.setText(labelText);
     }
     farmLabel.setWrapText(true);
+  }
+
+  /**
+   * ChangeListener: Resizing the SubScene in the FarmView.
+   */
+  public void changed(@SuppressWarnings("rawtypes") ObservableValue observable, Object oldValue,
+      Object newValue) {
+    double width = farmLabel.getScene().getWidth();
+    double height = farmLabel.getScene().getHeight();
+    if (observable.equals(farmLabel.getScene().widthProperty())) {
+      double scale = width / 1200;
+      subScene.setWidth(950 * scale);
+    } else if (observable.equals(farmLabel.getScene().heightProperty())) {
+      double scale = height / 800;
+      subScene.setHeight(400 * scale);
+    }
   }
 
   @SuppressWarnings("checkstyle:linelength")
@@ -303,5 +331,11 @@ public class MainController {
   public void objectAdded(NamedPolygonHolder object) {
     LOGGER.info("Neues Objekt: " + object.getClass().getSimpleName() + " '" + object.getName()
         + "' mit Polygon " + object.getPolygon().getGeoPoints());
+  }
+
+  @Override
+  public void initialize(URL arg0, ResourceBundle arg1) {
+    // TODO Auto-generated method stub
+
   }
 }
