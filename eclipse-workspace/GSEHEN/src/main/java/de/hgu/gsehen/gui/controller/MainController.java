@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -28,6 +26,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Side;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
@@ -36,6 +35,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
@@ -57,6 +57,7 @@ import javafx.stage.Stage;
  * @author CWI
  *
  */
+@SuppressWarnings("rawtypes")
 public class MainController implements Initializable, ChangeListener {
   {
     Gsehen.getInstance().setMainController(this);
@@ -87,6 +88,10 @@ public class MainController implements Initializable, ChangeListener {
   private PieChart farmPieChart;
   @FXML
   private Label farmLabel;
+  // @FXML
+  // private SubScene subScene;
+  @FXML
+  private Pane farmViewPane;
 
   // Help-Menu
   @FXML
@@ -97,7 +102,6 @@ public class MainController implements Initializable, ChangeListener {
   private MenuItem aboutUsMenuItem;
 
   private Canvas canvas = new Canvas();
-  private DoubleProperty scale;
   private NodeGestures nodeGestures;
   private GeoPolygon[] polygons = extractPolygons(buildFarm());
   private GraphicsContext gc;
@@ -140,22 +144,29 @@ public class MainController implements Initializable, ChangeListener {
   @SuppressWarnings("unchecked")
   @FXML
   protected void enterFarmView() {
-    Pane farmViewPane = new Pane();
+    // Pane farmViewPane = new Pane();
+    // farmViewPane.setMinHeight(400);
+    // farmViewPane.setMinWidth(950);
+    // farmViewPane.setPrefHeight(Control.USE_PREF_SIZE);
+    // farmViewPane.setPrefWidth(Control.USE_PREF_SIZE);
+    // farmViewPane.setMaxHeight(Double.MAX_VALUE);
+    // farmViewPane.setMaxWidth(Double.MAX_VALUE);
+
     farmViewPane.setStyle("-fx-background-color: #394c77;"); // nur zur Übersicht.
 
     subScene = new SubScene(farmViewPane, 950, 400, true, SceneAntialiasing.BALANCED);
-    farmViewBorderPane.setCenter(subScene);
+    // subScene = new SubScene(null, 0, 0);
+    // subScene.setRoot(farmViewPane);
+    subScene.heightProperty().bind(farmViewPane.heightProperty());
+    subScene.widthProperty().bind(farmViewPane.widthProperty());
     farmLabel.getScene().widthProperty().addListener(this);
     farmLabel.getScene().heightProperty().addListener(this);
 
-    int width = (int) (subScene.getWidth() * 0.75); // 75% from parent
-    int height = (int) (subScene.getHeight() * 0.75); // 75% from parent
+    int width = (int) (farmViewPane.getWidth() * 0.75); // 75% from parent
+    int height = (int) (farmViewPane.getHeight() * 0.75); // 75% from parent
 
     canvas.setWidth(width);
     canvas.setHeight(height);
-    scale = new SimpleDoubleProperty(1.0);
-    canvas.scaleXProperty().bindBidirectional(scale);
-    canvas.scaleYProperty().bindBidirectional(scale);
 
     gc = canvas.getGraphicsContext2D();
     setTransformation(gc, width, height, polygons);
@@ -173,7 +184,7 @@ public class MainController implements Initializable, ChangeListener {
     AnimatedZoomOperator zoomOperator = new AnimatedZoomOperator();
 
     // Listen to scroll events
-    subScene.setOnScroll(new EventHandler<ScrollEvent>() {
+    farmViewPane.setOnScroll(new EventHandler<ScrollEvent>() {
       @Override
       public void handle(ScrollEvent event) {
         double zoomFactor = 2.0;
@@ -181,7 +192,7 @@ public class MainController implements Initializable, ChangeListener {
           // zoom out
           zoomFactor = 1 / zoomFactor;
         }
-        zoomOperator.zoom(canvas, zoomFactor, event.getSceneX(), event.getSceneY());
+        zoomOperator.zoom(farmViewPane, zoomFactor, event.getSceneX(), event.getSceneY());
       }
     });
 
@@ -213,8 +224,7 @@ public class MainController implements Initializable, ChangeListener {
   /**
    * ChangeListener: Resizing the SubScene in the FarmView.
    */
-  public void changed(@SuppressWarnings("rawtypes") ObservableValue observable, Object oldValue,
-      Object newValue) {
+  public void changed(ObservableValue observable, Object oldValue, Object newValue) {
     double width = farmLabel.getScene().getWidth();
     double height = farmLabel.getScene().getHeight();
     if (observable.equals(farmLabel.getScene().widthProperty())) {

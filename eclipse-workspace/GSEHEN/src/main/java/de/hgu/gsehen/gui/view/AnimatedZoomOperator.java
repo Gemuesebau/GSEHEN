@@ -29,8 +29,15 @@ public class AnimatedZoomOperator {
     double scale = oldScale * factor;
     double f = (scale / oldScale) - 1;
 
+    // System.out.println(oldScale);
+    // System.out.println(scale);
+    // System.out.println(f);
+
     // determine offset that we will have to move the node
     Bounds bounds = node.localToScene(node.getBoundsInLocal());
+
+    System.out.println(bounds);
+
     double dx = (x - (bounds.getWidth() / 2 + bounds.getMinX()));
     double dy = (y - (bounds.getHeight() / 2 + bounds.getMinY()));
 
@@ -43,6 +50,7 @@ public class AnimatedZoomOperator {
             new KeyValue(node.translateYProperty(), node.getTranslateY() - f * dy)),
         new KeyFrame(Duration.millis(200), new KeyValue(node.scaleXProperty(), scale)),
         new KeyFrame(Duration.millis(200), new KeyValue(node.scaleYProperty(), scale)));
+
     timeline.play();
   }
 }

@@ -161,6 +161,9 @@
                            </padding>
                         </HBox>
                      </bottom>
+                     <center>
+                        <Pane fx:id="farmViewPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                     </center>
                   </BorderPane>
                </content>
           </Tab>
