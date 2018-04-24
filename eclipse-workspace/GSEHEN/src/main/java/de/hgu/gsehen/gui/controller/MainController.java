@@ -12,10 +12,8 @@ import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -24,7 +22,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
@@ -57,8 +54,7 @@ import javafx.stage.Stage;
  * @author CWI
  */
 @SuppressWarnings({"checkstyle:commentsindentation", "rawtypes"})
-public class MainController
-    implements Initializable, ChangeListener, GsehenEventListener<FarmDataChanged> {
+public class MainController implements ChangeListener, GsehenEventListener<FarmDataChanged> {
   {
     Gsehen gsehenInstance = Gsehen.getInstance();
     // gsehenInstance.setMainController(this);
@@ -116,7 +112,7 @@ public class MainController
 
   // Hides the Accordion and the tabs in the TabPane.
   @FXML
-  protected void openContactView(ActionEvent o) {
+  private void openContactView(ActionEvent o) {
     accordion.setVisible(false);
     tabPane.getTabs().clear();
     tabPane.getTabs().add(contactViewTab);
@@ -124,7 +120,7 @@ public class MainController
 
   // Returns to Main-Menu.
   @FXML
-  protected void backFromContactView(ActionEvent b) {
+  private void backFromContactView(ActionEvent b) {
     accordion.setVisible(true);
     tabPane.getTabs().clear();
     tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, fieldPlotViewTab);
@@ -132,7 +128,7 @@ public class MainController
 
   // Opens a new Stage.
   @FXML
-  protected void about(ActionEvent a) {
+  private void about(ActionEvent a) {
     Stage stage = new Stage();
     Scene scene = new Scene(new VBox(), 400, 400);
     stage.setTitle("About us");
@@ -143,28 +139,24 @@ public class MainController
   // TODO Mit den neuen Daten (18.04.) experimentieren.
   @SuppressWarnings("unchecked")
   @FXML
-  protected void enterFarmView() {
+  private void enterFarmView() {
     farmViewPane = new Pane();
-    farmViewPane.setStyle("-fx-background-color: #394c77;"); // nur zur �bersicht.
+    farmViewPane.setStyle("-fx-background-color: #394c77;"); // nur zur Übersicht.
 
     subScene = new SubScene(farmViewPane, 950, 400, true, SceneAntialiasing.BALANCED);
     farmViewBorderPane.setCenter(subScene);
     farmLabel.getScene().widthProperty().addListener(this);
     farmLabel.getScene().heightProperty().addListener(this);
 
-    // create sample nodes which can be dragged
-    nodeGestures = new NodeGestures(canvas);
-    canvas.addEventFilter(MouseEvent.MOUSE_PRESSED, nodeGestures.getOnMousePressedEventHandler());
-    canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, nodeGestures.getOnMouseDraggedEventHandler());
+    drawCanvas(canvas);
 
     // Create ContextMenu
     ContextMenu contextMenu = new ContextMenu();
-    MenuItem item1 = new MenuItem("Aktualisieren");
+    MenuItem item1 = new MenuItem("Reset");
     item1.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
         clear();
-        draw();
       }
     });
 
@@ -172,11 +164,10 @@ public class MainController
     contextMenu.getItems().addAll(item1);
 
     // When user right-click on SubScene
-    subScene.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
-
+    farmViewPane.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
       @Override
       public void handle(ContextMenuEvent event) {
-        contextMenu.show(subScene, event.getScreenX(), event.getScreenY());
+        contextMenu.show(farmViewPane, event.getScreenX(), event.getScreenY());
       }
     });
 
@@ -200,11 +191,7 @@ public class MainController
     farmLabel.setWrapText(true);
   }
 
-  public void draw() {
-    System.out.println("DRAW!");
-    farmViewPane.getChildren().clear();
-    // subScene.setRoot(farmViewPane);
-
+  private void drawCanvas(Canvas canvas) {
     int width = (int) (farmViewPane.getWidth() * 0.75); // 75% from parent
     int height = (int) (farmViewPane.getHeight() * 0.75); // 75% from parent
 
@@ -222,17 +209,13 @@ public class MainController
         .bind(farmViewPane.widthProperty().subtract(canvas.widthProperty()).divide(2));
     canvas.layoutYProperty()
         .bind(farmViewPane.heightProperty().subtract(canvas.heightProperty()).divide(2));
-    this.zoom();
+
+    // create sample nodes which can be dragged
+    nodeGestures = new NodeGestures(canvas);
+    canvas.addEventFilter(MouseEvent.MOUSE_PRESSED, nodeGestures.getOnMousePressedEventHandler());
+    canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, nodeGestures.getOnMouseDraggedEventHandler());
 
     farmViewPane.getChildren().add(canvas);
-  }
-
-  public void clear() {}
-
-  /**
-   * Zoom for canvas in the farmViewPane.
-   */
-  public void zoom() {
 
     farmViewPane.setOnScroll(event -> {
       double zoomFactor = 1.3;
@@ -252,6 +235,12 @@ public class MainController
 
       event.consume();
     });
+  }
+
+  private void clear() {
+    farmViewPane.getChildren().remove(0);
+    Canvas cleanCanvas = new Canvas();
+    drawCanvas(cleanCanvas);
   }
 
   /**
@@ -375,11 +364,6 @@ public class MainController
   // LOGGER.info("Neues Objekt: " + object.getClass().getSimpleName() + " '" + object.getName()
   // + "' mit Polygon " + object.getPolygon().getGeoPoints());
   // }
-
-  @Override
-  public void initialize(URL arg0, ResourceBundle arg1) {
-    // FIXME klären woher dies kommt und ob/wie es ausimplementiert werden muss
-  }
 
   @Override
   public void handle(FarmDataChanged event) {
