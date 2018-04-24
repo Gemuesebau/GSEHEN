@@ -21,6 +21,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Side;
@@ -32,10 +33,12 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -145,29 +148,35 @@ public class MainController implements Initializable, ChangeListener {
     farmLabel.getScene().widthProperty().addListener(this);
     farmLabel.getScene().heightProperty().addListener(this);
 
-    int width = (int) (farmViewPane.getWidth() * 0.75); // 75% from parent
-    int height = (int) (farmViewPane.getHeight() * 0.75); // 75% from parent
-
-    canvas.setWidth(width);
-    canvas.setHeight(height);
-
-    gc = canvas.getGraphicsContext2D();
-    setTransformation(gc, width, height, polygons);
-    drawShapes(gc, polygons);
-
-    if (!farmViewPane.getChildren().contains(canvas)) {
-      farmViewPane.getChildren().add(canvas);
-      canvas.layoutXProperty()
-          .bind(farmViewPane.widthProperty().subtract(canvas.widthProperty()).divide(2));
-      canvas.layoutYProperty()
-          .bind(farmViewPane.heightProperty().subtract(canvas.heightProperty()).divide(2));
-      this.zoom();
-    }
+    this.draw();
 
     // create sample nodes which can be dragged
     nodeGestures = new NodeGestures(canvas);
     canvas.addEventFilter(MouseEvent.MOUSE_PRESSED, nodeGestures.getOnMousePressedEventHandler());
     canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, nodeGestures.getOnMouseDraggedEventHandler());
+
+    // Create ContextMenu
+    ContextMenu contextMenu = new ContextMenu();
+    MenuItem item1 = new MenuItem("Aktualisieren");
+    item1.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        clear();
+        draw();
+      }
+    });
+
+    // Add MenuItem to ContextMenu
+    contextMenu.getItems().addAll(item1);
+
+    // When user right-click on SubScene
+    subScene.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
+
+      @Override
+      public void handle(ContextMenuEvent event) {
+        contextMenu.show(subScene, event.getScreenX(), event.getScreenY());
+      }
+    });
 
     farmPieChart = pieChart;
     farmPieChart.setTitle("Anbau");
@@ -187,6 +196,33 @@ public class MainController implements Initializable, ChangeListener {
       farmLabel.setText(labelText);
     }
     farmLabel.setWrapText(true);
+  }
+
+  public void draw() {
+    System.out.println("DRAW!");
+    farmViewPane.getChildren().clear();
+    // subScene.setRoot(farmViewPane);
+
+    int width = (int) (farmViewPane.getWidth() * 0.75); // 75% from parent
+    int height = (int) (farmViewPane.getHeight() * 0.75); // 75% from parent
+
+    canvas.setWidth(width);
+    canvas.setHeight(height);
+
+    gc = canvas.getGraphicsContext2D();
+    setTransformation(gc, width, height, polygons);
+    drawShapes(gc, polygons);
+
+    canvas.layoutXProperty()
+        .bind(farmViewPane.widthProperty().subtract(canvas.widthProperty()).divide(2));
+    canvas.layoutYProperty()
+        .bind(farmViewPane.heightProperty().subtract(canvas.heightProperty()).divide(2));
+    this.zoom();
+
+    farmViewPane.getChildren().add(canvas);
+  }
+
+  public void clear() {
   }
 
   /**
