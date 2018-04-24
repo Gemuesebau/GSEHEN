@@ -4,7 +4,6 @@ import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.PolygonData;
-import de.hgu.gsehen.gui.view.AnimatedZoomOperator;
 import de.hgu.gsehen.gui.view.NodeGestures;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.DrawableParent;
@@ -22,11 +21,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Side;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
@@ -35,13 +32,11 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
-import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -49,6 +44,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
+import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 
 /**
@@ -88,10 +84,6 @@ public class MainController implements Initializable, ChangeListener {
   private PieChart farmPieChart;
   @FXML
   private Label farmLabel;
-  // @FXML
-  // private SubScene subScene;
-  @FXML
-  private Pane farmViewPane;
 
   // Help-Menu
   @FXML
@@ -112,6 +104,7 @@ public class MainController implements Initializable, ChangeListener {
           new PieChart.Data("frei", 22), new PieChart.Data("Mais", 30));
   private PieChart pieChart = new PieChart(pieChartData);
   private String labelText;
+  private Pane farmViewPane;
   private SubScene subScene;
 
   // Hides the Accordion and the tabs in the TabPane.
@@ -144,21 +137,11 @@ public class MainController implements Initializable, ChangeListener {
   @SuppressWarnings("unchecked")
   @FXML
   protected void enterFarmView() {
-    // Pane farmViewPane = new Pane();
-    // farmViewPane.setMinHeight(400);
-    // farmViewPane.setMinWidth(950);
-    // farmViewPane.setPrefHeight(Control.USE_PREF_SIZE);
-    // farmViewPane.setPrefWidth(Control.USE_PREF_SIZE);
-    // farmViewPane.setMaxHeight(Double.MAX_VALUE);
-    // farmViewPane.setMaxWidth(Double.MAX_VALUE);
-
+    farmViewPane = new Pane();
     farmViewPane.setStyle("-fx-background-color: #394c77;"); // nur zur Übersicht.
 
     subScene = new SubScene(farmViewPane, 950, 400, true, SceneAntialiasing.BALANCED);
-    // subScene = new SubScene(null, 0, 0);
-    // subScene.setRoot(farmViewPane);
-    subScene.heightProperty().bind(farmViewPane.heightProperty());
-    subScene.widthProperty().bind(farmViewPane.widthProperty());
+    farmViewBorderPane.setCenter(subScene);
     farmLabel.getScene().widthProperty().addListener(this);
     farmLabel.getScene().heightProperty().addListener(this);
 
@@ -178,23 +161,8 @@ public class MainController implements Initializable, ChangeListener {
           .bind(farmViewPane.widthProperty().subtract(canvas.widthProperty()).divide(2));
       canvas.layoutYProperty()
           .bind(farmViewPane.heightProperty().subtract(canvas.heightProperty()).divide(2));
+      this.zoom();
     }
-
-    // Create operator
-    AnimatedZoomOperator zoomOperator = new AnimatedZoomOperator();
-
-    // Listen to scroll events
-    farmViewPane.setOnScroll(new EventHandler<ScrollEvent>() {
-      @Override
-      public void handle(ScrollEvent event) {
-        double zoomFactor = 2.0;
-        if (event.getDeltaY() <= 0) {
-          // zoom out
-          zoomFactor = 1 / zoomFactor;
-        }
-        zoomOperator.zoom(farmViewPane, zoomFactor, event.getSceneX(), event.getSceneY());
-      }
-    });
 
     // create sample nodes which can be dragged
     nodeGestures = new NodeGestures(canvas);
@@ -219,6 +187,31 @@ public class MainController implements Initializable, ChangeListener {
       farmLabel.setText(labelText);
     }
     farmLabel.setWrapText(true);
+  }
+
+  /**
+   * Zoom for canvas in the farmViewPane.
+   */
+  public void zoom() {
+
+    farmViewPane.setOnScroll(event -> {
+      double zoomFactor = 1.3;
+      double deltaY = event.getDeltaY();
+
+      if (deltaY < 0) {
+        zoomFactor = 2.0 - zoomFactor;
+      }
+
+      Scale newScale = new Scale();
+      newScale.setPivotX(event.getX());
+      newScale.setPivotY(event.getY());
+      newScale.setX(canvas.getScaleX() * zoomFactor);
+      newScale.setY(canvas.getScaleY() * zoomFactor);
+
+      canvas.getTransforms().add(newScale);
+
+      event.consume();
+    });
   }
 
   /**
