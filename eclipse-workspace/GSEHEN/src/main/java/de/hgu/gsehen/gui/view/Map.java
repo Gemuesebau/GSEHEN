@@ -1,7 +1,7 @@
 package de.hgu.gsehen.gui.view;
 
+import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.gui.GeoPolygon;
-import de.hgu.gsehen.gui.controller.MainController;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.NamedPolygonHolder;
@@ -28,6 +28,7 @@ import netscape.javascript.JSObject;
  *
  * @author AT
  */
+@SuppressWarnings({"checkstyle:commentsindentation"})
 public class Map {
   private static final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
       Locale.GERMAN);
@@ -37,14 +38,16 @@ public class Map {
 
   private WebEngine engine;
   private String loadWorkerSucceededScript;
-  private MainController mainController;
+  //private MainController mainController;
+  private Gsehen application;
 
   /**
    * Constructs a new map in the given WebView.
    *
    * @param webView the WebView where to load the map
    */
-  public Map(WebView webView) {
+  public Map(Gsehen application, WebView webView) {
+    this.application = application;
     engine = webView.getEngine();
     engine.setOnAlert(event -> alert(event.getData()));
     engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
@@ -91,7 +94,7 @@ public class Map {
           NamedPolygonHolder object =
               (NamedPolygonHolder)typesMap.get(dialogResult.getText()).newInstance();
           object.setNameAndPolygon(name, polygon);
-          mainController.objectAdded(object);
+          application.objectAdded(object);
         }
       }
       catch (Exception exception) {
@@ -149,7 +152,7 @@ public class Map {
     engine.loadContent(getMapHtml());
   }
 
-  public void setMainController(MainController mainController) {
-    this.mainController = mainController;
-  }
+//  public void setMainController(MainController mainController) {
+//    this.mainController = mainController;
+//  }
 }

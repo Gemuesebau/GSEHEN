@@ -1,18 +1,26 @@
 package de.hgu.gsehen;
 
-import static de.hgu.gsehen.jdbc.DatabaseUtils.executeQuery;
-import static de.hgu.gsehen.jdbc.DatabaseUtils.executeUpdate;
-import static de.hgu.gsehen.jdbc.DatabaseUtils.parseYmd;
+import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
+import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
+import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
+import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
 
-import de.hgu.gsehen.gui.controller.MainController;
+import de.hgu.gsehen.event.GsehenEvent;
+import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.view.Map;
-
+import de.hgu.gsehen.model.Farm;
+import de.hgu.gsehen.model.Field;
+import de.hgu.gsehen.model.NamedPolygonHolder;
+import de.hgu.gsehen.model.Plot;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -44,7 +52,14 @@ public class Gsehen extends Application {
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private static Map map;
   private static Gsehen instance;
-  private MainController mainController;
+  //private MainController mainController;
+
+  private java.util.Map<Class<? extends GsehenEvent>,
+        List<GsehenEventListener<?>>> eventListeners =
+      new HashMap<>();
+
+  // TODO aus persistenten Daten laden; Programmstart und Menü
+  private List<Farm> farms = new ArrayList<>();
 
   {
     instance = this;
@@ -98,8 +113,8 @@ public class Gsehen extends Application {
     stage.sizeToScene();
     stage.show();
 
-    map = new Map((WebView)scene.lookup(WEB_VIEW_ID));
-    map.setMainController(mainController);
+    map = new Map(this, (WebView)scene.lookup(WEB_VIEW_ID));
+    //map.setMainController(mainController);
     map.reload();
 
     TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
@@ -162,7 +177,33 @@ public class Gsehen extends Application {
     return instance;
   }
 
-  public void setMainController(MainController mainController) {
-    this.mainController = mainController;
+//  public void setMainController(MainController mainController) {
+//    this.mainController = mainController;
+//  }
+
+  public void registerForEvent(Class<? extends GsehenEvent> eventClass,
+      GsehenEventListener<?> eventListener) {
+    addToMappedList(eventListeners, eventClass, eventListener);
+  }
+
+  // FIXME Unterobjekte müssen bereits ein Parent haben ODER in "unzugeordnet" o.ä. liegen
+  @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
+  public void objectAdded(NamedPolygonHolder object) {
+    if (object instanceof Farm) {
+      farms.add((Farm)object);
+    }
+    else if (object instanceof Field) {
+      if (!farms.isEmpty()) {
+        farms.get(0).getFields().add((Field)object);
+      }
+    }
+    else if (object instanceof Plot) {
+      if (!farms.isEmpty()) {
+        List<Field> fields = farms.get(0).getFields();
+        if (!fields.isEmpty()) {
+          fields.get(0).getPlots().add((Plot)object);
+        }
+      }
+    }
   }
 }

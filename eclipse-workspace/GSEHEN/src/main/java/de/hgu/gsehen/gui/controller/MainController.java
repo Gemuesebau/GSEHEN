@@ -1,6 +1,8 @@
 package de.hgu.gsehen.gui.controller;
 
 import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.event.FarmDataChanged;
+import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.PolygonData;
@@ -9,7 +11,6 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
-import de.hgu.gsehen.model.NamedPolygonHolder;
 import de.hgu.gsehen.model.Plot;
 import java.net.URL;
 import java.util.ArrayList;
@@ -51,14 +52,17 @@ import javafx.stage.Stage;
  * The GSEHEN Main-Controller.
  *
  * @author CWI
- *
  */
-@SuppressWarnings("rawtypes")
-public class MainController implements Initializable, ChangeListener {
+@SuppressWarnings({"checkstyle:commentsindentation", "rawtypes"})
+public class MainController implements Initializable, ChangeListener,
+    GsehenEventListener<FarmDataChanged> {
   {
-    Gsehen.getInstance().setMainController(this);
+    Gsehen gsehenInstance = Gsehen.getInstance();
+    //gsehenInstance.setMainController(this);
+    gsehenInstance.registerForEvent(FarmDataChanged.class, this);
   }
 
+  @SuppressWarnings("unused")
   private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
 
   // Views
@@ -138,7 +142,7 @@ public class MainController implements Initializable, ChangeListener {
   @FXML
   protected void enterFarmView() {
     farmViewPane = new Pane();
-    farmViewPane.setStyle("-fx-background-color: #394c77;"); // nur zur Übersicht.
+    farmViewPane.setStyle("-fx-background-color: #394c77;"); // nur zur ï¿½bersicht.
 
     subScene = new SubScene(farmViewPane, 950, 400, true, SceneAntialiasing.BALANCED);
     farmViewBorderPane.setCenter(subScene);
@@ -152,6 +156,9 @@ public class MainController implements Initializable, ChangeListener {
     canvas.setHeight(height);
 
     gc = canvas.getGraphicsContext2D();
+    
+    // TODO rausrefactorn. Muss auch durch die handle(FarmDataChanged) hervorgerufen werden kÃ¶nnen.
+    // s.u. .....
     setTransformation(gc, width, height, polygons);
     drawShapes(gc, polygons);
 
@@ -177,7 +184,7 @@ public class MainController implements Initializable, ChangeListener {
     }
 
     // TODO Bislang nur ein kleiner Test. Generell aber nicht verkehrt, wenn man die GeoPoints
-    // mittels Label anzeigen lassen würde.
+    // mittels Label anzeigen lassen wuerde.
     for (GeoPolygon polygon : polygons) {
       labelText = "";
       for (GeoPoint geoPoint : polygon.getGeoPoints()) {
@@ -326,19 +333,30 @@ public class MainController implements Initializable, ChangeListener {
     gc.setTransform(affineTransformation);
   }
 
-  /**
-   * Called by others to tell an instance of this class that a new object has been created.
-   *
-   * @param object the newly created object, e.g. a Farm, Field, or Plot
-   */
-  public void objectAdded(NamedPolygonHolder object) {
-    LOGGER.info("Neues Objekt: " + object.getClass().getSimpleName() + " '" + object.getName()
-        + "' mit Polygon " + object.getPolygon().getGeoPoints());
-  }
+//  /**
+//   * Called by others to tell an instance of this class that a new object has been created.
+//   *
+//   * @param object the newly created object, e.g. a Farm, Field, or Plot
+//   */
+//  public void objectAdded(NamedPolygonHolder object) {
+//    LOGGER.info("Neues Objekt: " + object.getClass().getSimpleName() + " '" + object.getName()
+//        + "' mit Polygon " + object.getPolygon().getGeoPoints());
+//  }
 
   @Override
   public void initialize(URL arg0, ResourceBundle arg1) {
-    // TODO Auto-generated method stub
+    // FIXME klÃ¤ren woher dies kommt und ob/wie es ausimplementiert werden muss
+  }
 
+  @Override
+  public void handle(FarmDataChanged event) {
+    List<Farm> farms = event.getFarms();
+    Drawable[] farmsArray = new Drawable[farms.size()];
+    int i = 0;
+    for (Farm farm : farms) {
+      farmsArray[i++] = farm;
+    }
+    @SuppressWarnings("unused")
+    GeoPolygon[] polygons2 = extractPolygons(farmsArray); // TODO verarbeiten!!
   }
 }

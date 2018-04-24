@@ -1,4 +1,4 @@
-package de.hgu.gsehen.jdbc;
+package de.hgu.gsehen.util;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -9,7 +9,8 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-public class DatabaseUtils {
+@SuppressWarnings({"checkstyle:abbreviationaswordinname"})
+public class JDBCUtil {
 
   /**
    * Parses a date string in format yyyy-MM-dd.
