@@ -6,7 +6,6 @@ import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.PolygonData;
-import de.hgu.gsehen.gui.view.NodeGestures;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
@@ -38,7 +37,6 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -97,7 +95,6 @@ public class MainController_scrollZoom implements GsehenEventListener<FarmDataCh
   private MenuItem aboutUsMenuItem;
 
   private Canvas canvas = new Canvas();
-  private NodeGestures nodeGestures;
   private GeoPolygon[] polygons = extractPolygons(buildFarm());
   private GraphicsContext gc;
   // TODO Ist das sinnvoll, oder wird's dadurch zu voll?
@@ -185,11 +182,6 @@ public class MainController_scrollZoom implements GsehenEventListener<FarmDataCh
     // s.u. .....
     setTransformation(gc, width, height, polygons);
     drawShapes(gc, polygons);
-
-    // create sample nodes which can be dragged
-    nodeGestures = new NodeGestures(canvas);
-    canvas.addEventFilter(MouseEvent.MOUSE_PRESSED, nodeGestures.getOnMousePressedEventHandler());
-    canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, nodeGestures.getOnMouseDraggedEventHandler());
 
     WritableImage canvasImage = pixelScaleAwareCanvasSnapshot(canvas, 1.0);
 
