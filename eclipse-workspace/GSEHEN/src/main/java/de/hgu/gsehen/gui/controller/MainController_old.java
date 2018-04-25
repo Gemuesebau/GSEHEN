@@ -54,7 +54,7 @@ import javafx.stage.Stage;
  * @author CWI
  */
 @SuppressWarnings({"checkstyle:commentsindentation", "rawtypes"})
-public class MainController implements ChangeListener, GsehenEventListener<FarmDataChanged> {
+public class MainController_old implements ChangeListener, GsehenEventListener<FarmDataChanged> {
   {
     Gsehen gsehenInstance = Gsehen.getInstance();
     // gsehenInstance.setMainController(this);
@@ -62,7 +62,7 @@ public class MainController implements ChangeListener, GsehenEventListener<FarmD
   }
 
   @SuppressWarnings("unused")
-  private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(MainController_old.class.getName());
 
   // Views
   @FXML
