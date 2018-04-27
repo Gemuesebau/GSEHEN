@@ -1,23 +1,21 @@
 package de.hgu.gsehen.model;
 
 import de.hgu.gsehen.gui.GeoPolygon;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class Field implements Drawable, DrawableParent, NamedPolygonHolder {
   private WeatherDataSource weatherDataSource;
-  private SoilProfile       soilProfile;
-  private Double            rootingZone;
-  private Location          location;
-  private GeoPolygon        polygon;
-  private String            name;
-  private List<Plot>        plots;
-  private double            area;
+  private SoilProfile soilProfile;
+  private Double rootingZone;
+  private Location location;
+  private GeoPolygon polygon;
+  private String name;
+  private List<Plot> plots;
+  private double area;
 
-  public Field() {
-  }
+  public Field() {}
 
   /**
    * Konstruktor für ein Feld, der direkt Name, Umrisse und enthaltene Plots setzt.
@@ -105,12 +103,15 @@ public class Field implements Drawable, DrawableParent, NamedPolygonHolder {
     this.area = area;
   }
 
-  public void configure(){}
+  public void configure() {}
 
-  public void modify(){}
+  public void modify() {}
 
   @Override
   public void forAllChildDrawables(Consumer<Drawable> handler) {
+    if (plots == null) {
+      return;
+    }
     plots.forEach(handler);
   }
 }

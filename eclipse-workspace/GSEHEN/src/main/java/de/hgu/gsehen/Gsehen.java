@@ -4,7 +4,7 @@ import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
 import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
 import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
-
+import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.view.Map;
@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import com.sun.javafx.property.adapter.PropertyDescriptor.Listener;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -187,7 +188,7 @@ public class Gsehen extends Application {
   }
 
   // FIXME Unterobjekte müssen bereits ein Parent haben ODER in "unzugeordnet" o.ä. liegen
-  @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
+  @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly", "unchecked"})
   public void objectAdded(NamedPolygonHolder object) {
     if (object instanceof Farm) {
       farms.add((Farm)object);
@@ -205,5 +206,10 @@ public class Gsehen extends Application {
         }
       }
     }
+    eventListeners.get(FarmDataChanged.class).forEach(listener -> {
+      FarmDataChanged farmDataChanged = new FarmDataChanged();
+      farmDataChanged.setFarms(farms);
+      ((GsehenEventListener<FarmDataChanged>)listener).handle(farmDataChanged);
+    });
   }
 }
