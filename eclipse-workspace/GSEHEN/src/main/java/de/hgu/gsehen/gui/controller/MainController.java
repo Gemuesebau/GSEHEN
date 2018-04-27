@@ -103,14 +103,13 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   private PieChart pieChart = new PieChart(pieChartData);
   // private String labelText;
   private BorderPane imageView = new BorderPane();
-  private ImageView farmImageView;
+  private ImageView farmImageView = new ImageView();
   private WritableImage canvasImage;
   private Drawable[] farmsArray;
   private HBox zoom;
   private Slider zoomLvl;
   private Slider horScroll;
   private Slider verScroll;
-  private VBox farmVBox = new VBox(20);
   private static int height;
   private static int width;
   private static double initx;
@@ -148,14 +147,15 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   // TODO Mit den neuen Daten (18.04.) experimentieren.
   @FXML
   private void enterFarmView() {
-    farmImageView = new ImageView();
+    farmViewBorderPane.setCenter(imageView);
+    drawCanvas();
 
-    farmPieChart = pieChart;
-    farmPieChart.setTitle("Anbau");
-    farmPieChart.setLegendSide(Side.RIGHT);
-    if (!farmViewTopHBox.getChildren().contains(farmPieChart)) {
-      farmViewTopHBox.getChildren().addAll(farmPieChart);
-    }
+    // farmPieChart = pieChart;
+    // farmPieChart.setTitle("Anbau");
+    // farmPieChart.setLegendSide(Side.RIGHT);
+    // if (!farmViewTopHBox.getChildren().contains(farmPieChart)) {
+    // farmViewTopHBox.getChildren().addAll(farmPieChart);
+    // }
 
     // for (GeoPolygon polygon : polygons) {
     // labelText = "";
@@ -169,33 +169,10 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   }
 
   private void drawCanvas() {
-    System.out.println("drawCanvas()");
-
-    width = 900;
-    height = 300;
-    canvas.setWidth(width);
-    canvas.setHeight(height);
-    
-    GeoPolygon[] polygons = extractPolygons(farmsArray);
-    System.out.println(polygons.length);
-    GraphicsContext gc = canvas.getGraphicsContext2D();
-    System.out.println(gc.getCanvas().getId());
-    setTransformation(gc, width, height, polygons);
-    drawShapes(gc, polygons);
-
-    System.out.println(canvas.getWidth() + " & " + canvas.getHeight());
-
-    canvasImage = pixelScaleAwareCanvasSnapshot(canvas, 1.0);
-
     farmImageView.setImage(canvasImage);
-
-    farmVBox.setAlignment(Pos.CENTER);
-
-    farmImageView.setPreserveRatio(false);
+    farmImageView.setPreserveRatio(true);
     farmImageView.setFitWidth(width);
     farmImageView.setFitHeight(height);
-    height = (int) canvasImage.getHeight();
-    width = (int) canvasImage.getWidth();
 
     zoom = new HBox(10);
     zoom.setAlignment(Pos.CENTER);
@@ -203,34 +180,20 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     zoomLvl = new Slider();
     zoomLvl.setMax(4);
     zoomLvl.setMin(1);
-    zoomLvl.setMaxWidth(200);
-    zoomLvl.setMinWidth(200);
+    zoomLvl.setMaxWidth(400);
+    zoomLvl.setMinWidth(400);
     Label hint = new Label("Zoom Level");
     Label value = new Label("1.0");
-
-    offSetX = width / 2;
-    offSetY = height / 2;
 
     zoom.getChildren().addAll(hint, zoomLvl, value);
 
     horScroll = new Slider();
     horScroll.setMin(0);
     horScroll.setMax(width);
-    horScroll.setMaxWidth(farmImageView.getFitWidth());
-    horScroll.setMinWidth(farmImageView.getFitWidth());
-    horScroll.setTranslateY(-20);
-
     verScroll = new Slider();
     verScroll.setMin(0);
     verScroll.setMax(height);
-    verScroll.setMaxHeight(farmImageView.getFitHeight());
-    verScroll.setMinHeight(farmImageView.getFitHeight());
-    verScroll.setOrientation(Orientation.VERTICAL);
-    verScroll.setTranslateX(-20);
 
-
-    BorderPane.setAlignment(horScroll, Pos.CENTER);
-    BorderPane.setAlignment(verScroll, Pos.CENTER_LEFT);
     horScroll.valueProperty().addListener(e -> {
       offSetX = horScroll.getValue();
       zoomlvl = zoomLvl.getValue();
@@ -263,8 +226,8 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     });
 
     imageView.setCenter(farmImageView);
-    imageView.setTop(horScroll);
-    imageView.setRight(verScroll);
+    imageView.setBottom(zoom);
+
     zoomLvl.valueProperty().addListener(e -> {
       zoomlvl = zoomLvl.getValue();
       double newValue = (double) ((int) (zoomlvl * 10)) / 10;
@@ -310,12 +273,6 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
         zoomLvl.setValue(zoomValue -= 0.1);
       }
     });
-
-    Label title = new Label("ZOOM! [Label kann weg, oder sinnvoll genutzt werden.]");
-
-    if (farmVBox.getChildren().isEmpty()) {
-      farmVBox.getChildren().addAll(title, imageView, zoom);
-    }
   }
 
   /**
@@ -421,15 +378,27 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
 
   @Override
   public void handle(FarmDataChanged event) {
-    System.out.println("handle()");
-
     List<Farm> farms = event.getFarms();
-    System.out.println(farms.size());
     farmsArray = new Drawable[farms.size()];
     int i = 0;
     for (Farm farm : farms) {
       farmsArray[i++] = farm;
     }
-    drawCanvas();
+
+    farmImageView.setFitWidth(1200);
+    farmImageView.setFitHeight(800);
+
+    width = (int) (farmImageView.getFitWidth() * 0.75);
+    height = (int) (farmImageView.getFitHeight() * 0.75);
+
+    canvas.setWidth(width);
+    canvas.setHeight(height);
+
+    GeoPolygon[] polygons = extractPolygons(farmsArray);
+    GraphicsContext gc = canvas.getGraphicsContext2D();
+    setTransformation(gc, width, height, polygons);
+    drawShapes(gc, polygons);
+
+    canvasImage = pixelScaleAwareCanvasSnapshot(canvas, 1.0);
   }
 }
