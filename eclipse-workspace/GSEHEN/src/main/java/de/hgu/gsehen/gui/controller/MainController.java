@@ -3,6 +3,7 @@ package de.hgu.gsehen.gui.controller;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
+import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.PolygonData;
 import de.hgu.gsehen.model.Drawable;
@@ -15,7 +16,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.geometry.Side;
@@ -106,6 +106,9 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   private ImageView farmImageView = new ImageView();
   private WritableImage canvasImage;
   private Drawable[] farmsArray;
+  private GeoPolygon[] polygons;
+  private List<Farm> farms;
+  private String labelText;
   private HBox zoom;
   private Slider zoomLvl;
   private Slider horScroll;
@@ -144,35 +147,38 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     stage.show();
   }
 
-  // TODO Mit den neuen Daten (18.04.) experimentieren.
   @FXML
   private void enterFarmView() {
     farmViewBorderPane.setCenter(imageView);
     drawCanvas();
 
-    // farmPieChart = pieChart;
-    // farmPieChart.setTitle("Anbau");
-    // farmPieChart.setLegendSide(Side.RIGHT);
-    // if (!farmViewTopHBox.getChildren().contains(farmPieChart)) {
-    // farmViewTopHBox.getChildren().addAll(farmPieChart);
-    // }
+    farmPieChart = pieChart;
+    farmPieChart.setTitle("Anbau");
+    farmPieChart.setLegendSide(Side.RIGHT);
+    if (!farmViewTopHBox.getChildren().contains(farmPieChart)) {
+      farmViewTopHBox.getChildren().addAll(farmPieChart);
+    }
 
-    // for (GeoPolygon polygon : polygons) {
-    // labelText = "";
-    // for (GeoPoint geoPoint : polygon.getGeoPoints()) {
-    // labelText += "GeoPoint Lat: " + geoPoint.getLat() + "; GeoPoint Lng: " + geoPoint.getLng()
-    // + "\n" + "\n";
-    // }
-    // farmLabel.setText(labelText);
-    // }
-    // farmLabel.setWrapText(true);
+    if (polygons != null) {
+      for (GeoPolygon polygon : polygons) {
+        for (Farm farm : farms) {
+          labelText = farm.getClass().getSimpleName() + ": '" + farm.getName() + "' \n" + "\n";
+        }
+        for (GeoPoint geoPoint : polygon.getGeoPoints()) {
+          labelText += "GeoPoint Lat: " + geoPoint.getLat() + "; GeoPoint Lng: " + geoPoint.getLng()
+              + "\n" + "\n";
+        }
+        farmLabel.setText(labelText);
+      }
+      farmLabel.setWrapText(true);
+    }
   }
 
   private void drawCanvas() {
     farmImageView.setImage(canvasImage);
-    farmImageView.setPreserveRatio(true);
-    farmImageView.setFitWidth(width);
-    farmImageView.setFitHeight(height);
+    // farmImageView.setPreserveRatio(true);
+    // farmImageView.setFitWidth(width);
+    // farmImageView.setFitHeight(height);
 
     zoom = new HBox(10);
     zoom.setAlignment(Pos.CENTER);
@@ -378,23 +384,24 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
 
   @Override
   public void handle(FarmDataChanged event) {
-    List<Farm> farms = event.getFarms();
+    farms = event.getFarms();
     farmsArray = new Drawable[farms.size()];
     int i = 0;
     for (Farm farm : farms) {
       farmsArray[i++] = farm;
     }
 
-    farmImageView.setFitWidth(1200);
-    farmImageView.setFitHeight(800);
+    farmImageView.setFitWidth(950);
+    farmImageView.setFitHeight(400);
+    farmImageView.setPreserveRatio(true);
 
-    width = (int) (farmImageView.getFitWidth() * 0.75);
-    height = (int) (farmImageView.getFitHeight() * 0.75);
+    width = (int) (farmImageView.getFitWidth());
+    height = (int) (farmImageView.getFitHeight());
 
     canvas.setWidth(width);
     canvas.setHeight(height);
 
-    GeoPolygon[] polygons = extractPolygons(farmsArray);
+    polygons = extractPolygons(farmsArray);
     GraphicsContext gc = canvas.getGraphicsContext2D();
     setTransformation(gc, width, height, polygons);
     drawShapes(gc, polygons);
