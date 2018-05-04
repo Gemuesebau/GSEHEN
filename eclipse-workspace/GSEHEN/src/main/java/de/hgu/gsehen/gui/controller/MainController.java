@@ -9,7 +9,6 @@ import de.hgu.gsehen.gui.PolygonData;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -310,24 +309,22 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   }
 
   public void redraw() {
-    canvas.autosize();
-    
     width = (int) (imageBorderPane.getPrefWidth());
     height = (int) (imageBorderPane.getPrefHeight());
 
     System.out.println(width);
     System.out.println(height);
 
-    farmImageView.prefWidth(width);
-    farmImageView.prefHeight(height);
-    
+    farmImageView.setFitWidth(width);
+    farmImageView.setFitHeight(height);
+
     canvas.setWidth(width);
     canvas.setHeight(height);
 
-    polygons = extractPolygons(farmsArray);
-    GraphicsContext gc = canvas.getGraphicsContext2D();
-    setTransformation(gc, width, height, polygons);
-    drawShapes(gc, polygons);
+    // polygons = extractPolygons(farmsArray);
+    // GraphicsContext gc = canvas.getGraphicsContext2D();
+    // setTransformation(gc, width, height, polygons);
+    // drawShapes(gc, polygons);
 
     canvasImage = pixelScaleAwareCanvasSnapshot(canvas, 1.0);
     drawCanvas();
@@ -436,6 +433,7 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
 
   @Override
   public void handle(FarmDataChanged event) {
+    System.out.println("handle()");
     farms = event.getFarms();
     farmsArray = new Drawable[farms.size()];
     int i = 0;
@@ -443,16 +441,15 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
       farmsArray[i++] = farm;
     }
 
+    farmImageView.setFitWidth(950);
+    farmImageView.setFitHeight(400);
     farmImageView.setPreserveRatio(true);
 
-    width = (950);
-    height = (400);
+    width = (int) (farmImageView.getFitWidth());
+    height = (int) (farmImageView.getFitHeight());
 
     canvas.setWidth(width);
     canvas.setHeight(height);
-
-    farmImageView.setFitWidth(canvas.getWidth());
-    farmImageView.setFitHeight(canvas.getHeight());
 
     polygons = extractPolygons(farmsArray);
     GraphicsContext gc = canvas.getGraphicsContext2D();
