@@ -32,12 +32,14 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Transform;
@@ -102,9 +104,10 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
           new PieChart.Data("frei", 22), new PieChart.Data("Mais", 30));
   private PieChart pieChart = new PieChart(pieChartData);
   // private String labelText;
-  private BorderPane imageView = new BorderPane();
+  private BorderPane imageBorderPane = new BorderPane();
   private ImageView farmImageView = new ImageView();
   private WritableImage canvasImage;
+  private WritableImage image;
   private Drawable[] farmsArray;
   private GeoPolygon[] polygons;
   private List<Farm> farms;
@@ -149,7 +152,10 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
 
   @FXML
   private void enterFarmView() {
-    farmViewBorderPane.setCenter(imageView);
+    farmViewBorderPane.setCenter(imageBorderPane);
+    farmViewBorderPane.widthProperty().addListener(observable -> redraw());
+    farmViewBorderPane.heightProperty().addListener(observable -> redraw());
+
     drawCanvas();
 
     farmPieChart = pieChart;
@@ -176,9 +182,26 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
 
   private void drawCanvas() {
     farmImageView.setImage(canvasImage);
-    // farmImageView.setPreserveRatio(true);
-    // farmImageView.setFitWidth(width);
-    // farmImageView.setFitHeight(height);
+
+    // set a clip to apply rounded border to the original image.
+    Rectangle clip = new Rectangle(farmImageView.getFitWidth(), farmImageView.getFitHeight());
+    clip.setArcWidth(10);
+    clip.setArcHeight(10);
+    farmImageView.setClip(clip);
+
+    // snapshot the rounded image.
+    SnapshotParameters parameters = new SnapshotParameters();
+    parameters.setFill(Color.TRANSPARENT);
+    image = farmImageView.snapshot(parameters, null);
+
+    // remove the rounding clip so that our effect can show through.
+    farmImageView.setClip(null);
+
+    // apply a shadow effect.
+    farmImageView.setEffect(new DropShadow(20, Color.BLACK));
+
+    // store the rounded image in the imageView.
+    farmImageView.setImage(image);
 
     zoom = new HBox(10);
     zoom.setAlignment(Pos.CENTER);
@@ -231,8 +254,10 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
           offSetY - ((height / newValue) / 2), width / newValue, height / newValue));
     });
 
-    imageView.setCenter(farmImageView);
-    imageView.setBottom(zoom);
+    imageBorderPane.prefWidthProperty().bind(farmLabel.getScene().widthProperty().divide(2));
+    imageBorderPane.prefHeightProperty().bind(farmLabel.getScene().heightProperty().divide(2));
+    imageBorderPane.setCenter(farmImageView);
+    imageBorderPane.setBottom(zoom);
 
     zoomLvl.valueProperty().addListener(e -> {
       zoomlvl = zoomLvl.getValue();
@@ -255,14 +280,14 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
       farmImageView.setViewport(new Rectangle2D(offSetX - ((width / newValue) / 2),
           offSetY - ((height / newValue) / 2), width / newValue, height / newValue));
     });
-    imageView.setCursor(Cursor.OPEN_HAND);
+    imageBorderPane.setCursor(Cursor.OPEN_HAND);
     farmImageView.setOnMousePressed(e -> {
       initx = e.getSceneX();
       inity = e.getSceneY();
-      imageView.setCursor(Cursor.CLOSED_HAND);
+      imageBorderPane.setCursor(Cursor.CLOSED_HAND);
     });
     farmImageView.setOnMouseReleased(e -> {
-      imageView.setCursor(Cursor.OPEN_HAND);
+      imageBorderPane.setCursor(Cursor.OPEN_HAND);
     });
     farmImageView.setOnMouseDragged(e -> {
       horScroll.setValue(horScroll.getValue() + (initx - e.getSceneX()));
@@ -279,6 +304,30 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
         zoomLvl.setValue(zoomValue -= 0.1);
       }
     });
+  }
+
+  public void redraw() {
+    canvas.autosize();
+    
+    width = (int) (imageBorderPane.getPrefWidth());
+    height = (int) (imageBorderPane.getPrefHeight());
+
+    System.out.println(width);
+    System.out.println(height);
+
+    farmImageView.prefWidth(width);
+    farmImageView.prefHeight(height);
+    
+    canvas.setWidth(width);
+    canvas.setHeight(height);
+
+    polygons = extractPolygons(farmsArray);
+    GraphicsContext gc = canvas.getGraphicsContext2D();
+    setTransformation(gc, width, height, polygons);
+    drawShapes(gc, polygons);
+
+    canvasImage = pixelScaleAwareCanvasSnapshot(canvas, 1.0);
+    drawCanvas();
   }
 
   /**
@@ -391,15 +440,16 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
       farmsArray[i++] = farm;
     }
 
-    farmImageView.setFitWidth(950);
-    farmImageView.setFitHeight(400);
     farmImageView.setPreserveRatio(true);
 
-    width = (int) (farmImageView.getFitWidth());
-    height = (int) (farmImageView.getFitHeight());
+    width = (950);
+    height = (400);
 
     canvas.setWidth(width);
     canvas.setHeight(height);
+
+    farmImageView.setFitWidth(canvas.getWidth());
+    farmImageView.setFitHeight(canvas.getHeight());
 
     polygons = extractPolygons(farmsArray);
     GraphicsContext gc = canvas.getGraphicsContext2D();
