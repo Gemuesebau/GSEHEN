@@ -1,4 +1,4 @@
-var userDataFileName = java.lang.System.getProperty("user.home") + "\\Desktop\\gsehen-data.json";
+eval(instance.getUtf8ResourceAsOneString("/de/hgu/gsehen/js/utilities.js"));
 var jsonData = JSON.parse(instance.readUTF8FileAsString(userDataFileName));
 
 var Farm = Java.type("de.hgu.gsehen.model.Farm");
@@ -10,7 +10,7 @@ var ArrayList = Java.type("java.util.ArrayList");
 function buildJavaPolygon(jsonPolygon, logIndent) {
 	var javaPolygon = new GeoPolygon();
 	for each(var polygonPoint in jsonPolygon) {
-		javaPolygon.addGeoPointByCoords(polygonPoint.lng, polygonPoint.lat);
+		javaPolygon.addGeoPointByCoords(polygonPoint.lat, polygonPoint.lng);
 		LOGGER.info(logIndent + "added polygon point " + polygonPoint.lng + ", " + polygonPoint.lat);
 	}
 	return javaPolygon;

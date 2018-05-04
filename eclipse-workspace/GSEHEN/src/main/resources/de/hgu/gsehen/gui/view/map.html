@@ -47,7 +47,7 @@ function captureDrawing() {
 	  var javaPolygon = gsehenGuiViewMap.getEmptyPolygon();
 	  var polygonLatLngArray = polygon.overlay.getPath().getArray();
 	  for (var i=0; i<polygonLatLngArray.length; i++) {
-	    javaPolygon.addGeoPointByCoords(polygonLatLngArray[i].lng(), polygonLatLngArray[i].lat());
+	    javaPolygon.addGeoPointByCoords(polygonLatLngArray[i].lat(), polygonLatLngArray[i].lng());
 	  }
       gsehenGuiViewMap.polygonDrawn(javaPolygon);
     }

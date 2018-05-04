@@ -13,7 +13,7 @@ import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.NamedPolygonHolder;
 import de.hgu.gsehen.model.Plot;
-
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -200,8 +201,7 @@ public class Gsehen extends Application {
       engine.put("instance", this);
       engine.put("LOGGER", LOGGER);
       engine.put("farms", farms);
-      engine.eval(new InputStreamReader(
-          this.getClass().getResourceAsStream(LOAD_USER_DATA_JS), "utf-8"));
+      engine.eval(getReaderForUtf8(LOAD_USER_DATA_JS));
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Can't evaluate " + LOAD_USER_DATA_JS, e);
     }
@@ -216,10 +216,27 @@ public class Gsehen extends Application {
       engine.put("instance", this);
       engine.put("LOGGER", LOGGER);
       engine.put("farms", farms);
-      engine.eval(new InputStreamReader(
-          this.getClass().getResourceAsStream(SAVE_USER_DATA_JS), "utf-8"));
+      engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Can't evaluate " + SAVE_USER_DATA_JS, e);
+    }
+  }
+
+  public InputStreamReader getReaderForUtf8(String resourceName) throws IOException {
+    return new InputStreamReader(
+        this.getClass().getResourceAsStream(resourceName), "utf-8");
+  }
+
+  /**
+   * Reads the contents of a given utf-8-encoded resource as one String.
+   *
+   * @param resourceName the name of the resource to read
+   * @return a String containing the given resource's contents
+   * @throws IOException if the resource can't be read (as utf-8)
+   */
+  public String getUtf8ResourceAsOneString(String resourceName) throws IOException {
+    try (BufferedReader buffer = new BufferedReader(getReaderForUtf8(resourceName))) {
+      return buffer.lines().collect(Collectors.joining("\n"));
     }
   }
 
@@ -263,7 +280,12 @@ public class Gsehen extends Application {
   }
 
   @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
-  public String readUTF8FileAsString(String userDataFileName) throws IOException {
-    return new String(Files.readAllBytes(Paths.get(userDataFileName)), "utf-8");
+  public String readUTF8FileAsString(String dataFileName) throws IOException {
+    return new String(Files.readAllBytes(Paths.get(dataFileName)), "utf-8");
+  }
+
+  @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
+  public void writeStringAsUTF8File(String data, String dataFileName) throws IOException {
+    Files.write(Paths.get(dataFileName), data.getBytes("utf-8"));
   }
 }
