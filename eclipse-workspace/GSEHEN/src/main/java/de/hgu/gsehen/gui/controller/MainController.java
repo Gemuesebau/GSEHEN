@@ -9,6 +9,7 @@ import de.hgu.gsehen.gui.PolygonData;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -50,8 +51,10 @@ import javafx.stage.Stage;
  */
 @SuppressWarnings({"checkstyle:commentsindentation"})
 public class MainController implements GsehenEventListener<FarmDataChanged> {
+  private Gsehen gsehenInstance;
+
   {
-    Gsehen gsehenInstance = Gsehen.getInstance();
+    gsehenInstance = Gsehen.getInstance();
     // gsehenInstance.setMainController(this);
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
   }
@@ -407,5 +410,19 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     drawShapes(gc, polygons);
 
     canvasImage = pixelScaleAwareCanvasSnapshot(canvas, 1.0);
+  }
+
+  /**
+   * Loads the user-created data (farms, fields, plots, ..)
+   */
+  public void loadUserData() {
+    gsehenInstance.loadUserData();
+  }
+
+  /**
+   * Saves the user-created data (farms, fields, plots, ..)
+   */
+  public void saveUserData() {
+    gsehenInstance.saveUserData();
   }
 }

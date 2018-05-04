@@ -21,8 +21,8 @@
               <menus>
                 <Menu mnemonicParsing="false" text="Datei">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Zurücksetzen" />
-                        <MenuItem mnemonicParsing="false" text="Sichern" />
+                    <MenuItem mnemonicParsing="false" text="Zurücksetzen" onAction="#loadUserData" />
+                        <MenuItem mnemonicParsing="false" text="Sichern" onAction="#saveUserData" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Ansicht">

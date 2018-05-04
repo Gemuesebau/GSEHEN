@@ -4,6 +4,7 @@ import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
 import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
 import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
+
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
@@ -12,7 +13,11 @@ import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.NamedPolygonHolder;
 import de.hgu.gsehen.model.Plot;
+
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -21,9 +26,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import com.sun.javafx.property.adapter.PropertyDescriptor.Listener;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -32,6 +37,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
 /**
  * The GSEHEN main application.
@@ -51,6 +58,8 @@ public class Gsehen extends Application {
   private static final String WEB_VIEW_ID = "#webView";
 
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+  private static final String LOAD_USER_DATA_JS = "/de/hgu/gsehen/js/loadUserData.js";
+  private static final String SAVE_USER_DATA_JS = "/de/hgu/gsehen/js/saveUserData.js";
   private static Map map;
   private static Gsehen instance;
   //private MainController mainController;
@@ -59,11 +68,11 @@ public class Gsehen extends Application {
         List<GsehenEventListener<?>>> eventListeners =
       new HashMap<>();
 
-  // TODO aus persistenten Daten laden; Programmstart und Menü
   private List<Farm> farms = new ArrayList<>();
 
   {
     instance = this;
+    loadUserData();
   }
 
   /**
@@ -182,13 +191,45 @@ public class Gsehen extends Application {
 //    this.mainController = mainController;
 //  }
 
+  /**
+   * Loads the user-created data (farms, fields, plots, ..)
+   */
+  public void loadUserData() {
+    ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+    try {
+      engine.put("instance", this);
+      engine.put("LOGGER", LOGGER);
+      engine.put("farms", farms);
+      engine.eval(new InputStreamReader(
+          this.getClass().getResourceAsStream(LOAD_USER_DATA_JS), "utf-8"));
+    } catch (Exception e) {
+      LOGGER.log(Level.SEVERE, "Can't evaluate " + LOAD_USER_DATA_JS, e);
+    }
+  }
+
+  /**
+   * Saves the user-created data (farms, fields, plots, ..)
+   */
+  public void saveUserData() {
+    ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+    try {
+      engine.put("instance", this);
+      engine.put("LOGGER", LOGGER);
+      engine.put("farms", farms);
+      engine.eval(new InputStreamReader(
+          this.getClass().getResourceAsStream(SAVE_USER_DATA_JS), "utf-8"));
+    } catch (Exception e) {
+      LOGGER.log(Level.SEVERE, "Can't evaluate " + SAVE_USER_DATA_JS, e);
+    }
+  }
+
   public void registerForEvent(Class<? extends GsehenEvent> eventClass,
       GsehenEventListener<?> eventListener) {
     addToMappedList(eventListeners, eventClass, eventListener);
   }
 
   // FIXME Unterobjekte müssen bereits ein Parent haben ODER in "unzugeordnet" o.ä. liegen
-  @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly", "unchecked"})
+  @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
   public void objectAdded(NamedPolygonHolder object) {
     if (object instanceof Farm) {
       farms.add((Farm)object);
@@ -206,10 +247,23 @@ public class Gsehen extends Application {
         }
       }
     }
-    eventListeners.get(FarmDataChanged.class).forEach(listener -> {
-      FarmDataChanged farmDataChanged = new FarmDataChanged();
-      farmDataChanged.setFarms(farms);
-      ((GsehenEventListener<FarmDataChanged>)listener).handle(farmDataChanged);
-    });
+    notifyEventListeners();
+  }
+
+  @SuppressWarnings({"checkstyle:javadocmethod", "unchecked"})
+  public void notifyEventListeners() {
+    List<GsehenEventListener<?>> farmDataChgListeners = eventListeners.get(FarmDataChanged.class);
+    if (farmDataChgListeners != null) {
+      farmDataChgListeners.forEach(listener -> {
+        FarmDataChanged farmDataChanged = new FarmDataChanged();
+        farmDataChanged.setFarms(farms);
+        ((GsehenEventListener<FarmDataChanged>)listener).handle(farmDataChanged);
+      });
+    }
+  }
+
+  @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
+  public String readUTF8FileAsString(String userDataFileName) throws IOException {
+    return new String(Files.readAllBytes(Paths.get(userDataFileName)), "utf-8");
   }
 }
