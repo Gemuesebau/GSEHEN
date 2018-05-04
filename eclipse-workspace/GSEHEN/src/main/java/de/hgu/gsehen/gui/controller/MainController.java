@@ -33,7 +33,6 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
@@ -99,15 +98,13 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   private MenuItem aboutUsMenuItem;
 
   private Canvas canvas = new Canvas();
-  // private GeoPolygon[] polygons = extractPolygons(buildFarm());
-  // TODO Ist das sinnvoll, oder wird's dadurch zu voll?
   private ObservableList<PieChart.Data> pieChartData =
       FXCollections.observableArrayList(new PieChart.Data("Bananen", 13),
           new PieChart.Data("Weizen", 25), new PieChart.Data("Kartoffeln", 10),
           new PieChart.Data("frei", 22), new PieChart.Data("Mais", 30));
   private PieChart pieChart = new PieChart(pieChartData);
-  // private String labelText;
   private BorderPane imageBorderPane = new BorderPane();
+  // TODO: Statt ImageView Pane testen, um das Bild zu zentrieren!
   private ImageView farmImageView = new ImageView();
   private WritableImage canvasImage;
   private WritableImage image;
