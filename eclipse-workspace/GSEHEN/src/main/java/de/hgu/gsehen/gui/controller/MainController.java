@@ -33,14 +33,12 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Transform;
@@ -104,10 +102,8 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
           new PieChart.Data("frei", 22), new PieChart.Data("Mais", 30));
   private PieChart pieChart = new PieChart(pieChartData);
   private BorderPane imageBorderPane = new BorderPane();
-  // TODO: Statt ImageView Pane testen, um das Bild zu zentrieren!
   private ImageView farmImageView = new ImageView();
   private WritableImage canvasImage;
-  private WritableImage image;
   private Drawable[] farmsArray;
   private GeoPolygon[] polygons;
   private List<Farm> farms;
@@ -297,6 +293,7 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
 
     gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
     setTransformation(gc, width, height, polygons);
+    LOGGER.log(Level.CONFIG, "redraw(): calling 'drawShapes'");
     drawShapes(gc, polygons);
 
     farmImageView.setImage(canvasImage);
@@ -337,12 +334,12 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   private void drawShapes(GraphicsContext gc, GeoPolygon... polygons) {
     gc.setStroke(Color.WHITE);
     gc.setFill(Color.WHEAT);
+    LOGGER.log(Level.CONFIG, "Starting to draw polygons ...");
     for (GeoPolygon polygon : polygons) {
       PolygonData polygonData = polygon.getPolygonData();
       gc.fillPolygon(polygonData.getPointsX(), polygonData.getPointsY(),
           polygonData.getPointsCount());
       LOGGER.log(Level.CONFIG, "Polygon drawn: " + polygon.getGeoPoints());
-      // LOGGER.info("Polygon drawn: " + polygon.getGeoPoints());
     }
   }
 
@@ -428,6 +425,7 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     polygons = extractPolygons(farmsArray);
     gc = canvas.getGraphicsContext2D();
     setTransformation(gc, width, height, polygons);
+    LOGGER.log(Level.CONFIG, "handle(): calling 'drawShapes'");
     drawShapes(gc, polygons);
 
     canvasImage = pixelScaleAwareCanvasSnapshot(canvas, 1.0);
