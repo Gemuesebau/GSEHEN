@@ -319,6 +319,7 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
 
     gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
     setTransformation(gc, width, height, polygons);
+    LOGGER.log(Level.CONFIG, "redraw(): calling 'drawShapes'");
     drawShapes(gc, polygons);
 
     drawCanvas();
@@ -359,12 +360,12 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   private void drawShapes(GraphicsContext gc, GeoPolygon... polygons) {
     gc.setStroke(Color.WHITE);
     gc.setFill(Color.WHEAT);
+    LOGGER.log(Level.CONFIG, "Starting to draw polygons ...");
     for (GeoPolygon polygon : polygons) {
       PolygonData polygonData = polygon.getPolygonData();
       gc.fillPolygon(polygonData.getPointsX(), polygonData.getPointsY(),
           polygonData.getPointsCount());
       LOGGER.log(Level.CONFIG, "Polygon drawn: " + polygon.getGeoPoints());
-      //LOGGER.info("Polygon drawn: " + polygon.getGeoPoints());
     }
   }
 
@@ -450,6 +451,7 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     polygons = extractPolygons(farmsArray);
     gc = canvas.getGraphicsContext2D();
     setTransformation(gc, width, height, polygons);
+    LOGGER.log(Level.CONFIG, "handle(): calling 'drawShapes'");
     drawShapes(gc, polygons);
 
     canvasImage = pixelScaleAwareCanvasSnapshot(canvas, 1.0);
