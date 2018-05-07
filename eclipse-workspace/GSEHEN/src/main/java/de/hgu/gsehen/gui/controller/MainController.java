@@ -33,12 +33,14 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Transform;
@@ -102,8 +104,10 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
           new PieChart.Data("frei", 22), new PieChart.Data("Mais", 30));
   private PieChart pieChart = new PieChart(pieChartData);
   private BorderPane imageBorderPane = new BorderPane();
+  // TODO: Statt ImageView Pane testen, um das Bild zu zentrieren!
   private ImageView farmImageView = new ImageView();
   private WritableImage canvasImage;
+  private WritableImage image;
   private Drawable[] farmsArray;
   private GeoPolygon[] polygons;
   private List<Farm> farms;
@@ -308,8 +312,8 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
    */
   public static WritableImage pixelScaleAwareCanvasSnapshot(Canvas canvas, double pixelScale) {
     WritableImage writableImage =
-        new WritableImage((int) Math.rint((pixelScale * canvas.getWidth()) * 2),
-            (int) Math.rint((pixelScale * canvas.getHeight()) * 2));
+        new WritableImage((int) Math.rint((pixelScale * canvas.getWidth()) * 1.5),
+            (int) Math.rint((pixelScale * canvas.getHeight()) * 1.5));
     SnapshotParameters spa = new SnapshotParameters();
     spa.setTransform(Transform.scale(pixelScale, pixelScale));
     return canvas.snapshot(spa, writableImage);
@@ -340,6 +344,7 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
       gc.fillPolygon(polygonData.getPointsX(), polygonData.getPointsY(),
           polygonData.getPointsCount());
       LOGGER.log(Level.CONFIG, "Polygon drawn: " + polygon.getGeoPoints());
+      // LOGGER.info("Polygon drawn: " + polygon.getGeoPoints());
     }
   }
 
