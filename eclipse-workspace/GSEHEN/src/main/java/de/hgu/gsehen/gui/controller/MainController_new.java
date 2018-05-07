@@ -6,6 +6,7 @@ import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.PolygonData;
+import de.hgu.gsehen.gui.view.NodeGestures;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
@@ -15,35 +16,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.geometry.Side;
-import javafx.scene.Cursor;
 import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
+import javafx.scene.SceneAntialiasing;
+import javafx.scene.SubScene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
+import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
-import javafx.scene.transform.Transform;
+import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 
 /**
@@ -51,8 +54,8 @@ import javafx.stage.Stage;
  *
  * @author CWI
  */
-@SuppressWarnings({"checkstyle:commentsindentation"})
-public class MainController implements GsehenEventListener<FarmDataChanged> {
+@SuppressWarnings({"checkstyle:commentsindentation", "rawtypes"})
+public class MainController_new implements ChangeListener, GsehenEventListener<FarmDataChanged> {
   private Gsehen gsehenInstance;
 
   {
@@ -61,7 +64,7 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
   }
 
-  private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(MainController_new.class.getName());
 
   // Views
   @FXML
@@ -103,25 +106,16 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
           new PieChart.Data("Weizen", 25), new PieChart.Data("Kartoffeln", 10),
           new PieChart.Data("frei", 22), new PieChart.Data("Mais", 30));
   private PieChart pieChart = new PieChart(pieChartData);
-  private BorderPane imageBorderPane = new BorderPane();
-  private ImageView farmImageView = new ImageView();
-  private WritableImage canvasImage;
+  private Pane farmViewPane = new Pane();
+  private SubScene subScene;
+  private NodeGestures nodeGestures;
   private Drawable[] farmsArray;
   private Drawable[] flatDrawables;
   private List<Farm> farms;
   private GraphicsContext gc;
   private String labelText;
-  private HBox zoom;
-  private Slider zoomLvl;
-  private Slider horScroll;
-  private Slider verScroll;
   private static int height;
   private static int width;
-  private static double initx;
-  private static double inity;
-  private static double offSetX;
-  private static double offSetY;
-  private static double zoomlvl;
 
   // Hides the Accordion and the tabs in the TabPane.
   @FXML
@@ -149,15 +143,66 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     stage.show();
   }
 
+  @SuppressWarnings("unchecked")
   @FXML
   private void enterFarmView() {
-    farmViewBorderPane.setCenter(imageBorderPane);
-    farmViewBorderPane.widthProperty().addListener(observable -> redraw());
-    farmViewBorderPane.heightProperty().addListener(observable -> redraw());
+    farmViewPane = new Pane();
+    farmViewPane.setStyle("-fx-background-color: #394c77;"); // nur zur Übersicht.
 
-    if (canvasImage != null) {
-      farmImageView.setImage(canvasImage);
-    }
+    subScene = new SubScene(farmViewPane, 950, 400, true, SceneAntialiasing.BALANCED);
+    farmViewBorderPane.setCenter(subScene);
+    farmLabel.getScene().widthProperty().addListener(this);
+    farmLabel.getScene().heightProperty().addListener(this);
+
+    canvas.layoutXProperty()
+        .bind(farmViewPane.widthProperty().subtract(canvas.widthProperty()).divide(2));
+    canvas.layoutYProperty()
+        .bind(farmViewPane.heightProperty().subtract(canvas.heightProperty()).divide(2));
+
+    // create sample nodes which can be dragged
+    nodeGestures = new NodeGestures(canvas);
+    canvas.addEventFilter(MouseEvent.MOUSE_PRESSED, nodeGestures.getOnMousePressedEventHandler());
+    canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, nodeGestures.getOnMouseDraggedEventHandler());
+
+    farmViewPane.setOnScroll(e -> {
+      double zoomFactor = 1.3;
+      double deltaY = e.getDeltaY();
+
+      if (deltaY < 0) {
+        zoomFactor = 2.0 - zoomFactor;
+      }
+
+      Scale newScale = new Scale();
+      newScale.setPivotX(e.getX());
+      newScale.setPivotY(e.getY());
+      newScale.setX(canvas.getScaleX() * zoomFactor);
+      newScale.setY(canvas.getScaleY() * zoomFactor);
+
+      canvas.getTransforms().add(newScale);
+
+      e.consume();
+    });
+
+    // Create ContextMenu
+    ContextMenu contextMenu = new ContextMenu();
+    MenuItem item1 = new MenuItem("Reset");
+    item1.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        redraw();
+      }
+    });
+
+    // Add MenuItem to ContextMenu
+    contextMenu.getItems().addAll(item1);
+
+    // When user right-click on SubScene
+    farmViewPane.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
+      @Override
+      public void handle(ContextMenuEvent event) {
+        contextMenu.show(farmViewPane, event.getScreenX(), event.getScreenY());
+      }
+    });
 
     farmPieChart = pieChart;
     farmPieChart.setTitle("Anbau");
@@ -179,116 +224,11 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
       }
       farmLabel.setWrapText(true);
     }
-
-    zoom = new HBox(10);
-    zoom.setAlignment(Pos.CENTER);
-
-    zoomLvl = new Slider();
-    zoomLvl.setMax(4);
-    zoomLvl.setMin(1);
-    zoomLvl.setMaxWidth(400);
-    zoomLvl.setMinWidth(400);
-    Label hint = new Label("Zoom Level");
-    Label value = new Label("1.0");
-
-    zoom.getChildren().addAll(hint, zoomLvl, value);
-
-    horScroll = new Slider();
-    horScroll.setMin(0);
-    horScroll.setMax(width);
-    verScroll = new Slider();
-    verScroll.setMin(0);
-    verScroll.setMax(height);
-
-    horScroll.valueProperty().addListener(e -> {
-      offSetX = horScroll.getValue();
-      zoomlvl = zoomLvl.getValue();
-      double newValue = (double) ((int) (zoomlvl * 10)) / 10;
-      value.setText(newValue + "");
-      if (offSetX < (width / newValue) / 2) {
-        offSetX = (width / newValue) / 2;
-      }
-      if (offSetX > width - ((width / newValue) / 2)) {
-        offSetX = width - ((width / newValue) / 2);
-      }
-
-      farmImageView.setViewport(new Rectangle2D(offSetX - ((width / newValue) / 2),
-          offSetY - ((height / newValue) / 2), width / newValue, height / newValue));
-    });
-
-    verScroll.valueProperty().addListener(e -> {
-      offSetY = height - verScroll.getValue();
-      zoomlvl = zoomLvl.getValue();
-      double newValue = (double) ((int) (zoomlvl * 10)) / 10;
-      value.setText(newValue + "");
-      if (offSetY < (height / newValue) / 2) {
-        offSetY = (height / newValue) / 2;
-      }
-      if (offSetY > height - ((height / newValue) / 2)) {
-        offSetY = height - ((height / newValue) / 2);
-      }
-      farmImageView.setViewport(new Rectangle2D(offSetX - ((width / newValue) / 2),
-          offSetY - ((height / newValue) / 2), width / newValue, height / newValue));
-    });
-
-    imageBorderPane.prefWidthProperty().bind(farmLabel.getScene().widthProperty().divide(1.6));
-    imageBorderPane.prefHeightProperty().bind(farmLabel.getScene().heightProperty().divide(1.6));
-    imageBorderPane.setCenter(farmImageView);
-    imageBorderPane.setBottom(zoom);
-
-    zoomLvl.valueProperty().addListener(e -> {
-      zoomlvl = zoomLvl.getValue();
-      double newValue = (double) ((int) (zoomlvl * 10)) / 10;
-      value.setText(newValue + "");
-      if (offSetX < (width / newValue) / 2) {
-        offSetX = (width / newValue) / 2;
-      }
-      if (offSetX > width - ((width / newValue) / 2)) {
-        offSetX = width - ((width / newValue) / 2);
-      }
-      if (offSetY < (height / newValue) / 2) {
-        offSetY = (height / newValue) / 2;
-      }
-      if (offSetY > height - ((height / newValue) / 2)) {
-        offSetY = height - ((height / newValue) / 2);
-      }
-      horScroll.setValue(offSetX);
-      verScroll.setValue(height - offSetY);
-      farmImageView.setViewport(new Rectangle2D(offSetX - ((width / newValue) / 2),
-          offSetY - ((height / newValue) / 2), width / newValue, height / newValue));
-    });
-    imageBorderPane.setCursor(Cursor.OPEN_HAND);
-    farmImageView.setOnMousePressed(e -> {
-      initx = e.getSceneX();
-      inity = e.getSceneY();
-      imageBorderPane.setCursor(Cursor.CLOSED_HAND);
-    });
-    farmImageView.setOnMouseReleased(e -> {
-      imageBorderPane.setCursor(Cursor.OPEN_HAND);
-    });
-    farmImageView.setOnMouseDragged(e -> {
-      horScroll.setValue(horScroll.getValue() + (initx - e.getSceneX()));
-      verScroll.setValue(verScroll.getValue() - (inity - e.getSceneY()));
-      initx = e.getSceneX();
-      inity = e.getSceneY();
-    });
-    farmImageView.setOnScroll(e -> {
-      double zoomValue = zoomLvl.getValue();
-      double deltaY = e.getDeltaY();
-      if (deltaY > 0) {
-        zoomLvl.setValue(zoomValue += 0.1);
-      } else {
-        zoomLvl.setValue(zoomValue -= 0.1);
-      }
-    });
   }
 
   private void redraw() {
-    width = (int) (imageBorderPane.getPrefWidth());
-    height = (int) (imageBorderPane.getPrefHeight());
-
-    farmImageView.setFitWidth(width);
-    farmImageView.setFitHeight(height);
+    int width = (int) (farmViewPane.getWidth() * 0.75); // 75% from parent
+    int height = (int) (farmViewPane.getHeight() * 0.75); // 75% from parent
 
     canvas.setWidth(width);
     canvas.setHeight(height);
@@ -298,23 +238,7 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     LOGGER.log(Level.CONFIG, "redraw(): calling 'drawShapes'");
     drawShapes(gc, flatDrawables);
 
-    farmImageView.setImage(canvasImage);
-  }
-
-  /**
-   * Converts a canvas in a picture.
-   * 
-   * @param canvas - The Canvas.
-   * @param pixelScale == 1.0.
-   * @return - Picture of the canvas.
-   */
-  public static WritableImage pixelScaleAwareCanvasSnapshot(Canvas canvas, double pixelScale) {
-    WritableImage writableImage =
-        new WritableImage((int) Math.rint((pixelScale * canvas.getWidth()) * 1.5),
-            (int) Math.rint((pixelScale * canvas.getHeight()) * 1.5));
-    SnapshotParameters spa = new SnapshotParameters();
-    spa.setTransform(Transform.scale(pixelScale, pixelScale));
-    return canvas.snapshot(spa, writableImage);
+    farmViewPane.getChildren().add(canvas);
   }
 
   private Drawable[] extractPolygons(Drawable... drawables) {
@@ -423,12 +347,8 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
       farmsArray[i++] = farm;
     }
 
-    farmImageView.setFitWidth(950);
-    farmImageView.setFitHeight(400);
-    farmImageView.setPreserveRatio(true);
-
-    width = (int) (farmImageView.getFitWidth());
-    height = (int) (farmImageView.getFitHeight());
+    width = (int) (farmViewPane.getWidth() * 0.75); // 75% from parent
+    height = (int) (farmViewPane.getHeight() * 0.75); // 75% from parent
 
     canvas.setWidth(width);
     canvas.setHeight(height);
@@ -439,7 +359,7 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     LOGGER.log(Level.CONFIG, "handle(): calling 'drawShapes'");
     drawShapes(gc, flatDrawables);
 
-    canvasImage = pixelScaleAwareCanvasSnapshot(canvas, 1.0);
+    farmViewPane.getChildren().add(canvas);
   }
 
   /**
@@ -454,5 +374,18 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
    */
   public void saveUserData() {
     gsehenInstance.saveUserData();
+  }
+
+  @Override
+  public void changed(ObservableValue observable, Object arg1, Object arg2) {
+    double width = farmLabel.getScene().getWidth();
+    double height = farmLabel.getScene().getHeight();
+    if (observable.equals(farmLabel.getScene().widthProperty())) {
+      double scale = width / 1200;
+      subScene.setWidth(950 * scale);
+    } else if (observable.equals(farmLabel.getScene().heightProperty())) {
+      double scale = height / 800;
+      subScene.setHeight(400 * scale);
+    }
   }
 }
