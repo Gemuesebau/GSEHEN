@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class Field implements Drawable, DrawableParent, NamedPolygonHolder {
+public class Field implements Drawable, DrawableParent {
   private WeatherDataSource weatherDataSource;
   private SoilProfile soilProfile;
   private Double rootingZone;

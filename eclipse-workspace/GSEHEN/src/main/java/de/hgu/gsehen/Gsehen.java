@@ -9,9 +9,9 @@ import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.view.Map;
+import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
-import de.hgu.gsehen.model.NamedPolygonHolder;
 import de.hgu.gsehen.model.Plot;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -247,7 +247,7 @@ public class Gsehen extends Application {
 
   // FIXME Unterobjekte müssen bereits ein Parent haben ODER in "unzugeordnet" o.ä. liegen
   @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
-  public void objectAdded(NamedPolygonHolder object) {
+  public void objectAdded(Drawable object) {
     if (object instanceof Farm) {
       farms.add((Farm)object);
     }

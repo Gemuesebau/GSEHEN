@@ -2,9 +2,9 @@ package de.hgu.gsehen.gui.view;
 
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.gui.GeoPolygon;
+import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
-import de.hgu.gsehen.model.NamedPolygonHolder;
 import de.hgu.gsehen.model.Plot;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -91,8 +91,8 @@ public class Map {
       String name = dialog.getResult();
       try {
         if (name != null) {
-          NamedPolygonHolder object =
-              (NamedPolygonHolder)typesMap.get(dialogResult.getText()).newInstance();
+          Drawable object =
+              (Drawable)typesMap.get(dialogResult.getText()).newInstance();
           object.setNameAndPolygon(name, polygon);
           application.objectAdded(object);
         }

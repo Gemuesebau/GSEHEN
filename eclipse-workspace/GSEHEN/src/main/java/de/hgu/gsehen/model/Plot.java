@@ -4,7 +4,7 @@ import de.hgu.gsehen.gui.GeoPolygon;
 
 import java.util.Date;
 
-public class Plot implements Drawable, NamedPolygonHolder {
+public class Plot implements Drawable {
   private String name;
   private double area;
   private GeoPolygon polygon;

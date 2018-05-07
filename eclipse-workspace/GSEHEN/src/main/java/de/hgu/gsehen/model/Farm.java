@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class Farm implements Drawable, DrawableParent, NamedPolygonHolder {
+public class Farm implements Drawable, DrawableParent {
   private String name;
   private GeoPolygon polygon;
   private List<Field> fields;
