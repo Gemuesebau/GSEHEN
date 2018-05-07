@@ -13,11 +13,7 @@
 
   <target name="echo-os">
     <echo message="${os.name}" />
-<<<<<<< HEAD
     <echo message="${java.version}" />
-=======
-  	<echo message="${java.version}" />
->>>>>>> branch 'master' of git@github.com:Gemuesebau/GSEHEN.git
   </target>
 
   <target name="delete-entire-db-file">
