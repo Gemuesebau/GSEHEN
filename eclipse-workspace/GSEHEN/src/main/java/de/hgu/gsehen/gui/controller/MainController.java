@@ -285,30 +285,6 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     });
   }
 
-  private void drawCanvas() {
-    farmImageView.setImage(canvasImage);
-
-    // // set a clip to apply rounded border to the original image.
-    // Rectangle clip = new Rectangle(farmImageView.getFitWidth(), farmImageView.getFitHeight());
-    // clip.setArcWidth(20);
-    // clip.setArcHeight(20);
-    // farmImageView.setClip(clip);
-    //
-    // // snapshot the rounded image.
-    // SnapshotParameters parameters = new SnapshotParameters();
-    // parameters.setFill(Color.TRANSPARENT);
-    // image = farmImageView.snapshot(parameters, null);
-    //
-    // // remove the rounding clip so that our effect can show through.
-    // farmImageView.setClip(null);
-    //
-    // // apply a shadow effect.
-    // farmImageView.setEffect(new DropShadow(20, Color.BLACK));
-    //
-    // // store the rounded image in the imageView.
-    // farmImageView.setImage(image);
-  }
-
   private void redraw() {
     width = (int) (imageBorderPane.getPrefWidth());
     height = (int) (imageBorderPane.getPrefHeight());
@@ -323,7 +299,7 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     setTransformation(gc, width, height, polygons);
     drawShapes(gc, polygons);
 
-    drawCanvas();
+    farmImageView.setImage(canvasImage);
   }
 
   /**
@@ -366,7 +342,7 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
       gc.fillPolygon(polygonData.getPointsX(), polygonData.getPointsY(),
           polygonData.getPointsCount());
       LOGGER.log(Level.CONFIG, "Polygon drawn: " + polygon.getGeoPoints());
-      //LOGGER.info("Polygon drawn: " + polygon.getGeoPoints());
+      // LOGGER.info("Polygon drawn: " + polygon.getGeoPoints());
     }
   }
 
