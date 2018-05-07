@@ -9,6 +9,8 @@ import de.hgu.gsehen.gui.PolygonData;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
+import de.hgu.gsehen.model.Field;
+import de.hgu.gsehen.model.Plot;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -33,14 +35,12 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Transform;
@@ -107,9 +107,9 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   // TODO: Statt ImageView Pane testen, um das Bild zu zentrieren!
   private ImageView farmImageView = new ImageView();
   private WritableImage canvasImage;
-  private WritableImage image;
+  //private WritableImage image;
   private Drawable[] farmsArray;
-  private GeoPolygon[] polygons;
+  private Drawable[] flatDrawables;
   private List<Farm> farms;
   private GraphicsContext gc;
   private String labelText;
@@ -168,12 +168,12 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
       farmViewTopHBox.getChildren().addAll(farmPieChart);
     }
 
-    if (polygons != null) {
-      for (GeoPolygon polygon : polygons) {
+    if (flatDrawables != null) {
+      for (Drawable drawable : flatDrawables) {
         for (Farm farm : farms) {
           labelText = farm.getClass().getSimpleName() + ": '" + farm.getName() + "' \n" + "\n";
         }
-        for (GeoPoint geoPoint : polygon.getGeoPoints()) {
+        for (GeoPoint geoPoint : drawable.getPolygon().getGeoPoints()) {
           labelText += "GeoPoint Lat: " + geoPoint.getLat() + "; GeoPoint Lng: " + geoPoint.getLng()
               + "\n" + "\n";
         }
@@ -296,9 +296,9 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     canvas.setHeight(height);
 
     gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-    setTransformation(gc, width, height, polygons);
+    setTransformation(gc, width, height, flatDrawables);
     LOGGER.log(Level.CONFIG, "redraw(): calling 'drawShapes'");
-    drawShapes(gc, polygons);
+    drawShapes(gc, flatDrawables);
 
     farmImageView.setImage(canvasImage);
   }
@@ -319,15 +319,15 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     return canvas.snapshot(spa, writableImage);
   }
 
-  private GeoPolygon[] extractPolygons(Drawable... drawables) {
-    List<GeoPolygon> result = new ArrayList<>();
+  private Drawable[] extractPolygons(Drawable... drawables) {
+    List<Drawable> result = new ArrayList<>();
     extractPolygonsImpl(result, drawables);
-    return result.toArray(new GeoPolygon[0]);
+    return result.toArray(new Drawable[0]);
   }
 
-  private void extractPolygonsImpl(List<GeoPolygon> result, Drawable... drawables) {
+  private void extractPolygonsImpl(List<Drawable> result, Drawable... drawables) {
     for (Drawable drawable : drawables) {
-      result.add(drawable.getPolygon());
+      result.add(drawable);
       if (drawable instanceof DrawableParent) {
         ((DrawableParent) drawable)
             .forAllChildDrawables(drawableChild -> extractPolygonsImpl(result, drawableChild));
@@ -335,31 +335,39 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     }
   }
 
-  private void drawShapes(GraphicsContext gc, GeoPolygon... polygons) {
+  private void drawShapes(GraphicsContext gc, Drawable... drawables) {
     gc.setStroke(Color.WHITE);
-    gc.setFill(Color.WHEAT);
     LOGGER.log(Level.CONFIG, "Starting to draw polygons ...");
-    for (GeoPolygon polygon : polygons) {
-      PolygonData polygonData = polygon.getPolygonData();
+    for (Drawable drawable : drawables) {
+      if (drawable instanceof Farm) {
+        gc.setFill(Color.BLACK);
+      } else if (drawable instanceof Field) {
+        gc.setFill(Color.BLUE);
+      } else if (drawable instanceof Plot) {
+        gc.setFill(Color.ORANGE); // TODO depending on water balance!!
+      } else {
+        gc.setFill(Color.WHEAT);
+      }
+      PolygonData polygonData = drawable.getPolygon().getPolygonData();
       gc.fillPolygon(polygonData.getPointsX(), polygonData.getPointsY(),
           polygonData.getPointsCount());
-      LOGGER.log(Level.CONFIG, "Polygon drawn: " + polygon.getGeoPoints());
+      LOGGER.log(Level.CONFIG, "Polygon drawn: " + drawable.getPolygon().getGeoPoints());
       // LOGGER.info("Polygon drawn: " + polygon.getGeoPoints());
     }
   }
 
   private void setTransformation(GraphicsContext gc, int widthPx, int heightPx,
-      GeoPolygon... polygons) {
+      Drawable... polygons) {
     if (polygons == null || polygons.length == 0) {
       throw new IllegalArgumentException("at least one polygon must be given");
     }
-    GeoPolygon g = polygons[0];
+    GeoPolygon g = polygons[0].getPolygon();
     double minX = g.getMinX();
     double maxX = g.getMaxX();
     double minY = g.getMinY();
     double maxY = g.getMaxY();
     for (int i = 1; i < polygons.length; i++) {
-      g = polygons[i];
+      g = polygons[i].getPolygon();
       double compare = g.getMinX();
       if (compare < minX) {
         minX = compare;
@@ -427,11 +435,11 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     canvas.setWidth(width);
     canvas.setHeight(height);
 
-    polygons = extractPolygons(farmsArray);
+    flatDrawables = extractPolygons(farmsArray);
     gc = canvas.getGraphicsContext2D();
-    setTransformation(gc, width, height, polygons);
+    setTransformation(gc, width, height, flatDrawables);
     LOGGER.log(Level.CONFIG, "handle(): calling 'drawShapes'");
-    drawShapes(gc, polygons);
+    drawShapes(gc, flatDrawables);
 
     canvasImage = pixelScaleAwareCanvasSnapshot(canvas, 1.0);
   }
