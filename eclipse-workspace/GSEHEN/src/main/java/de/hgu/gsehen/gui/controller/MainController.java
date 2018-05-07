@@ -11,6 +11,7 @@ import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -60,7 +61,6 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
   }
 
-  @SuppressWarnings("unused")
   private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
 
   // Views
@@ -363,6 +363,8 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
       PolygonData polygonData = polygon.getPolygonData();
       gc.fillPolygon(polygonData.getPointsX(), polygonData.getPointsY(),
           polygonData.getPointsCount());
+      LOGGER.log(Level.CONFIG, "Polygon drawn: " + polygon.getGeoPoints());
+      //LOGGER.info("Polygon drawn: " + polygon.getGeoPoints());
     }
   }
 
