@@ -157,7 +157,9 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     farmViewBorderPane.widthProperty().addListener(observable -> redraw());
     farmViewBorderPane.heightProperty().addListener(observable -> redraw());
 
-    drawCanvas();
+    if (canvasImage != null) {
+      farmImageView.setImage(canvasImage);
+    }
 
     farmPieChart = pieChart;
     farmPieChart.setTitle("Anbau");
@@ -286,25 +288,25 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   private void drawCanvas() {
     farmImageView.setImage(canvasImage);
 
-    // set a clip to apply rounded border to the original image.
-    Rectangle clip = new Rectangle(farmImageView.getFitWidth(), farmImageView.getFitHeight());
-    clip.setArcWidth(20);
-    clip.setArcHeight(20);
-    farmImageView.setClip(clip);
-
-    // snapshot the rounded image.
-    SnapshotParameters parameters = new SnapshotParameters();
-    parameters.setFill(Color.TRANSPARENT);
-    image = farmImageView.snapshot(parameters, null);
-
-    // remove the rounding clip so that our effect can show through.
-    farmImageView.setClip(null);
-
-    // apply a shadow effect.
-    farmImageView.setEffect(new DropShadow(20, Color.BLACK));
-
-    // store the rounded image in the imageView.
-    farmImageView.setImage(image);
+    // // set a clip to apply rounded border to the original image.
+    // Rectangle clip = new Rectangle(farmImageView.getFitWidth(), farmImageView.getFitHeight());
+    // clip.setArcWidth(20);
+    // clip.setArcHeight(20);
+    // farmImageView.setClip(clip);
+    //
+    // // snapshot the rounded image.
+    // SnapshotParameters parameters = new SnapshotParameters();
+    // parameters.setFill(Color.TRANSPARENT);
+    // image = farmImageView.snapshot(parameters, null);
+    //
+    // // remove the rounding clip so that our effect can show through.
+    // farmImageView.setClip(null);
+    //
+    // // apply a shadow effect.
+    // farmImageView.setEffect(new DropShadow(20, Color.BLACK));
+    //
+    // // store the rounded image in the imageView.
+    // farmImageView.setImage(image);
   }
 
   private void redraw() {
@@ -333,8 +335,8 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
    */
   public static WritableImage pixelScaleAwareCanvasSnapshot(Canvas canvas, double pixelScale) {
     WritableImage writableImage =
-        new WritableImage((int) Math.rint((pixelScale * canvas.getWidth()) * 1.5),
-            (int) Math.rint((pixelScale * canvas.getHeight()) * 1.5));
+        new WritableImage((int) Math.rint((pixelScale * canvas.getWidth()) * 2),
+            (int) Math.rint((pixelScale * canvas.getHeight()) * 2));
     SnapshotParameters spa = new SnapshotParameters();
     spa.setTransform(Transform.scale(pixelScale, pixelScale));
     return canvas.snapshot(spa, writableImage);
