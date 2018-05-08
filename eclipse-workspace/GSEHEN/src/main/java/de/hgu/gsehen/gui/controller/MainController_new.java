@@ -23,10 +23,13 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.geometry.Side;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.SceneAntialiasing;
-import javafx.scene.SubScene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.PieChart;
@@ -35,6 +38,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.ContextMenuEvent;
@@ -42,11 +46,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
-import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 
 /**
@@ -107,7 +112,7 @@ public class MainController_new implements ChangeListener, GsehenEventListener<F
           new PieChart.Data("frei", 22), new PieChart.Data("Mais", 30));
   private PieChart pieChart = new PieChart(pieChartData);
   private Pane farmViewPane = new Pane();
-  private SubScene subScene;
+  // private SubScene subScene;
   private NodeGestures nodeGestures;
   private Drawable[] farmsArray;
   private Drawable[] flatDrawables;
@@ -143,16 +148,81 @@ public class MainController_new implements ChangeListener, GsehenEventListener<F
     stage.show();
   }
 
-  @SuppressWarnings("unchecked")
   @FXML
   private void enterFarmView() {
-    farmViewPane = new Pane();
-    farmViewPane.setStyle("-fx-background-color: #394c77;"); // nur zur Übersicht.
 
-    subScene = new SubScene(farmViewPane, 950, 400, true, SceneAntialiasing.BALANCED);
-    farmViewBorderPane.setCenter(subScene);
-    farmLabel.getScene().widthProperty().addListener(this);
-    farmLabel.getScene().heightProperty().addListener(this);
+    Region zoomTarget = createContent();
+    zoomTarget.setPrefSize(950, 400);
+    zoomTarget.setOnDragDetected(evt -> {
+      Node target = (Node) evt.getTarget();
+      while (target != zoomTarget && target != null) {
+        target = target.getParent();
+      }
+      if (target != null) {
+        target.startFullDrag();
+      }
+    });
+
+    Group group = new Group(zoomTarget);
+
+    // stackpane for centering the content, in case the ScrollPane viewport
+    // is larget than zoomTarget
+    StackPane content = new StackPane(group);
+    group.layoutBoundsProperty().addListener((observable, oldBounds, newBounds) -> {
+      // keep it at least as large as the content
+      content.setMinWidth(newBounds.getWidth());
+      content.setMinHeight(newBounds.getHeight());
+    });
+
+    ScrollPane scrollPane = new ScrollPane(content);
+    scrollPane.setPannable(true);
+    scrollPane.viewportBoundsProperty().addListener((observable, oldBounds, newBounds) -> {
+      // use vieport size, if not too small for zoomTarget
+      content.setPrefSize(newBounds.getWidth(), newBounds.getHeight());
+    });
+
+    content.setOnScroll(evt -> {
+      if (evt.isControlDown()) {
+        evt.consume();
+
+        final double zoomFactor = evt.getDeltaY() > 0 ? 1.2 : 1 / 1.2;
+
+        Bounds groupBounds = group.getLayoutBounds();
+        final Bounds viewportBounds = scrollPane.getViewportBounds();
+
+        // calculate pixel offsets from [0, 1] range
+        double valX = scrollPane.getHvalue() * (groupBounds.getWidth() - viewportBounds.getWidth());
+        double valY =
+            scrollPane.getVvalue() * (groupBounds.getHeight() - viewportBounds.getHeight());
+
+        // convert content coordinates to zoomTarget coordinates
+        Point2D posInZoomTarget =
+            zoomTarget.parentToLocal(group.parentToLocal(new Point2D(evt.getX(), evt.getY())));
+
+        // calculate adjustment of scroll position (pixels)
+        Point2D adjustment = zoomTarget.getLocalToParentTransform()
+            .deltaTransform(posInZoomTarget.multiply(zoomFactor - 1));
+
+        // do the resizing
+        zoomTarget.setScaleX(zoomFactor * zoomTarget.getScaleX());
+        zoomTarget.setScaleY(zoomFactor * zoomTarget.getScaleY());
+
+        // refresh ScrollPane scroll positions & content bounds
+        scrollPane.layout();
+
+        // convert back to [0, 1] range
+        // (too large/small values are automatically corrected by ScrollPane)
+        groupBounds = group.getLayoutBounds();
+        scrollPane.setHvalue(
+            (valX + adjustment.getX()) / (groupBounds.getWidth() - viewportBounds.getWidth()));
+        scrollPane.setVvalue(
+            (valY + adjustment.getY()) / (groupBounds.getHeight() - viewportBounds.getHeight()));
+      }
+    });
+
+    farmViewBorderPane.setCenter(scrollPane);
+
+    farmViewPane.getChildren().add(canvas);
 
     canvas.layoutXProperty()
         .bind(farmViewPane.widthProperty().subtract(canvas.widthProperty()).divide(2));
@@ -163,25 +233,6 @@ public class MainController_new implements ChangeListener, GsehenEventListener<F
     nodeGestures = new NodeGestures(canvas);
     canvas.addEventFilter(MouseEvent.MOUSE_PRESSED, nodeGestures.getOnMousePressedEventHandler());
     canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, nodeGestures.getOnMouseDraggedEventHandler());
-
-    farmViewPane.setOnScroll(e -> {
-      double zoomFactor = 1.3;
-      double deltaY = e.getDeltaY();
-
-      if (deltaY < 0) {
-        zoomFactor = 2.0 - zoomFactor;
-      }
-
-      Scale newScale = new Scale();
-      newScale.setPivotX(e.getX());
-      newScale.setPivotY(e.getY());
-      newScale.setX(canvas.getScaleX() * zoomFactor);
-      newScale.setY(canvas.getScaleY() * zoomFactor);
-
-      canvas.getTransforms().add(newScale);
-
-      e.consume();
-    });
 
     // Create ContextMenu
     ContextMenu contextMenu = new ContextMenu();
@@ -226,9 +277,31 @@ public class MainController_new implements ChangeListener, GsehenEventListener<F
     }
   }
 
+  private Region createContent() {
+    gc.beginPath();
+
+    for (int i1 = 50; i1 < width; i1 += 50) {
+      gc.moveTo(i1, 0);
+      gc.lineTo(i1, height);
+    }
+
+    for (int i2 = 50; i2 < height; i2 += 50) {
+      gc.moveTo(0, i2);
+      gc.lineTo(width, i2);
+    }
+    gc.stroke();
+
+    farmViewPane = new Pane();
+
+    StackPane result = new StackPane(canvas, farmViewPane);
+    result.setAlignment(Pos.TOP_LEFT);
+
+    return result;
+  }
+
   private void redraw() {
-    int width = (int) (farmViewPane.getWidth() * 0.75); // 75% from parent
-    int height = (int) (farmViewPane.getHeight() * 0.75); // 75% from parent
+    int width = (int) (farmViewPane.getWidth()); // 75% from parent
+    int height = (int) (farmViewPane.getHeight()); // 75% from parent
 
     canvas.setWidth(width);
     canvas.setHeight(height);
@@ -328,16 +401,6 @@ public class MainController_new implements ChangeListener, GsehenEventListener<F
     gc.setTransform(affineTransformation);
   }
 
-  // /**
-  // * Called by others to tell an instance of this class that a new object has been created.
-  // *
-  // * @param object the newly created object, e.g. a Farm, Field, or Plot
-  // */
-  // public void objectAdded(NamedPolygonHolder object) {
-  // LOGGER.info("Neues Objekt: " + object.getClass().getSimpleName() + " '" + object.getName()
-  // + "' mit Polygon " + object.getPolygon().getGeoPoints());
-  // }
-
   @Override
   public void handle(FarmDataChanged event) {
     farms = event.getFarms();
@@ -347,19 +410,18 @@ public class MainController_new implements ChangeListener, GsehenEventListener<F
       farmsArray[i++] = farm;
     }
 
-    width = (int) (farmViewPane.getWidth() * 0.75); // 75% from parent
-    height = (int) (farmViewPane.getHeight() * 0.75); // 75% from parent
+    width = (int) (farmViewPane.getWidth());
+    height = (int) (farmViewPane.getHeight());
 
     canvas.setWidth(width);
     canvas.setHeight(height);
 
     flatDrawables = extractPolygons(farmsArray);
     gc = canvas.getGraphicsContext2D();
+    gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
     setTransformation(gc, width, height, flatDrawables);
     LOGGER.log(Level.CONFIG, "handle(): calling 'drawShapes'");
     drawShapes(gc, flatDrawables);
-
-    farmViewPane.getChildren().add(canvas);
   }
 
   /**
@@ -382,10 +444,10 @@ public class MainController_new implements ChangeListener, GsehenEventListener<F
     double height = farmLabel.getScene().getHeight();
     if (observable.equals(farmLabel.getScene().widthProperty())) {
       double scale = width / 1200;
-      subScene.setWidth(950 * scale);
+      farmViewPane.setPrefWidth(950 * scale);
     } else if (observable.equals(farmLabel.getScene().heightProperty())) {
       double scale = height / 800;
-      subScene.setHeight(400 * scale);
+      farmViewPane.setPrefHeight(950 * scale);
     }
   }
 }
