@@ -8,11 +8,14 @@ import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
-import de.hgu.gsehen.gui.view.Map;
+import de.hgu.gsehen.gui.GeoPoint;
+import de.hgu.gsehen.gui.view.Farms;
+import de.hgu.gsehen.gui.view.Maps;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.util.Pair;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -26,6 +29,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -34,7 +40,6 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -48,6 +53,8 @@ import javax.script.ScriptEngineManager;
  */
 @SuppressWarnings({"checkstyle:commentsindentation"})
 public class Gsehen extends Application {
+  protected static final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
+      Locale.GERMAN);
 
   private static final String GSEHEN_H2_LOCAL_DB = "gsehen-h2-local.db";
   private static final String DAYDATA_TABLE = "DAYDATA";
@@ -56,20 +63,22 @@ public class Gsehen extends Application {
 
   public static final String DEBUG_TEXTAREA_ID = "#debugTA";
   public static final String TAB_PANE_ID = "#tabPane";
-  private static final String WEB_VIEW_ID = "#webView";
+  private static final String MAPS_WEB_VIEW_ID = "#mapsWebView";
+  private static final String FARMS_WEB_VIEW_ID = "#farmsWebView";
 
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private static final String LOAD_USER_DATA_JS = "/de/hgu/gsehen/js/loadUserData.js";
   private static final String SAVE_USER_DATA_JS = "/de/hgu/gsehen/js/saveUserData.js";
-  private static Map map;
-  private static Gsehen instance;
+  private static Maps maps;
+  private static Farms farms;
   //private MainController mainController;
+  private List<Farm> farmsList = new ArrayList<>();
 
   private java.util.Map<Class<? extends GsehenEvent>,
         List<GsehenEventListener<?>>> eventListeners =
       new HashMap<>();
 
-  private List<Farm> farms = new ArrayList<>();
+  private static Gsehen instance;
 
   {
     instance = this;
@@ -113,7 +122,7 @@ public class Gsehen extends Application {
   public void start(Stage stage) {
     Parent root;
     try {
-      root = FXMLLoader.load(getClass().getResource(MAIN_FXML));
+      root = FXMLLoader.load(getClass().getResource(MAIN_FXML), mainBundle);
     } catch (IOException e) {
       throw new RuntimeException(MAIN_FXML + " couldn't be loaded", e);
     }
@@ -124,19 +133,18 @@ public class Gsehen extends Application {
     stage.sizeToScene();
     stage.show();
 
-    map = new Map(this, (WebView)scene.lookup(WEB_VIEW_ID));
+    maps = new Maps(this, (WebView)scene.lookup(MAPS_WEB_VIEW_ID));
     //map.setMainController(mainController);
-    map.reload();
+    maps.reload();
 
-    TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
-    tabPane.getTabs().remove(4);
+    farms = new Farms(this, (WebView)scene.lookup(FARMS_WEB_VIEW_ID));
+    //farms.reload();
+
+    //TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
+    //tabPane.getTabs().remove(4);
 
     // TextArea debugTextArea = (TextArea) stage.getScene().lookup(DEBUG_TEXTAREA_ID);
     // testDatabase(debugTextArea);
-  }
-
-  public static Map getMap() {
-    return map;
   }
 
   @SuppressWarnings({"unused", "checkstyle:rightcurly"})
@@ -200,7 +208,7 @@ public class Gsehen extends Application {
     try {
       engine.put("instance", this);
       engine.put("LOGGER", LOGGER);
-      engine.put("farms", farms);
+      engine.put("farms", farmsList);
       engine.eval(getReaderForUtf8(LOAD_USER_DATA_JS));
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Can't evaluate " + LOAD_USER_DATA_JS, e);
@@ -215,7 +223,7 @@ public class Gsehen extends Application {
     try {
       engine.put("instance", this);
       engine.put("LOGGER", LOGGER);
-      engine.put("farms", farms);
+      engine.put("farms", farmsList);
       engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Can't evaluate " + SAVE_USER_DATA_JS, e);
@@ -245,36 +253,47 @@ public class Gsehen extends Application {
     addToMappedList(eventListeners, eventClass, eventListener);
   }
 
-  // FIXME Unterobjekte müssen bereits ein Parent haben ODER in "unzugeordnet" o.ä. liegen
   @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
   public void objectAdded(Drawable object) {
     if (object instanceof Farm) {
-      farms.add((Farm)object);
+      farmsList.add((Farm)object);
     }
     else if (object instanceof Field) {
-      if (!farms.isEmpty()) {
-        farms.get(0).getFields().add((Field)object);
+      if (!farmsList.isEmpty()) {
+        farmsList.get(0).getFields().add((Field)object);
       }
     }
     else if (object instanceof Plot) {
-      if (!farms.isEmpty()) {
-        List<Field> fields = farms.get(0).getFields();
+      if (!farmsList.isEmpty()) {
+        List<Field> fields = farmsList.get(0).getFields();
         if (!fields.isEmpty()) {
           fields.get(0).getPlots().add((Plot)object);
         }
       }
     }
-    notifyEventListeners();
+    sendFarmDataChanged(object);
+  }
+
+  private void sendFarmDataChanged(Drawable object) {
+    Pair<GeoPoint> pair = new Pair<>(
+        new GeoPoint(object.getPolygon().getMinY(), object.getPolygon().getMinX()),
+        new GeoPoint(object.getPolygon().getMaxY(), object.getPolygon().getMaxX())
+    );
+    notifyEventListeners(() -> {
+      FarmDataChanged event = new FarmDataChanged();
+      event.setFarms(farmsList);
+      event.setViewPort(pair);
+      return event;
+    });
   }
 
   @SuppressWarnings({"checkstyle:javadocmethod", "unchecked"})
-  public void notifyEventListeners() {
-    List<GsehenEventListener<?>> farmDataChgListeners = eventListeners.get(FarmDataChanged.class);
+  public <T extends GsehenEvent> void notifyEventListeners(Supplier<T> eventSupplier) {
+    T event = eventSupplier.get();
+    List<GsehenEventListener<?>> farmDataChgListeners = eventListeners.get(event.getClass());
     if (farmDataChgListeners != null) {
       farmDataChgListeners.forEach(listener -> {
-        FarmDataChanged farmDataChanged = new FarmDataChanged();
-        farmDataChanged.setFarms(farms);
-        ((GsehenEventListener<FarmDataChanged>)listener).handle(farmDataChanged);
+        ((GsehenEventListener<T>)listener).handle(event);
       });
     }
   }
@@ -287,5 +306,17 @@ public class Gsehen extends Application {
   @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
   public void writeStringAsUTF8File(String data, String dataFileName) throws IOException {
     Files.write(Paths.get(dataFileName), data.getBytes("utf-8"));
+  }
+
+  public static Maps getMaps() {
+    return maps;
+  }
+
+  public static Farms getFarms() {
+    return farms;
+  }
+
+  public ResourceBundle getBundle() {
+    return mainBundle;
   }
 }

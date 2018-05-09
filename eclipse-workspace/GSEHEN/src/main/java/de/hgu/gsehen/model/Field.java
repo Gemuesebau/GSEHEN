@@ -114,4 +114,9 @@ public class Field implements Drawable, DrawableParent {
     }
     plots.forEach(handler);
   }
+
+  @Override
+  public String toString() {
+    return " " + getClass().getSimpleName() + " '" + getName() + "'";
+  }
 }

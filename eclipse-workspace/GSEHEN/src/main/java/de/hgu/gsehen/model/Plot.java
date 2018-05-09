@@ -162,4 +162,9 @@ public class Plot implements Drawable {
   public void modify(){}
 
   public void archive(){}
+
+  @Override
+  public String toString() {
+    return " " + getClass().getSimpleName() + " '" + getName() + "'";
+  }
 }

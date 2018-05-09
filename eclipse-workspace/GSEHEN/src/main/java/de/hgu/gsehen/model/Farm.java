@@ -79,4 +79,9 @@ public class Farm implements Drawable, DrawableParent {
     }
     fields.forEach(handler);
   }
+
+  @Override
+  public String toString() {
+    return " " + getClass().getSimpleName() + " '" + getName() + "'";
+  }
 }

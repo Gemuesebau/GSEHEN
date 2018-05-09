@@ -2,8 +2,9 @@
 
 <?import javafx.scene.control.*?>
 
-<Menu mnemonicParsing="false" text="Entwickler" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.DeveloperController">
+<Menu mnemonicParsing="false" text="%menu.view.developer" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.DeveloperController">
   <items>
-	<MenuItem fx:id="reloadMapViewHTMLMenuItem" mnemonicParsing="false" text="MapView-HTML neu laden" onAction="#reloadMapViewHTML" />
+	<MenuItem fx:id="reloadMapViewHTMLMenuItem" mnemonicParsing="false" text="%menu.view.developer.reload.maps" onAction="#reloadMapViewHTML" />
+	<MenuItem fx:id="reloadFarmViewHTMLMenuItem" mnemonicParsing="false" text="%menu.view.developer.reload.farms" onAction="#reloadFarmViewHTML" />
   </items>
 </Menu>

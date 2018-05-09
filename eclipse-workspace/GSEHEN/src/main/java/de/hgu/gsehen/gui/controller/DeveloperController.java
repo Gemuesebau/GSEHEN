@@ -13,7 +13,17 @@ public class DeveloperController {
 
   @FXML
   @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
+  private MenuItem reloadFarmViewHTMLMenuItem;
+
+  @FXML
+  @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
   public void reloadMapViewHTML(ActionEvent e) {
-    Gsehen.getMap().reload();
+    Gsehen.getMaps().reload();
+  }
+
+  @FXML
+  @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
+  public void reloadFarmViewHTML(ActionEvent e) {
+    Gsehen.getFarms().reload();
   }
 }

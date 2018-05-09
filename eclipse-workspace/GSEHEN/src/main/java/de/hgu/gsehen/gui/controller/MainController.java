@@ -58,7 +58,7 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   {
     gsehenInstance = Gsehen.getInstance();
     // gsehenInstance.setMainController(this);
-    gsehenInstance.registerForEvent(FarmDataChanged.class, this);
+    //gsehenInstance.registerForEvent(FarmDataChanged.class, this);
   }
 
   private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
