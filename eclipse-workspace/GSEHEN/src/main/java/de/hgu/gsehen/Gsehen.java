@@ -133,7 +133,7 @@ public class Gsehen extends Application {
     map.reload();
 
     TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
-    tabPane.getTabs().remove(4);
+    tabPane.getTabs().remove(4, 6);
 
     stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
       @Override

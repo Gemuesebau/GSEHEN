@@ -201,20 +201,26 @@
 						</AnchorPane>
 					</content>
 				</Tab>
-				<Tab fx:id="contactViewTab" closable="false" text="Contact">
-					<content>
-						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-							<children>
-								<TextArea id="debugTA" editable="false" layoutX="48.0" layoutY="57.0" prefHeight="369.0" prefWidth="296.0" text="Hallo, wir sind Menschen.&#10;&#10;Freut Euch, dass es uns gibt!&#10;&#10;[Alternativ bieten wir hier eine oder mehrere Möglichkeiten an, Kontakt aufzunehmen. E-Mail, Facebook, was auch immer.&#10;Oder die Idee verschwindet und kann für etwas ganz anderes genutzt werden. ;)]" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-									<font>
-										<Font name="Monospaced Regular" size="12.0" />
-									</font>
-								</TextArea>
-								<Button fx:id="contactBack" cancelButton="true" layoutY="108.0" mnemonicParsing="false" onAction="#backFromContactView" text="Back" AnchorPane.bottomAnchor="639.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="950.0" AnchorPane.topAnchor="105.0" />
-							</children>
-						</AnchorPane>
-					</content>
-				</Tab>
+            <Tab fx:id="contactViewTab" closable="false" text="Kontakt">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <WebView fx:id="contactWebView" layoutX="403.0" layoutY="18.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        <Button cancelButton="true" layoutX="14.0" layoutY="703.0" mnemonicParsing="false" onAction="#backToMainView" prefHeight="25.0" prefWidth="60.0" text="Zurück" AnchorPane.bottomAnchor="41.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="933.0" AnchorPane.topAnchor="703.0" />
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+            <Tab fx:id="aboutViewTab" closable="false" text="Über uns">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <WebView fx:id="aboutWebView" layoutX="403.0" layoutY="18.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        <Button cancelButton="true" layoutX="14.0" layoutY="703.0" mnemonicParsing="false" onAction="#backToMainView" prefHeight="25.0" prefWidth="59.0" text="Zurück" AnchorPane.bottomAnchor="41.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="933.0" AnchorPane.topAnchor="703.0" />
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
 			</tabs>
 		</TabPane>
 	</items>

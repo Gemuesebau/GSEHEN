@@ -39,14 +39,16 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Transform;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 /**
@@ -82,6 +84,12 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   @FXML
   private Tab contactViewTab;
   @FXML
+  private Tab aboutViewTab;
+  @FXML
+  private WebView contactWebView;
+  @FXML
+  private WebView aboutWebView;
+  @FXML
   private BorderPane farmViewBorderPane;
   @FXML
   private HBox farmViewTopHBox;
@@ -95,8 +103,6 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   // Help-Menu
   @FXML
   private MenuItem contactMenuItem;
-  @FXML
-  private Button contactBack;
   @FXML
   private MenuItem aboutUsMenuItem;
 
@@ -127,31 +133,61 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   private static double offSetY;
   private static double zoomlvl;
 
-  // Hides the Accordion and the tabs in the TabPane.
+  @FXML
+  private void about(ActionEvent a) {
+    accordion.setVisible(false);
+    tabPane.getTabs().clear();
+    tabPane.getTabs().add(aboutViewTab);
+    WebEngine engine = aboutWebView.getEngine();
+    engine.load(
+        "https://www.hs-geisenheim.de/forschung/institute/gemuesebau/ueberblick-institut-fuer-gemuesebau/bewaesserung/ble-gsehen/");
+
+    // if the URL does not contain "https://www.hs-geisenheim.de" skip back
+    engine.locationProperty().addListener((observable, oldValue, newValue) -> {
+      if (!newValue.contains("https://www.hs-geisenheim.de")) {
+        Platform.runLater(() -> {
+          engine.load(
+              "https://www.hs-geisenheim.de/forschung/institute/gemuesebau/ueberblick-institut-fuer-gemuesebau/bewaesserung/ble-gsehen/");
+        });
+      }
+    });
+  }
+
   @FXML
   private void openContactView(ActionEvent o) {
     accordion.setVisible(false);
     tabPane.getTabs().clear();
     tabPane.getTabs().add(contactViewTab);
+    WebEngine engine = contactWebView.getEngine();
+    engine.load("https://www.hs-geisenheim.de/personen/person/231/");
+
+    // if the URL does not contain "https://www.hs-geisenheim.de" skip back
+    engine.locationProperty().addListener((observable, oldValue, newValue) -> {
+      if (!newValue.contains("https://www.hs-geisenheim.de")) {
+        Platform.runLater(() -> {
+          engine.load("https://www.hs-geisenheim.de/personen/person/231/");
+        });
+      }
+    });
   }
 
   // Returns to Main-Menu.
   @FXML
-  private void backFromContactView(ActionEvent b) {
+  private void backToMainView(ActionEvent b) {
     accordion.setVisible(true);
     tabPane.getTabs().clear();
     tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, fieldPlotViewTab);
   }
 
-  // Opens a new Stage.
-  @FXML
-  private void about(ActionEvent a) {
-    Stage stage = new Stage();
-    Scene scene = new Scene(new VBox(), 400, 400);
-    stage.setTitle("About us");
-    stage.setScene(scene);
-    stage.show();
-  }
+  // // Opens a new Stage.
+  // @FXML
+  // private void about(ActionEvent a) {
+  // Stage stage = new Stage();
+  // Scene scene = new Scene(new VBox(), 400, 400);
+  // stage.setTitle("About us");
+  // stage.setScene(scene);
+  // stage.show();
+  // }
 
   @FXML
   private void enterFarmView() {
