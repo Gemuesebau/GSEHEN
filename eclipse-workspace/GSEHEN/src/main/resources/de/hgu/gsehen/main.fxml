@@ -14,204 +14,208 @@
 <?import javafx.scene.control.*?>
 
 <SplitPane dividerPositions="0.2104851330203443" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="800.0" minWidth="1280.0" prefHeight="800.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
-   <items>
-      <BorderPane prefHeight="200.0" prefWidth="200.0">
-         <top>
-            <MenuBar BorderPane.alignment="CENTER">
-              <menus>
-                <Menu mnemonicParsing="false" text="Datei">
-                  <items>
-                    <MenuItem mnemonicParsing="false" text="Zurücksetzen" onAction="#loadUserData" />
-                        <MenuItem mnemonicParsing="false" text="Sichern" onAction="#saveUserData" />
-                  </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Ansicht">
-                  <items>
-                        <fx:include source="developerMenu.fxml" />
-                  </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Hilfe">
-                  <items>
-                    <MenuItem fx:id="contactMenuItem" mnemonicParsing="false" onAction="#openContactView" text="Kontakt" />
-                        <MenuItem fx:id="aboutUsMenuItem" mnemonicParsing="false" onAction="#about" text="Über uns" />
-                  </items>
-                </Menu>
-              </menus>
-            </MenuBar>
-         </top>
-         <center>
-            <Accordion fx:id="accordion" BorderPane.alignment="CENTER">
-              <panes>
-                <TitledPane animated="false" text="Felder">
-                     <content>
-                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                           <children>
-                              <Button layoutX="10.0" layoutY="2.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
-                              <Button layoutX="10.0" layoutY="27.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
-                              <Button layoutX="10.0" layoutY="52.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
-                           </children>
-                        </AnchorPane>
-                     </content>
-                </TitledPane>
-                <TitledPane animated="false" text="Wetterstationen">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0">
-                           <children>
-                              <Button mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-                              <Button layoutX="95.0" layoutY="25.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-                           </children>
-                        </AnchorPane>
-                  </content>
-                </TitledPane>
-                <TitledPane animated="false" text="Einstellungen">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                           <children>
-                              <Button mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-                              <Button layoutX="95.0" layoutY="25.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-                           </children>
-                        </AnchorPane>
-                  </content>
-                </TitledPane>
-                  <TitledPane animated="false" text="Betrieb/Farm">
-                     <content>
-                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                           <children>
-                              <Button layoutX="10.0" layoutY="2.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
-                              <Button layoutX="10.0" layoutY="27.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
-                              <Button layoutX="10.0" layoutY="52.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
-                           </children>
-                        </AnchorPane>
-                     </content>
-                  </TitledPane>
-              </panes>
-            </Accordion>
-         </center>
-         <bottom>
-            <ImageView fitHeight="460.0" fitWidth="200.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
-         </bottom>
-      </BorderPane>
-      <TabPane id="tabPane" fx:id="tabPane" prefHeight="398.0" prefWidth="431.0" tabClosingPolicy="UNAVAILABLE">
-        <tabs>
-          <Tab fx:id="mapViewTab" closable="false" text="MapView">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <WebView id="webView" layoutX="48.0" layoutY="85.0" prefHeight="369.0" prefWidth="296.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                     </children></AnchorPane>
-            </content>
-          </Tab>
-          <Tab fx:id="farmViewTab" closable="false" onSelectionChanged="#enterFarmView" text="FarmView">
-               <content>
-                  <BorderPane fx:id="farmViewBorderPane" prefHeight="200.0" prefWidth="200.0">
-                     <top>
-                        <HBox fx:id="farmViewTopHBox" prefHeight="275.0" prefWidth="1006.0" BorderPane.alignment="CENTER">
-                           <children>
-                              <Label fx:id="farmLabel">
-                                 <HBox.margin>
-                                    <Insets />
-                                 </HBox.margin>
-                                 <padding>
-                                    <Insets left="10.0" top="10.0" />
-                                 </padding>
-                                 <contextMenu>
-                                    <ContextMenu>
-                                      <items>
-                                        <MenuItem mnemonicParsing="false" text="Bearbeiten" />
-                                      </items>
-                                    </ContextMenu>
-                                 </contextMenu>
-                              </Label>
-                              <PieChart fx:id="farmPieChart" legendSide="RIGHT" titleSide="RIGHT">
-                                 <padding>
-                                    <Insets right="10.0" top="10.0" />
-                                 </padding></PieChart>
-                           </children>
-                           <padding>
-                              <Insets left="10.0" right="10.0" />
-                           </padding>
-                        </HBox>
-                     </top>
-                     <bottom>
-                        <HBox fillHeight="false" BorderPane.alignment="CENTER_LEFT">
-                           <children>
-                              <Button mnemonicParsing="false" styleClass="darkBlueButton" stylesheets="@Style.css" text="Bewässerungsplan ausgeben" textFill="WHITE">
-                                 <HBox.margin>
-                                    <Insets right="50.0" />
-                                 </HBox.margin>
-                                 <font>
-                                    <Font name="System Bold" size="12.0" />
-                                 </font>
-                              </Button>
-                              <Button mnemonicParsing="false" styleClass="greenButton" stylesheets="@Style.css" text="Pflanzenstatus buchen" textFill="WHITE">
-                                 <HBox.margin>
-                                    <Insets right="10.0" />
-                                 </HBox.margin>
-                                 <font>
-                                    <Font name="System Bold" size="12.0" />
-                                 </font>
-                              </Button>
-                              <Button mnemonicParsing="false" styleClass="lightBlueButton" stylesheets="@Style.css" text="Bewässerung buchen" textFill="WHITE">
-                                 <font>
-                                    <Font name="System Bold" size="12.0" />
-                                 </font></Button>
-                           </children>
-                           <padding>
-                              <Insets bottom="10.0" left="10.0" top="20.0" />
-                           </padding>
-                        </HBox>
-                     </bottom>
-                  </BorderPane>
-               </content>
-          </Tab>
-            <Tab fx:id="fieldViewTab" closable="false" text="Field View">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <TextArea id="debugTA" layoutX="48.0" layoutY="57.0" prefHeight="369.0" prefWidth="296.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <font>
-                              <Font name="Monospaced Regular" size="12.0" />
-                           </font>
-                        </TextArea>
-                        <Label layoutX="680.0" layoutY="303.0" text="Salat II" />
-                        <Label layoutX="783.0" layoutY="208.0" text="Zwiebel" />
-                        <Label layoutX="549.0" layoutY="285.0" text="Salat" />
-                        <Label layoutX="709.0" layoutY="97.0" text="Im alten Grund" />
-                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#b8ff1f" height="86.0" layoutX="809.0" layoutY="231.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
-                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ff5221" height="86.0" layoutX="497.0" layoutY="173.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
-                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="648.0" layoutY="333.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-            <Tab fx:id="fieldPlotViewTab" closable="false" text="Field Plot View">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <TextArea id="debugTA" layoutX="48.0" layoutY="57.0" prefHeight="369.0" prefWidth="296.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <font>
-                              <Font name="Monospaced Regular" size="12.0" />
-                           </font>
-                        </TextArea>
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-            <Tab fx:id="contactViewTab" closable="false" text="Contact">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <TextArea id="debugTA" editable="false" layoutX="48.0" layoutY="57.0" prefHeight="369.0" prefWidth="296.0" text="Hallo, wir sind Menschen.&#10;&#10;Freut Euch, dass es uns gibt!&#10;&#10;[Alternativ bieten wir hier eine oder mehrere Möglichkeiten an, Kontakt aufzunehmen. E-Mail, Facebook, was auch immer.&#10;Oder die Idee verschwindet und kann für etwas ganz anderes genutzt werden. ;)]" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <font>
-                              <Font name="Monospaced Regular" size="12.0" />
-                           </font>
-                        </TextArea>
-                        <Button fx:id="contactBack" cancelButton="true" layoutY="108.0" mnemonicParsing="false" onAction="#backFromContactView" text="Back" AnchorPane.bottomAnchor="639.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="950.0" AnchorPane.topAnchor="105.0" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-        </tabs>
-      </TabPane>
-   </items>
+	<items>
+		<BorderPane prefHeight="200.0" prefWidth="200.0">
+			<top>
+				<MenuBar BorderPane.alignment="CENTER">
+					<menus>
+						<Menu mnemonicParsing="false" text="Datei">
+							<items>
+								<MenuItem mnemonicParsing="false" onAction="#loadUserData" text="Zurücksetzen" />
+								<MenuItem mnemonicParsing="false" onAction="#saveUserData" text="Sichern" />
+								<MenuItem mnemonicParsing="false" onAction="#exit" text="Beenden" />
+							</items>
+						</Menu>
+						<Menu mnemonicParsing="false" text="Ansicht">
+							<items>
+								<fx:include source="developerMenu.fxml" />
+							</items>
+						</Menu>
+						<Menu mnemonicParsing="false" text="Hilfe">
+							<items>
+								<MenuItem fx:id="contactMenuItem" mnemonicParsing="false" onAction="#openContactView" text="Kontakt" />
+								<MenuItem fx:id="aboutUsMenuItem" mnemonicParsing="false" onAction="#about" text="Über uns" />
+							</items>
+						</Menu>
+					</menus>
+				</MenuBar>
+			</top>
+			<center>
+				<Accordion fx:id="accordion" BorderPane.alignment="CENTER">
+					<panes>
+						<TitledPane animated="false" text="Felder">
+							<content>
+								<AnchorPane prefHeight="200.0" prefWidth="200.0">
+									<children>
+										<Button layoutX="10.0" layoutY="2.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+										<Button layoutX="10.0" layoutY="27.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+										<Button layoutX="10.0" layoutY="52.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+									</children>
+								</AnchorPane>
+							</content>
+						</TitledPane>
+						<TitledPane animated="false" text="Wetterstationen">
+							<content>
+								<AnchorPane minHeight="0.0" minWidth="0.0">
+									<children>
+										<Button mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+										<Button layoutX="95.0" layoutY="25.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+									</children>
+								</AnchorPane>
+							</content>
+						</TitledPane>
+						<TitledPane animated="false" text="Einstellungen">
+							<content>
+								<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+									<children>
+										<Button mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+										<Button layoutX="95.0" layoutY="25.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+									</children>
+								</AnchorPane>
+							</content>
+						</TitledPane>
+						<TitledPane animated="false" text="Betrieb/Farm">
+							<content>
+								<AnchorPane prefHeight="200.0" prefWidth="200.0">
+									<children>
+										<Button layoutX="10.0" layoutY="2.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+										<Button layoutX="10.0" layoutY="27.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+										<Button layoutX="10.0" layoutY="52.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
+									</children>
+								</AnchorPane>
+							</content>
+						</TitledPane>
+					</panes>
+				</Accordion>
+			</center>
+			<bottom>
+				<ImageView fitHeight="460.0" fitWidth="200.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
+			</bottom>
+		</BorderPane>
+		<TabPane id="tabPane" fx:id="tabPane" prefHeight="398.0" prefWidth="431.0" tabClosingPolicy="UNAVAILABLE">
+			<tabs>
+				<Tab fx:id="mapViewTab" closable="false" text="MapView">
+					<content>
+						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<WebView id="webView" layoutX="48.0" layoutY="85.0" prefHeight="369.0" prefWidth="296.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+							</children>
+						</AnchorPane>
+					</content>
+				</Tab>
+				<Tab fx:id="farmViewTab" closable="false" onSelectionChanged="#enterFarmView" text="FarmView">
+					<content>
+						<BorderPane fx:id="farmViewBorderPane" prefHeight="200.0" prefWidth="200.0">
+							<top>
+								<HBox fx:id="farmViewTopHBox" prefHeight="275.0" prefWidth="1006.0" BorderPane.alignment="CENTER">
+									<children>
+										<Label fx:id="farmLabel">
+											<HBox.margin>
+												<Insets />
+											</HBox.margin>
+											<padding>
+												<Insets left="10.0" top="10.0" />
+											</padding>
+											<contextMenu>
+												<ContextMenu>
+													<items>
+														<MenuItem mnemonicParsing="false" text="Bearbeiten" />
+													</items>
+												</ContextMenu>
+											</contextMenu>
+										</Label>
+										<PieChart fx:id="farmPieChart" legendSide="RIGHT" titleSide="RIGHT">
+											<padding>
+												<Insets right="10.0" top="10.0" />
+											</padding>
+										</PieChart>
+									</children>
+									<padding>
+										<Insets left="10.0" right="10.0" />
+									</padding>
+								</HBox>
+							</top>
+							<bottom>
+								<HBox fillHeight="false" BorderPane.alignment="CENTER_LEFT">
+									<children>
+										<Button mnemonicParsing="false" styleClass="darkBlueButton" stylesheets="@Style.css" text="Bewässerungsplan ausgeben" textFill="WHITE">
+											<HBox.margin>
+												<Insets right="50.0" />
+											</HBox.margin>
+											<font>
+												<Font name="System Bold" size="12.0" />
+											</font>
+										</Button>
+										<Button mnemonicParsing="false" styleClass="greenButton" stylesheets="@Style.css" text="Pflanzenstatus buchen" textFill="WHITE">
+											<HBox.margin>
+												<Insets right="10.0" />
+											</HBox.margin>
+											<font>
+												<Font name="System Bold" size="12.0" />
+											</font>
+										</Button>
+										<Button mnemonicParsing="false" styleClass="lightBlueButton" stylesheets="@Style.css" text="Bewässerung buchen" textFill="WHITE">
+											<font>
+												<Font name="System Bold" size="12.0" />
+											</font>
+										</Button>
+									</children>
+									<padding>
+										<Insets bottom="10.0" left="10.0" top="20.0" />
+									</padding>
+								</HBox>
+							</bottom>
+						</BorderPane>
+					</content>
+				</Tab>
+				<Tab fx:id="fieldViewTab" closable="false" text="Field View">
+					<content>
+						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<TextArea id="debugTA" layoutX="48.0" layoutY="57.0" prefHeight="369.0" prefWidth="296.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+									<font>
+										<Font name="Monospaced Regular" size="12.0" />
+									</font>
+								</TextArea>
+								<Label layoutX="680.0" layoutY="303.0" text="Salat II" />
+								<Label layoutX="783.0" layoutY="208.0" text="Zwiebel" />
+								<Label layoutX="549.0" layoutY="285.0" text="Salat" />
+								<Label layoutX="709.0" layoutY="97.0" text="Im alten Grund" />
+								<Rectangle arcHeight="5.0" arcWidth="5.0" fill="#b8ff1f" height="86.0" layoutX="809.0" layoutY="231.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
+								<Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ff5221" height="86.0" layoutX="497.0" layoutY="173.0" stroke="BLACK" strokeType="INSIDE" width="78.0" />
+								<Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="648.0" layoutY="333.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
+							</children>
+						</AnchorPane>
+					</content>
+				</Tab>
+				<Tab fx:id="fieldPlotViewTab" closable="false" text="Field Plot View">
+					<content>
+						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<TextArea id="debugTA" layoutX="48.0" layoutY="57.0" prefHeight="369.0" prefWidth="296.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+									<font>
+										<Font name="Monospaced Regular" size="12.0" />
+									</font>
+								</TextArea>
+							</children>
+						</AnchorPane>
+					</content>
+				</Tab>
+				<Tab fx:id="contactViewTab" closable="false" text="Contact">
+					<content>
+						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<TextArea id="debugTA" editable="false" layoutX="48.0" layoutY="57.0" prefHeight="369.0" prefWidth="296.0" text="Hallo, wir sind Menschen.&#10;&#10;Freut Euch, dass es uns gibt!&#10;&#10;[Alternativ bieten wir hier eine oder mehrere Möglichkeiten an, Kontakt aufzunehmen. E-Mail, Facebook, was auch immer.&#10;Oder die Idee verschwindet und kann für etwas ganz anderes genutzt werden. ;)]" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+									<font>
+										<Font name="Monospaced Regular" size="12.0" />
+									</font>
+								</TextArea>
+								<Button fx:id="contactBack" cancelButton="true" layoutY="108.0" mnemonicParsing="false" onAction="#backFromContactView" text="Back" AnchorPane.bottomAnchor="639.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="950.0" AnchorPane.topAnchor="105.0" />
+							</children>
+						</AnchorPane>
+					</content>
+				</Tab>
+			</tabs>
+		</TabPane>
+	</items>
 </SplitPane>

@@ -15,9 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -37,6 +39,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -97,6 +100,7 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
   @FXML
   private MenuItem aboutUsMenuItem;
 
+  private Boolean change = false;
   private Canvas canvas = new Canvas();
   private ObservableList<PieChart.Data> pieChartData =
       FXCollections.observableArrayList(new PieChart.Data("Bananen", 13),
@@ -433,7 +437,12 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
     canvas.setWidth(width);
     canvas.setHeight(height);
 
-    flatDrawables = extractPolygons(farmsArray);
+    if (flatDrawables == null) {
+      flatDrawables = extractPolygons(farmsArray);
+    } else {
+      flatDrawables = extractPolygons(farmsArray);
+      change = true;
+    }
     gc = canvas.getGraphicsContext2D();
     setTransformation(gc, width, height, flatDrawables);
     LOGGER.log(Level.CONFIG, "handle(): calling 'drawShapes'");
@@ -454,5 +463,62 @@ public class MainController implements GsehenEventListener<FarmDataChanged> {
    */
   public void saveUserData() {
     gsehenInstance.saveUserData();
+  }
+
+  /**
+   * Save & Exit Event.
+   */
+  public void exit() {
+    if (change) {
+      Button button1 = new Button("Ja");
+      button1.setStyle("-fx-font: 14 arial;");
+      Button button2 = new Button("Nein");
+      button2.setStyle("-fx-font: 14 arial;");
+      Button button3 = new Button("Abbrechen");
+      button3.setStyle("-fx-font: 14 arial;");
+
+      button1.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          gsehenInstance.saveUserData();
+          Platform.exit();
+          System.exit(0);
+        }
+      });
+
+      button2.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          Platform.exit();
+          System.exit(0);
+        }
+      });
+
+      Stage stage = new Stage();
+
+      button3.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent e) {
+          stage.close();
+        }
+      });
+
+      Label label = new Label("Wollen Sie Ihre Daten speichern,\nbevor Sie das Programm beenden?");
+      label.setStyle("-fx-font: 16 arial;");
+      HBox horBox = new HBox();
+      horBox.setSpacing(10);
+      horBox.getChildren().addAll(button1, button2, button3);
+
+      BorderPane borderPane = new BorderPane();
+      borderPane.setTop(label);
+      borderPane.setBottom(horBox);
+
+      Scene scene = new Scene(borderPane, 260, 100);
+      stage.setTitle("Speichern & beenden?");
+      stage.setScene(scene);
+      stage.show();
+    } else {
+      Platform.exit();
+    }
   }
 }
