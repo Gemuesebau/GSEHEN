@@ -37,6 +37,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -123,6 +124,8 @@ public class Gsehen extends Application {
 
     Scene scene = new Scene(root, 1280, 800);
     stage.setScene(scene);
+    stage.setTitle("GSEHEN");
+    stage.getIcons().add(new Image("/de/hgu/gsehen/images/Logo_UniGeisenheim_36x36.png"));
     stage.setMinWidth(root.minWidth(-1));
     stage.setMinHeight(root.minHeight(-1));
     stage.sizeToScene();
