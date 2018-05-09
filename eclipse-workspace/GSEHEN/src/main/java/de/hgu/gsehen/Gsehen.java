@@ -9,6 +9,7 @@ import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.GeoPoint;
+import de.hgu.gsehen.gui.controller.MainController;
 import de.hgu.gsehen.gui.view.Farms;
 import de.hgu.gsehen.gui.view.Maps;
 import de.hgu.gsehen.model.Drawable;
@@ -37,12 +38,15 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
@@ -71,14 +75,15 @@ public class Gsehen extends Application {
   private static final String SAVE_USER_DATA_JS = "/de/hgu/gsehen/js/saveUserData.js";
   private static Maps maps;
   private static Farms farms;
-  //private MainController mainController;
+
   private List<Farm> farmsList = new ArrayList<>();
 
-  private java.util.Map<Class<? extends GsehenEvent>,
-        List<GsehenEventListener<?>>> eventListeners =
+  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners =
       new HashMap<>();
 
   private static Gsehen instance;
+
+  private MainController mainController;
 
   {
     instance = this;
@@ -98,7 +103,7 @@ public class Gsehen extends Application {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    //LOGGER.log(Level.INFO, "TEST einer Exception", new RuntimeException("Exception Nachricht"));
+    // LOGGER.log(Level.INFO, "TEST einer Exception", new RuntimeException("Exception Nachricht"));
 
     // try {
     // Server server = Server.createWebServer();
@@ -122,26 +127,34 @@ public class Gsehen extends Application {
   public void start(Stage stage) {
     Parent root;
     try {
-      root = FXMLLoader.load(getClass().getResource(MAIN_FXML), mainBundle);
+      FXMLLoader loader = new FXMLLoader(getClass().getResource(MAIN_FXML), mainBundle);
+      root = loader.load();
+      mainController = loader.getController();
     } catch (IOException e) {
       throw new RuntimeException(MAIN_FXML + " couldn't be loaded", e);
     }
+
     Scene scene = new Scene(root, 1280, 800);
     stage.setScene(scene);
+    stage.setTitle("GSEHEN");
+    stage.getIcons().add(new Image("/de/hgu/gsehen/images/Logo_UniGeisenheim_36x36.png"));
     stage.setMinWidth(root.minWidth(-1));
     stage.setMinHeight(root.minHeight(-1));
     stage.sizeToScene();
     stage.show();
 
     maps = new Maps(this, (WebView)scene.lookup(MAPS_WEB_VIEW_ID));
-    //map.setMainController(mainController);
     maps.reload();
 
     farms = new Farms(this, (WebView)scene.lookup(FARMS_WEB_VIEW_ID));
-    //farms.reload();
 
-    //TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
-    //tabPane.getTabs().remove(4);
+    stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+      @Override
+      public void handle(WindowEvent t) {
+        t.consume();
+        mainController.exit();
+      }
+    });
 
     // TextArea debugTextArea = (TextArea) stage.getScene().lookup(DEBUG_TEXTAREA_ID);
     // testDatabase(debugTextArea);
@@ -196,10 +209,6 @@ public class Gsehen extends Application {
     return instance;
   }
 
-//  public void setMainController(MainController mainController) {
-//    this.mainController = mainController;
-//  }
-
   /**
    * Loads the user-created data (farms, fields, plots, ..)
    */
@@ -231,8 +240,7 @@ public class Gsehen extends Application {
   }
 
   public InputStreamReader getReaderForUtf8(String resourceName) throws IOException {
-    return new InputStreamReader(
-        this.getClass().getResourceAsStream(resourceName), "utf-8");
+    return new InputStreamReader(this.getClass().getResourceAsStream(resourceName), "utf-8");
   }
 
   /**
@@ -267,7 +275,7 @@ public class Gsehen extends Application {
       if (!farmsList.isEmpty()) {
         List<Field> fields = farmsList.get(0).getFields();
         if (!fields.isEmpty()) {
-          fields.get(0).getPlots().add((Plot)object);
+          fields.get(0).getPlots().add((Plot) object);
         }
       }
     }

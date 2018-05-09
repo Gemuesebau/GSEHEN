@@ -23,6 +23,7 @@
 							<items>
 								<MenuItem mnemonicParsing="false" text="%menu.file.load" onAction="#loadUserData" />
 								<MenuItem mnemonicParsing="false" text="%menu.file.save" onAction="#saveUserData" />
+								<MenuItem mnemonicParsing="false" text="%menu.file.exit" onAction="#exit" />
 							</items>
 						</Menu>
 						<Menu mnemonicParsing="false" text="%menu.view">
@@ -111,6 +112,26 @@
 						</AnchorPane>
 					</content>
 				</Tab>
+	            <Tab fx:id="contactViewTab" closable="false" text="Kontakt">
+	               <content>
+	                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+	                     <children>
+	                        <WebView fx:id="contactWebView" layoutX="403.0" layoutY="18.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+	                        <Button cancelButton="true" layoutX="14.0" layoutY="703.0" mnemonicParsing="false" onAction="#backToMainView" prefHeight="25.0" prefWidth="60.0" text="Zurück" AnchorPane.bottomAnchor="41.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="933.0" AnchorPane.topAnchor="703.0" />
+	                     </children>
+	                  </AnchorPane>
+	               </content>
+	            </Tab>
+	            <Tab fx:id="aboutViewTab" closable="false" text="Über uns">
+	               <content>
+	                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+	                     <children>
+	                        <WebView fx:id="aboutWebView" layoutX="403.0" layoutY="18.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+	                        <Button cancelButton="true" layoutX="14.0" layoutY="703.0" mnemonicParsing="false" onAction="#backToMainView" prefHeight="25.0" prefWidth="59.0" text="Zurück" AnchorPane.bottomAnchor="41.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="933.0" AnchorPane.topAnchor="703.0" />
+	                     </children>
+	                  </AnchorPane>
+	               </content>
+	            </Tab>
 			</tabs>
 		</TabPane>
 	</items>
