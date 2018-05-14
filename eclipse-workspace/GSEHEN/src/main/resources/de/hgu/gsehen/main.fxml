@@ -21,9 +21,9 @@
 					<menus>
 						<Menu mnemonicParsing="false" text="%menu.file">
 							<items>
-								<MenuItem mnemonicParsing="false" text="%menu.file.load" onAction="#loadUserData" />
-								<MenuItem mnemonicParsing="false" text="%menu.file.save" onAction="#saveUserData" />
-								<MenuItem mnemonicParsing="false" text="%menu.file.exit" onAction="#exit" />
+								<MenuItem mnemonicParsing="false" onAction="#loadUserData" text="%menu.file.load" />
+								<MenuItem mnemonicParsing="false" onAction="#saveUserData" text="%menu.file.save" />
+								<MenuItem mnemonicParsing="false" onAction="#exit" text="%menu.file.exit" />
 							</items>
 						</Menu>
 						<Menu mnemonicParsing="false" text="%menu.view">
@@ -46,11 +46,9 @@
 						<TitledPane animated="false" text="%accordion.pane.fields">
 							<content>
 								<AnchorPane prefHeight="200.0" prefWidth="200.0">
-									<children>
-										<Button layoutX="10.0" layoutY="2.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
-										<Button layoutX="10.0" layoutY="27.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
-										<Button layoutX="10.0" layoutY="52.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
-									</children>
+                           <children>
+                              <TreeView id="farmTreeView" layoutX="32.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
 								</AnchorPane>
 							</content>
 						</TitledPane>
