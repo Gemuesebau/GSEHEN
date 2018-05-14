@@ -42,6 +42,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.web.WebView;
@@ -57,8 +58,8 @@ import javax.script.ScriptEngineManager;
  */
 @SuppressWarnings({"checkstyle:commentsindentation"})
 public class Gsehen extends Application {
-  protected static final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
-      Locale.GERMAN);
+  protected static final ResourceBundle mainBundle =
+      ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
 
   private static final String GSEHEN_H2_LOCAL_DB = "gsehen-h2-local.db";
   private static final String DAYDATA_TABLE = "DAYDATA";
@@ -143,10 +144,13 @@ public class Gsehen extends Application {
     stage.sizeToScene();
     stage.show();
 
-    maps = new Maps(this, (WebView)scene.lookup(MAPS_WEB_VIEW_ID));
+    maps = new Maps(this, (WebView) scene.lookup(MAPS_WEB_VIEW_ID));
     maps.reload();
 
-    farms = new Farms(this, (WebView)scene.lookup(FARMS_WEB_VIEW_ID));
+    farms = new Farms(this, (WebView) scene.lookup(FARMS_WEB_VIEW_ID));
+
+    TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
+    tabPane.getTabs().remove(tabPane.getTabs().size() - 2, tabPane.getTabs().size());
 
     stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
       @Override
@@ -264,14 +268,12 @@ public class Gsehen extends Application {
   @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
   public void objectAdded(Drawable object) {
     if (object instanceof Farm) {
-      farmsList.add((Farm)object);
-    }
-    else if (object instanceof Field) {
+      farmsList.add((Farm) object);
+    } else if (object instanceof Field) {
       if (!farmsList.isEmpty()) {
-        farmsList.get(0).getFields().add((Field)object);
+        farmsList.get(0).getFields().add((Field) object);
       }
-    }
-    else if (object instanceof Plot) {
+    } else if (object instanceof Plot) {
       if (!farmsList.isEmpty()) {
         List<Field> fields = farmsList.get(0).getFields();
         if (!fields.isEmpty()) {
@@ -283,10 +285,9 @@ public class Gsehen extends Application {
   }
 
   private void sendFarmDataChanged(Drawable object) {
-    Pair<GeoPoint> pair = new Pair<>(
-        new GeoPoint(object.getPolygon().getMinY(), object.getPolygon().getMinX()),
-        new GeoPoint(object.getPolygon().getMaxY(), object.getPolygon().getMaxX())
-    );
+    Pair<GeoPoint> pair =
+        new Pair<>(new GeoPoint(object.getPolygon().getMinY(), object.getPolygon().getMinX()),
+            new GeoPoint(object.getPolygon().getMaxY(), object.getPolygon().getMaxX()));
     notifyEventListeners(() -> {
       FarmDataChanged event = new FarmDataChanged();
       event.setFarms(farmsList);
@@ -301,7 +302,7 @@ public class Gsehen extends Application {
     List<GsehenEventListener<?>> farmDataChgListeners = eventListeners.get(event.getClass());
     if (farmDataChgListeners != null) {
       farmDataChgListeners.forEach(listener -> {
-        ((GsehenEventListener<T>)listener).handle(event);
+        ((GsehenEventListener<T>) listener).handle(event);
       });
     }
   }
