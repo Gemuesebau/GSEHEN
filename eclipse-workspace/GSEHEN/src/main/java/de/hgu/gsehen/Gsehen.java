@@ -4,10 +4,10 @@ import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
 import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
 import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
-
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
+import de.hgu.gsehen.event.TreeTextFieldEditor;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.controller.MainController;
 import de.hgu.gsehen.gui.view.Farms;
@@ -44,10 +44,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Callback;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
@@ -70,13 +74,18 @@ public class Gsehen extends Application {
   public static final String TAB_PANE_ID = "#tabPane";
   private static final String MAPS_WEB_VIEW_ID = "#mapsWebView";
   private static final String FARMS_WEB_VIEW_ID = "#farmsWebView";
+  private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
 
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private static final String LOAD_USER_DATA_JS = "/de/hgu/gsehen/js/loadUserData.js";
   private static final String SAVE_USER_DATA_JS = "/de/hgu/gsehen/js/saveUserData.js";
   private static Maps maps;
   private static Farms farms;
+  private static TreeView<String> farmTreeView;
 
+  private TreeItem<String> farmItem;
+  private TreeItem<String> fieldItem;
+  private TreeItem<String> plotItem;
   private List<Farm> farmsList = new ArrayList<>();
 
   private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners =
@@ -123,7 +132,7 @@ public class Gsehen extends Application {
    *
    * @see javafx.application.Application#start(javafx.stage.Stage)
    */
-  @SuppressWarnings({"checkstyle:rightcurly"})
+  @SuppressWarnings({"checkstyle:rightcurly", "unchecked"})
   @Override
   public void start(Stage stage) {
     Parent root;
@@ -148,6 +157,9 @@ public class Gsehen extends Application {
     maps.reload();
 
     farms = new Farms(this, (WebView) scene.lookup(FARMS_WEB_VIEW_ID));
+
+    farmTreeView = (TreeView<String>) scene.lookup(FARM_TREE_VIEW_ID);
+    fillTreeView();
 
     TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
     tabPane.getTabs().remove(tabPane.getTabs().size() - 2, tabPane.getTabs().size());
@@ -211,6 +223,37 @@ public class Gsehen extends Application {
 
   public static Gsehen getInstance() {
     return instance;
+  }
+
+  /**
+   * Fills the TreeView with Farms, Fields and Plots.
+   */
+  public void fillTreeView() {
+    TreeItem<String> rootItem = new TreeItem<String>("Betrieb");
+    for (int i = 0; i < farmsList.size(); i++) {
+      farmItem = new TreeItem<String>(farmsList.get(i).getName());
+      rootItem.getChildren().add(farmItem);
+
+      for (int j = 0; j < farmsList.get(i).getFields().size(); j++) {
+        fieldItem = new TreeItem<String>(farmsList.get(i).getFields().get(j).getName());
+        farmItem.getChildren().add(fieldItem);
+
+        for (int k = 0; k < farmsList.get(i).getFields().get(j).getPlots().size(); k++) {
+          plotItem =
+              new TreeItem<String>(farmsList.get(i).getFields().get(j).getPlots().get(k).getName());
+          fieldItem.getChildren().add(plotItem);
+        }
+      }
+      farmTreeView.setRoot(rootItem);
+      farmTreeView.setShowRoot(false);
+      farmTreeView.setEditable(true);
+
+      farmTreeView.setCellFactory(new Callback<TreeView<String>, TreeCell<String>>() {
+        public TreeCell<String> call(TreeView<String> t) {
+          return new TreeTextFieldEditor();
+        }
+      });
+    }
   }
 
   /**

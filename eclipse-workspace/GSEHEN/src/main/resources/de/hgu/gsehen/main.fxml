@@ -47,7 +47,7 @@
 							<content>
 								<AnchorPane prefHeight="200.0" prefWidth="200.0">
                            <children>
-                              <TreeView id="farmTreeView" layoutX="32.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                              <TreeView id="farmTreeView" prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                            </children>
 								</AnchorPane>
 							</content>
