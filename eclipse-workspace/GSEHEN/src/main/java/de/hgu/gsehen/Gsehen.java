@@ -4,10 +4,11 @@ import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
 import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
 import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
+
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
-import de.hgu.gsehen.event.TreeTextFieldEditor;
+import de.hgu.gsehen.event.RenameMenuTreeCell;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.controller.MainController;
 import de.hgu.gsehen.gui.view.Farms;
@@ -171,7 +172,6 @@ public class Gsehen extends Application {
         mainController.exit();
       }
     });
-
     // TextArea debugTextArea = (TextArea) stage.getScene().lookup(DEBUG_TEXTAREA_ID);
     // testDatabase(debugTextArea);
   }
@@ -250,9 +250,28 @@ public class Gsehen extends Application {
 
       farmTreeView.setCellFactory(new Callback<TreeView<String>, TreeCell<String>>() {
         public TreeCell<String> call(TreeView<String> t) {
-          return new TreeTextFieldEditor();
+          return new RenameMenuTreeCell();
         }
       });
+    }
+  }
+
+  /**
+   * Updates the names from farms, fields and plots via TreeView.
+   * TODO: Löschen, etc. abfangen.
+   */
+  public void updateName() {
+    for (int i = 0; i < farmTreeView.getRoot().getChildren().size(); i++) {
+      farmsList.get(i).setName(farmTreeView.getRoot().getChildren().get(i).getValue());
+      for (int j = 0; j < farmTreeView.getRoot().getChildren().get(i).getChildren().size(); j++) {
+        farmsList.get(i).getFields().get(j)
+            .setName(farmTreeView.getRoot().getChildren().get(i).getChildren().get(j).getValue());
+        for (int k = 0; k < farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
+            .getChildren().size(); k++) {
+          farmsList.get(i).getFields().get(j).getPlots().get(k).setName(farmTreeView.getRoot()
+              .getChildren().get(i).getChildren().get(j).getChildren().get(k).getValue());
+        }
+      }
     }
   }
 
