@@ -59,7 +59,7 @@ import javax.script.ScriptEngineManager;
 /**
  * The GSEHEN main application.
  *
- * @author MO, AT
+ * @author MO, AT, CW
  */
 @SuppressWarnings({"checkstyle:commentsindentation"})
 public class Gsehen extends Application {
@@ -221,10 +221,6 @@ public class Gsehen extends Application {
     }
   }
 
-  public static Gsehen getInstance() {
-    return instance;
-  }
-
   /**
    * Fills the TreeView with Farms, Fields and Plots.
    */
@@ -247,6 +243,10 @@ public class Gsehen extends Application {
       farmTreeView.setRoot(rootItem);
       farmTreeView.setShowRoot(false);
       farmTreeView.setEditable(true);
+      farmTreeView.setOnDragDetected(event -> {
+        System.out.println("Drag!");
+        // TODO
+      });
 
       farmTreeView.setCellFactory(new Callback<TreeView<String>, TreeCell<String>>() {
         public TreeCell<String> call(TreeView<String> t) {
@@ -360,6 +360,10 @@ public class Gsehen extends Application {
   @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
   public void writeStringAsUTF8File(String data, String dataFileName) throws IOException {
     Files.write(Paths.get(dataFileName), data.getBytes("utf-8"));
+  }
+
+  public static Gsehen getInstance() {
+    return instance;
   }
 
   public static Maps getMaps() {
