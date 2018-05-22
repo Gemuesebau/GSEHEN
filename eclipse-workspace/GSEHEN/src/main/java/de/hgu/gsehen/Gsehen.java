@@ -176,8 +176,8 @@ public class Gsehen extends Application {
     farmTreeView = (TreeTableView<Map<String, Object>>) scene.lookup(FARM_TREE_VIEW_ID);
     rootItem = new TreeItem<>();
     farmTreeView.setRowFactory(this::rowFactory);
-    addColumn("Name", "name");
-    addColumn("Type", "type");
+    addColumn(mainBundle.getString("treetableview.name"), "name");
+    addColumn(mainBundle.getString("treetableview.type"), "type");
 
     deleteItem = new MenuItem(mainBundle.getString("treeview.remove"));
     menu.getItems().add(deleteItem);
@@ -286,15 +286,28 @@ public class Gsehen extends Application {
         int index = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
         TreeItem<Map<String, Object>> item = farmTreeView.getTreeItem(index);
 
-        System.out.println(item.getValue().containsValue("Plot"));
-        System.out.println(getTarget(row).isLeaf()); // PLOT
-        // TODO: Richtiges Zuordnen!
+        Map<String, Object> itemMap = item.getValue();
+        String itemType = "";
+        for (String key : itemMap.keySet()) {
+          itemType = (String) itemMap.get(key);
+        }
 
-        item.getParent().getChildren().remove(item);
-        getTarget(row).getChildren().add(item);
-        event.setDropCompleted(true);
-        farmTreeView.getSelectionModel().select(item);
-        event.consume();
+        Map<String, Object> map = row.getTreeItem().getValue();
+        String destinationType = "";
+        for (String key : map.keySet()) {
+          destinationType = (String) map.get(key);
+        }
+
+        if (itemType.equals("Plot") && destinationType.equals("Field")
+            || itemType.equals("Field") && destinationType.equals("Farm")) {
+          item.getParent().getChildren().remove(item);
+          getTarget(row).getChildren().add(item);
+          event.setDropCompleted(true);
+          farmTreeView.getSelectionModel().select(item);
+          event.consume();
+        } else {
+          LOGGER.info(itemType + " can't be stack on " + destinationType);
+        }
       }
     });
 
