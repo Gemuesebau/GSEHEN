@@ -9,6 +9,7 @@ import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.GeoPoint;
+import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
 import de.hgu.gsehen.gui.view.Farms;
 import de.hgu.gsehen.gui.view.Maps;
@@ -38,21 +39,16 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Orientation;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
@@ -69,7 +65,6 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import javafx.util.Duration;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
@@ -100,26 +95,21 @@ public class Gsehen extends Application {
   private static Farms farms;
 
   private TreeTableView<Map<String, Object>> farmTreeView;
-  private TreeItem<Map<String, Object>> rootItem;
-  private TreeItem<Map<String, Object>> farmItem;
-  private TreeItem<Map<String, Object>> fieldItem;
-  @SuppressWarnings("unused")
-  private TreeItem<Map<String, Object>> plotItem;
   private TreeItem<Map<String, Object>> trash;
-  private TreeItem<Map<String, Object>> item;
   private TreeTableColumn<Map<String, Object>, String> column;
+
+  private TreeItem<Map<String, Object>> rootItem;
 
   private List<Farm> farmsList = new ArrayList<>();
   private ContextMenu menu = new ContextMenu();
   private MainController mainController;
   private MenuItem deleteItem;
-  private Timeline scrolltimeline = new Timeline();
-  private double scrollDirection = 0;
 
   private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners =
       new HashMap<>();
 
   private static Gsehen instance;
+  private GsehenTreeTable treeTable = new GsehenTreeTable();
 
   {
     instance = this;
@@ -185,9 +175,9 @@ public class Gsehen extends Application {
       @Override
       public void handle(ActionEvent e) {
         trash = farmTreeView.getSelectionModel().getSelectedItem();
-        removeItem();
+        treeTable.removeItem();
         farmTreeView.getRoot().getChildren().clear();
-        fillTreeView();
+        treeTable.fillTreeView();
       }
     });
 
@@ -195,8 +185,8 @@ public class Gsehen extends Application {
     farmTreeView.setShowRoot(false);
     farmTreeView.setEditable(true);
     farmTreeView.setContextMenu(menu);
-    fillTreeView();
-    setupScrolling();
+    treeTable.fillTreeView();
+    treeTable.setupScrolling();
 
     TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
     tabPane.getTabs().remove(tabPane.getTabs().size() - 2, tabPane.getTabs().size());
@@ -209,54 +199,6 @@ public class Gsehen extends Application {
       }
     });
   }
-
-  // TODO: Code aufräumen!!!
-  private void setupScrolling() {
-    scrolltimeline.setCycleCount(Timeline.INDEFINITE);
-    scrolltimeline.getKeyFrames()
-        .add(new KeyFrame(Duration.millis(20), "Scoll", (ActionEvent e) -> {
-          dragScroll();
-        }));
-    farmTreeView.setOnDragExited(event -> {
-      if (event.getY() > 0) {
-        scrollDirection = 1.0 / farmTreeView.getExpandedItemCount();
-      } else {
-        scrollDirection = -1.0 / farmTreeView.getExpandedItemCount();
-      }
-      scrolltimeline.play();
-    });
-    farmTreeView.setOnDragEntered(event -> {
-      scrolltimeline.stop();
-    });
-    farmTreeView.setOnDragDone(event -> {
-      scrolltimeline.stop();
-    });
-
-  }
-
-  private void dragScroll() {
-    ScrollBar sb = getVerticalScrollbar();
-    if (sb != null) {
-      double newValue = sb.getValue() + scrollDirection;
-      newValue = Math.min(newValue, 1.0);
-      newValue = Math.max(newValue, 0.0);
-      sb.setValue(newValue);
-    }
-  }
-
-  private ScrollBar getVerticalScrollbar() {
-    ScrollBar result = null;
-    for (Node n : farmTreeView.lookupAll(".scroll-bar")) {
-      if (n instanceof ScrollBar) {
-        ScrollBar bar = (ScrollBar) n;
-        if (bar.getOrientation().equals(Orientation.VERTICAL)) {
-          result = bar;
-        }
-      }
-    }
-    return result;
-  }
-
 
   @SuppressWarnings("unchecked")
   private TreeTableRow<Map<String, Object>> rowFactory(TreeTableView<Map<String, Object>> view) {
@@ -305,12 +247,13 @@ public class Gsehen extends Application {
           event.setDropCompleted(true);
           farmTreeView.getSelectionModel().select(item);
           event.consume();
+
+          // TODO: Update der farmsList!
         } else {
           LOGGER.info(itemType + " can't be stack on " + destinationType);
         }
       }
     });
-
     return row;
   }
 
@@ -348,40 +291,7 @@ public class Gsehen extends Application {
     return result;
   }
 
-  /**
-   * Fills the TreeView with Farms, Fields and Plots.
-   */
-  public void fillTreeView() {
-    for (int i = 0; i < farmsList.size(); i++) {
-      farmItem = createItem(rootItem, farmsList.get(i).getName(),
-          farmsList.get(i).getClass().getSimpleName());
-
-      for (int j = 0; j < farmsList.get(i).getFields().size(); j++) {
-        fieldItem = createItem(farmItem, farmsList.get(i).getFields().get(j).getName(),
-            farmsList.get(i).getFields().get(j).getClass().getSimpleName());
-
-        for (int k = 0; k < farmsList.get(i).getFields().get(j).getPlots().size(); k++) {
-          plotItem =
-              createItem(fieldItem, farmsList.get(i).getFields().get(j).getPlots().get(k).getName(),
-                  farmsList.get(i).getFields().get(j).getPlots().get(k).getClass().getSimpleName());
-        }
-      }
-    }
-  }
-
-  private TreeItem<Map<String, Object>> createItem(TreeItem<Map<String, Object>> parent,
-      String name, String type) {
-    item = new TreeItem<>();
-    Map<String, Object> value = new HashMap<>();
-    value.put("name", name);
-    value.put("type", type);
-    item.setValue(value);
-    parent.getChildren().add(item);
-    item.setExpanded(true);
-    return item;
-  }
-
-  protected void addColumn(String label, String dataIndex) {
+  private void addColumn(String label, String dataIndex) {
     column = new TreeTableColumn<>(label);
     column.setPrefWidth(150);
     column.setCellValueFactory(
@@ -417,34 +327,10 @@ public class Gsehen extends Application {
           }
         }
         farmTreeView.getRoot().getChildren().clear();
-        fillTreeView();
+        treeTable.fillTreeView();
       }
     });
     farmTreeView.getColumns().add(column);
-  }
-
-  /**
-   * Removes an item (and his childs) from the TreeTableView.
-   */
-  public void removeItem() {
-    for (int i = 0; i < farmsList.size(); i++) {
-      if (trash.getValue().containsValue(farmsList.get(i).getName())) {
-        farmsList.remove(i);
-      } else {
-        for (int j = 0; j < farmsList.get(i).getFields().size(); j++) {
-          if (trash.getValue().containsValue(farmsList.get(i).getFields().get(j).getName())) {
-            farmsList.get(i).getFields().remove(j);
-          } else {
-            for (int k = 0; k < farmsList.get(i).getFields().get(j).getPlots().size(); k++) {
-              if (trash.getValue()
-                  .containsValue(farmsList.get(i).getFields().get(j).getPlots().get(k).getName())) {
-                farmsList.get(i).getFields().get(j).getPlots().remove(j);
-              }
-            }
-          }
-        }
-      }
-    }
   }
 
   @SuppressWarnings({"unused", "checkstyle:rightcurly"})
@@ -620,5 +506,13 @@ public class Gsehen extends Application {
 
   public List<Farm> getFarmsList() {
     return farmsList;
+  }
+
+  public TreeItem<Map<String, Object>> getRootItem() {
+    return rootItem;
+  }
+
+  public TreeItem<Map<String, Object>> getTrash() {
+    return trash;
   }
 }
