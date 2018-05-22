@@ -95,6 +95,18 @@ public class Field implements Drawable, DrawableParent {
     this.plots = plots;
   }
 
+  /**
+   * Setzt die Plots des Fields.
+   *
+   * @param plots - Die Plots des Fields
+   */
+  public void setPlots(Plot... plots) {
+    this.plots = new ArrayList<>();
+    for (Plot plot : plots) {
+      this.plots.add(plot);
+    }
+  }
+
   public double getArea() {
     return area;
   }

@@ -9,6 +9,7 @@ import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.GeoPoint;
+import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
 import de.hgu.gsehen.gui.view.Farms;
@@ -101,6 +102,7 @@ public class Gsehen extends Application {
   private TreeItem<Map<String, Object>> rootItem;
 
   private List<Farm> farmsList = new ArrayList<>();
+  private List<Farm> newFarmsList = new ArrayList<>();
   private ContextMenu menu = new ContextMenu();
   private MainController mainController;
   private MenuItem deleteItem;
@@ -248,11 +250,61 @@ public class Gsehen extends Application {
           farmTreeView.getSelectionModel().select(item);
           event.consume();
 
+          // String farmName;
+          // GeoPolygon farmGeo;
+          // Farm farm;
+          //
+          // String fieldName;
+          // GeoPolygon fieldGeo;
+          // Field field;
+          //
+          // String plotName;
+          // GeoPolygon plotGeo;
+          // Plot plot;
+
           // TODO: Update der farmsList!
+          // for (int i = 0; i < farmTreeView.getRoot().getChildren().size(); i++) {
+          //
+          // farmName = (String) farmTreeView.getRoot().getChildren().get(i).getValue().entrySet()
+          // .iterator().next().getValue();
+          // farmGeo = farmsList.get(i).getPolygon();
+          // farm = new Farm(farmName, farmGeo);
+          // System.out.println("Farm \"" + farmName + "\" created");
+          //
+          // for (int j = 0; j < farmTreeView.getRoot().getChildren().get(i).getChildren()
+          // .size(); j++) {
+          //
+          // fieldName = (String) farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
+          // .getValue().entrySet().iterator().next().getValue();
+          // fieldGeo = farmsList.get(i).getFields().get(j).getPolygon();
+          // field = new Field(fieldName, fieldGeo);
+          // farm.setFields(field);
+          // System.out.println("Field \"" + fieldName + "\" created");
+          //
+          // for (int k = 0; k < farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
+          // .getChildren().size(); k++) {
+          //
+          // plotName = (String) farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
+          // .getChildren().get(k).getValue().entrySet().iterator().next().getValue();
+          // plotGeo = farmsList.get(i).getFields().get(j).getPlots().get(k).getPolygon();
+          // plot = new Plot(plotName, plotGeo);
+          // field.setPlots(plot);
+          // System.out.println("Plot \"" + plotName + "\" created");
+          // }
+          // }
+          // newFarmsList.add(farm);
+          // System.out.println(farm.getName());
+          // }
         } else {
           LOGGER.info(itemType + " can't be stack on " + destinationType);
         }
       }
+
+//      farmsList.clear();
+//      System.out.println(farmsList);
+//      System.out.println(newFarmsList);
+//      farmsList.addAll(newFarmsList);
+
     });
     return row;
   }
