@@ -9,4 +9,6 @@ public interface Drawable {
   public String getName();
 
   public GeoPolygon getPolygon();
+
+  public GeoPolygon getPolygonByName(String name);
 }

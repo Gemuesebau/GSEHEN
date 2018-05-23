@@ -67,6 +67,12 @@ public class Farm implements Drawable, DrawableParent {
   public GeoPolygon getPolygon() {
     return polygon;
   }
+  
+  @Override
+  public GeoPolygon getPolygonByName(String name) {
+    this.name = name;
+    return polygon;
+  }
 
   public void setPolygon(GeoPolygon polygon) {
     this.polygon = polygon;
