@@ -5,6 +5,8 @@ import java.util.List;
 
 public class GeoPolygon {
 
+  private static final String POLYGON_MUST_HAVE_AT_LEAST_ONE_POINT =
+      "the polygon must have at least one point";
   private List<GeoPoint> geoPoints;
 
   public GeoPolygon() {
@@ -62,7 +64,7 @@ public class GeoPolygon {
    */
   public double getMinX() {
     if (geoPoints.isEmpty()) {
-      throw new IllegalArgumentException("the polygon must have at least one point");
+      throw new IllegalArgumentException(POLYGON_MUST_HAVE_AT_LEAST_ONE_POINT);
     }
     double result = geoPoints.get(0).getLng();
     for (int i = 1; i < geoPoints.size(); i++) {
@@ -81,7 +83,7 @@ public class GeoPolygon {
    */
   public double getMinY() {
     if (geoPoints.isEmpty()) {
-      throw new IllegalArgumentException("the polygon must have at least one point");
+      throw new IllegalArgumentException(POLYGON_MUST_HAVE_AT_LEAST_ONE_POINT);
     }
     double result = geoPoints.get(0).getLat();
     for (int i = 1; i < geoPoints.size(); i++) {
@@ -100,7 +102,7 @@ public class GeoPolygon {
    */
   public double getMaxX() {
     if (geoPoints.isEmpty()) {
-      throw new IllegalArgumentException("the polygon must have at least one point");
+      throw new IllegalArgumentException(POLYGON_MUST_HAVE_AT_LEAST_ONE_POINT);
     }
     double result = geoPoints.get(0).getLng();
     for (int i = 1; i < geoPoints.size(); i++) {
@@ -119,7 +121,7 @@ public class GeoPolygon {
    */
   public double getMaxY() {
     if (geoPoints.isEmpty()) {
-      throw new IllegalArgumentException("the polygon must have at least one point");
+      throw new IllegalArgumentException(POLYGON_MUST_HAVE_AT_LEAST_ONE_POINT);
     }
     double result = geoPoints.get(0).getLat();
     for (int i = 1; i < geoPoints.size(); i++) {

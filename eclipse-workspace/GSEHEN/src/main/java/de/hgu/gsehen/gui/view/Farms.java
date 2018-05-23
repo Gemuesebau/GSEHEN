@@ -89,21 +89,37 @@ public class Farms extends WebController implements GsehenEventListener<FarmData
     double maxX = -180;
     double maxY = -90;
     for (Drawable drawable : drawables) {
-      double drawableMinX = drawable.getPolygon().getMinX();
-      if (drawableMinX < minX) {
-        minX = drawableMinX;
+      try {
+        double drawableMinX = drawable.getPolygon().getMinX();
+        if (drawableMinX < minX) {
+          minX = drawableMinX;
+        }
+      } catch (IllegalArgumentException e) {
+        // just skip it
       }
-      double drawableMinY = drawable.getPolygon().getMinY();
-      if (drawableMinY < minY) {
-        minY = drawableMinY;
+      try {
+        double drawableMinY = drawable.getPolygon().getMinY();
+        if (drawableMinY < minY) {
+          minY = drawableMinY;
+        }
+      } catch (IllegalArgumentException e) {
+        // just skip it
       }
-      double drawableMaxX = drawable.getPolygon().getMaxX();
-      if (drawableMaxX > maxX) {
-        maxX = drawableMaxX;
+      try {
+        double drawableMaxX = drawable.getPolygon().getMaxX();
+        if (drawableMaxX > maxX) {
+          maxX = drawableMaxX;
+        }
+      } catch (IllegalArgumentException e) {
+        // just skip it
       }
-      double drawableMaxY = drawable.getPolygon().getMaxY();
-      if (drawableMaxY > maxY) {
-        maxY = drawableMaxY;
+      try {
+        double drawableMaxY = drawable.getPolygon().getMaxY();
+        if (drawableMaxY > maxY) {
+          maxY = drawableMaxY;
+        }
+      } catch (IllegalArgumentException e) {
+        // just skip it
       }
     }
     return new Pair<>(new GeoPoint(minY, minX), new GeoPoint(maxY, maxX));
@@ -118,7 +134,8 @@ public class Farms extends WebController implements GsehenEventListener<FarmData
       farmsArray[i++] = farm;
     }
     drawables = flattenDrawables(farmsArray);
-    lastViewPort = findBounds(drawables);
+    Pair<GeoPoint> viewPort = event.getViewPort();
+    lastViewPort = viewPort != null ? viewPort : findBounds(drawables);
     reload();
   }
 

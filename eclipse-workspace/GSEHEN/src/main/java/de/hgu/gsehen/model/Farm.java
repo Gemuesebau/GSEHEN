@@ -10,24 +10,28 @@ public class Farm implements Drawable, DrawableParent {
   private GeoPolygon polygon;
   private List<Field> fields;
 
-  public Farm() {}
+  public Farm() {
+    fields = new ArrayList<>();
+  }
 
   /**
    * Konstruktor für eine Farm, der direkt den Namen und die Umrisse setzt. Felder werden mit
-   * de.hgu.gsehen.model.Farm.setFields(Field...) gesetzt.
+   * de.hgu.gsehen.model.Farm.setFields(Field...), oder
+   * de.hgu.gsehen.model.Farm.getFields().add(...) gesetzt.
    *
    * @see de.hgu.gsehen.model.Farm.setFields
    * @param name der Name der Farm
    * @param polygon die Umrisse der Hauptgebäudeanlage, nicht der Felder!
    */
   public Farm(String name, GeoPolygon polygon) {
+    this();
     setNameAndPolygon(name, polygon);
   }
 
   @Override
   public void setNameAndPolygon(String name, GeoPolygon polygon) {
-    this.name = name;
-    this.polygon = polygon;
+    setName(name);
+    setPolygon(polygon);
   }
 
   public String getName() {
@@ -35,7 +39,16 @@ public class Farm implements Drawable, DrawableParent {
   }
 
   public void setName(String name) {
-    this.name = name;
+    this.name = name != null ? name : "Unbenannt"; // FIXME localize
+  }
+
+  @Override
+  public GeoPolygon getPolygon() {
+    return polygon;
+  }
+
+  public void setPolygon(GeoPolygon polygon) {
+    this.polygon = polygon != null ? polygon : new GeoPolygon();
   }
 
   public List<Field> getFields() {
@@ -64,18 +77,9 @@ public class Farm implements Drawable, DrawableParent {
   }
 
   @Override
-  public GeoPolygon getPolygon() {
-    return polygon;
-  }
-  
-  @Override
   public GeoPolygon getPolygonByName(String name) {
-    this.name = name;
+    this.name = name; // FIXME what's this?!
     return polygon;
-  }
-
-  public void setPolygon(GeoPolygon polygon) {
-    this.polygon = polygon;
   }
 
   @Override
