@@ -15,7 +15,9 @@ public class Field implements Drawable, DrawableParent {
   private List<Plot> plots;
   private double area;
 
-  public Field() {}
+  public Field() {
+    plots = new ArrayList<>();
+  }
 
   /**
    * Konstruktor für ein Feld, der direkt Name, Umrisse und enthaltene Plots setzt.
@@ -25,17 +27,32 @@ public class Field implements Drawable, DrawableParent {
    * @param plots die enthaltenen Plots
    */
   public Field(String name, GeoPolygon polygon, Plot... plots) {
+    this();
     setNameAndPolygon(name, polygon);
-    this.plots = new ArrayList<>();
-    for (Plot plot : plots) {
-      this.plots.add(plot);
-    }
+    setPlots(plots);
   }
 
   @Override
   public void setNameAndPolygon(String name, GeoPolygon polygon) {
-    this.name = name;
-    this.polygon = polygon;
+    setName(name);
+    setPolygon(polygon);
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name != null ? name : "Unbenannt"; // FIXME localize
+  }
+
+  @Override
+  public GeoPolygon getPolygon() {
+    return polygon;
+  }
+
+  public void setPolygon(GeoPolygon polygon) {
+    this.polygon = polygon != null ? polygon : new GeoPolygon();
   }
 
   public WeatherDataSource getWeatherDataSource() {
@@ -68,23 +85,6 @@ public class Field implements Drawable, DrawableParent {
 
   public void setLocation(Location location) {
     this.location = location;
-  }
-
-  @Override
-  public GeoPolygon getPolygon() {
-    return polygon;
-  }
-
-  public void setPolygon(GeoPolygon polygon) {
-    this.polygon = polygon;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public List<Plot> getPlots() {

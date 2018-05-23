@@ -9,7 +9,6 @@ import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.GeoPoint;
-import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
 import de.hgu.gsehen.gui.view.Farms;
@@ -102,7 +101,6 @@ public class Gsehen extends Application {
   private TreeItem<Map<String, Object>> rootItem;
 
   private List<Farm> farmsList = new ArrayList<>();
-  private List<Farm> newFarmsList = new ArrayList<>();
   private ContextMenu menu = new ContextMenu();
   private MainController mainController;
   private MenuItem deleteItem;
@@ -488,19 +486,47 @@ public class Gsehen extends Application {
   public void objectAdded(Drawable object) {
     if (object instanceof Farm) {
       farmsList.add((Farm) object);
+      LOGGER.info("Added farm " + object.getName());
     } else if (object instanceof Field) {
-      if (!farmsList.isEmpty()) {
-        farmsList.get(0).getFields().add((Field) object);
-      }
+      getNewFieldsFarm().getFields().add((Field) object);
+      LOGGER.info("Added field " + object.getName());
     } else if (object instanceof Plot) {
-      if (!farmsList.isEmpty()) {
-        List<Field> fields = farmsList.get(0).getFields();
-        if (!fields.isEmpty()) {
-          fields.get(0).getPlots().add((Plot) object);
-        }
-      }
+      getNewPlotsField(getNewFieldsFarm()).getPlots().add((Plot) object);
+      LOGGER.info("Added plot " + object.getName());
     }
     sendFarmDataChanged(object);
+  }
+
+  private Field getNewPlotsField(Farm farm) {
+    String newPlotsFieldName = mainBundle.getString("gui.control.objectTree.newPlotsFieldName");
+    Field newPlotsField = null;
+    for (Field field : farm.getFields()) {
+      if (field.getName().equals(newPlotsFieldName)) {
+        newPlotsField = field;
+        break;
+      }
+    }
+    if (newPlotsField == null) {
+      newPlotsField = new Field(newPlotsFieldName, null);
+      farm.getFields().add(newPlotsField);
+    }
+    return newPlotsField;
+  }
+
+  private Farm getNewFieldsFarm() {
+    String newFieldsFarmName = mainBundle.getString("gui.control.objectTree.newFieldsFarmName");
+    Farm newFieldsFarm = null;
+    for (Farm farm : farmsList) {
+      if (farm.getName().equals(newFieldsFarmName)) {
+        newFieldsFarm = farm;
+        break;
+      }
+    }
+    if (newFieldsFarm == null) {
+      newFieldsFarm = new Farm(newFieldsFarmName, null);
+      farmsList.add(newFieldsFarm);
+    }
+    return newFieldsFarm;
   }
 
   private void sendFarmDataChanged(Drawable object) {
