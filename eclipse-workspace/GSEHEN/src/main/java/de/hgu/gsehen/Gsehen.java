@@ -370,7 +370,6 @@ public class Gsehen extends Application {
     
     if (column.getText().equals(mainBundle.getString("treetableview.name"))) {
       column.setPrefWidth(200);
-
       column.setOnEditCommit(new EventHandler<CellEditEvent<Map<String, Object>, String>>() {
         @Override
         public void handle(CellEditEvent<Map<String, Object>, String> event) {
