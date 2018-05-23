@@ -16,6 +16,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TitledPane;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -39,6 +40,8 @@ public class MainController {
   // Views
   @FXML
   private Accordion accordion;
+  @FXML
+  private TitledPane fieldsPane;
   @FXML
   private TabPane tabPane;
   @FXML

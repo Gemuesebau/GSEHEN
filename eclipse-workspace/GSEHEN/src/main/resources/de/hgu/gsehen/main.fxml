@@ -41,9 +41,9 @@
 				</MenuBar>
 			</top>
 			<center>
-				<Accordion fx:id="accordion" BorderPane.alignment="CENTER">
+				<Accordion fx:id="accordion" BorderPane.alignment="CENTER" expandedPane="$fieldsPane">
 					<panes>
-						<TitledPane animated="false" text="%accordion.pane.fields">
+						<TitledPane fx:id="fieldsPane" animated="false" text="%accordion.pane.fields">
 							<content>
 								<AnchorPane prefHeight="200.0" prefWidth="200.0">
                            <children>
@@ -52,7 +52,7 @@
 								</AnchorPane>
 							</content>
 						</TitledPane>
-						<TitledPane animated="false" text="%accordion.pane.weather.stations">
+						<TitledPane animated="false" expanded="false" text="%accordion.pane.weather.stations">
 							<content>
 								<AnchorPane minHeight="0.0" minWidth="0.0">
 									<children>
@@ -62,7 +62,7 @@
 								</AnchorPane>
 							</content>
 						</TitledPane>
-						<TitledPane animated="false" text="%accordion.pane.settings">
+						<TitledPane animated="false" expanded="false" text="%accordion.pane.settings">
 							<content>
 								<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
 									<children>
@@ -72,7 +72,7 @@
 								</AnchorPane>
 							</content>
 						</TitledPane>
-						<TitledPane animated="false" text="%accordion.pane.farm.company">
+						<TitledPane animated="false" expanded="false" text="%accordion.pane.farm.company">
 							<content>
 								<AnchorPane prefHeight="200.0" prefWidth="200.0">
 									<children>

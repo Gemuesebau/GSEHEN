@@ -4,7 +4,6 @@ import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
 import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
 import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
-
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
@@ -354,7 +353,11 @@ public class Gsehen extends Application {
 
   private void addColumn(String label, String dataIndex) {
     column = new TreeTableColumn<>(label);
-    column.setPrefWidth(150);
+    if (column.getText().equals(mainBundle.getString("treetableview.name"))) {
+      column.setPrefWidth(200);
+    } else {
+      column.setPrefWidth(100);
+    }
     column.setCellValueFactory(
         (TreeTableColumn.CellDataFeatures<Map<String, Object>, String> param) -> {
           ObservableValue<String> result = new ReadOnlyStringWrapper("");
