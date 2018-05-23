@@ -2,6 +2,8 @@ package de.hgu.gsehen.gui;
 
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.model.Farm;
+import de.hgu.gsehen.model.Field;
+import de.hgu.gsehen.model.Plot;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -87,18 +89,18 @@ public class GsehenTreeTable {
     farmsList = Gsehen.getInstance().getFarmsList();
     rootItem = Gsehen.getInstance().getRootItem();
 
-    for (int i = 0; i < farmsList.size(); i++) {
-      farmItem = createItem(rootItem, farmsList.get(i).getName(),
-          farmsList.get(i).getClass().getSimpleName());
+    for (Farm farm : farmsList) {
+      farmItem = createItem(rootItem, farm.getName(), farm.getClass().getSimpleName());
 
-      for (int j = 0; j < farmsList.get(i).getFields().size(); j++) {
-        fieldItem = createItem(farmItem, farmsList.get(i).getFields().get(j).getName(),
-            farmsList.get(i).getFields().get(j).getClass().getSimpleName());
+      if (farm.getFields() != null) {
+        for (Field field : farm.getFields()) {
+          fieldItem = createItem(farmItem, field.getName(), field.getClass().getSimpleName());
 
-        for (int k = 0; k < farmsList.get(i).getFields().get(j).getPlots().size(); k++) {
-          plotItem =
-              createItem(fieldItem, farmsList.get(i).getFields().get(j).getPlots().get(k).getName(),
-                  farmsList.get(i).getFields().get(j).getPlots().get(k).getClass().getSimpleName());
+          if (field.getPlots() != null) {
+            for (Plot plot : field.getPlots()) {
+              plotItem = createItem(fieldItem, plot.getName(), plot.getClass().getSimpleName());
+            }
+          }
         }
       }
     }

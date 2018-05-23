@@ -77,6 +77,12 @@ public class Farm implements Drawable, DrawableParent {
   }
 
   @Override
+  public GeoPolygon getPolygonByName(String name) {
+    this.name = name; // FIXME what's this?!
+    return polygon;
+  }
+
+  @Override
   public void forAllChildDrawables(Consumer<Drawable> handler) {
     if (fields == null) {
       return;
