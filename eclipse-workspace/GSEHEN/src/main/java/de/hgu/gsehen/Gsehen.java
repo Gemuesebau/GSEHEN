@@ -4,6 +4,7 @@ import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
 import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
 import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
+
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
@@ -353,11 +354,7 @@ public class Gsehen extends Application {
 
   private void addColumn(String label, String dataIndex) {
     column = new TreeTableColumn<>(label);
-    if (column.getText().equals(mainBundle.getString("treetableview.name"))) {
-      column.setPrefWidth(200);
-    } else {
-      column.setPrefWidth(100);
-    }
+    
     column.setCellValueFactory(
         (TreeTableColumn.CellDataFeatures<Map<String, Object>, String> param) -> {
           ObservableValue<String> result = new ReadOnlyStringWrapper("");
@@ -368,32 +365,40 @@ public class Gsehen extends Application {
         });
 
     column.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn());
+    
+    if (column.getText().equals(mainBundle.getString("treetableview.name"))) {
+      column.setPrefWidth(200);
 
-    column.setOnEditCommit(new EventHandler<CellEditEvent<Map<String, Object>, String>>() {
-      @Override
-      public void handle(CellEditEvent<Map<String, Object>, String> event) {
-        for (int i = 0; i < farmTreeView.getRoot().getChildren().size(); i++) {
-          if (farmsList.get(i).getName().equals(event.getOldValue())) {
-            farmsList.get(i).setName(event.getNewValue());
-          }
-          for (int j = 0; j < farmTreeView.getRoot().getChildren().get(i).getChildren()
-              .size(); j++) {
-            if (farmsList.get(i).getFields().get(j).getName().equals(event.getOldValue())) {
-              farmsList.get(i).getFields().get(j).setName(event.getNewValue());
+      column.setOnEditCommit(new EventHandler<CellEditEvent<Map<String, Object>, String>>() {
+        @Override
+        public void handle(CellEditEvent<Map<String, Object>, String> event) {
+          for (int i = 0; i < farmTreeView.getRoot().getChildren().size(); i++) {
+            if (farmsList.get(i).getName().equals(event.getOldValue())) {
+              farmsList.get(i).setName(event.getNewValue());
             }
-            for (int k = 0; k < farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
-                .getChildren().size(); k++) {
-              if (farmsList.get(i).getFields().get(j).getPlots().get(k).getName()
-                  .equals(event.getOldValue())) {
-                farmsList.get(i).getFields().get(j).getPlots().get(k).setName(event.getNewValue());
+            for (int j = 0; j < farmTreeView.getRoot().getChildren().get(i).getChildren()
+                .size(); j++) {
+              if (farmsList.get(i).getFields().get(j).getName().equals(event.getOldValue())) {
+                farmsList.get(i).getFields().get(j).setName(event.getNewValue());
+              }
+              for (int k = 0; k < farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
+                  .getChildren().size(); k++) {
+                if (farmsList.get(i).getFields().get(j).getPlots().get(k).getName()
+                    .equals(event.getOldValue())) {
+                  farmsList.get(i).getFields().get(j).getPlots().get(k)
+                      .setName(event.getNewValue());
+                }
               }
             }
           }
+          farmTreeView.getRoot().getChildren().clear();
+          treeTable.fillTreeView();
         }
-        farmTreeView.getRoot().getChildren().clear();
-        treeTable.fillTreeView();
-      }
-    });
+      });
+    } else {
+      column.setPrefWidth(100);
+      column.setEditable(false);
+    }
     farmTreeView.getColumns().add(column);
   }
 
