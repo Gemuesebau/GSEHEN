@@ -267,31 +267,20 @@ public class GsehenTreeTable {
       column.setOnEditCommit(new EventHandler<CellEditEvent<Drawable, String>>() {
         @Override
         public void handle(CellEditEvent<Drawable, String> event) {
-          // TODO: gleich heißende Objekte werden aktuell zusammen umbenannt.
-
-          // TreeItem<Map<String, Object>> item =
-          // farmTreeView.getSelectionModel().getSelectedItem();
-          // item.getClass().getSimpleName().replaceAll("", event.getNewValue());
-          // Gsehen.getInstance().saveUserData();
-
-          for (int i = 0; i < farmTreeView.getRoot().getChildren().size(); i++) {
-            if (farmsList.get(i).getName().equals(event.getOldValue())
-                && event.getRowValue() == farmTreeView.getSelectionModel().getSelectedItem()) {
-              farmsList.get(i).setName(event.getNewValue());
+          for (Farm farm : farmsList) {
+            if (farm.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
+                .getSelectedItem().getValue().getClass().getSimpleName().equals("Farm")) {
+              farm.setName(event.getNewValue());
             }
-            for (int j = 0; j < farmTreeView.getRoot().getChildren().get(i).getChildren()
-                .size(); j++) {
-              if (farmsList.get(i).getFields().get(j).getName().equals(event.getOldValue())
-                  && event.getRowValue() == farmTreeView.getSelectionModel().getSelectedItem()) {
-                farmsList.get(i).getFields().get(j).setName(event.getNewValue());
+            for (Field field : farm.getFields()) {
+              if (field.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
+                  .getSelectedItem().getValue().getClass().getSimpleName().equals("Field")) {
+                field.setName(event.getNewValue());
               }
-              for (int k = 0; k < farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
-                  .getChildren().size(); k++) {
-                if (farmsList.get(i).getFields().get(j).getPlots().get(k).getName()
-                    .equals(event.getOldValue())
-                    && event.getRowValue() == farmTreeView.getSelectionModel().getSelectedItem()) {
-                  farmsList.get(i).getFields().get(j).getPlots().get(k)
-                      .setName(event.getNewValue());
+              for (Plot plot : field.getPlots()) {
+                if (plot.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
+                    .getSelectedItem().getValue().getClass().getSimpleName().equals("Plot")) {
+                  plot.setName(event.getNewValue());
                 }
               }
             }
