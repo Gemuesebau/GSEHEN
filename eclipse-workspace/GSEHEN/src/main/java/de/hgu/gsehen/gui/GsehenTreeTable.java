@@ -157,7 +157,7 @@ public class GsehenTreeTable {
           for (int i = 0; i < farmTreeView.getRoot().getChildren().size(); i++) {
 
             farmName = (String) farmTreeView.getRoot().getChildren().get(i).getValue().getName();
-            farmGeo = farmsList.iterator().next().getPolygonByName(farmName);
+            farmGeo = farmTreeView.getRoot().getChildren().get(i).getValue().getPolygon();
             farm = new Farm(farmName, farmGeo);
 
             for (int j = 0; j < farmTreeView.getRoot().getChildren().get(i).getChildren()
@@ -165,8 +165,8 @@ public class GsehenTreeTable {
 
               fieldName = (String) farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
                   .getValue().getName();
-              fieldGeo = farmsList.iterator().next().getFields().iterator().next()
-                  .getPolygonByName(fieldName);
+              fieldGeo = farmTreeView.getRoot().getChildren().get(i).getChildren().get(j).getValue()
+                  .getPolygon();
               field = new Field(fieldName, fieldGeo);
 
               if (j == 0) {
@@ -181,8 +181,8 @@ public class GsehenTreeTable {
 
                 plotName = (String) farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
                     .getChildren().get(k).getValue().getName();
-                plotGeo = farmsList.iterator().next().getFields().iterator().next().getPlots()
-                    .iterator().next().getPolygonByName(plotName);
+                plotGeo = farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
+                    .getChildren().get(k).getValue().getPolygon();
                 plot = new Plot(plotName, plotGeo);
 
                 if (k == 0) {

@@ -87,12 +87,6 @@ public class Field implements Drawable, DrawableParent {
     this.location = location;
   }
 
-  @Override
-  public GeoPolygon getPolygonByName(String name) {
-    this.name = name; // FIXME what's this?!
-    return polygon;
-  }
-
   public List<Plot> getPlots() {
     return plots;
   }

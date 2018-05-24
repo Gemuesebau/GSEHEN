@@ -12,5 +12,4 @@ public interface Drawable {
 
   public GeoPolygon getPolygon();
 
-  public GeoPolygon getPolygonByName(String name);
 }
