@@ -1,6 +1,8 @@
 package de.hgu.gsehen.gui;
 
 import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.event.FarmDataChanged;
+import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
@@ -33,7 +35,16 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.util.Duration;
 
-public class GsehenTreeTable {
+public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
+  private Gsehen gsehenInstance;
+  private static GsehenTreeTable instance;
+
+  {
+    instance = this;
+    gsehenInstance = Gsehen.getInstance();
+    gsehenInstance.registerForEvent(FarmDataChanged.class, instance);
+  }
+
   protected static final ResourceBundle mainBundle =
       ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
   private static final DataFormat SERIALIZED_MIME_TYPE =
@@ -60,10 +71,12 @@ public class GsehenTreeTable {
   private ContextMenu menu = new ContextMenu();
   private MenuItem deleteItem;
 
-  private static GsehenTreeTable instance;
-
-  {
-    instance = this;
+  /**
+   * Constructs a new farm view in the given WebView.
+   *
+   */
+  public GsehenTreeTable() {
+    super();
   }
 
   /**
@@ -75,8 +88,8 @@ public class GsehenTreeTable {
         (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
     rootItem = new TreeItem<Drawable>();
     farmTreeView.setRowFactory(this::rowFactory);
-    addColumn(mainBundle.getString("treetableview.name"), "name");
-    addColumn(mainBundle.getString("treetableview.type"), "type");
+    addColumn(mainBundle.getString("treetableview.name"), "name", getClass());
+    addColumn(mainBundle.getString("treetableview.type"), "type", getClass());
 
     deleteItem = new MenuItem(mainBundle.getString("treeview.remove"));
     menu.getItems().add(deleteItem);
@@ -84,7 +97,7 @@ public class GsehenTreeTable {
       @Override
       public void handle(ActionEvent e) {
         trash = farmTreeView.getSelectionModel().getSelectedItem();
-        removeItem();
+        removeItem(GsehenTreeTable.class);
         farmTreeView.getRoot().getChildren().clear();
         fillTreeView();
       }
@@ -132,6 +145,8 @@ public class GsehenTreeTable {
         Drawable map = row.getTreeItem().getValue();
         String destinationType = map.getClass().getSimpleName();
 
+        Drawable object = null;
+
         if (itemType.equals("Plot") && destinationType.equals("Field")
             || itemType.equals("Field") && destinationType.equals("Farm")) {
           item.getParent().getChildren().remove(item);
@@ -159,6 +174,7 @@ public class GsehenTreeTable {
             farmName = (String) farmTreeView.getRoot().getChildren().get(i).getValue().getName();
             farmGeo = farmTreeView.getRoot().getChildren().get(i).getValue().getPolygon();
             farm = new Farm(farmName, farmGeo);
+            object = farm;
 
             for (int j = 0; j < farmTreeView.getRoot().getChildren().get(i).getChildren()
                 .size(); j++) {
@@ -168,6 +184,7 @@ public class GsehenTreeTable {
               fieldGeo = farmTreeView.getRoot().getChildren().get(i).getChildren().get(j).getValue()
                   .getPolygon();
               field = new Field(fieldName, fieldGeo);
+              object = field;
 
               if (j == 0) {
                 farm.setFields(field);
@@ -184,6 +201,7 @@ public class GsehenTreeTable {
                 plotGeo = farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
                     .getChildren().get(k).getValue().getPolygon();
                 plot = new Plot(plotName, plotGeo);
+                object = plot;
 
                 if (k == 0) {
                   field.setPlots(plot);
@@ -200,7 +218,7 @@ public class GsehenTreeTable {
         }
         farmsList.clear();
         farmsList.addAll(newFarmsList);
-        Gsehen.getInstance().saveUserData();
+        gsehenInstance.sendFarmDataChanged(object, null);
       }
     });
     return row;
@@ -246,7 +264,8 @@ public class GsehenTreeTable {
    * @param label - Name of the column.
    * @param dataIndex - Content of the column.
    */
-  public void addColumn(String label, String dataIndex) {
+  public void addColumn(String label, String dataIndex,
+      Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
     column = new TreeTableColumn<>(label);
 
     column.setCellValueFactory((TreeTableColumn.CellDataFeatures<Drawable, String> param) -> {
@@ -267,26 +286,31 @@ public class GsehenTreeTable {
       column.setOnEditCommit(new EventHandler<CellEditEvent<Drawable, String>>() {
         @Override
         public void handle(CellEditEvent<Drawable, String> event) {
+          Drawable object = null;
           for (Farm farm : farmsList) {
             if (farm.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
                 .getSelectedItem().getValue().getClass().getSimpleName().equals("Farm")) {
               farm.setName(event.getNewValue());
+              object = farm;
             }
             for (Field field : farm.getFields()) {
               if (field.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
                   .getSelectedItem().getValue().getClass().getSimpleName().equals("Field")) {
                 field.setName(event.getNewValue());
+                object = field;
               }
               for (Plot plot : field.getPlots()) {
                 if (plot.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
                     .getSelectedItem().getValue().getClass().getSimpleName().equals("Plot")) {
                   plot.setName(event.getNewValue());
+                  object = plot;
                 }
               }
             }
           }
           farmTreeView.getRoot().getChildren().clear();
           fillTreeView();
+          gsehenInstance.sendFarmDataChanged(object, skipClass);
         }
       });
     } else {
@@ -378,22 +402,27 @@ public class GsehenTreeTable {
   /**
    * Removes an item (and his childs) from the TreeTableView.
    */
-  public void removeItem() {
+  public void removeItem(Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
     List<Farm> delFarm = new ArrayList<Farm>();
     List<Field> delField = new ArrayList<Field>();
     List<Plot> delPlot = new ArrayList<Plot>();
 
+    Drawable object = null;
+
     for (Farm farm : farmsList) {
       if (trash.getValue().getName().equals(farm.getName())) {
         delFarm.add(farm);
+        object = farm;
       } else {
         for (Field field : farm.getFields()) {
           if (trash.getValue().getName().equals(field.getName())) {
             delField.add(field);
+            object = field;
           } else {
             for (Plot plot : field.getPlots()) {
               if (trash.getValue().getName().equals(plot.getName())) {
                 delPlot.add(plot);
+                object = plot;
               }
             }
           }
@@ -403,6 +432,7 @@ public class GsehenTreeTable {
       farm.getFields().removeAll(delField);
     }
     farmsList.removeAll(delFarm);
+    gsehenInstance.sendFarmDataChanged(object, skipClass);
   }
 
   public static GsehenTreeTable getInstance() {
@@ -412,5 +442,8 @@ public class GsehenTreeTable {
   public TreeTableView<Drawable> getFarmTreeView() {
     return farmTreeView;
   }
+
+  @Override
+  public void handle(FarmDataChanged event) {}
 
 }

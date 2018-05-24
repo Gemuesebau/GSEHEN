@@ -74,7 +74,7 @@ public class Gsehen extends Application {
 
   private static Maps maps;
   private static Farms farms;
-  private GsehenTreeTable treeTable = new GsehenTreeTable();
+  private GsehenTreeTable treeTable;
   private List<Farm> farmsList = new ArrayList<>();
 
   private Scene scene;
@@ -137,6 +137,7 @@ public class Gsehen extends Application {
 
     farms = new Farms(this, (WebView) scene.lookup(FARMS_WEB_VIEW_ID));
 
+    treeTable = new GsehenTreeTable();
     treeTable.addFarmTreeView();
 
     TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
@@ -298,26 +299,31 @@ public class Gsehen extends Application {
     return newFieldsFarm;
   }
 
-  private void sendFarmDataChanged(Drawable object,
+  /**
+   * //TODO.
+   * 
+   * @param object - .
+   * @param skipClass - .
+   */
+  public void sendFarmDataChanged(Drawable object,
       Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
     Pair<GeoPoint> pair =
         new Pair<>(new GeoPoint(object.getPolygon().getMinY(), object.getPolygon().getMinX()),
             new GeoPoint(object.getPolygon().getMaxY(), object.getPolygon().getMaxX()));
     notifyEventListeners(() -> {
       FarmDataChanged event = new FarmDataChanged();
-      System.out.println(farmsList);
       event.setFarms(farmsList);
       event.setViewPort(pair);
       return event;
     }, skipClass);
-    GsehenTreeTable.getInstance().getFarmTreeView().getRoot().getChildren().clear();
-    treeTable.fillTreeView();
   }
 
   /**
    * Notifies listeners registered for the (type of) event supplied by the given supplier.
    *
-   * <p>Is currently also called from JS (.../resources/de/hgu/gsehen/js/loadUserData.js).</p>
+   * <p>
+   * Is currently also called from JS (.../resources/de/hgu/gsehen/js/loadUserData.js).
+   * </p>
    *
    * @param eventSupplier supplier for the actual event to be sent to the registered listeners
    * @param skipClass a listener class that shall be skipped when iterating the listeners, or null
