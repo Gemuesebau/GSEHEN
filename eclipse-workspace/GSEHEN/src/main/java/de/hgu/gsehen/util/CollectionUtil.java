@@ -2,6 +2,8 @@ package de.hgu.gsehen.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class CollectionUtil {
 
@@ -22,4 +24,18 @@ public class CollectionUtil {
     list.add(listValue);
   }
 
+
+  /**
+   * Creates a map that contains the given classes as values, mapped by their respective "simpleName".
+   *
+   * @param clazzes the Class objects to map
+   * @return a map containing the given classes, by their respective simple names
+   */
+  public static Map<String, Class<?>> simpleClassMap(Class<?>[] clazzes) {
+    Map<String, Class<?>> result = new TreeMap<>();
+    for (Class<?> clazz : clazzes) {
+      result.put(clazz.getSimpleName(), clazz);
+    }
+    return result;
+  }
 }
