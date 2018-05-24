@@ -1,6 +1,8 @@
 package de.hgu.gsehen.gui.view;
 
 import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.event.FarmDataChanged;
+import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
@@ -17,7 +19,7 @@ import javafx.scene.web.WebView;
  * @author AT
  */
 @SuppressWarnings({"checkstyle:commentsindentation"})
-public class Maps extends WebController {
+public class Maps extends WebController implements GsehenEventListener<FarmDataChanged> {
   private static final Logger LOGGER = Logger.getLogger(Maps.class.getName());
 
   @Override
@@ -32,6 +34,7 @@ public class Maps extends WebController {
    */
   public Maps(Gsehen application, WebView webView) {
     super(application, webView);
+    application.registerForEvent(FarmDataChanged.class, this);
   }
 
   /**
@@ -76,7 +79,7 @@ public class Maps extends WebController {
         Drawable object =
             (Drawable)typesMap.get(typeKey).newInstance();
         object.setNameAndPolygon(name, polygon);
-        application.objectAdded(object);
+        application.objectAdded(object, getClass());
       }
     }
     catch (Exception exception) {
@@ -104,6 +107,11 @@ public class Maps extends WebController {
       typesMap.put(clazz.getSimpleName(), clazz);
     }
     return typesMap;
+  }
+
+  @Override
+  public void handle(FarmDataChanged event) {
+    // FIXME Polygone löschen, die nicht mehr da sind, etc.
   }
 
 //  private String getBundleString(String key) {

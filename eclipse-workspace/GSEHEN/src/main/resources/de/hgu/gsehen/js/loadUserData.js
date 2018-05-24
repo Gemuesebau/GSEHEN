@@ -74,4 +74,4 @@ instance.notifyEventListeners(function(){
     event.setFarms(farms);
     event.setViewPort(new Pair(new GeoPoint(bounds.minY, bounds.minX), new GeoPoint(bounds.maxY, bounds.maxX)));
     return event;
-});
+}, null);

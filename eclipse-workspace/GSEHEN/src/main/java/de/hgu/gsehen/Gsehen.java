@@ -251,7 +251,8 @@ public class Gsehen extends Application {
   }
 
   @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
-  public void objectAdded(Drawable object) {
+  public void objectAdded(Drawable object,
+      Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
     if (object instanceof Farm) {
       farmsList.add((Farm) object);
       LOGGER.info("Added farm " + object.getName());
@@ -262,7 +263,7 @@ public class Gsehen extends Application {
       getNewPlotsField(getNewFieldsFarm()).getPlots().add((Plot) object);
       LOGGER.info("Added plot " + object.getName());
     }
-    sendFarmDataChanged(object);
+    sendFarmDataChanged(object, skipClass);
   }
 
   private Field getNewPlotsField(Farm farm) {
@@ -297,7 +298,8 @@ public class Gsehen extends Application {
     return newFieldsFarm;
   }
 
-  private void sendFarmDataChanged(Drawable object) {
+  private void sendFarmDataChanged(Drawable object,
+      Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
     Pair<GeoPoint> pair =
         new Pair<>(new GeoPoint(object.getPolygon().getMinY(), object.getPolygon().getMinX()),
             new GeoPoint(object.getPolygon().getMaxY(), object.getPolygon().getMaxX()));
@@ -307,17 +309,29 @@ public class Gsehen extends Application {
       event.setFarms(farmsList);
       event.setViewPort(pair);
       return event;
-    });
+    }, skipClass);
     GsehenTreeTable.getInstance().getFarmTreeView().getRoot().getChildren().clear();
     treeTable.fillTreeView();
   }
 
-  @SuppressWarnings({"checkstyle:javadocmethod", "unchecked"})
-  public <T extends GsehenEvent> void notifyEventListeners(Supplier<T> eventSupplier) {
+  /**
+   * Notifies listeners registered for the (type of) event supplied by the given supplier.
+   *
+   * <p>Is currently also called from JS (.../resources/de/hgu/gsehen/js/loadUserData.js).</p>
+   *
+   * @param eventSupplier supplier for the actual event to be sent to the registered listeners
+   * @param skipClass a listener class that shall be skipped when iterating the listeners, or null
+   */
+  @SuppressWarnings({"unchecked"})
+  public <T extends GsehenEvent> void notifyEventListeners(Supplier<T> eventSupplier,
+      Class<? extends GsehenEventListener<T>> skipClass) {
     T event = eventSupplier.get();
     List<GsehenEventListener<?>> farmDataChgListeners = eventListeners.get(event.getClass());
     if (farmDataChgListeners != null) {
       farmDataChgListeners.forEach(listener -> {
+        if (skipClass != null && skipClass.equals(listener.getClass())) {
+          return;
+        }
         ((GsehenEventListener<T>) listener).handle(event);
       });
     }
