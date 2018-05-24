@@ -385,17 +385,14 @@ public class GsehenTreeTable {
 
     for (Farm farm : farmsList) {
       if (trash.getValue().getName().equals(farm.getName())) {
-        System.out.println(farm.getName());
         delFarm.add(farm);
       } else {
         for (Field field : farm.getFields()) {
           if (trash.getValue().getName().equals(field.getName())) {
-            System.out.println(field.getName());
             delField.add(field);
           } else {
             for (Plot plot : field.getPlots()) {
               if (trash.getValue().getName().equals(plot.getName())) {
-                System.out.println(plot.getName());
                 delPlot.add(plot);
               }
             }
