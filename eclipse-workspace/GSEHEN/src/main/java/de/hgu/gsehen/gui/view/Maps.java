@@ -1,5 +1,7 @@
 package de.hgu.gsehen.gui.view;
 
+import static de.hgu.gsehen.util.CollectionUtil.simpleClassMap;
+
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
@@ -8,7 +10,8 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
-import java.util.TreeMap;
+import de.hgu.gsehen.util.Pair;
+
 import java.util.logging.Logger;
 
 import javafx.scene.web.WebView;
@@ -19,7 +22,7 @@ import javafx.scene.web.WebView;
  * @author AT
  */
 @SuppressWarnings({"checkstyle:commentsindentation"})
-public class Maps extends WebController implements GsehenEventListener<FarmDataChanged> {
+public class Maps extends FarmDataController implements GsehenEventListener<FarmDataChanged> {
   private static final Logger LOGGER = Logger.getLogger(Maps.class.getName());
 
   @Override
@@ -34,8 +37,10 @@ public class Maps extends WebController implements GsehenEventListener<FarmDataC
    */
   public Maps(Gsehen application, WebView webView) {
     super(application, webView);
-    application.registerForEvent(FarmDataChanged.class, this);
   }
+
+  private java.util.Map<String, Class<?>> typesMap =
+      simpleClassMap(new Class[] { Farm.class, Field.class, Plot.class });
 
   /**
    * Creates a new GeoPolygon; intended to be called from web JavaScript.
@@ -44,6 +49,38 @@ public class Maps extends WebController implements GsehenEventListener<FarmDataC
    */
   public GeoPolygon getEmptyPolygon() {
     return new GeoPolygon();
+  }
+
+  // ------------------------------- these should use getLastViewPort (???) -------------------------------
+  public double getCenterLat() {
+    return 52.266344; // TODO get from current viewport, or, at least initially, from (user's) settings
+  }
+
+  public double getCenterLng() {
+    return 10.519835; // TODO get from current viewport, or, at least initially, from (user's) settings
+  }
+
+  public double getZoom() {
+    return 16;        // TODO derive from current viewport, or, at least initially, from (user's) settings
+  }
+  // ------------------------------------------------------------------------------------------------------
+
+  /**
+   * Returns the object types with their localized names; intended to be called from web JavaScript.
+   *
+   * @return an array of pairs, each of which contains the type key and its localized name
+   */
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public Pair<String>[] getLocalizedTypes() {
+    Pair<String>[] result = new Pair[3];
+    int[] i = new int[] { 0 };
+    typesMap.keySet().forEach(type -> {
+      result[i[0]++] = new Pair(
+          type,
+          application.getBundle().getString("gui.view.Map.drawableType." + type)
+      );
+    });
+    return result;
   }
 
   /**
@@ -55,27 +92,9 @@ public class Maps extends WebController implements GsehenEventListener<FarmDataC
    */
   @SuppressWarnings("checkstyle:rightcurly")
   public void polygonDrawn(GeoPolygon polygon, String typeKey) {
-    // TODO move/"copy" types to maps.js ... use code like this old snippet from createTypesMap
-//    typesMap.put(getBundleString("gui.view.Map.drawableType." + clazz.getSimpleName()),
-//        clazz);
-    java.util.Map<String, Class<?>> typesMap =
-        createTypesMap(new Class[] { Farm.class, Field.class, Plot.class });
-//    Alert alert = new Alert(AlertType.NONE, null, createButtonTypes(typesMap, ButtonType.CANCEL));
-//    alert.setTitle("GSEHEN");
-//    alert.setContentText(getBundleString("gui.view.Map.drawableTypeChoiceCaption"));
-//    alert.showAndWait();
-//    ButtonType dialogResult = alert.getResult();
-//    if (dialogResult != ButtonType.CANCEL) {
-//      TextInputDialog dialog = new TextInputDialog();
-//      dialog.setTitle("GSEHEN");
-//      dialog.setContentText(getBundleString("gui.view.Map.drawableTypeNameCaption"));
-//      dialog.showAndWait();
-//      String name = dialog.getResult();
     String name = "Unbenannt";
     try {
       if (name != null) {
-//      Drawable object =
-//          (Drawable)typesMap.get(dialogResult.getText()).newInstance();
         Drawable object =
             (Drawable)typesMap.get(typeKey).newInstance();
         object.setNameAndPolygon(name, polygon);
@@ -86,35 +105,5 @@ public class Maps extends WebController implements GsehenEventListener<FarmDataC
       // Java reflection stuff - exception should not happen, since all input comes from code
       LOGGER.info(exception.getMessage());
     }
-//    }
   }
-
-//  private ButtonType[] createButtonTypes(java.util.Map<String, Class<?>> typesMap,
-//      ButtonType additionalButton) {
-//    Set<String> keySet = typesMap.keySet(); // java.util.Set
-//    ButtonType[] result = new ButtonType[keySet.size() + 1];
-//    int i = 0;
-//    for (String key : keySet) {
-//      result[i++] = new ButtonType(key);
-//    }
-//    result[i] = additionalButton;
-//    return result;
-//  }
-
-  private java.util.Map<String, Class<?>> createTypesMap(Class<?>[] clazzes) {
-    java.util.Map<String, Class<?>> typesMap = new TreeMap<>();
-    for (Class<?> clazz : clazzes) {
-      typesMap.put(clazz.getSimpleName(), clazz);
-    }
-    return typesMap;
-  }
-
-  @Override
-  public void handle(FarmDataChanged event) {
-    // FIXME Polygone löschen, die nicht mehr da sind, etc.
-  }
-
-//  private String getBundleString(String key) {
-//    return application.getBundle().getString(key);
-//  }
 }

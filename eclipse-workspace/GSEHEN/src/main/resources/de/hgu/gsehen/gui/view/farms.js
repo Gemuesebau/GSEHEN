@@ -44,8 +44,8 @@ function drawPoints(x, y, k) {
   var canvasHeight = canvas.property("height");
   context.clearRect(0, 0, canvasWidth, canvasHeight);
   var viewPort = webController.getLastViewPort();
-  var viewPortWidth = viewPort.getRight().getLng() -  viewPort.getLeft().getLng();
-  var viewPortHeight = viewPort.getRight().getLat() -  viewPort.getLeft().getLat();
+  var viewPortWidth = viewPort.getRight().getLng() - viewPort.getLeft().getLng();
+  var viewPortHeight = viewPort.getRight().getLat() - viewPort.getLeft().getLat();
   var factor = Math.min(canvasWidth / viewPortWidth, canvasHeight / viewPortHeight);
   context.translate(x, y);
   context.scale(k, k);
