@@ -1,5 +1,5 @@
 // from Google Maps API Doc, modified
-function TypeControl(controlDiv, options) {
+function TypeControl(controlDiv, options, setTypeToValueFunction) {
     // Set CSS for the control border.
     var controlUI = document.createElement('div');
     controlUI.style.backgroundColor = '#fff';
@@ -38,10 +38,7 @@ function TypeControl(controlDiv, options) {
     var inputs = controlText.getElementsByTagName("input");
     for (var i=0; i<inputs.length; i++) {
     	var input = inputs[i];
-    	input.addEventListener('change', function() {
-    	    alert("Setze Typ auf: " + this.value);
-    	    selectedType = this.value;
-    	});
+    	input.addEventListener('change', function() { setTypeToValueFunction(this.value) });
     }
     controlUI.appendChild(controlText);
 }

@@ -30,7 +30,7 @@ function updateBoundsAndBuildJavaPolygon(bounds, jsonPolygon, logIndent) {
 	for each(var polygonPoint in jsonPolygon) {
 		javaPolygon.addGeoPointByCoords(polygonPoint.lat, polygonPoint.lng);
 		updateBounds(bounds, polygonPoint.lng, polygonPoint.lat);
-		LOGGER.info(logIndent + "added polygon point " + polygonPoint.lng + ", " + polygonPoint.lat);
+		//LOGGER.info(logIndent + "added polygon point " + polygonPoint.lng + ", " + polygonPoint.lat);
 	}
 	return javaPolygon;
 }
