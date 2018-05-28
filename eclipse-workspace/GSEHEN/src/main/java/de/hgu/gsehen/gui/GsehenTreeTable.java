@@ -84,6 +84,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
    */
   @SuppressWarnings("unchecked")
   public void addFarmTreeView() {
+    gsehenInstance.loadUserData();
     farmTreeView =
         (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
     rootItem = new TreeItem<Drawable>();
@@ -97,9 +98,11 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
       @Override
       public void handle(ActionEvent e) {
         trash = farmTreeView.getSelectionModel().getSelectedItem();
-        removeItem(GsehenTreeTable.class);
-        farmTreeView.getRoot().getChildren().clear();
-        fillTreeView();
+        if (trash != null) {
+          removeItem(GsehenTreeTable.class);
+          farmTreeView.getRoot().getChildren().clear();
+          fillTreeView();
+        }
       }
     });
 
