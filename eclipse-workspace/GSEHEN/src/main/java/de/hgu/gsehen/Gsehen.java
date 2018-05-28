@@ -4,7 +4,6 @@ import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
 import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
 import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
-
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
@@ -82,6 +81,7 @@ public class Gsehen extends Application {
 
   private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners =
       new HashMap<>();
+  private boolean wasCalled;
 
   private static Gsehen instance;
 
@@ -314,8 +314,11 @@ public class Gsehen extends Application {
       FarmDataChanged event = new FarmDataChanged();
       event.setFarms(farmsList);
       event.setViewPort(pair);
+      this.wasCalled = true;
       return event;
     }, skipClass);
+    GsehenTreeTable.getInstance().getFarmTreeView().getRoot().getChildren().clear();
+    treeTable.fillTreeView();
   }
 
   /**
@@ -375,5 +378,9 @@ public class Gsehen extends Application {
 
   public Scene getScene() {
     return scene;
+  }
+
+  public boolean isWasCalled() {
+    return wasCalled;
   }
 }
