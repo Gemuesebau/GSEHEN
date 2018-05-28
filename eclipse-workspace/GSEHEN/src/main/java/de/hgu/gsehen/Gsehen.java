@@ -82,6 +82,7 @@ public class Gsehen extends Application {
 
   private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners =
       new HashMap<>();
+  private boolean wasCalled;
 
   private static Gsehen instance;
 
@@ -314,6 +315,7 @@ public class Gsehen extends Application {
       FarmDataChanged event = new FarmDataChanged();
       event.setFarms(farmsList);
       event.setViewPort(pair);
+      this.wasCalled = true;
       return event;
     }, skipClass);
   }
@@ -375,5 +377,9 @@ public class Gsehen extends Application {
 
   public Scene getScene() {
     return scene;
+  }
+  
+  public boolean isWasCalled() {
+    return wasCalled;
   }
 }
