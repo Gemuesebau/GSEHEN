@@ -9,7 +9,9 @@ import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.util.Pair;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import javafx.scene.web.WebView;
 
 public abstract class FarmDataController extends WebController
@@ -44,6 +46,9 @@ public abstract class FarmDataController extends WebController
     drawables = flattenDrawables(farmsArray);
     Pair<GeoPoint> viewPort = event.getViewPort();
     lastViewPort = viewPort != null ? viewPort : findBounds(drawables);
+    getLogger().log(Level.INFO, "About to reload " + this.getClass().getSimpleName() + " web view,"
+        + " with drawables=" + Arrays.asList(drawables)
+        + " and lastViewPort=" + lastViewPort);
     reload();
   }
 
@@ -106,10 +111,34 @@ public abstract class FarmDataController extends WebController
   }
 
   public Drawable[] getDrawables() {
+    //getLogger().log(Level.INFO, "getDrawables=" + Arrays.asList(drawables));
     return drawables;
   }
 
   public Pair<GeoPoint> getLastViewPort() {
     return lastViewPort;
+  }
+
+  /**
+   * Determines the map or farm view polygon color for the given type (object).
+   *
+   * @param typeObject a "Drawable", or a String
+   * @return the appropriate stroke and fill color for the given type
+   */
+  public String getFillStyle(Object typeObject) {
+    String type = (typeObject instanceof String)
+        ? ((String) typeObject)
+        : typeObject.getClass().getSimpleName();
+    switch (type) {
+      case "Farm":
+        return "black";
+      case "Field":
+        return "blue";
+      case "Plot":
+        // FIXME: depending on water balance! (according to most recent calculation)
+        return "orange";
+      default:
+        return "white";
+    }
   }
 }

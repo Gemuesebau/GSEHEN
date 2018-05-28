@@ -87,7 +87,6 @@ public class Gsehen extends Application {
 
   {
     instance = this;
-    loadUserData();
   }
 
   /**
@@ -133,8 +132,6 @@ public class Gsehen extends Application {
     stage.show();
 
     maps = new Maps(this, (WebView) scene.lookup(MAPS_WEB_VIEW_ID));
-    maps.reload();
-
     farms = new Farms(this, (WebView) scene.lookup(FARMS_WEB_VIEW_ID));
 
     treeTable = new GsehenTreeTable();
@@ -150,6 +147,8 @@ public class Gsehen extends Application {
         mainController.exit();
       }
     });
+
+    loadUserData();
   }
 
   @SuppressWarnings({"unused", "checkstyle:rightcurly"})
@@ -300,10 +299,11 @@ public class Gsehen extends Application {
   }
 
   /**
-   * //TODO.
-   * 
-   * @param object - .
-   * @param skipClass - .
+   * Sends a "FarmDataChanged" event to all listeners registered for that kind of event,
+   * except the listeners that belong to the given "skipClass".
+   *
+   * @param object the object that initially caused the event to be sent
+   * @param skipClass the event listener class to skip when iterating the listeners, or null
    */
   public void sendFarmDataChanged(Drawable object,
       Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
