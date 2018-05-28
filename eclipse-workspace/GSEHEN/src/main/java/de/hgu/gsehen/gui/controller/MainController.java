@@ -106,7 +106,7 @@ public class MainController {
   private void backToMainView(ActionEvent b) {
     accordion.setVisible(true);
     tabPane.getTabs().clear();
-    // TODO: SObald die Tabs wieder da sind:
+    // TODO: Sobald die Tabs wieder da sind:
     // tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, fieldPlotViewTab);
     tabPane.getTabs().addAll(mapViewTab, farmViewTab);
   }
@@ -165,6 +165,7 @@ public class MainController {
       stage.show();
     } else {
       Platform.exit();
+      System.exit(0);
     }
   }
 
