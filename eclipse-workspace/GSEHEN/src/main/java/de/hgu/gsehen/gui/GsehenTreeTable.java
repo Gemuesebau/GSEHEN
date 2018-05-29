@@ -84,10 +84,10 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
    */
   @SuppressWarnings("unchecked")
   public void addFarmTreeView() {
-    gsehenInstance.loadUserData();
     farmTreeView =
         (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
     rootItem = new TreeItem<Drawable>();
+    
     farmTreeView.setRowFactory(this::rowFactory);
     addColumn(mainBundle.getString("treetableview.name"), "name", getClass());
     addColumn(mainBundle.getString("treetableview.type"), "type", getClass());

@@ -135,9 +135,6 @@ public class Gsehen extends Application {
     maps = new Maps(this, (WebView) scene.lookup(MAPS_WEB_VIEW_ID));
     farms = new Farms(this, (WebView) scene.lookup(FARMS_WEB_VIEW_ID));
 
-    treeTable = new GsehenTreeTable();
-    treeTable.addFarmTreeView();
-
     TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
     tabPane.getTabs().remove(tabPane.getTabs().size() - 2, tabPane.getTabs().size());
 
@@ -150,6 +147,9 @@ public class Gsehen extends Application {
     });
 
     loadUserData();
+    
+    treeTable = new GsehenTreeTable();
+    treeTable.addFarmTreeView();
   }
 
   @SuppressWarnings({"unused", "checkstyle:rightcurly"})
