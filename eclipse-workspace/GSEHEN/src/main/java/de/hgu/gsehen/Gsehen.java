@@ -222,8 +222,6 @@ public class Gsehen extends Application {
       engine.put("LOGGER", LOGGER);
       engine.put("farms", farmsList);
       engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
-      for (int i = 0; i == farmsList.size(); i++) {
-      }
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Can't evaluate " + SAVE_USER_DATA_JS, e);
     }
