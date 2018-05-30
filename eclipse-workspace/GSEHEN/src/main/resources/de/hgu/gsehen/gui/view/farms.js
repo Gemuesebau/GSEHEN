@@ -55,7 +55,7 @@ function drawPoints(x, y, k) {
     context.beginPath();
     var points = drawable.getPolygon().getGeoPoints();
     if (points.size() < 3) {
-      return;
+      continue;
     }
     //alert("Got points: " + points);
     try {
