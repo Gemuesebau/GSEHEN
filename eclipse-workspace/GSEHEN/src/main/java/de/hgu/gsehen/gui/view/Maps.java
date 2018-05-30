@@ -6,7 +6,6 @@ import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.GeoPolygon;
-import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
@@ -98,7 +97,6 @@ public class Maps extends FarmDataController implements GsehenEventListener<Farm
         Drawable object = (Drawable) typesMap.get(typeKey).newInstance();
         object.setNameAndPolygon(name, polygon);
         application.objectAdded(object, getClass());
-        GsehenTreeTable.getInstance().fillTreeView(null);
       }
     } catch (Exception exception) {
       // Java reflection stuff - exception should not happen, since all input comes from code

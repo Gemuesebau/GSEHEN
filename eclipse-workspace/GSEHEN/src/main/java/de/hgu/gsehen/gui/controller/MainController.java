@@ -2,7 +2,6 @@ package de.hgu.gsehen.gui.controller;
 
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.gui.GsehenFileChooser;
-import de.hgu.gsehen.gui.GsehenTreeTable;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -125,7 +124,6 @@ public class MainController {
    */
   public void loadUserData() {
     gsehenInstance.loadUserData();
-    GsehenTreeTable.getInstance().fillTreeView(null);
   }
 
   /**
