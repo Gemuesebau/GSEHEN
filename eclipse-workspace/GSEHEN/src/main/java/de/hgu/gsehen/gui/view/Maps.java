@@ -52,17 +52,17 @@ public class Maps extends FarmDataController implements GsehenEventListener<Farm
   // ------------------------------- these should use getLastViewPort (???)
   // -------------------------------
   public double getCenterLat() {
-    return 52.266344; // TODO get from current viewport, or, at least initially, from (user's)
+    return 49.400981; // TODO get from current viewport, or, at least initially, from (user's)
                       // settings
   }
 
   public double getCenterLng() {
-    return 10.519835; // TODO get from current viewport, or, at least initially, from (user's)
+    return 8.350068;  // TODO get from current viewport, or, at least initially, from (user's)
                       // settings
   }
 
   public double getZoom() {
-    return 16; // TODO derive from current viewport, or, at least initially, from (user's) settings
+    return 18; // TODO derive from current viewport, or, at least initially, from (user's) settings
   }
   // ----------------------------------------------------------------------------------------------
 

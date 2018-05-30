@@ -1,6 +1,7 @@
 alert("Maps (re)loaded, now running custom JavaScript");
 
 #include("typeControl.js")
+#include("searchControl.js")
 #include("objectArray.js")
 
 #include("../../js/commons.js")
@@ -86,5 +87,6 @@ else {
   }
 }
 
+initAutocomplete();
 draw();
 captureDrawing();
