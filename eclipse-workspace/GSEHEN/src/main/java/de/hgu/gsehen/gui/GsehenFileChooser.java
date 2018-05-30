@@ -2,11 +2,15 @@ package de.hgu.gsehen.gui;
 
 import de.hgu.gsehen.Gsehen;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -25,6 +29,7 @@ public final class GsehenFileChooser extends Application {
   private Gsehen gsehenInstance;
   protected static final ResourceBundle mainBundle =
       ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
+  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -49,12 +54,7 @@ public final class GsehenFileChooser extends Application {
         configureFileChooser(fileChooser);
         File file = fileChooser.showSaveDialog(stage);
         if (file != null) {
-          // TODO
-          // try {
-          //
-          // } catch (IOException ex) {
-          // System.out.println(ex.getMessage());
-          // }
+          saveFile("", file);
         }
         gsehenInstance.saveUserData();
         Platform.exit();
@@ -106,5 +106,15 @@ public final class GsehenFileChooser extends Application {
     DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     Date date = new Date();
     fileChooser.setInitialFileName("MeineFarm_" + dateFormat.format(date));
+  }
+
+  private void saveFile(String content, File file) {
+    try {
+      FileWriter fileWriter = new FileWriter(file);
+      fileWriter.write(content);
+      fileWriter.close();
+    } catch (IOException ex) {
+      LOGGER.log(Level.SEVERE, null, ex);
+    }
   }
 }
