@@ -82,7 +82,7 @@ public class Gsehen extends Application {
 
   private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners =
       new HashMap<>();
-  private boolean wasCalled;
+  private boolean dataChanged;
 
   private static Gsehen instance;
 
@@ -306,14 +306,18 @@ public class Gsehen extends Application {
    */
   public void sendFarmDataChanged(Drawable object,
       Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
-    Pair<GeoPoint> pair =
-        new Pair<>(new GeoPoint(object.getPolygon().getMinY(), object.getPolygon().getMinX()),
-            new GeoPoint(object.getPolygon().getMaxY(), object.getPolygon().getMaxX()));
+    dataChanged = true;
+    FarmDataChanged event = new FarmDataChanged();
+    event.setFarms(farmsList);
+    try {
+      event.setViewPort(new Pair<>(
+          new GeoPoint(object.getPolygon().getMinY(), object.getPolygon().getMinX()),
+          new GeoPoint(object.getPolygon().getMaxY(), object.getPolygon().getMaxX())
+      ));
+    } catch (IllegalArgumentException e) {
+      event.setViewPort(null);
+    }
     notifyEventListeners(() -> {
-      FarmDataChanged event = new FarmDataChanged();
-      event.setFarms(farmsList);
-      event.setViewPort(pair);
-      this.wasCalled = true;
       return event;
     }, skipClass);
   }
@@ -377,7 +381,7 @@ public class Gsehen extends Application {
     return scene;
   }
 
-  public boolean isWasCalled() {
-    return wasCalled;
+  public boolean isDataChanged() {
+    return dataChanged;
   }
 }

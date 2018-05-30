@@ -26,7 +26,8 @@ public class CollectionUtil {
 
 
   /**
-   * Creates a map that contains the given classes as values, mapped by their respective "simpleName".
+   * Creates a map that contains the given classes as values,
+   * mapped by their respective "simpleName".
    *
    * @param clazzes the Class objects to map
    * @return a map containing the given classes, by their respective simple names

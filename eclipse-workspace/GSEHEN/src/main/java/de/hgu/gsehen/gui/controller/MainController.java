@@ -109,7 +109,7 @@ public class MainController {
    * Save & Exit Event.
    */
   public void exit() {
-    if (gsehenInstance.isWasCalled()) {
+    if (gsehenInstance.isDataChanged()) {
       Stage stage = new Stage();
       GsehenFileChooser fileChooser = new GsehenFileChooser();
       fileChooser.start(stage);
