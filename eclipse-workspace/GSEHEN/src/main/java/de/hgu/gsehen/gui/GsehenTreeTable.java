@@ -97,6 +97,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     deleteItem.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
+        farmTreeView.getSelectionModel().getSelectedItem().getValue().setName("del");
         trash = farmTreeView.getSelectionModel().getSelectedItem();
         if (trash != null) {
           removeItem();
@@ -108,7 +109,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     farmTreeView.setShowRoot(false);
     farmTreeView.setEditable(true);
     farmTreeView.setContextMenu(menu);
-    fillTreeView(null);
+    fillTreeView();
     setupScrolling();
   }
 
@@ -173,39 +174,32 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
 
           // Updates the farmList.
           for (int i = 0; i < farmTreeView.getRoot().getChildren().size(); i++) {
-
             farmName = (String) farmTreeView.getRoot().getChildren().get(i).getValue().getName();
             farmGeo = farmTreeView.getRoot().getChildren().get(i).getValue().getPolygon();
             farm = new Farm(farmName, farmGeo);
             object = farm;
-
             for (int j = 0; j < farmTreeView.getRoot().getChildren().get(i).getChildren()
                 .size(); j++) {
-
               fieldName = (String) farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
                   .getValue().getName();
               fieldGeo = farmTreeView.getRoot().getChildren().get(i).getChildren().get(j).getValue()
                   .getPolygon();
               field = new Field(fieldName, fieldGeo);
               object = field;
-
               if (j == 0) {
                 farm.setFields(field);
               } else {
                 List<Field> fields = farm.getFields();
                 fields.add(field);
               }
-
               for (int k = 0; k < farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
                   .getChildren().size(); k++) {
-
                 plotName = (String) farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
                     .getChildren().get(k).getValue().getName();
                 plotGeo = farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
                     .getChildren().get(k).getValue().getPolygon();
                 plot = new Plot(plotName, plotGeo);
                 object = plot;
-
                 if (k == 0) {
                   field.setPlots(plot);
                 } else {
@@ -269,7 +263,6 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
    */
   public void addColumn(String label, String dataIndex) {
     column = new TreeTableColumn<>(label);
-
     column.setCellValueFactory((TreeTableColumn.CellDataFeatures<Drawable, String> param) -> {
       ObservableValue<String> result = new ReadOnlyStringWrapper("");
       if (param.getValue().getValue() != null && dataIndex.equals("name")) {
@@ -332,7 +325,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
   public void setupScrolling() {
     scrolltimeline.setCycleCount(Timeline.INDEFINITE);
     scrolltimeline.getKeyFrames()
-        .add(new KeyFrame(Duration.millis(20), "Scoll", (ActionEvent e) -> {
+        .add(new KeyFrame(Duration.millis(20), "Scroll", (ActionEvent e) -> {
           dragScroll();
         }));
     farmTreeView.setOnDragExited(event -> {
@@ -378,10 +371,9 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
   /**
    * Fills the TreeView with Farms, Fields and Plots.
    */
-  public void fillTreeView(Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
+  public void fillTreeView() {
     farmsList = Gsehen.getInstance().getFarmsList();
     farmTreeView.getRoot().getChildren().clear();
-
     for (Farm farm : farmsList) {
       farmItem = createItem(rootItem, farm);
       if (farm.getFields() != null) {
@@ -443,17 +435,9 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     gsehenInstance.sendFarmDataChanged(object, null);
   }
 
-  public static GsehenTreeTable getInstance() {
-    return instance;
-  }
-
-  public TreeTableView<Drawable> getFarmTreeView() {
-    return farmTreeView;
-  }
-
   @Override
   public void handle(FarmDataChanged event) {
-    fillTreeView(null);
+    fillTreeView();
   }
 
 }
