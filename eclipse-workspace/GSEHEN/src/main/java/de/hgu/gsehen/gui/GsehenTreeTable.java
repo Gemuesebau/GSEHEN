@@ -100,8 +100,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
         trash = farmTreeView.getSelectionModel().getSelectedItem();
         if (trash != null) {
           removeItem(GsehenTreeTable.class);
-          farmTreeView.getRoot().getChildren().clear();
-          fillTreeView();
+          fillTreeView(null);
         }
       }
     });
@@ -110,7 +109,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     farmTreeView.setShowRoot(false);
     farmTreeView.setEditable(true);
     farmTreeView.setContextMenu(menu);
-    fillTreeView();
+    fillTreeView(null);
     setupScrolling();
   }
 
@@ -311,8 +310,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
               }
             }
           }
-          farmTreeView.getRoot().getChildren().clear();
-          fillTreeView();
+          fillTreeView(null);
           gsehenInstance.sendFarmDataChanged(object, skipClass);
         }
       });
@@ -375,8 +373,9 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
   /**
    * Fills the TreeView with Farms, Fields and Plots.
    */
-  public void fillTreeView() {
+  public void fillTreeView(Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
     farmsList = Gsehen.getInstance().getFarmsList();
+    farmTreeView.getRoot().getChildren().clear();
 
     for (Farm farm : farmsList) {
       farmItem = createItem(rootItem, farm);

@@ -125,8 +125,7 @@ public class MainController {
    */
   public void loadUserData() {
     gsehenInstance.loadUserData();
-    GsehenTreeTable.getInstance().getFarmTreeView().getRoot().getChildren().clear();
-    GsehenTreeTable.getInstance().fillTreeView();
+    GsehenTreeTable.getInstance().fillTreeView(null);
   }
 
   /**

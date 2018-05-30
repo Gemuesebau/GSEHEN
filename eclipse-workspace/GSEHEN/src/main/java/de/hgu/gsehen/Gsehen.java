@@ -316,8 +316,6 @@ public class Gsehen extends Application {
       this.wasCalled = true;
       return event;
     }, skipClass);
-    GsehenTreeTable.getInstance().getFarmTreeView().getRoot().getChildren().clear();
-    treeTable.fillTreeView();
   }
 
   /**
