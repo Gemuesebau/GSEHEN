@@ -100,7 +100,6 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
         trash = farmTreeView.getSelectionModel().getSelectedItem();
         if (trash != null) {
           removeItem();
-          fillTreeView(null);
         }
       }
     });
@@ -317,7 +316,6 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
               }
             }
           }
-          fillTreeView(null);
           gsehenInstance.sendFarmDataChanged(object, null);
         }
       });
@@ -454,6 +452,8 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
   }
 
   @Override
-  public void handle(FarmDataChanged event) {}
+  public void handle(FarmDataChanged event) {
+    fillTreeView(null);
+  }
 
 }
