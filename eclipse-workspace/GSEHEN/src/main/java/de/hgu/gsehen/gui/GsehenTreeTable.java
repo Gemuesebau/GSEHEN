@@ -97,6 +97,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     deleteItem.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
+        farmTreeView.getSelectionModel().getSelectedItem().getValue().setName("del");
         trash = farmTreeView.getSelectionModel().getSelectedItem();
         if (trash != null) {
           removeItem();
