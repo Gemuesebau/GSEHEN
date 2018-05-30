@@ -87,10 +87,10 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     farmTreeView =
         (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
     rootItem = new TreeItem<Drawable>();
-    
+
     farmTreeView.setRowFactory(this::rowFactory);
-    addColumn(mainBundle.getString("treetableview.name"), "name", getClass());
-    addColumn(mainBundle.getString("treetableview.type"), "type", getClass());
+    addColumn(mainBundle.getString("treetableview.name"), "name");
+    addColumn(mainBundle.getString("treetableview.type"), "type");
 
     deleteItem = new MenuItem(mainBundle.getString("treeview.remove"));
     menu.getItems().add(deleteItem);
@@ -99,7 +99,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
       public void handle(ActionEvent e) {
         trash = farmTreeView.getSelectionModel().getSelectedItem();
         if (trash != null) {
-          removeItem(GsehenTreeTable.class);
+          removeItem();
           fillTreeView(null);
         }
       }
@@ -156,6 +156,8 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
           event.setDropCompleted(true);
           farmTreeView.getSelectionModel().select(item);
           event.consume();
+
+          LOGGER.info(item + " stacked on " + getTarget(row));
 
           newFarmsList = new ArrayList<>();
 
@@ -266,8 +268,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
    * @param label - Name of the column.
    * @param dataIndex - Content of the column.
    */
-  public void addColumn(String label, String dataIndex,
-      Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
+  public void addColumn(String label, String dataIndex) {
     column = new TreeTableColumn<>(label);
 
     column.setCellValueFactory((TreeTableColumn.CellDataFeatures<Drawable, String> param) -> {
@@ -292,18 +293,24 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
           for (Farm farm : farmsList) {
             if (farm.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
                 .getSelectedItem().getValue().getClass().getSimpleName().equals("Farm")) {
+              LOGGER
+                  .info("\"Farm\": " + event.getOldValue() + " renamed in " + event.getNewValue());
               farm.setName(event.getNewValue());
               object = farm;
             }
             for (Field field : farm.getFields()) {
               if (field.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
                   .getSelectedItem().getValue().getClass().getSimpleName().equals("Field")) {
+                LOGGER.info(
+                    "\"Field\": " + event.getOldValue() + " renamed in " + event.getNewValue());
                 field.setName(event.getNewValue());
                 object = field;
               }
               for (Plot plot : field.getPlots()) {
                 if (plot.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
                     .getSelectedItem().getValue().getClass().getSimpleName().equals("Plot")) {
+                  LOGGER.info(
+                      "\"Plot\": " + event.getOldValue() + " renamed in " + event.getNewValue());
                   plot.setName(event.getNewValue());
                   object = plot;
                 }
@@ -311,7 +318,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
             }
           }
           fillTreeView(null);
-          gsehenInstance.sendFarmDataChanged(object, skipClass);
+          gsehenInstance.sendFarmDataChanged(object, null);
         }
       });
     } else {
@@ -404,7 +411,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
   /**
    * Removes an item (and his childs) from the TreeTableView.
    */
-  public void removeItem(Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
+  public void removeItem() {
     List<Farm> delFarm = new ArrayList<Farm>();
     List<Field> delField = new ArrayList<Field>();
     List<Plot> delPlot = new ArrayList<Plot>();
@@ -433,8 +440,9 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
       }
       farm.getFields().removeAll(delField);
     }
+    LOGGER.info(object + " deleted.");
     farmsList.removeAll(delFarm);
-    gsehenInstance.sendFarmDataChanged(object, skipClass);
+    gsehenInstance.sendFarmDataChanged(object, null);
   }
 
   public static GsehenTreeTable getInstance() {
