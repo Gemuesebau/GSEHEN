@@ -23,6 +23,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollBar;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableColumn.CellEditEvent;
@@ -97,7 +98,13 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     deleteItem.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
-        farmTreeView.getSelectionModel().getSelectedItem().getValue().setName("del");
+        for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedItems().size(); i++) {
+          System.out.println("Vorher: "
+              + farmTreeView.getSelectionModel().getSelectedItems().get(i).getValue().getName());
+          farmTreeView.getSelectionModel().getSelectedItems().get(i).getValue().setName("del");
+          System.out.println("Nachher: "
+              + farmTreeView.getSelectionModel().getSelectedItems().get(i).getValue().getName());
+        }
         trash = farmTreeView.getSelectionModel().getSelectedItem();
         if (trash != null) {
           removeItem();
@@ -111,6 +118,8 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     farmTreeView.setContextMenu(menu);
     fillTreeView();
     setupScrolling();
+    farmTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    farmTreeView.getSelectionModel().setCellSelectionEnabled(true);
   }
 
   @SuppressWarnings("unchecked")
@@ -315,6 +324,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     } else {
       column.setPrefWidth(100);
       column.setEditable(false);
+      column.setSortType(TreeTableColumn.SortType.ASCENDING);
     }
     farmTreeView.getColumns().add(column);
   }
@@ -439,5 +449,4 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
   public void handle(FarmDataChanged event) {
     fillTreeView();
   }
-
 }
