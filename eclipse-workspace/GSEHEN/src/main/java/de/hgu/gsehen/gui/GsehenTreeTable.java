@@ -99,11 +99,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
       @Override
       public void handle(ActionEvent e) {
         for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedItems().size(); i++) {
-          System.out.println("Vorher: "
-              + farmTreeView.getSelectionModel().getSelectedItems().get(i).getValue().getName());
           farmTreeView.getSelectionModel().getSelectedItems().get(i).getValue().setName("del");
-          System.out.println("Nachher: "
-              + farmTreeView.getSelectionModel().getSelectedItems().get(i).getValue().getName());
         }
         trash = farmTreeView.getSelectionModel().getSelectedItem();
         if (trash != null) {
