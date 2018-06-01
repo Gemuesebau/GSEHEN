@@ -92,6 +92,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     farmTreeView.setRowFactory(this::rowFactory);
     addColumn(mainBundle.getString("treetableview.name"), "name");
     addColumn(mainBundle.getString("treetableview.type"), "type");
+    addColumn(mainBundle.getString("treetableview.soilCrop"), "soilCrop");
 
     deleteItem = new MenuItem(mainBundle.getString("treeview.remove"));
     menu.getItems().add(deleteItem);
@@ -271,10 +272,19 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     column.setCellValueFactory((TreeTableColumn.CellDataFeatures<Drawable, String> param) -> {
       ObservableValue<String> result = new ReadOnlyStringWrapper("");
       if (param.getValue().getValue() != null && dataIndex.equals("name")) {
-        result = new ReadOnlyStringWrapper("" + param.getValue().getValue().getName());
+        result = new ReadOnlyStringWrapper(param.getValue().getValue().getName());
+      } else if (param.getValue().getValue() != null && dataIndex.equals("type")) {
+        result = new ReadOnlyStringWrapper(param.getValue().getValue().getClass().getSimpleName());
       } else {
-        result =
-            new ReadOnlyStringWrapper("" + param.getValue().getValue().getClass().getSimpleName());
+        if (param.getValue().getValue().getClass().getSimpleName().equals("Farm")) {
+          result = new ReadOnlyStringWrapper("/");
+        } else if (param.getValue().getValue().getClass().getSimpleName().equals("Field")) {
+          // result =
+          // new ReadOnlyStringWrapper(param.getValue().getValue().getClass().getFields());
+          // TODO
+        } else {
+          // TODO
+        }
       }
       return result;
     });
