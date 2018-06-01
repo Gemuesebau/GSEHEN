@@ -132,4 +132,9 @@ public class GeoPolygon {
     }
     return result;
   }
+
+  // TODO wird das (hier) benötigt? (aus UML "Shape")
+  public double calculateArea() {
+    return 0.0;
+  }
 }
