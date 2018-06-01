@@ -1,36 +1,32 @@
 package de.hgu.gsehen.model;
 
-/**
- * Class representing a type of soil.
- *
- * @author AT
- */
+import java.util.Set;
+
 public class SoilProfile {
-  private String name;
-  private double availableWaterCapacity;
-  private String description;
+  // TODO Sets auf drei Elemente beschränken?!
 
-  public String getName() {
-    return name;
+  private Set<Soil> soilType;
+  private Set<SoilProfileDepth> profileDepth;
+
+  public Set<Soil> getSoilType() {
+    return soilType;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setSoilType(Set<Soil> soilType) {
+    this.soilType = soilType;
   }
 
-  public double getAvailableWaterCapacity() {
-    return availableWaterCapacity;
+  public Set<SoilProfileDepth> getProfileDepth() {
+    return profileDepth;
   }
 
-  public void setAvailableWaterCapacity(double availableWaterCapacity) {
-    this.availableWaterCapacity = availableWaterCapacity;
+  public void setProfileDepth(Set<SoilProfileDepth> profileDepth) {
+    this.profileDepth = profileDepth;
   }
 
-  public String getDescription() {
-    return description;
-  }
+  public void configure(){}
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+  public void visualize(){}
+
+  public void modify(){}
 }
