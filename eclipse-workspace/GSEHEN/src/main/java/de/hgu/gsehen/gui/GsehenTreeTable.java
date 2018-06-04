@@ -16,10 +16,14 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollBar;
@@ -30,10 +34,12 @@ import javafx.scene.control.TreeTableColumn.CellEditEvent;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
+import javafx.scene.image.Image;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
@@ -71,6 +77,8 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
 
   private ContextMenu menu = new ContextMenu();
   private MenuItem deleteItem;
+  private MenuItem soiltem;
+  private MenuItem cropItem;
 
   /**
    * Constructs a new farm view in the given WebView.
@@ -106,6 +114,47 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
         if (trash != null) {
           removeItem();
         }
+      }
+    });
+
+    soiltem = new MenuItem(mainBundle.getString("treeview.soil"));
+    menu.getItems().add(soiltem);
+    soiltem.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent e) {
+        Stage stage = new Stage();
+        stage.setTitle("DUMMY");
+        stage.getIcons().add(new Image("/de/hgu/gsehen/images/Logo_UniGeisenheim_36x36.png"));
+        stage.setAlwaysOnTop(true);
+        stage.setHeight(75);
+        stage.setWidth(200);
+
+        ObservableList<String> options = FXCollections.observableArrayList("Beton", "Erde", "Sand");
+        final ComboBox<String> comboBox = new ComboBox<String>(options);
+        
+        stage.setScene(new Scene(comboBox));
+        stage.show();
+      }
+    });
+
+    cropItem = new MenuItem(mainBundle.getString("treeview.crop"));
+    menu.getItems().add(cropItem);
+    cropItem.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent e) {
+        Stage stage = new Stage();
+        stage.setTitle("DUMMY");
+        stage.getIcons().add(new Image("/de/hgu/gsehen/images/Logo_UniGeisenheim_36x36.png"));
+        stage.setAlwaysOnTop(true);
+        stage.setHeight(75);
+        stage.setWidth(200);
+
+        ObservableList<String> options =
+            FXCollections.observableArrayList("Apfel", "Birne", "Löwenzahn", "Tomate", "Zwiebel");
+        final ComboBox<String> comboBox = new ComboBox<String>(options);
+
+        stage.setScene(new Scene(comboBox));
+        stage.show();
       }
     });
 
