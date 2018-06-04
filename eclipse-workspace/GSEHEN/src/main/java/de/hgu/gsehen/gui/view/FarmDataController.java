@@ -120,7 +120,7 @@ public abstract class FarmDataController extends WebController
   }
 
   public void setLastViewport(double north, double south, double east, double west) {
-    lastViewport = new Pair<>(new GeoPoint(north, west), new GeoPoint(south, east));
+    lastViewport = new Pair<>(new GeoPoint(south, west), new GeoPoint(north, east));
   }
 
   public void setViewport(Pair<GeoPoint> lastViewport) {
