@@ -312,12 +312,12 @@ public class Gsehen extends Application {
     FarmDataChanged event = new FarmDataChanged();
     event.setFarms(farmsList);
     try {
-      event.setViewPort(new Pair<>(
+      event.setViewport(new Pair<>(
           new GeoPoint(object.getPolygon().getMinY(), object.getPolygon().getMinX()),
           new GeoPoint(object.getPolygon().getMaxY(), object.getPolygon().getMaxX())
       ));
     } catch (IllegalArgumentException e) {
-      event.setViewPort(null);
+      event.setViewport(null);
     }
     notifyEventListeners(() -> {
       return event;
@@ -350,7 +350,7 @@ public class Gsehen extends Application {
   }
 
   @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
-  public String readUTF8FileAsString(String dataFileName) throws IOException {
+  public String readUTF8FileAsOneString(String dataFileName) throws IOException {
     return new String(Files.readAllBytes(Paths.get(dataFileName)), "utf-8");
   }
 
@@ -385,5 +385,15 @@ public class Gsehen extends Application {
 
   public boolean isDataChanged() {
     return dataChanged;
+  }
+
+  public void setMapViewportFromFarm() {
+    maps.setViewport(farms.getLastViewport());
+    maps.reload();
+  }
+
+  public void setFarmViewportFromMap() {
+    farms.setViewport(maps.getLastViewport());
+    farms.reload();
   }
 }

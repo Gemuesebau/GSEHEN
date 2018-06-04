@@ -132,4 +132,18 @@ public class MainController {
   public void saveUserData() {
     gsehenInstance.saveUserData();
   }
+
+  /**
+   * @see de.hgu.gsehen.Gsehen.setFarmViewportFromMap()
+   */
+  public void setFarmViewportFromMap() {
+    gsehenInstance.setFarmViewportFromMap();
+  }
+
+  /**
+   * @see de.hgu.gsehen.Gsehen.setMapViewportFromFarm()
+   */
+  public void setMapViewportFromFarm() {
+    gsehenInstance.setMapViewportFromFarm();
+  }
 }

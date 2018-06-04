@@ -20,12 +20,6 @@ public abstract class WebController {
 
   private String loadWorkerSucceededScript;
 
-//  protected MainController mainController;
-
-//  public void setMainController(MainController mainController) {
-//    this.mainController = mainController;
-//  }
-
   private String getCompanionFileContents(String dotExtension) {
     return getFileContents(getClass().getSimpleName().toLowerCase() + dotExtension);
   }
@@ -76,6 +70,7 @@ public abstract class WebController {
     this.application = application;
     engine = webView.getEngine();
     engine.setOnAlert(event -> alert(event.getData()));
+    engine.executeScript("console.log = function(message){alert(message)};");
     engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
       if (newState == State.SUCCEEDED) {
         JSObject win = (JSObject)engine.executeScript("window");
