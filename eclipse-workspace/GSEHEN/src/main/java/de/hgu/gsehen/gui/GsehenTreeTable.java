@@ -3,10 +3,12 @@ package de.hgu.gsehen.gui;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
+import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.model.Soil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -23,6 +25,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -39,6 +42,8 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -96,6 +101,9 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     farmTreeView =
         (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
     rootItem = new TreeItem<Drawable>();
+    farmTreeView.setRoot(rootItem);
+    farmTreeView.setShowRoot(false);
+    farmTreeView.setEditable(true);
 
     farmTreeView.setRowFactory(this::rowFactory);
     addColumn(mainBundle.getString("treetableview.name"), "name");
@@ -131,8 +139,37 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
 
         ObservableList<String> options = FXCollections.observableArrayList("Beton", "Erde", "Sand");
         final ComboBox<String> comboBox = new ComboBox<String>(options);
-        
-        stage.setScene(new Scene(comboBox));
+
+        Button ok = new Button("Ok");
+        ok.setOnAction(new EventHandler<ActionEvent>() {
+          @Override
+          public void handle(ActionEvent e) {
+            Drawable obj = null;
+            Soil soil = new Soil();
+            soil.setName(comboBox.getValue());
+
+            for (Farm farm : farmsList) {
+              for (Field field : farm.getFields()) {
+                obj = field;
+                for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedItems()
+                    .size(); i++) {
+                  if (field.getName().equals(farmTreeView.getSelectionModel().getSelectedItems()
+                      .get(i).getValue().getName())) {
+                    // field.setSoilProfile(soilProfile);
+                    // TODO
+                  }
+                }
+              }
+            }
+            gsehenInstance.sendFarmDataChanged(obj, null);
+            stage.close();
+          }
+        });
+
+        final Pane rootGroup = new HBox(2);
+        rootGroup.getChildren().addAll(comboBox, ok);
+
+        stage.setScene(new Scene(rootGroup));
         stage.show();
       }
     });
@@ -153,17 +190,44 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
             FXCollections.observableArrayList("Apfel", "Birne", "Löwenzahn", "Tomate", "Zwiebel");
         final ComboBox<String> comboBox = new ComboBox<String>(options);
 
-        stage.setScene(new Scene(comboBox));
+        Button ok = new Button("Ok");
+        ok.setOnAction(new EventHandler<ActionEvent>() {
+          @Override
+          public void handle(ActionEvent e) {
+            Drawable obj = null;
+            Crop crop = new Crop();
+            crop.setName(comboBox.getValue());
+            for (Farm farm : farmsList) {
+              for (Field field : farm.getFields()) {
+                for (Plot plot : field.getPlots()) {
+                  obj = plot;
+                  for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedItems()
+                      .size(); i++) {
+                    if (plot.getName().equals(farmTreeView.getSelectionModel().getSelectedItems()
+                        .get(i).getValue().getName())) {
+                      plot.setCrop(crop);
+                    }
+                  }
+                }
+              }
+            }
+            gsehenInstance.sendFarmDataChanged(obj, null);
+            stage.close();
+          }
+        });
+
+        final Pane rootGroup = new HBox(2);
+        rootGroup.getChildren().addAll(comboBox, ok);
+
+        stage.setScene(new Scene(rootGroup));
         stage.show();
       }
     });
 
-    farmTreeView.setRoot(rootItem);
-    farmTreeView.setShowRoot(false);
-    farmTreeView.setEditable(true);
-    farmTreeView.setContextMenu(menu);
     fillTreeView();
     setupScrolling();
+
+    farmTreeView.setContextMenu(menu);
     farmTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     farmTreeView.getSelectionModel().setCellSelectionEnabled(true);
   }
@@ -339,7 +403,6 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
           Plot plot = (Plot) param.getValue().getValue();
           if (plot.getCrop() != null) {
             result = new ReadOnlyStringWrapper(plot.getCrop().getName());
-            // TODO: Passt das so?
           } else {
             result = new ReadOnlyStringWrapper("/");
           }
@@ -349,6 +412,23 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     });
 
     column.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn());
+
+    // TODO
+    // column.setCellFactory(param -> new TreeTableCell<Drawable, String>() {
+    // @Override
+    // protected void updateItem(String item, boolean empty) {
+    // super.updateItem(item, empty);
+    //
+    // if (item == null || empty) {
+    // setGraphic(null);
+    // return;
+    // }
+    //
+    // System.out.println(item);
+    //
+    // }
+    //
+    // });
 
     if (column.getText().equals(mainBundle.getString("treetableview.name"))) {
       column.setPrefWidth(200);
