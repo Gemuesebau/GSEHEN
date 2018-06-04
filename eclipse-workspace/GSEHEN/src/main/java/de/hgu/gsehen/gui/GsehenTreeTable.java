@@ -290,6 +290,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
           Plot plot = (Plot) param.getValue().getValue();
           if (plot.getCrop() != null) {
             result = new ReadOnlyStringWrapper(plot.getCrop().getName());
+            // TODO: Passt das so?
           } else {
             result = new ReadOnlyStringWrapper("/");
           }
