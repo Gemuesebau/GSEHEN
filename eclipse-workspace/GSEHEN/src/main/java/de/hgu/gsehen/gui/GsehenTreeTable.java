@@ -279,11 +279,20 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
         if (param.getValue().getValue().getClass().getSimpleName().equals("Farm")) {
           result = new ReadOnlyStringWrapper("/");
         } else if (param.getValue().getValue().getClass().getSimpleName().equals("Field")) {
-          // result =
-          // new ReadOnlyStringWrapper(param.getValue().getValue().getClass().getFields());
-          // TODO
-        } else {
-          // TODO
+          Field field = (Field) param.getValue().getValue();
+          if (field.getSoilProfile() != null) {
+            result = new ReadOnlyStringWrapper(field.getSoilProfile().getSoilType().toString());
+            // TODO: Passt das so?
+          } else {
+            result = new ReadOnlyStringWrapper("/");
+          }
+        } else if (param.getValue().getValue().getClass().getSimpleName().equals("Plot")) {
+          Plot plot = (Plot) param.getValue().getValue();
+          if (plot.getCrop() != null) {
+            result = new ReadOnlyStringWrapper(plot.getCrop().getName());
+          } else {
+            result = new ReadOnlyStringWrapper("/");
+          }
         }
       }
       return result;
