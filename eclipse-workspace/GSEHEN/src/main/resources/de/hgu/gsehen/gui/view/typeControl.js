@@ -38,7 +38,7 @@ function TypeControl(controlDiv, options, setTypeToValueFunction) {
     var inputs = controlText.getElementsByTagName("input");
     for (var i=0; i<inputs.length; i++) {
     	var input = inputs[i];
-    	input.addEventListener('change', function() { setTypeToValueFunction(this.value) });
+    	input.addEventListener('change', function () { setTypeToValueFunction(this.value) });
     }
     controlUI.appendChild(controlText);
 }

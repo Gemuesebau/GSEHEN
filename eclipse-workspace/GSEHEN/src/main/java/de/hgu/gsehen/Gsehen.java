@@ -350,7 +350,7 @@ public class Gsehen extends Application {
   }
 
   @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
-  public String readUTF8FileAsString(String dataFileName) throws IOException {
+  public String readUTF8FileAsOneString(String dataFileName) throws IOException {
     return new String(Files.readAllBytes(Paths.get(dataFileName)), "utf-8");
   }
 
