@@ -8,7 +8,7 @@ import java.util.List;
 
 public class FarmDataChanged extends GsehenEvent {
   private List<Farm> farms;
-  private Pair<GeoPoint> viewPort;
+  private Pair<GeoPoint> viewport;
 
   public List<Farm> getFarms() {
     return farms;
@@ -18,11 +18,11 @@ public class FarmDataChanged extends GsehenEvent {
     this.farms = farms;
   }
 
-  public Pair<GeoPoint> getViewPort() {
-    return viewPort;
+  public Pair<GeoPoint> getViewport() {
+    return viewport;
   }
 
-  public void setViewPort(Pair<GeoPoint> viewPort) {
-    this.viewPort = viewPort;
+  public void setViewport(Pair<GeoPoint> viewport) {
+    this.viewport = viewport;
   }
 }

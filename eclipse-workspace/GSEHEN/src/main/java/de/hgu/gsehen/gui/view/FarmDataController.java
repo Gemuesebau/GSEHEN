@@ -24,7 +24,7 @@ public abstract class FarmDataController extends WebController
   }
 
   private Drawable[] drawables;
-  private Pair<GeoPoint> lastViewPort = new Pair<>(new GeoPoint(-90, -180), new GeoPoint(90, 180));
+  private Pair<GeoPoint> lastViewport = new Pair<>(new GeoPoint(-90, -180), new GeoPoint(90, 180));
 
   /**
    * Constructs a new farm data controller associated with the given WebView.
@@ -44,11 +44,11 @@ public abstract class FarmDataController extends WebController
       farmsArray[i++] = farm;
     }
     drawables = flattenDrawables(farmsArray);
-    Pair<GeoPoint> viewPort = event.getViewPort();
-    lastViewPort = viewPort != null ? viewPort : findBounds(drawables);
+    Pair<GeoPoint> viewport = event.getViewport();
+    lastViewport = viewport != null ? viewport : findBounds(drawables);
     getLogger().log(Level.INFO, "About to reload " + this.getClass().getSimpleName() + " web view,"
         + " with drawables=" + Arrays.asList(drawables)
-        + " and lastViewPort=" + lastViewPort);
+        + " and lastViewport=" + lastViewport);
     reload();
   }
 
@@ -115,8 +115,16 @@ public abstract class FarmDataController extends WebController
     return drawables;
   }
 
-  public Pair<GeoPoint> getLastViewPort() {
-    return lastViewPort;
+  public Pair<GeoPoint> getLastViewport() {
+    return lastViewport;
+  }
+
+  public void setLastViewport(double north, double south, double east, double west) {
+    lastViewport = new Pair<>(new GeoPoint(north, west), new GeoPoint(south, east));
+  }
+
+  public void setViewport(Pair<GeoPoint> lastViewport) {
+    this.lastViewport = lastViewport;
   }
 
   /**

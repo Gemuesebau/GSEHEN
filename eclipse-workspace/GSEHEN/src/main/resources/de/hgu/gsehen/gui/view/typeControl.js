@@ -1,4 +1,4 @@
-// from Google Maps API Doc, modified
+// from Google Maps API Doc, modified FIXME move CSS to HTML file
 function TypeControl(controlDiv, options, setTypeToValueFunction) {
     // Set CSS for the control border.
     var controlUI = document.createElement('div');

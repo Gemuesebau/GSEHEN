@@ -70,7 +70,7 @@ catch (ex) {
 instance.notifyEventListeners(function () {
   var event = new FarmDataChanged();
   event.setFarms(farms);
-  event.setViewPort(new Pair(
+  event.setViewport(new Pair(
     new GeoPoint(bounds.minY, bounds.minX),
     new GeoPoint(bounds.maxY, bounds.maxX)
   ));

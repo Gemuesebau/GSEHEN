@@ -6,8 +6,43 @@ alert("Maps (re)loaded, now running custom JavaScript");
 
 #include("../../js/commons.js")
 
+var timeoutObjects = {};
+
+function debounce(timeoutObjKey, delegateFunc, delegateFuncArgsAsArray) {
+  if (timeoutObjects[timeoutObjKey] != null) {
+    window.clearTimeout(timeoutObjects[timeoutObjKey]);
+    timeoutObjects[timeoutObjKey] = null;
+  }
+  if (delegateFuncArgsAsArray == null || delegateFuncArgsAsArray.length == 0) {
+    timeoutObjects[timeoutObjKey] = window.setTimeout(delegateFunc, 500);
+  }
+  else if (delegateFuncArgsAsArray.length == 1) {
+    timeoutObjects[timeoutObjKey] = window.setTimeout(delegateFunc, 500,
+      delegateFuncArgsAsArray[0]
+    );
+  }
+  else if (delegateFuncArgsAsArray.length == 2) {
+    timeoutObjects[timeoutObjKey] = window.setTimeout(delegateFunc, 500,
+      delegateFuncArgsAsArray[0],
+      delegateFuncArgsAsArray[1]
+    );
+  }
+  else {
+    alert("No debounce implementation for " + delegateFuncArgsAsArray.length +
+      " delegate function arguments!");
+  }
+}
+
+function addPolygonOptions(obj, style) {
+  obj.editable = true;
+  obj.draggable = true;
+  obj.strokeColor = style;
+  obj.fillColor = style;
+  return obj;
+}
+
 function setSelectedType(type) {
-  alert("Setze Typ auf: " + type);
+  alert("Setting type for new objects to: " + type);
   selectedType = type;
   var style = webController.getFillStyle(type);
   var overlayType = google.maps.drawing.OverlayType;
@@ -19,12 +54,7 @@ function setSelectedType(type) {
       position:        controlPosition.TOP_RIGHT,
       drawingModes:    [ overlayType.POLYGON ]
     },
-    polygonOptions: {
-      editable:      true,
-      draggable:     true,
-      strokeColor:   style,
-      fillColor:     style
-    }
+    polygonOptions: addPolygonOptions({}, style)
   });
 }
 
@@ -36,10 +66,8 @@ function initialize(mapOptions, typeOptions) {
     setSelectedType(typeOptions[0].key);
   }
   map = new google.maps.Map(document.getElementById('mapcanvas'), mapOptions);
-  // from Google Maps API Doc, modified
   var typeControlDiv = document.createElement('div');
   var typeControl = new TypeControl(typeControlDiv, typeOptions, setSelectedType);
-  //typeControlDiv.index = 1;
   map.controls[google.maps.ControlPosition.TOP_CENTER].push(typeControlDiv);
 }
 
@@ -59,50 +87,61 @@ function captureDrawing() {
       webController.polygonDrawn(javaPolygon, selectedType);
     }
   );
+  google.maps.event.addListener(
+    map, 'bounds_changed', function() {
+    	debounce('mapBoundsChanged', function() {
+    		var bounds = map.getBounds().toJSON();
+    		webController.mapBoundsChanged(
+    				bounds.north, // 49.40646986706016
+    				bounds.south, // 49.39669051179038
+    				bounds.east,  // 8.355449915406325
+    				bounds.west   // 8.335816145417311
+    		)
+    	});
+    }
+  );
 }
 
-function setDefaultViewPortBounds() {
-  // green part of Geisenheim Campus
-  viewPortBounds.extend(new google.maps.LatLng(49.984605, 7.959441));
-  viewPortBounds.extend(new google.maps.LatLng(49.983059, 7.964469));
+/**
+ * Extends viewportBounds by the green part of Geisenheim Campus
+ */
+function setDefaultViewportBounds() {
+  viewportBounds.extend(new google.maps.LatLng(49.984605, 7.959441));
+  viewportBounds.extend(new google.maps.LatLng(49.983059, 7.964469));
 }
 
-initialize({
-  //center:            new google.maps.LatLng(webController.getCenterLat(), webController.getCenterLng()),
-  //zoom:              webController.getZoom(),
-  fullscreenControl: false
-}, objectArray(webController.getLocalizedTypes(), function(pair) { return { key: pair.getLeft(), title: pair.getRight() }; }));
+initialize({ fullscreenControl: false }, objectArray(webController.getLocalizedTypes(),
+  function objectConverter(pair) {
+    return { key: pair.getLeft(), title: pair.getRight() };
+  }
+));
 
-var viewPortBounds = new google.maps.LatLngBounds();
+var viewportBounds = new google.maps.LatLngBounds();
 var drawables = webController.getDrawables();
 if (drawables == null) {
   alert("Got 'null' drawables!");
-  setDefaultViewPortBounds();
+  setDefaultViewportBounds();
 }
 else {
   if (drawables.length == 0) {
     alert("Got no drawables");
-    setDefaultViewPortBounds();
+    setDefaultViewportBounds();
   }
   else {
     //alert("Drawables for map: " + drawables);
     for (var j = 0; j < drawables.length; j++) {
       var drawable = drawables[j];
-      //alert("drawable.getPolygon(): " + drawable +
-      // " (type of this drawable.getPolygon(): " + (typeof drawable.getPolygon()) + ")");
       var style = webController.getFillStyle(drawable);
-      var mapsPolygon = new google.maps.Polygon({
+      var mapsPolygon = new google.maps.Polygon(addPolygonOptions({
         paths: buildJavaScriptPolygonLatLngCallback(drawable.getPolygon(), function (lat, lng) {
-          viewPortBounds.extend(new google.maps.LatLng(lat, lng));
-        }),
-        strokeColor: style,
-        fillColor: style
-      });
+          viewportBounds.extend(new google.maps.LatLng(lat, lng));
+        })
+      }, style));
       mapsPolygon.setMap(map);
     }
   }
 }
-map.fitBounds(viewPortBounds);
+map.fitBounds(viewportBounds);
 
 initAutocomplete();
 draw();

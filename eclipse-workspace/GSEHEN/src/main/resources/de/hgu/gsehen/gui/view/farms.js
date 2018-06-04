@@ -16,8 +16,8 @@ canvas.call(d3.zoom()
 );
 drawPoints(0, 0, 1); // defaults
 
-function transform(pointCoordValue, viewPortCoordValue, factor, flipHeightOrNull) {
-  var value = (pointCoordValue - viewPortCoordValue) * factor;
+function transform(pointCoordValue, viewportCoordValue, factor, flipHeightOrNull) {
+  var value = (pointCoordValue - viewportCoordValue) * factor;
   if (flipHeightOrNull == null) {
     return value;
   }
@@ -26,9 +26,9 @@ function transform(pointCoordValue, viewPortCoordValue, factor, flipHeightOrNull
   }
 }
 
-function lineAndLog(context, points, pointIndex, viewPort, factor, canvasHeight) {
-  var x = transform(points.get(pointIndex).getLng(), viewPort.getLeft().getLng(), factor, null);
-  var y = transform(points.get(pointIndex).getLat(), viewPort.getLeft().getLat(), factor, canvasHeight);
+function lineAndLog(context, points, pointIndex, viewport, factor, canvasHeight) {
+  var x = transform(points.get(pointIndex).getLng(), viewport.getLeft().getLng(), factor, null);
+  var y = transform(points.get(pointIndex).getLat(), viewport.getLeft().getLat(), factor, canvasHeight);
   context.lineTo(x, y);
   //alert("*** Added line end point: [" + x + ", " + y + "]");
 }
@@ -38,10 +38,11 @@ function drawPoints(x, y, k) {
   var canvasWidth = canvas.property("width");
   var canvasHeight = canvas.property("height");
   context.clearRect(0, 0, canvasWidth, canvasHeight);
-  var viewPort = webController.getLastViewPort();
-  var viewPortWidth = viewPort.getRight().getLng() - viewPort.getLeft().getLng();
-  var viewPortHeight = viewPort.getRight().getLat() - viewPort.getLeft().getLat();
-  var factor = Math.min(canvasWidth / viewPortWidth, canvasHeight / viewPortHeight);
+  var viewport = webController.getLastViewport();
+  alert("Viewport is north: " + viewport.getLeft().getLat() + ", south: " + viewport.getRight().getLat() + ", east: " + viewport.getRight().getLng() + ", west: " + viewport.getLeft().getLng());
+  var viewportWidth = viewport.getRight().getLng() - viewport.getLeft().getLng();
+  var viewportHeight = viewport.getRight().getLat() - viewport.getLeft().getLat();
+  var factor = Math.min(canvasWidth / viewportWidth, canvasHeight / viewportHeight);
   context.translate(x, y);
   context.scale(k, k);
   var drawables = webController.getDrawables();
@@ -60,14 +61,14 @@ function drawPoints(x, y, k) {
     //alert("Got points: " + points);
     try {
       context.moveTo(
-        transform(points.get(0).getLng(), viewPort.getLeft().getLng(), factor, null),
-        transform(points.get(0).getLat(), viewPort.getLeft().getLat(), factor, canvasHeight)
+        transform(points.get(0).getLng(), viewport.getLeft().getLng(), factor, null),
+        transform(points.get(0).getLat(), viewport.getLeft().getLat(), factor, canvasHeight)
       );
       // the actual lines
       for (var i = 1; i < points.size(); i++) {
-        lineAndLog(context, points, i, viewPort, factor, canvasHeight);
+        lineAndLog(context, points, i, viewport, factor, canvasHeight);
       }
-      lineAndLog(context, points, 0, viewPort, factor, canvasHeight);
+      lineAndLog(context, points, 0, viewport, factor, canvasHeight);
       // color by type
       context.fillStyle = webController.getFillStyle(drawable);
       context.fill();

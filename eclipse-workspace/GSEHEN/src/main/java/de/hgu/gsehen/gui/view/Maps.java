@@ -49,23 +49,6 @@ public class Maps extends FarmDataController implements GsehenEventListener<Farm
     return new GeoPolygon();
   }
 
-  // ------------------------------- these should use getLastViewPort (???)
-  // -------------------------------
-  public double getCenterLat() {
-    return 49.400981; // TODO get from current viewport, or, at least initially, from (user's)
-                      // settings
-  }
-
-  public double getCenterLng() {
-    return 8.350068;  // TODO get from current viewport, or, at least initially, from (user's)
-                      // settings
-  }
-
-  public double getZoom() {
-    return 18; // TODO derive from current viewport, or, at least initially, from (user's) settings
-  }
-  // ----------------------------------------------------------------------------------------------
-
   /**
    * Returns the object types with their localized names; intended to be called from web JavaScript.
    *
@@ -74,7 +57,7 @@ public class Maps extends FarmDataController implements GsehenEventListener<Farm
   @SuppressWarnings({"unchecked", "rawtypes"})
   public Pair<String>[] getLocalizedTypes() {
     Pair<String>[] result = new Pair[3];
-    int[] i = new int[] {0};
+    int[] i = new int[] { 0 };
     typesMap.keySet().forEach(type -> {
       result[i[0]++] =
           new Pair(type, application.getBundle().getString("gui.view.Map.drawableType." + type));
@@ -102,5 +85,24 @@ public class Maps extends FarmDataController implements GsehenEventListener<Farm
       // Java reflection stuff - exception should not happen, since all input comes from code
       LOGGER.info(exception.getMessage());
     }
+  }
+
+  /**
+   * Handles the event of a change in the map's bounds (viewport).
+   *
+   * @param north northern latitude
+   * @param south southern latitude
+   * @param east eastern longitude
+   * @param west western longitude
+   */
+  public void mapBoundsChanged(double north, double south, double east, double west) {
+    getLogger().info("Map bounds changed to"
+        + " north: "  + north
+        + ", south: " + south
+        + ", east: "  + east
+        + ", west: "  + west
+        + "; setting as lastViewport"
+    );
+    setLastViewport(north, south, east, west);
   }
 }
