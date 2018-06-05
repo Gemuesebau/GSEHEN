@@ -4,7 +4,6 @@ import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
 import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
 import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
-
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
@@ -12,7 +11,9 @@ import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
 import de.hgu.gsehen.gui.view.Farms;
+import de.hgu.gsehen.gui.view.Fields;
 import de.hgu.gsehen.gui.view.Maps;
+import de.hgu.gsehen.gui.view.Plots;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
@@ -46,6 +47,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -68,12 +70,16 @@ public class Gsehen extends Application {
   public static final String TAB_PANE_ID = "#tabPane";
   private static final String MAPS_WEB_VIEW_ID = "#mapsWebView";
   private static final String FARMS_WEB_VIEW_ID = "#farmsWebView";
+  private static final String FIELDS_VIEW_ID = "#fieldsBorderPane";
+  private static final String PLOTS_VIEW_ID = "#plotsBorderPane";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private static final String LOAD_USER_DATA_JS = "/de/hgu/gsehen/js/loadUserData.js";
   private static final String SAVE_USER_DATA_JS = "/de/hgu/gsehen/js/saveUserData.js";
 
   private static Maps maps;
   private static Farms farms;
+  private static Fields fields;
+  private static Plots plots;
   private GsehenTreeTable treeTable;
   private List<Farm> farmsList = new ArrayList<>();
 
@@ -147,9 +153,12 @@ public class Gsehen extends Application {
     });
 
     loadUserData();
-    
+
     treeTable = new GsehenTreeTable();
     treeTable.addFarmTreeView();
+
+    fields = new Fields(this, (BorderPane) scene.lookup(FIELDS_VIEW_ID));
+    plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
   }
 
   @SuppressWarnings({"unused", "checkstyle:rightcurly"})
@@ -300,8 +309,8 @@ public class Gsehen extends Application {
   }
 
   /**
-   * Sends a "FarmDataChanged" event to all listeners registered for that kind of event,
-   * except the listeners that belong to the given "skipClass".
+   * Sends a "FarmDataChanged" event to all listeners registered for that kind of event, except the
+   * listeners that belong to the given "skipClass".
    *
    * @param object the object that initially caused the event to be sent
    * @param skipClass the event listener class to skip when iterating the listeners, or null
@@ -312,10 +321,9 @@ public class Gsehen extends Application {
     FarmDataChanged event = new FarmDataChanged();
     event.setFarms(farmsList);
     try {
-      event.setViewport(new Pair<>(
-          new GeoPoint(object.getPolygon().getMinY(), object.getPolygon().getMinX()),
-          new GeoPoint(object.getPolygon().getMaxY(), object.getPolygon().getMaxX())
-      ));
+      event.setViewport(
+          new Pair<>(new GeoPoint(object.getPolygon().getMinY(), object.getPolygon().getMinX()),
+              new GeoPoint(object.getPolygon().getMaxY(), object.getPolygon().getMaxX())));
     } catch (IllegalArgumentException e) {
       event.setViewport(null);
     }
@@ -395,5 +403,13 @@ public class Gsehen extends Application {
   public void setFarmViewportFromMap() {
     farms.setViewport(maps.getLastViewport());
     farms.reload();
+  }
+
+  public static Fields getFields() {
+    return fields;
+  }
+
+  public static Plots getPlots() {
+    return plots;
   }
 }

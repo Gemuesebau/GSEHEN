@@ -32,6 +32,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableColumn.CellEditEvent;
 import javafx.scene.control.TreeTableRow;
@@ -84,14 +85,6 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
   private MenuItem deleteItem;
   private MenuItem soiltem;
   private MenuItem cropItem;
-
-  /**
-   * Constructs a new farm view in the given WebView.
-   *
-   */
-  public GsehenTreeTable() {
-    super();
-  }
 
   /**
    * Adds the FarmTreeView.
@@ -415,7 +408,6 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
 
     // TODO
     // column.setCellFactory(param -> new TreeTableCell<Drawable, String>() {
-    // @Override
     // protected void updateItem(String item, boolean empty) {
     // super.updateItem(item, empty);
     //
@@ -424,7 +416,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     // return;
     // }
     //
-    // System.out.println(item);
+    //
     //
     // }
     //
@@ -593,5 +585,13 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
   @Override
   public void handle(FarmDataChanged event) {
     fillTreeView();
+  }
+  
+  public static GsehenTreeTable getInstance() {
+    return instance;
+  }
+  
+  public TreeTableView<Drawable> getFarmTreeView() {
+    return farmTreeView;
   }
 }

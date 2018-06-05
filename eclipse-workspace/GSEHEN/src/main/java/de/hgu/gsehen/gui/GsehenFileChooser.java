@@ -44,8 +44,8 @@ public final class GsehenFileChooser extends Application {
     stage.setWidth(260);
 
     final FileChooser fileChooser = new FileChooser();
-    final Button saveButton = new Button(mainBundle.getString("filechooser.save"));
-    final Button exitButton = new Button(mainBundle.getString("filechooser.exit"));
+    final Button saveButton = new Button(mainBundle.getString("menu.file.save"));
+    final Button exitButton = new Button(mainBundle.getString("menu.file.exit"));
     final Button cancelButton = new Button(mainBundle.getString("filechooser.cancel"));
 
     saveButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -99,7 +99,7 @@ public final class GsehenFileChooser extends Application {
   }
 
   private static void configureFileChooser(final FileChooser fileChooser) {
-    fileChooser.setTitle(mainBundle.getString("filechooser.save") + "...");
+    fileChooser.setTitle(mainBundle.getString("menu.file.save") + "...");
     fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
     fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("JSON", "*.json"));
 
