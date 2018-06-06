@@ -17,3 +17,31 @@ function buildJavaScriptPolygonLatLngCallback(javaPolygon, callbackFunc) {
 	}
 	return javaScriptPolygon;
 }
+
+var eventsDebouncer = {
+  timeoutObjects: {},
+  debounce: function(timeoutObjKey, delegateFunc, delegateFuncArgsAsArray) {
+    if (eventsDebouncer.timeoutObjects[timeoutObjKey] != null) {
+      window.clearTimeout(eventsDebouncer.timeoutObjects[timeoutObjKey]);
+      eventsDebouncer.timeoutObjects[timeoutObjKey] = null;
+    }
+    if (delegateFuncArgsAsArray == null || delegateFuncArgsAsArray.length == 0) {
+      eventsDebouncer.timeoutObjects[timeoutObjKey] = window.setTimeout(delegateFunc, 500);
+    }
+    else if (delegateFuncArgsAsArray.length == 1) {
+      eventsDebouncer.timeoutObjects[timeoutObjKey] = window.setTimeout(delegateFunc, 500,
+        delegateFuncArgsAsArray[0]
+      );
+    }
+    else if (delegateFuncArgsAsArray.length == 2) {
+      eventsDebouncer.timeoutObjects[timeoutObjKey] = window.setTimeout(delegateFunc, 500,
+        delegateFuncArgsAsArray[0],
+        delegateFuncArgsAsArray[1]
+      );
+    }
+    else {
+      alert("No debounce implementation for " + delegateFuncArgsAsArray.length +
+        " delegate function arguments!");
+    }
+  }
+}

@@ -31,11 +31,30 @@
       #pac-input:focus {
         border-color: #4d90fe;
       }
+      #types-box {
+        color: rgb(25,25,25);
+        font-family: Arial,sans-serif;
+        font-size: 14px;
+        line-height: 38px;
+        padding-left: 5px;
+        padding-right: 5px;
+      }
+      #types-container {
+        background-color = '#fff';
+        border = '2px solid #fff';
+        border-radius = '3px';
+        box-shadow = '0 2px 6px rgba(0,0,0,.3)';
+        cursor = 'pointer';
+        margin-bottom = '22px';
+        text-align = 'center';
+      }
     </style>
   </head>
   <body><!--
     --><div id="mapcanvas"></div><!--
     --><input id="pac-input" class="pac-control" type="text" placeholder="&#x1F50D;"><!--
+    --><div id="types-box"></div><!--
+    --><div id="types-container"></div><!--
     --><script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing,places"></script><!--
     --><script type="text/javascript">
       var map;

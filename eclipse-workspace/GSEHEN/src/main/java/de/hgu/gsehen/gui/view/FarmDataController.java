@@ -111,7 +111,6 @@ public abstract class FarmDataController extends WebController
   }
 
   public Drawable[] getDrawables() {
-    //getLogger().log(Level.INFO, "getDrawables=" + Arrays.asList(drawables));
     return drawables;
   }
 
@@ -119,12 +118,24 @@ public abstract class FarmDataController extends WebController
     return lastViewport;
   }
 
+  public void setLastViewport(Pair<GeoPoint> lastViewport) {
+    this.lastViewport = lastViewport;
+  }
+
   public void setLastViewport(double north, double south, double east, double west) {
     lastViewport = new Pair<>(new GeoPoint(south, west), new GeoPoint(north, east));
   }
 
-  public void setViewport(Pair<GeoPoint> lastViewport) {
-    this.lastViewport = lastViewport;
+  // FIXME check logic!
+  @SuppressWarnings({"checkstyle:javadocmethod"})
+  public void setLastViewportByPanZoom(double viewportWidth, double viewportHeight,
+      double lngTranslation, double latTranslation) {
+    setLastViewport(
+        latTranslation,
+        latTranslation - viewportHeight,
+        lngTranslation + viewportWidth,
+        lngTranslation
+    );
   }
 
   /**

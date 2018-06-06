@@ -388,12 +388,12 @@ public class Gsehen extends Application {
   }
 
   public void setMapViewportFromFarm() {
-    maps.setViewport(farms.getLastViewport());
+    maps.setLastViewport(farms.getLastViewport());
     maps.reload();
   }
 
   public void setFarmViewportFromMap() {
-    farms.setViewport(maps.getLastViewport());
+    farms.setLastViewport(maps.getLastViewport());
     farms.reload();
   }
 }

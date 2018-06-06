@@ -17,7 +17,7 @@ var context = canvas.node().getContext("2d");
 alert("Viewport is north: " + viewport.getLeft().getLat() + ", south: " + viewport.getRight().getLat() + ", east: " + viewport.getRight().getLng() + ", west: " + viewport.getLeft().getLng());
 
 canvas.call(d3.zoom()
-  .scaleExtent([0.2, 5])
+  .scaleExtent([0.1, 10])
   .on("zoom", function () {
     drawPoints(d3.event.transform.x, d3.event.transform.y, d3.event.transform.k);
   })
