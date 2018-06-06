@@ -3,6 +3,7 @@ package de.hgu.gsehen.gui;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
+import de.hgu.gsehen.gui.view.PlotDataController;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
@@ -32,7 +33,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableColumn.CellEditEvent;
 import javafx.scene.control.TreeTableRow;
@@ -69,8 +69,8 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
   private Farm farm;
   private Timeline scrolltimeline = new Timeline();
   private double scrollDirection = 0;
+  
   private TreeTableView<Drawable> farmTreeView;
-
   private TreeTableColumn<Drawable, String> column;
   private TreeItem<Drawable> farmItem;
   private TreeItem<Drawable> fieldItem;

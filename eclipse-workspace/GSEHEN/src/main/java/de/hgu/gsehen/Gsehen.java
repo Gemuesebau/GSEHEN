@@ -4,6 +4,7 @@ import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
 import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
 import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
+
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
@@ -91,7 +92,7 @@ public class Gsehen extends Application {
   private boolean dataChanged;
 
   private static Gsehen instance;
-
+  
   {
     instance = this;
   }
@@ -140,6 +141,8 @@ public class Gsehen extends Application {
 
     maps = new Maps(this, (WebView) scene.lookup(MAPS_WEB_VIEW_ID));
     farms = new Farms(this, (WebView) scene.lookup(FARMS_WEB_VIEW_ID));
+    fields = new Fields(this, (BorderPane) scene.lookup(FIELDS_VIEW_ID));
+    plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
 
     TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
     tabPane.getTabs().remove(tabPane.getTabs().size() - 2, tabPane.getTabs().size());
@@ -156,9 +159,6 @@ public class Gsehen extends Application {
 
     treeTable = new GsehenTreeTable();
     treeTable.addFarmTreeView();
-
-    fields = new Fields(this, (BorderPane) scene.lookup(FIELDS_VIEW_ID));
-    plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
   }
 
   @SuppressWarnings({"unused", "checkstyle:rightcurly"})

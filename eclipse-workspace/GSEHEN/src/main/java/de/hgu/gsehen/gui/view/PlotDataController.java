@@ -3,12 +3,12 @@ package de.hgu.gsehen.gui.view;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
-import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -25,15 +25,22 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
+  private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
+  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+
+  private static PlotDataController instance;
   private Gsehen gsehenInstance;
-  private GsehenTreeTable gsehenTreeTable;
   private BorderPane pane;
   private TreeTableView<Drawable> treeTableView;
 
+  private Text name;
+  private Text geopolygon;
+  private Text location;
+
   {
+    instance = this;
     gsehenInstance = Gsehen.getInstance();
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
-    gsehenTreeTable = GsehenTreeTable.getInstance();
   }
 
   /**
@@ -46,17 +53,17 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     this.pane = pane;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void handle(FarmDataChanged event) {
-
     // TOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Text name = new Text("Name:");
+    name = new Text("Name:");
     name.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
-    Text geopolygon = new Text("GeoPolygon:");
+    geopolygon = new Text("GeoPolygon:");
     geopolygon.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
-    Text location = new Text("Location:");
+    location = new Text("Location:");
     location.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
     VBox topBox = new VBox(25);
@@ -74,11 +81,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     cropCombo.valueProperty().addListener(new ChangeListener<String>() {
       @SuppressWarnings("rawtypes")
       @Override
-      public void changed(ObservableValue ov, String t, String t1) {
-        System.out.println(ov);
-        System.out.println(t);
-        System.out.println(t1);
-
+      public void changed(ObservableValue ov, String oldValue, String newValue) {
         Drawable obj = null;
         Crop crop = new Crop();
         crop.setName(cropCombo.getValue());
@@ -87,24 +90,26 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           for (Field field : farm.getFields()) {
             for (Plot plot : field.getPlots()) {
               obj = plot;
-              for (int i = 0; i < treeTableView.getSelectionModel().getSelectedItems()
-                  .size(); i++) {
-                if (treeTableView.getSelectionModel().getSelectedItems().size() == 1) {
+              // TODO - Testen, wieso immer ein Item mehr selektiert wird!
+              for (int i = 0; i < treeTableView.getSelectionModel().getSelectedItems().size()
+                  - 1; i++) {
+                if (treeTableView.getSelectionModel().getSelectedItems().size() == 2) {
                   if (plot.getName().equals(
                       treeTableView.getSelectionModel().getSelectedItem().getValue().getName())) {
                     plot.setCrop(crop);
+                    LOGGER.info("'" + crop.getName() + "' was set as crop in" + obj);
                   }
                 } else {
                   if (plot.getName().equals(treeTableView.getSelectionModel().getSelectedItems()
                       .get(i).getValue().getName())) {
                     plot.setCrop(crop);
+                    LOGGER.info("'" + crop.getName() + "' was set as crop in" + obj);
                   }
                 }
               }
             }
           }
         }
-
         gsehenInstance.sendFarmDataChanged(obj, null);
       }
     });
@@ -115,14 +120,14 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     pane.setLeft(leftBox);
     // LEFT END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    treeTableView = gsehenTreeTable.getFarmTreeView();
+    treeTableView =
+        (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
     treeTableView.getSelectionModel().selectedItemProperty()
         .addListener(new ChangeListener<Object>() {
-
-          @SuppressWarnings("unchecked")
           @Override
           public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
-            TreeItem<Drawable> selectedItem = (TreeItem<Drawable>) newVal;
+            TreeItem<Drawable> selectedItem = treeTableView.getSelectionModel().getSelectedItem();
+            // TODO: Nullpointer! Könnte was mit dem Problem von oben zu tun haben!?
             if (selectedItem.getValue().getClass().getSimpleName().equals("Plot")) {
               name.setText("Name:\t\t\t" + selectedItem.getValue().getName());
               geopolygon
@@ -131,6 +136,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             }
           }
         });
+  }
+
+  public static PlotDataController getInstance() {
+    return instance;
   }
 
 }

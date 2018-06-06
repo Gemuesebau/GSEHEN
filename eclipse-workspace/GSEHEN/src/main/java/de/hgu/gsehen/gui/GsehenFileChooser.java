@@ -41,7 +41,7 @@ public final class GsehenFileChooser extends Application {
     stage.getIcons().add(new Image("/de/hgu/gsehen/images/Logo_UniGeisenheim_36x36.png"));
     stage.setAlwaysOnTop(true);
     stage.setHeight(100);
-    stage.setWidth(260);
+    stage.setWidth(300);
 
     final FileChooser fileChooser = new FileChooser();
     final Button saveButton = new Button(mainBundle.getString("menu.file.save"));
