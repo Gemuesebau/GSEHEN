@@ -5,17 +5,17 @@ function buildJavaScriptPolygon(javaPolygon, logIndent) {
 }
 
 function buildJavaScriptPolygonLatLngCallback(javaPolygon, callbackFunc) {
-	var javaPolygonPoints = javaPolygon.getGeoPoints();
-	var javaPolygonPointsLength = javaPolygonPoints.size();
-	var javaScriptPolygon = [];
-	for (var i=0; i<javaPolygonPointsLength; i++) {
-		var polygonPoint = javaPolygonPoints.get(i);
-		javaScriptPolygon.push({ lat: polygonPoint.getLat(), lng: polygonPoint.getLng() });
-		if (callbackFunc != null) {
-			callbackFunc(polygonPoint.getLat(), polygonPoint.getLng());
-		}
-	}
-	return javaScriptPolygon;
+  var javaPolygonPoints = javaPolygon.getGeoPoints();
+  var javaPolygonPointsLength = javaPolygonPoints.size();
+  var javaScriptPolygon = [];
+  for (var i=0; i<javaPolygonPointsLength; i++) {
+    var polygonPoint = javaPolygonPoints.get(i);
+    javaScriptPolygon.push({ lat: polygonPoint.getLat(), lng: polygonPoint.getLng() });
+    if (callbackFunc != null) {
+      callbackFunc(polygonPoint.getLat(), polygonPoint.getLng());
+    }
+  }
+  return javaScriptPolygon;
 }
 
 var eventsDebouncer = {

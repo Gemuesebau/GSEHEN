@@ -126,18 +126,6 @@ public abstract class FarmDataController extends WebController
     lastViewport = new Pair<>(new GeoPoint(south, west), new GeoPoint(north, east));
   }
 
-  // FIXME check logic!
-  @SuppressWarnings({"checkstyle:javadocmethod"})
-  public void setLastViewportByPanZoom(double viewportWidth, double viewportHeight,
-      double lngTranslation, double latTranslation) {
-    setLastViewport(
-        latTranslation,
-        latTranslation - viewportHeight,
-        lngTranslation + viewportWidth,
-        lngTranslation
-    );
-  }
-
   /**
    * Determines the map or farm view polygon color for the given type (object).
    *

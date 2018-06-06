@@ -32,4 +32,30 @@ public class Farms extends FarmDataController implements GsehenEventListener<Far
   public double getCanvasHeight() {
     return (double) engine.executeScript("innerHeight * 0.96");
   }
+
+  /**
+   * Handles the event of a change in the farm view's bounds (viewport).
+   *
+   * <p>All parameters must be given as numbers in the coordinate scale.</p>
+   *
+   * @param viewportWidth longitude difference between east and west bounds
+   * @param viewportHeight latitude difference between north and south bounds
+   * @param lngTranslation longitude of the viewport translation since last view initialization
+   * @param latTranslation latitude of the viewport translation since last view initialization
+   */
+  public void farmBoundsChanged(double viewportWidth, double viewportHeight,
+      double lngTranslation, double latTranslation) {
+    getLogger().info("*** "
+        + "viewportWidth = " + viewportWidth
+        + ", viewportHeight = " + viewportHeight
+        + ", lngTranslation = " + lngTranslation
+        + ", latTranslation = " + latTranslation
+    );
+    //setLastViewport(
+    //    latTranslation,
+    //    latTranslation - viewportHeight,
+    //    lngTranslation + viewportWidth,
+    //    lngTranslation
+    //);
+  }
 }
