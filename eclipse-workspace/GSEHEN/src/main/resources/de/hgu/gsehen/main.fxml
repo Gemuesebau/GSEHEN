@@ -30,12 +30,8 @@
 							<items>
 								<Menu mnemonicParsing="false" text="%menu.view.bounds">
 									<items>
-										<MenuItem
-											mnemonicParsing="false" text="%menu.view.bounds.mapToFarm"
-											onAction="#setFarmViewportFromMap" />
-										<MenuItem
-											mnemonicParsing="false" text="%menu.view.bounds.farmToMap"
-											onAction="#setMapViewportFromFarm" />
+										<MenuItem mnemonicParsing="false" onAction="#setFarmViewportFromMap" text="%menu.view.bounds.mapToFarm" />
+										<MenuItem mnemonicParsing="false" onAction="#setMapViewportFromFarm" text="%menu.view.bounds.farmToMap" />
 									</items>
 								</Menu>
 								<fx:include source="developerMenu.fxml" />
@@ -120,6 +116,22 @@
 						</AnchorPane>
 					</content>
 				</Tab>
+            <Tab fx:id="fieldViewTab" closable="false" text="FieldView">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <BorderPane id="fieldsBorderPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children></AnchorPane>
+               </content>
+            </Tab>
+            <Tab fx:id="plotViewTab" closable="false" text="PlotView">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <BorderPane id="plotsBorderPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children></AnchorPane>
+               </content>
+            </Tab>
 	            <Tab fx:id="contactViewTab" closable="false" text="Kontakt">
 	               <content>
 	                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">

@@ -41,7 +41,7 @@ public class MainController {
   @FXML
   private Tab fieldViewTab;
   @FXML
-  private Tab fieldPlotViewTab;
+  private Tab plotViewTab;
   @FXML
   private Tab contactViewTab;
   @FXML
@@ -100,9 +100,7 @@ public class MainController {
   private void backToMainView(ActionEvent b) {
     accordion.setVisible(true);
     tabPane.getTabs().clear();
-    // TODO: Sobald die Tabs wieder da sind:
-    // tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, fieldPlotViewTab);
-    tabPane.getTabs().addAll(mapViewTab, farmViewTab);
+    tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab);
   }
 
   /**
@@ -134,14 +132,14 @@ public class MainController {
   }
 
   /**
-   * @see de.hgu.gsehen.Gsehen.setFarmViewportFromMap()
+   * @see "de.hgu.gsehen.Gsehen.setFarmViewportFromMap()"
    */
   public void setFarmViewportFromMap() {
     gsehenInstance.setFarmViewportFromMap();
   }
 
   /**
-   * @see de.hgu.gsehen.Gsehen.setMapViewportFromFarm()
+   * @see "de.hgu.gsehen.Gsehen.setMapViewportFromFarm()"
    */
   public void setMapViewportFromFarm() {
     gsehenInstance.setMapViewportFromFarm();
