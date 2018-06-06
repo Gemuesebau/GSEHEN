@@ -45,17 +45,17 @@ public class Farms extends FarmDataController implements GsehenEventListener<Far
    */
   public void farmBoundsChanged(double viewportWidth, double viewportHeight,
       double lngTranslation, double latTranslation) {
-    getLogger().info("*** "
-        + "viewportWidth = " + viewportWidth
-        + ", viewportHeight = " + viewportHeight
-        + ", lngTranslation = " + lngTranslation
-        + ", latTranslation = " + latTranslation
-    );
-    //setLastViewport(
-    //    latTranslation,
-    //    latTranslation - viewportHeight,
-    //    lngTranslation + viewportWidth,
-    //    lngTranslation
+    //getLogger().info("*** "
+    //    + "viewportWidth = " + viewportWidth
+    //    + ", viewportHeight = " + viewportHeight
+    //    + ", lngTranslation = " + lngTranslation
+    //    + ", latTranslation = " + latTranslation
     //);
+    setLastViewport(
+        latTranslation + viewportHeight / 2,
+        latTranslation - viewportHeight / 2,
+        lngTranslation + viewportWidth / 2,
+        lngTranslation - viewportWidth / 2
+    );
   }
 }
