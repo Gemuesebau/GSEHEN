@@ -53,7 +53,7 @@ function lineAndLog(context, points, pointIndex, viewport, factor, canvasHeight)
 function drawPoints(x, y, k) {
   context.save();
   context.clearRect(0, 0, canvasWidth, canvasHeight);
-  context.fillStyle = "#FFDDDD";
+  context.fillStyle = "white";
   context.fillRect(0, 0, canvasWidth, canvasHeight);
   context.translate(x, y);
   context.scale(k, k);
