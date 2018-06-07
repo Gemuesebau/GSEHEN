@@ -28,23 +28,27 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
-  private static PlotDataController instance;
   private Gsehen gsehenInstance;
   private BorderPane pane;
   private TreeTableView<Drawable> treeTableView;
 
+  private Text nameLabel;
+  private Text locationLabel;
+  private Text cropStartLabel;
+  private Text cropEndLabel;
+
   private Text name;
-  private Text geopolygon;
   private Text location;
+  private Text cropStart;
+  private Text cropEnd;
 
   {
-    instance = this;
     gsehenInstance = Gsehen.getInstance();
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
   }
 
   /**
-   * Constructs a new field data controller associated with the given BorderPane.
+   * Constructs a new plot data controller associated with the given BorderPane.
    *
    * @param pane - the associated BorderPane.
    */
@@ -57,24 +61,35 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   @Override
   public void handle(FarmDataChanged event) {
     // TOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    name = new Text("Name:");
+    nameLabel = new Text("Name:");
+    nameLabel.setFont(Font.font("Arial", 14));
+    name = new Text("");
     name.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
-    geopolygon = new Text("GeoPolygon:");
-    geopolygon.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+    HBox nameBox = new HBox();
+    // nameBox.setStyle("-fx-background-color: #d39494;"); // Nur zur Übersicht!
+    nameBox.getChildren().addAll(nameLabel, name);
 
-    location = new Text("Location:");
+    locationLabel = new Text("Location: ");
+    locationLabel.setFont(Font.font("Arial", 14));
+    location = new Text("");
     location.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
+    HBox locationBox = new HBox();
+    // locationBox.setStyle("-fx-background-color: #acd293;"); // Nur zur Übersicht!
+    locationBox.getChildren().addAll(locationLabel, location);
+
     VBox topBox = new VBox(25);
+    // topBox.setStyle("-fx-background-color: #f4ec46;"); // Nur zur Übersicht!
     topBox.setPadding(new Insets(20, 20, 20, 20));
-    topBox.getChildren().addAll(name, geopolygon, location);
+    topBox.getChildren().addAll(nameBox, locationBox);
     pane.setTop(topBox);
     // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // LEFT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Text crop = new Text("Bestellung:\t\t");
-    crop.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+    Text crop = new Text("Bestellung: ");
+    crop.setFont(Font.font("Arial", 14));
+    // Dummy-Liste
     ObservableList<String> cropList =
         FXCollections.observableArrayList("Apfel", "Birne", "Löwenzahn", "Tomate", "Zwiebel");
     ComboBox<String> cropCombo = new ComboBox<String>(cropList);
@@ -106,9 +121,32 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
-    HBox leftBox = new HBox();
+    HBox cropBox = new HBox();
+    // cropBox.setStyle("-fx-background-color: #d39494;"); // Nur zur Übersicht!
+    cropBox.getChildren().addAll(crop, cropCombo);
+
+    cropStartLabel = new Text("Start am:");
+    cropStartLabel.setFont(Font.font("Arial", 14));
+    cropStart = new Text("");
+    cropStart.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+
+    HBox cropStartBox = new HBox();
+    // cropStartBox.setStyle("-fx-background-color: #acd293;"); // Nur zur Übersicht!
+    cropStartBox.getChildren().addAll(cropStartLabel, cropStart);
+
+    cropEndLabel = new Text("Ende am:");
+    cropEndLabel.setFont(Font.font("Arial", 14));
+    cropEnd = new Text("");
+    cropEnd.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+
+    HBox cropEndBox = new HBox();
+    // cropEndBox.setStyle("-fx-background-color: #466bf4;"); // Nur zur Übersicht!
+    cropEndBox.getChildren().addAll(cropEndLabel, cropEnd);
+
+    VBox leftBox = new VBox(50);
+    // leftBox.setStyle("-fx-background-color: #f4ba46;"); // Nur zur Übersicht!
     leftBox.setPadding(new Insets(20, 20, 20, 20));
-    leftBox.getChildren().addAll(crop, cropCombo);
+    leftBox.getChildren().addAll(cropBox, cropStartBox, cropEndBox);
     pane.setLeft(leftBox);
     // LEFT END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -124,19 +162,26 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                     treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
                 if (selectedItem != null
                     && selectedItem.getValue().getClass().getSimpleName().equals("Plot")) {
-                  name.setText("Name:\t\t\t" + selectedItem.getValue().getName());
-                  geopolygon.setText(
-                      "GeoPolygon:\t\t" + selectedItem.getValue().getPolygon().getGeoPoints());
-                  // location.setText("Location: " + selectedItem.getValue().);
+                  pane.setVisible(true);
+                  name.setText(selectedItem.getValue().getName());
+
+                  // String geoPolygon = "";
+                  // DecimalFormat decimal = new DecimalFormat("#.#####");
+                  // for (double dx : selectedItem.getValue().getPolygon().getPolygonData()
+                  // .getPointsX()) {
+                  // for (double dy : selectedItem.getValue().getPolygon().getPolygonData()
+                  // .getPointsY()) {
+                  // geoPolygon += "[X: " + decimal.format(dx) + " / Y: " + decimal.format(dy)
+                  // + "] \n\t\t\t\t";
+                  // }
+                  // }
+                  // geopolygon.setText("GeoPolygon:\t\t" + geoPolygon);
+                } else {
+                  pane.setVisible(false);
                 }
               }
             }
           }
         });
   }
-
-  public static PlotDataController getInstance() {
-    return instance;
-  }
-
 }
