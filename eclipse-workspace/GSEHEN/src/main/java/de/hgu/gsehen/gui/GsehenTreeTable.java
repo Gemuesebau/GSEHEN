@@ -69,7 +69,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
   private Farm farm;
   private Timeline scrolltimeline = new Timeline();
   private double scrollDirection = 0;
-  
+
   private TreeTableView<Drawable> farmTreeView;
   private TreeTableColumn<Drawable, String> column;
   private TreeItem<Drawable> farmItem;
@@ -322,12 +322,12 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
             }
             newFarmsList.add(farm);
           }
+          farmsList.clear();
+          farmsList.addAll(newFarmsList);
+          gsehenInstance.sendFarmDataChanged(object, null);
         } else {
           LOGGER.info(itemType + " can't be stack on " + destinationType);
         }
-        farmsList.clear();
-        farmsList.addAll(newFarmsList);
-        gsehenInstance.sendFarmDataChanged(object, null);
       }
     });
     return row;
@@ -586,11 +586,11 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
   public void handle(FarmDataChanged event) {
     fillTreeView();
   }
-  
+
   public static GsehenTreeTable getInstance() {
     return instance;
   }
-  
+
   public TreeTableView<Drawable> getFarmTreeView() {
     return farmTreeView;
   }

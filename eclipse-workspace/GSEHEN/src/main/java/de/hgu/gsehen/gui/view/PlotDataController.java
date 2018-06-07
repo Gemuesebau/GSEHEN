@@ -90,21 +90,13 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           for (Field field : farm.getFields()) {
             for (Plot plot : field.getPlots()) {
               obj = plot;
-              // TODO - Testen, wieso immer ein Item mehr selektiert wird!
-              for (int i = 0; i < treeTableView.getSelectionModel().getSelectedItems().size()
-                  - 1; i++) {
-                if (treeTableView.getSelectionModel().getSelectedItems().size() == 2) {
-                  if (plot.getName().equals(
-                      treeTableView.getSelectionModel().getSelectedItem().getValue().getName())) {
-                    plot.setCrop(crop);
-                    LOGGER.info("'" + crop.getName() + "' was set as crop in" + obj);
-                  }
-                } else {
-                  if (plot.getName().equals(treeTableView.getSelectionModel().getSelectedItems()
-                      .get(i).getValue().getName())) {
-                    plot.setCrop(crop);
-                    LOGGER.info("'" + crop.getName() + "' was set as crop in" + obj);
-                  }
+              for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells()
+                  .size(); i++) {
+                if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null
+                    && plot.getName().equals(treeTableView.getSelectionModel().getSelectedCells()
+                        .get(i).getTreeItem().getValue().getName())) {
+                  plot.setCrop(crop);
+                  LOGGER.info("'" + crop.getName() + "' was set as crop in" + obj);
                 }
               }
             }
@@ -126,13 +118,18 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         .addListener(new ChangeListener<Object>() {
           @Override
           public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
-            TreeItem<Drawable> selectedItem = treeTableView.getSelectionModel().getSelectedItem();
-            // TODO: Nullpointer! Könnte was mit dem Problem von oben zu tun haben!?
-            if (selectedItem.getValue().getClass().getSimpleName().equals("Plot")) {
-              name.setText("Name:\t\t\t" + selectedItem.getValue().getName());
-              geopolygon
-                  .setText("GeoPolygon:\t\t" + selectedItem.getValue().getPolygon().getGeoPoints());
-              // location.setText("Location: " + selectedItem.getValue().);
+            for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
+              if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
+                TreeItem<Drawable> selectedItem =
+                    treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
+                if (selectedItem != null
+                    && selectedItem.getValue().getClass().getSimpleName().equals("Plot")) {
+                  name.setText("Name:\t\t\t" + selectedItem.getValue().getName());
+                  geopolygon.setText(
+                      "GeoPolygon:\t\t" + selectedItem.getValue().getPolygon().getGeoPoints());
+                  // location.setText("Location: " + selectedItem.getValue().);
+                }
+              }
             }
           }
         });
