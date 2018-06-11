@@ -260,7 +260,13 @@ public class Gsehen extends Application {
     addToMappedList(eventListeners, eventClass, eventListener);
   }
 
-  @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
+  /**
+   * Notifies the application about a newly added object (farm, field, ..).
+   *
+   * @param object the newly added object
+   * @param skipClass a listener class to skip when notifying;
+   *     typically the class that originally created the new object
+   */
   public void objectAdded(Drawable object,
       Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
     if (object instanceof Farm) {
