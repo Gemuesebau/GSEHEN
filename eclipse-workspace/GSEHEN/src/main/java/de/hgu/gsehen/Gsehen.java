@@ -4,7 +4,7 @@ import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
 import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
 import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
-
+import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
@@ -338,6 +338,13 @@ public class Gsehen extends Application {
     }, skipClass);
   }
 
+  public void sendDrawableSelected(Drawable subject,
+      Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
+    DrawableSelected event = new DrawableSelected();
+    event.setSubject(subject);
+    
+  }
+
   /**
    * Notifies listeners registered for the (type of) event supplied by the given supplier.
    *
@@ -402,13 +409,11 @@ public class Gsehen extends Application {
   }
 
   public void setMapViewportFromFarm() {
-    maps.setLastViewport(farms.getLastViewport());
-    maps.reload();
+    maps.reloadWithViewport(farms.getLastViewport());
   }
 
   public void setFarmViewportFromMap() {
-    farms.setLastViewport(maps.getLastViewport());
-    farms.reload();
+    farms.reloadWithViewport(maps.getLastViewport());
   }
 
   public static Fields getFields() {

@@ -118,11 +118,12 @@ public abstract class FarmDataController extends WebController
     return lastViewport;
   }
 
-  public void setLastViewport(Pair<GeoPoint> lastViewport) {
+  public void reloadWithViewport(Pair<GeoPoint> lastViewport) {
     this.lastViewport = lastViewport;
+    reload();
   }
 
-  public void setLastViewport(double north, double south, double east, double west) {
+  protected void setLastViewport(double north, double south, double east, double west) {
     lastViewport = new Pair<>(new GeoPoint(south, west), new GeoPoint(north, east));
   }
 
