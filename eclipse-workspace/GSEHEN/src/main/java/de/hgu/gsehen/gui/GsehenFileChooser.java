@@ -1,6 +1,7 @@
 package de.hgu.gsehen.gui;
 
 import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.model.Farm;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import javafx.stage.Stage;
 
 public final class GsehenFileChooser extends Application {
   private Gsehen gsehenInstance;
+  private String data;
   protected static final ResourceBundle mainBundle =
       ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
@@ -54,7 +56,10 @@ public final class GsehenFileChooser extends Application {
         configureFileChooser(fileChooser);
         File file = fileChooser.showSaveDialog(stage);
         if (file != null) {
-          saveFile("", file);
+          for (Farm farm : gsehenInstance.getFarmsList()) {
+            data = ""; // TODO: .js im Stil der vorhandenen erstellen.
+          }
+          saveFile(data, file);
         }
         gsehenInstance.saveUserData();
         Platform.exit();

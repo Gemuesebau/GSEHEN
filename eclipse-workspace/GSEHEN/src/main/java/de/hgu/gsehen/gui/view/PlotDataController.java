@@ -76,10 +76,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   @Override
   public void handle(FarmDataChanged event) {
     /*
-     * TODO:
-     * Alles noch sehr wild auf einen Haufen geworfen. Hier wird also noch aufgeräumt! 
-     * 1) Echte Daten erstellen.
-     * 2) Schauen, was sinnvoll ist und was nicht.
+     * TODO: Alles noch sehr wild auf einen Haufen geworfen. Hier wird also noch aufgeräumt! 1)
+     * Echte Daten erstellen. 2) Schauen, was sinnvoll ist und was nicht.
      */
 
     pane.setVisible(false);
@@ -229,10 +227,14 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     final KeyFrame kf1 = new KeyFrame(Duration.millis(10000), kv1);
     timeline.getKeyFrames().addAll(kf0, kf1);
 
+    HBox waterBalanceBox = new HBox();
+    // waterBalanceBox.setStyle("-fx-background-color: #466bf4;"); // Nur zur Übersicht!
+    waterBalanceBox.getChildren().addAll(waterBalanceLabel, waterBalance);
+
     VBox centerBox = new VBox();
     // leftBox.setStyle("-fx-background-color: #917d57;"); // Nur zur Übersicht!
-    // centerBox.setPadding(new Insets(20, 20, 20, 20));
-    centerBox.getChildren().addAll(waterBalanceLabel, waterBalance);
+    centerBox.setPadding(new Insets(20, 20, 20, 20));
+    centerBox.getChildren().addAll(waterBalanceBox);
     pane.setCenter(centerBox);
     play();
     // CENTER END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

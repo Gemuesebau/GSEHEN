@@ -33,6 +33,8 @@ import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 import javafx.util.Duration;
 
@@ -100,6 +102,20 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
         trash = farmTreeView.getSelectionModel().getSelectedItem();
         if (trash != null) {
           removeItem();
+        }
+      }
+    });
+    farmTreeView.setOnKeyPressed(new EventHandler<KeyEvent>() {
+      @Override
+      public void handle(final KeyEvent keyEvent) {
+        for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedItems().size(); i++) {
+          farmTreeView.getSelectionModel().getSelectedItems().get(i).getValue().setName("del");
+        }
+        trash = farmTreeView.getSelectionModel().getSelectedItem();
+        if (trash != null) {
+          if (keyEvent.getCode().equals(KeyCode.DELETE)) {
+            removeItem();
+          }
         }
       }
     });
