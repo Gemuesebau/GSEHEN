@@ -4,10 +4,12 @@ import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
 import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
 import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
+
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
+import de.hgu.gsehen.event.GsehenViewEvent;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
@@ -35,7 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -318,7 +319,7 @@ public class Gsehen extends Application {
    * Sends a "FarmDataChanged" event to all listeners registered for that kind of event, except the
    * listeners that belong to the given "skipClass".
    *
-   * @param object the object that initially caused the event to be sent
+   * @param object the object that initially caused the event to be sent, or null
    * @param skipClass the event listener class to skip when iterating the listeners, or null
    */
   public void sendFarmDataChanged(Drawable object,
@@ -326,39 +327,52 @@ public class Gsehen extends Application {
     dataChanged = true;
     FarmDataChanged event = new FarmDataChanged();
     event.setFarms(farmsList);
-    try {
-      event.setViewport(
-          new Pair<>(new GeoPoint(object.getPolygon().getMinY(), object.getPolygon().getMinX()),
-              new GeoPoint(object.getPolygon().getMaxY(), object.getPolygon().getMaxX())));
-    } catch (IllegalArgumentException e) {
-      event.setViewport(null);
-    }
-    notifyEventListeners(() -> {
-      return event;
-    }, skipClass);
+    sendViewEvent(object, skipClass, event);
   }
 
+  /**
+   * Sends a "DrawableSelected" event to all listeners registered for that kind of event, except the
+   * listeners that belong to the given "skipClass".
+   *
+   * @param subject the "Drawable" that initially caused the event to be sent
+   * @param skipClass the event listener class to skip when iterating the listeners, or null
+   */
   public void sendDrawableSelected(Drawable subject,
-      Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
+      Class<? extends GsehenEventListener<DrawableSelected>> skipClass) {
     DrawableSelected event = new DrawableSelected();
     event.setSubject(subject);
-    
+    sendViewEvent(subject, skipClass, event);
+  }
+
+  /**
+   * Delegate method for sending prepared "view" events.
+   *
+   * @param drawable the "Drawable" that is subject of the event, or null
+   * @param skipClass the event listener class to skip when iterating the listeners, or null
+   * @param event the prepared event, lacking viewport data, which is determined here
+   */
+  private void sendViewEvent(Drawable drawable,
+      Class<? extends GsehenEventListener<? extends GsehenViewEvent>> skipClass,
+          GsehenViewEvent event) {
+    try {
+      event.setViewport(
+          new Pair<>(new GeoPoint(drawable.getPolygon().getMinY(), drawable.getPolygon().getMinX()),
+              new GeoPoint(drawable.getPolygon().getMaxY(), drawable.getPolygon().getMaxX())));
+    } catch (IllegalArgumentException | NullPointerException e) {
+      event.setViewport(null);
+    }
+    notifyEventListeners(event, skipClass);
   }
 
   /**
    * Notifies listeners registered for the (type of) event supplied by the given supplier.
    *
-   * <p>
-   * Is currently also called from JS (.../resources/de/hgu/gsehen/js/loadUserData.js).
-   * </p>
-   *
-   * @param eventSupplier supplier for the actual event to be sent to the registered listeners
+   * @param event the actual event to be sent to the registered listeners
    * @param skipClass a listener class that shall be skipped when iterating the listeners, or null
    */
   @SuppressWarnings({"unchecked"})
-  public <T extends GsehenEvent> void notifyEventListeners(Supplier<T> eventSupplier,
-      Class<? extends GsehenEventListener<T>> skipClass) {
-    T event = eventSupplier.get();
+  private <T extends GsehenEvent> void notifyEventListeners(T event,
+      Class<? extends GsehenEventListener<? extends T>> skipClass) {
     List<GsehenEventListener<?>> farmDataChgListeners = eventListeners.get(event.getClass());
     if (farmDataChgListeners != null) {
       farmDataChgListeners.forEach(listener -> {

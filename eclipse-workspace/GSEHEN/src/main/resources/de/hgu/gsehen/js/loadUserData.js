@@ -67,12 +67,4 @@ catch (ex) {
   LOGGER.log(Level.WARNING, "User data couldn't be loaded", ex);
 }
 
-instance.notifyEventListeners(function () {
-  var event = new FarmDataChanged();
-  event.setFarms(farms);
-  event.setViewport(new Pair(
-    new GeoPoint(bounds.minY, bounds.minX),
-    new GeoPoint(bounds.maxY, bounds.maxX)
-  ));
-  return event;
-}, null);
+instance.sendFarmDataChanged(null, null);

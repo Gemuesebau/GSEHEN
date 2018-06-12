@@ -118,28 +118,32 @@ public class MainController {
   }
 
   /**
-   * Loads the user-created data (farms, fields, plots, ..)
+   * Handles the user's request to (re)load the user-created data (farms, fields, plots, ..).
    */
   public void loadUserData() {
     gsehenInstance.loadUserData();
   }
 
   /**
-   * Saves the user-created data (farms, fields, plots, ..)
+   * Handles the user's request to save the user-created data (farms, fields, plots, ..).
    */
   public void saveUserData() {
     gsehenInstance.saveUserData();
   }
 
   /**
-   * @see "de.hgu.gsehen.Gsehen.setFarmViewportFromMap()"
+   * Handles the user's request to set the farm viewport according to the current map viewport.
+   *
+   * @see de.hgu.gsehen.Gsehen.setFarmViewportFromMap
    */
   public void setFarmViewportFromMap() {
     gsehenInstance.setFarmViewportFromMap();
   }
 
   /**
-   * @see "de.hgu.gsehen.Gsehen.setMapViewportFromFarm()"
+   * Handles the user's request to set the map viewport according to the current farm viewport.
+   *
+   * @see de.hgu.gsehen.Gsehen.setMapViewportFromFarm
    */
   public void setMapViewportFromFarm() {
     gsehenInstance.setMapViewportFromFarm();
