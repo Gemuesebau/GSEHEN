@@ -19,6 +19,11 @@ public abstract class WebController {
   protected WebEngine engine;
 
   private String loadWorkerSucceededScript;
+  private boolean loaded = false;
+
+  public boolean isLoaded() {
+    return loaded;
+  }
 
   private String getCompanionFileContents(String dotExtension) {
     return getFileContents(getClass().getSimpleName().toLowerCase() + dotExtension);
@@ -76,6 +81,7 @@ public abstract class WebController {
         JSObject win = (JSObject)engine.executeScript("window");
         win.setMember("webController", this);
         engine.executeScript(loadWorkerSucceededScript);
+        loaded = true;
       }
     });
     getLogger().info("WebEngine initialized");

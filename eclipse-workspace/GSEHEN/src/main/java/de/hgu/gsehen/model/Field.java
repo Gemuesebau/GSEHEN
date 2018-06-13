@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class Field implements Drawable, DrawableParent {
+public class Field extends Drawable implements DrawableParent {
   private WeatherDataSource weatherDataSource;
   private SoilProfile soilProfile;
   private Double rootingZone;
@@ -16,6 +16,7 @@ public class Field implements Drawable, DrawableParent {
   private double area;
 
   public Field() {
+    super();
     plots = new ArrayList<>();
   }
 

@@ -16,6 +16,12 @@ public class DeveloperController {
   private MenuItem reloadFarmViewHTMLMenuItem;
 
   @FXML
+  private MenuItem jsPromptForFarmViewMenuItem;
+
+  @FXML
+  private MenuItem jsPromptForMapViewMenuItem;
+
+  @FXML
   @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
   public void reloadMapViewHTML(ActionEvent e) {
     Gsehen.getMaps().reload();
@@ -25,5 +31,15 @@ public class DeveloperController {
   @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
   public void reloadFarmViewHTML(ActionEvent e) {
     Gsehen.getFarms().reload();
+  }
+
+  @FXML
+  public void jsPromptForFarmView() {
+    Gsehen.jsPrompt(Gsehen.getFarms());
+  }
+
+  @FXML
+  public void jsPromptForMapView() {
+    Gsehen.jsPrompt(Gsehen.getMaps());
   }
 }

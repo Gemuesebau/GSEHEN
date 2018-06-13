@@ -5,6 +5,8 @@
 <Menu mnemonicParsing="false" text="%menu.view.developer" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.DeveloperController">
   <items>
 	<MenuItem fx:id="reloadMapViewHTMLMenuItem" mnemonicParsing="false" text="%menu.view.developer.reload.maps" onAction="#reloadMapViewHTML" />
+	<MenuItem fx:id="jsPromptForMapViewMenuItem" mnemonicParsing="false" text="%menu.view.developer.jsprompt.maps" onAction="#jsPromptForMapView" />
 	<MenuItem fx:id="reloadFarmViewHTMLMenuItem" mnemonicParsing="false" text="%menu.view.developer.reload.farms" onAction="#reloadFarmViewHTML" />
+	<MenuItem fx:id="jsPromptForFarmViewMenuItem" mnemonicParsing="false" text="%menu.view.developer.jsprompt.farms" onAction="#jsPromptForFarmView" />
   </items>
 </Menu>

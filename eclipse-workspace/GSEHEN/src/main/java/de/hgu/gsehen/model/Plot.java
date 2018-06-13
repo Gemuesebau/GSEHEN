@@ -4,7 +4,7 @@ import de.hgu.gsehen.gui.GeoPolygon;
 
 import java.util.Date;
 
-public class Plot implements Drawable {
+public class Plot extends Drawable {
   private String name;
   private double area;
   private GeoPolygon polygon;
@@ -22,9 +22,11 @@ public class Plot implements Drawable {
   private Date cropEnd; 
 
   public Plot() {
+    super();
   }
 
   public Plot(String name, GeoPolygon polygon) {
+    this();
     setNameAndPolygon(name, polygon);
   }
 

@@ -1,15 +1,24 @@
 package de.hgu.gsehen.model;
 
+import java.util.UUID;
 import de.hgu.gsehen.gui.GeoPolygon;
 
-public interface Drawable {
+public abstract class Drawable {
+  private final String uuid;
 
-  public void setNameAndPolygon(String name, GeoPolygon polygon);
+  public String getUuid() {
+    return uuid;
+  }
+
+  public abstract void setNameAndPolygon(String name, GeoPolygon polygon);
   
-  public void setName(String name);
+  public abstract void setName(String name);
 
-  public String getName();
+  public abstract String getName();
 
-  public GeoPolygon getPolygon();
+  public abstract GeoPolygon getPolygon();
 
+  public Drawable() {
+    uuid = UUID.randomUUID().toString();
+  }
 }

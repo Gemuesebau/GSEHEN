@@ -21,16 +21,6 @@ public class Farms extends FarmDataController {
     super(application, webView);
   }
 
-  //canvasElement.width
-  public double getCanvasWidth() {
-    return (double) engine.executeScript("innerWidth * 0.96");
-  }
-
-  //canvasElement.height
-  public double getCanvasHeight() {
-    return (double) engine.executeScript("innerHeight * 0.96");
-  }
-
   /**
    * Handles the event of a change in the farm view's bounds (viewport).
    *
@@ -43,12 +33,6 @@ public class Farms extends FarmDataController {
    */
   public void farmBoundsChanged(double viewportWidth, double viewportHeight,
       double lngTranslation, double latTranslation) {
-    //getLogger().info("*** "
-    //    + "viewportWidth = " + viewportWidth
-    //    + ", viewportHeight = " + viewportHeight
-    //    + ", lngTranslation = " + lngTranslation
-    //    + ", latTranslation = " + latTranslation
-    //);
     setLastViewport(
         latTranslation + viewportHeight / 2,
         latTranslation - viewportHeight / 2,

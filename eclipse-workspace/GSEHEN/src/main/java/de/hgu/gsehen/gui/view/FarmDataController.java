@@ -55,8 +55,13 @@ public abstract class FarmDataController extends WebController {
             drawables = flattenDrawables(farmsArray);
             Pair<GeoPoint> viewport = event.getViewport();
             lastViewport = viewport != null ? viewport : findBounds(drawables);
-            logAboutToReload(event.getClass().getSimpleName());
-            reload();
+            if (!isLoaded()) {
+              logAboutToReload(event.getClass().getSimpleName(), "reload");
+              reload();
+            } else {
+              logAboutToReload(event.getClass().getSimpleName(), "redraw");
+              redraw();
+            }
           }
         });
     gsehenInstance.registerForEvent(DrawableSelected.class,
@@ -70,15 +75,15 @@ public abstract class FarmDataController extends WebController {
             Drawable drawable = event.getSubject();
             Pair<GeoPoint> viewport = event.getViewport();
             lastViewport = viewport != null ? viewport : findBounds(new Drawable[] { drawable });
-            logAboutToReload(event.getClass().getSimpleName());
+            logAboutToReload(event.getClass().getSimpleName(), "refocus");
             engine.executeScript("clearAndSetViewportByController();");
           }
         });
   }
 
-  private void logAboutToReload(String reason) {
-    getLogger().log(Level.INFO, "About to reload " + this.getClass().getSimpleName() + " web view"
-        + "due to " + reason + ", with drawables=" + Arrays.asList(drawables)
+  private void logAboutToReload(String reason, String verb) {
+    getLogger().log(Level.INFO, "About to " + verb + " " + this.getClass().getSimpleName()
+        + " web view due to " + reason + ", with drawables=" + Arrays.asList(drawables)
         + " and lastViewport=" + lastViewport);
   }
 
@@ -169,6 +174,10 @@ public abstract class FarmDataController extends WebController {
     lastViewport = new Pair<>(new GeoPoint(south, west), new GeoPoint(north, east));
   }
 
+  private void redraw() {
+    engine.executeScript("redraw();");
+  }
+
   /**
    * Determines the map or farm view polygon color for the given type (object).
    *
@@ -190,5 +199,9 @@ public abstract class FarmDataController extends WebController {
       default:
         return "white";
     }
+  }
+
+  public Object runJavaScript(String javaScript) {
+    return engine.executeScript(javaScript);
   }
 }

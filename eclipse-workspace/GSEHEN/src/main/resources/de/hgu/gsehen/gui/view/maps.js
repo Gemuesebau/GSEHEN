@@ -4,6 +4,7 @@ alert("Maps (re)loaded, now running custom JavaScript");
 #include("searchControl.js")
 #include("objectArray.js")
 
+// eventsDebouncer ...
 #include("../../js/commons.js")
 
 function addPolygonOptions(obj, style) {
@@ -106,30 +107,51 @@ initialize(objectArray(
   }
 ));
 
-var drawables = webController.getDrawables();
-if (drawables == null) {
-  alert("Got 'null' drawables!");
-  setDefaultViewportBounds();
+var polygons = {};
+
+function forAllPolygons(handler) {
+  for (var uuid in polygons) {
+    if (polygons.hasOwnProperty(uuid)) {
+      handler(uuid, polygons[uuid]);
+    }
+  }
 }
-else {
-  if (drawables.length == 0) {
-    alert("Got no drawables");
+
+var drawables = null;
+
+function redraw() {
+  forAllPolygons(function (uuid, polygon) {
+    alert("Removing polygon with UUID=" + uuid);
+    polygon.setMap(null);
+  });
+  polygons = {};
+  drawables = webController.getDrawables();
+  if (drawables == null) {
+    alert("Got 'null' drawables!");
     setDefaultViewportBounds();
   }
   else {
-    for (var j = 0; j < drawables.length; j++) {
-      var drawable = drawables[j];
-      var style = webController.getFillStyle(drawable);
-      var mapsPolygon = new google.maps.Polygon(addPolygonOptions({
-        paths: buildJavaScriptPolygon(drawable.getPolygon(), null)
-      }, style));
-      mapsPolygon.setMap(map);
+    if (drawables.length == 0) {
+      alert("Got no drawables");
+      setDefaultViewportBounds();
     }
-    setViewportByController();
+    else {
+      for (var j = 0; j < drawables.length; j++) {
+        var drawable = drawables[j];
+        var style = webController.getFillStyle(drawable);
+        var mapsPolygon = new google.maps.Polygon(addPolygonOptions({
+          paths: buildJavaScriptPolygon(drawable.getPolygon(), null)
+        }, style));
+        polygons[drawable.getUuid()] = mapsPolygon;
+        mapsPolygon.setMap(map);
+      }
+      setViewportByController();
+    }
   }
+  map.fitBounds(viewportBounds);
 }
-map.fitBounds(viewportBounds);
 
+redraw();
 initAutocomplete();
 drawingManager.setMap(map);
 addEventListeners();

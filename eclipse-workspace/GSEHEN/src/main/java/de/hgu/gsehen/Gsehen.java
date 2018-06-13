@@ -13,6 +13,7 @@ import de.hgu.gsehen.event.GsehenViewEvent;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
+import de.hgu.gsehen.gui.view.FarmDataController;
 import de.hgu.gsehen.gui.view.Farms;
 import de.hgu.gsehen.gui.view.Fields;
 import de.hgu.gsehen.gui.view.Maps;
@@ -48,6 +49,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
@@ -436,5 +438,32 @@ public class Gsehen extends Application {
 
   public static Plots getPlots() {
     return plots;
+  }
+
+  /**
+   * Prompts for JavaScript to be run in a WebView.
+   *
+   * @param controller the controller that belongs to the target web view
+   */
+  public static void jsPrompt(FarmDataController controller) {
+    final String contentTextKey =
+        "gui.dialog.developer.js.prompt." + controller.getClass().getSimpleName().toLowerCase();
+    String javaScript = textInputDialog(
+        contentTextKey,
+        instance.getBundle().getString("gui.dialog.developer.js.prompt.header")
+    );
+    Object result;
+    while (javaScript != null && (result = controller.runJavaScript(javaScript)) != null) {
+      javaScript = textInputDialog(contentTextKey, String.valueOf(result));
+    }
+  }
+
+  private static String textInputDialog(String contentTextKey, String headerText) {
+    TextInputDialog dialog = new TextInputDialog();
+    dialog.setTitle("GSEHEN");
+    dialog.setContentText(instance.getBundle().getString(contentTextKey));
+    dialog.setHeaderText(headerText);
+    dialog.showAndWait();
+    return dialog.getResult();
   }
 }
