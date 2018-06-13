@@ -113,12 +113,12 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
     farmTreeView.setOnKeyPressed(new EventHandler<KeyEvent>() {
       @Override
       public void handle(final KeyEvent keyEvent) {
-        for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedItems().size(); i++) {
-          farmTreeView.getSelectionModel().getSelectedItems().get(i).getValue().setName("del");
-        }
-        trash = farmTreeView.getSelectionModel().getSelectedItem();
-        if (trash != null) {
-          if (keyEvent.getCode().equals(KeyCode.DELETE)) {
+        if (keyEvent.getCode().equals(KeyCode.DELETE)) {
+          for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedItems().size(); i++) {
+            farmTreeView.getSelectionModel().getSelectedItems().get(i).getValue().setName("del");
+          }
+          trash = farmTreeView.getSelectionModel().getSelectedItem();
+          if (trash != null) {
             removeItem();
           }
         }
@@ -129,9 +129,13 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
         .addListener(new ChangeListener<Object>() {
           @Override
           public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
-            if (farmTreeView.getSelectionModel().getSelectedItem() != null) {
-              TreeItem<Drawable> selectedItem = farmTreeView.getSelectionModel().getSelectedItem();
-              gsehenInstance.sendDrawableSelected(selectedItem.getValue(), null);
+            for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedCells().size(); i++) {
+              if (farmTreeView.getSelectionModel().getSelectedCells().get(i)
+                  .getTreeItem() != null) {
+                TreeItem<Drawable> selectedItem =
+                    farmTreeView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
+                gsehenInstance.sendDrawableSelected(selectedItem.getValue(), null);
+              }
             }
           }
         });
