@@ -1,26 +1,85 @@
 package de.hgu.gsehen.gui.view;
 
 import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
+import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.util.Pair;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import javafx.scene.web.WebView;
 
-public abstract class FarmDataController extends WebController
-    implements GsehenEventListener<FarmDataChanged> {
+public abstract class FarmDataController extends WebController {
   private Gsehen gsehenInstance;
+  private
+      Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>>
+      eventListeners = new HashMap<>();
+
+  private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
+      Class<? extends GsehenEventListener<T>> eventListenerClass) {
+    eventListeners.put(eventClass, eventListenerClass);
+  }
+
+  @SuppressWarnings("unchecked")
+  protected <T extends GsehenEvent> Class<? extends GsehenEventListener<T>>
+      getEventListenerClass(Class<T> eventClass) {
+    return (Class<? extends GsehenEventListener<T>>) eventListeners.get(eventClass);
+  }
 
   {
     gsehenInstance = Gsehen.getInstance();
-    gsehenInstance.registerForEvent(FarmDataChanged.class, this);
+    gsehenInstance.registerForEvent(FarmDataChanged.class,
+        new GsehenEventListener<FarmDataChanged>() {
+          {
+            setEventListenerClass(FarmDataChanged.class, getClass());
+          }
+
+          @Override
+          public void handle(FarmDataChanged event) {
+            List<Farm> farms = event.getFarms();
+            Drawable[] farmsArray = new Drawable[farms.size()];
+            int i = 0;
+            for (Farm farm : farms) {
+              farmsArray[i++] = farm;
+            }
+            drawables = flattenDrawables(farmsArray);
+            Pair<GeoPoint> viewport = event.getViewport();
+            lastViewport = viewport != null ? viewport : findBounds(drawables);
+            logAboutToReload(event.getClass().getSimpleName());
+            reload();
+          }
+        });
+    gsehenInstance.registerForEvent(DrawableSelected.class,
+        new GsehenEventListener<DrawableSelected>() {
+          {
+            setEventListenerClass(DrawableSelected.class, getClass());
+          }
+
+          @Override
+          public void handle(DrawableSelected event) {
+            Drawable drawable = event.getSubject();
+            Pair<GeoPoint> viewport = event.getViewport();
+            lastViewport = viewport != null ? viewport : findBounds(new Drawable[] { drawable });
+            logAboutToReload(event.getClass().getSimpleName());
+            engine.executeScript("clearAndSetViewportByController();");
+          }
+        });
+  }
+
+  private void logAboutToReload(String reason) {
+    getLogger().log(Level.INFO, "About to reload " + this.getClass().getSimpleName() + " web view"
+        + "due to " + reason + ", with drawables=" + Arrays.asList(drawables)
+        + " and lastViewport=" + lastViewport);
   }
 
   private Drawable[] drawables;
@@ -33,23 +92,6 @@ public abstract class FarmDataController extends WebController
    */
   public FarmDataController(Gsehen application, WebView webView) {
     super(application, webView);
-  }
-
-  @Override
-  public void handle(FarmDataChanged event) {
-    List<Farm> farms = event.getFarms();
-    Drawable[] farmsArray = new Drawable[farms.size()];
-    int i = 0;
-    for (Farm farm : farms) {
-      farmsArray[i++] = farm;
-    }
-    drawables = flattenDrawables(farmsArray);
-    Pair<GeoPoint> viewport = event.getViewport();
-    lastViewport = viewport != null ? viewport : findBounds(drawables);
-    getLogger().log(Level.INFO, "About to reload " + this.getClass().getSimpleName() + " web view,"
-        + " with drawables=" + Arrays.asList(drawables)
-        + " and lastViewport=" + lastViewport);
-    reload();
   }
 
   private Drawable[] flattenDrawables(Drawable... drawables) {

@@ -1,12 +1,10 @@
 package de.hgu.gsehen.gui.view;
 
 import de.hgu.gsehen.Gsehen;
-import de.hgu.gsehen.event.FarmDataChanged;
-import de.hgu.gsehen.event.GsehenEventListener;
 import java.util.logging.Logger;
 import javafx.scene.web.WebView;
 
-public class Farms extends FarmDataController implements GsehenEventListener<FarmDataChanged> {
+public class Farms extends FarmDataController {
   private static final Logger LOGGER = Logger.getLogger(Farms.class.getName());
 
   @Override

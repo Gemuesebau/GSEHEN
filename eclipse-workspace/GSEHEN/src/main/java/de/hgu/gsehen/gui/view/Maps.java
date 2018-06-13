@@ -4,7 +4,6 @@ import static de.hgu.gsehen.util.CollectionUtil.simpleClassMap;
 
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
-import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
@@ -20,7 +19,7 @@ import javafx.scene.web.WebView;
  * @author AT
  */
 @SuppressWarnings({"checkstyle:commentsindentation"})
-public class Maps extends FarmDataController implements GsehenEventListener<FarmDataChanged> {
+public class Maps extends FarmDataController {
   private static final Logger LOGGER = Logger.getLogger(Maps.class.getName());
 
   @Override
@@ -79,7 +78,7 @@ public class Maps extends FarmDataController implements GsehenEventListener<Farm
       if (name != null) {
         Drawable object = (Drawable) typesMap.get(typeKey).newInstance();
         object.setNameAndPolygon(name, polygon);
-        application.objectAdded(object, getClass());
+        application.objectAdded(object, getEventListenerClass(FarmDataChanged.class));
       }
     } catch (Exception exception) {
       // Java reflection stuff - exception should not happen, since all input comes from code

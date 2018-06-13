@@ -83,6 +83,22 @@ function setViewportBounds(viewport) {
   viewportBounds.extend(new google.maps.LatLng(viewport.getRight().getLat(), viewport.getRight().getLng()));
 }
 
+/**
+ * Extends viewportBounds by controller's last viewport.
+ */
+function setViewportByController() {
+  setViewportBounds(webController.getLastViewport());
+}
+
+/**
+ * Sets viewportBounds by controller's last viewport.
+ */
+function clearAndSetViewportByController() {
+  viewportBounds = new google.maps.LatLngBounds();
+  setViewportByController();
+  map.fitBounds(viewportBounds);
+}
+
 initialize(objectArray(
   webController.getLocalizedTypes(),
   function objectConverter(pair) {
@@ -109,7 +125,7 @@ else {
       }, style));
       mapsPolygon.setMap(map);
     }
-    setViewportBounds(webController.getLastViewport());
+    setViewportByController();
   }
 }
 map.fitBounds(viewportBounds);
