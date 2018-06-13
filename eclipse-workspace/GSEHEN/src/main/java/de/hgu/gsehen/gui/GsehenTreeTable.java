@@ -326,7 +326,7 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
     column.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn());
 
     if (column.getText().equals(mainBundle.getString("treetableview.name"))) {
-      column.setPrefWidth(200);
+      column.setPrefWidth(150);
       column.setOnEditCommit(new EventHandler<CellEditEvent<Drawable, String>>() {
         @Override
         public void handle(CellEditEvent<Drawable, String> event) {
@@ -364,6 +364,7 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
     } else {
       column.setPrefWidth(100);
       column.setEditable(false);
+      column.setStyle("-fx-alignment: CENTER;");
       column.setSortType(TreeTableColumn.SortType.ASCENDING);
     }
     farmTreeView.getColumns().add(column);
@@ -392,7 +393,6 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
     farmTreeView.setOnDragDone(event -> {
       scrolltimeline.stop();
     });
-
   }
 
   private void dragScroll() {
