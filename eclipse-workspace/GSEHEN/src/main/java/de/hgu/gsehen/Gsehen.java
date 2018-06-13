@@ -25,6 +25,7 @@ import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.util.Pair;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -51,6 +52,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -76,6 +78,7 @@ public class Gsehen extends Application {
   private static final String FARMS_WEB_VIEW_ID = "#farmsWebView";
   private static final String FIELDS_VIEW_ID = "#fieldsBorderPane";
   private static final String PLOTS_VIEW_ID = "#plotsBorderPane";
+  private static final String IMAGE_VIEW_ID = "#imageView";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private static final String LOAD_USER_DATA_JS = "/de/hgu/gsehen/js/loadUserData.js";
   private static final String SAVE_USER_DATA_JS = "/de/hgu/gsehen/js/saveUserData.js";
@@ -95,7 +98,7 @@ public class Gsehen extends Application {
   private boolean dataChanged;
 
   private static Gsehen instance;
-  
+
   {
     instance = this;
   }
@@ -146,6 +149,12 @@ public class Gsehen extends Application {
     farms = new Farms(this, (WebView) scene.lookup(FARMS_WEB_VIEW_ID));
     fields = new Fields(this, (BorderPane) scene.lookup(FIELDS_VIEW_ID));
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
+
+    InputStream input =
+        this.getClass().getResourceAsStream("/de/hgu/gsehen/images/Logo_UniGeisenheim.png");
+    Image image = new Image(input);
+    ImageView imageView = (ImageView) scene.lookup(IMAGE_VIEW_ID);
+    imageView.setImage(image);
 
     TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
     tabPane.getTabs().remove(tabPane.getTabs().size() - 2, tabPane.getTabs().size());
@@ -267,8 +276,8 @@ public class Gsehen extends Application {
    * Notifies the application about a newly added object (farm, field, ..).
    *
    * @param object the newly added object
-   * @param skipClass a listener class to skip when notifying;
-   *     typically the class that originally created the new object
+   * @param skipClass a listener class to skip when notifying; typically the class that originally
+   *        created the new object
    */
   public void objectAdded(Drawable object,
       Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
@@ -355,7 +364,7 @@ public class Gsehen extends Application {
    */
   private void sendViewEvent(Drawable drawable,
       Class<? extends GsehenEventListener<? extends GsehenViewEvent>> skipClass,
-          GsehenViewEvent event) {
+      GsehenViewEvent event) {
     try {
       event.setViewport(
           new Pair<>(new GeoPoint(drawable.getPolygon().getMinY(), drawable.getPolygon().getMinX()),

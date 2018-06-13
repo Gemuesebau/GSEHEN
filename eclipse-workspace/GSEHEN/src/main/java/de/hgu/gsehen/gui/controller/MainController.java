@@ -10,6 +10,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TitledPane;
+import javafx.scene.image.ImageView;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -50,6 +51,8 @@ public class MainController {
   private WebView contactWebView;
   @FXML
   private WebView aboutWebView;
+  @FXML
+  private ImageView imageView;
 
   // Help-Menu
   @FXML

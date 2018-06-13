@@ -92,9 +92,16 @@
 					</panes>
 				</Accordion>
 			</center>
-			<bottom>
-				<ImageView fitHeight="460.0" fitWidth="200.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
-			</bottom>
+         <bottom>
+            <AnchorPane BorderPane.alignment="CENTER">
+               <children>
+      				<ImageView id="imageView" fx:id="imageView" disable="true" fitHeight="460.0" fitWidth="317.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+               </children>
+               <padding>
+                  <Insets bottom="100.0" top="100.0" />
+               </padding>
+            </AnchorPane>
+         </bottom>
 		</BorderPane>
 		<TabPane id="tabPane" fx:id="tabPane" prefHeight="398.0" prefWidth="431.0" tabClosingPolicy="UNAVAILABLE">
 			<tabs>
