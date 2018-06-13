@@ -129,13 +129,9 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
         .addListener(new ChangeListener<Object>() {
           @Override
           public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
-            for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedCells().size(); i++) {
-              if (farmTreeView.getSelectionModel().getSelectedCells().get(i)
-                  .getTreeItem() != null) {
-                TreeItem<Drawable> selectedItem =
-                    farmTreeView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
-                gsehenInstance.sendDrawableSelected(selectedItem.getValue(), null);
-              }
+            if (farmTreeView.getSelectionModel().getSelectedItem() != null) {
+              TreeItem<Drawable> selectedItem = farmTreeView.getSelectionModel().getSelectedItem();
+              gsehenInstance.sendDrawableSelected(selectedItem.getValue(), null);
             }
           }
         });
