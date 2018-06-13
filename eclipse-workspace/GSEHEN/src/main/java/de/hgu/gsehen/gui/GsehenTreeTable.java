@@ -1,8 +1,10 @@
 package de.hgu.gsehen.gui;
 
 import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
+import de.hgu.gsehen.event.GsehenViewEvent;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
@@ -15,6 +17,7 @@ import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -38,7 +41,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 import javafx.util.Duration;
 
-public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
+public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
+
   private Gsehen gsehenInstance;
   private static GsehenTreeTable instance;
 
@@ -46,6 +50,7 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     instance = this;
     gsehenInstance = Gsehen.getInstance();
     gsehenInstance.registerForEvent(FarmDataChanged.class, instance);
+    gsehenInstance.registerForEvent(DrawableSelected.class, instance);
   }
 
   protected static final ResourceBundle mainBundle =
@@ -119,6 +124,17 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
         }
       }
     });
+
+    farmTreeView.getSelectionModel().selectedItemProperty()
+        .addListener(new ChangeListener<Object>() {
+          @Override
+          public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
+            if (farmTreeView.getSelectionModel().getSelectedItem() != null) {
+              TreeItem<Drawable> selectedItem = farmTreeView.getSelectionModel().getSelectedItem();
+              gsehenInstance.sendDrawableSelected(selectedItem.getValue(), null);
+            }
+          }
+        });
 
     fillTreeView();
     setupScrolling();
@@ -469,16 +485,8 @@ public class GsehenTreeTable implements GsehenEventListener<FarmDataChanged> {
     gsehenInstance.sendFarmDataChanged(object, null);
   }
 
-  @Override
-  public void handle(FarmDataChanged event) {
+  public void handle(GsehenViewEvent event) {
     fillTreeView();
   }
 
-  public static GsehenTreeTable getInstance() {
-    return instance;
-  }
-
-  public TreeTableView<Drawable> getFarmTreeView() {
-    return farmTreeView;
-  }
 }
