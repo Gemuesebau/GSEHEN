@@ -67,6 +67,7 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
 
   private TreeTableView<Drawable> farmTreeView;
   private TreeTableColumn<Drawable, String> column;
+  private TreeTableRow<Drawable> row;
   private TreeItem<Drawable> farmItem;
   private TreeItem<Drawable> fieldItem;
   @SuppressWarnings("unused")
@@ -110,6 +111,7 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
         }
       }
     });
+    
     farmTreeView.setOnKeyPressed(new EventHandler<KeyEvent>() {
       @Override
       public void handle(final KeyEvent keyEvent) {
@@ -146,7 +148,8 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
 
   @SuppressWarnings("unchecked")
   private TreeTableRow<Drawable> rowFactory(TreeTableView<Drawable> view) {
-    TreeTableRow<Drawable> row = new TreeTableRow<>();
+    row = new TreeTableRow<>();
+
     row.setOnDragDetected(event -> {
       if (!row.isEmpty()) {
         Dragboard db = row.startDragAndDrop(TransferMode.MOVE);

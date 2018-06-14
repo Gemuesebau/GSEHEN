@@ -171,6 +171,7 @@ public class Gsehen extends Application {
 
     treeTable = new GsehenTreeTable();
     treeTable.addFarmTreeView();
+    scene.getStylesheets().add("/de/hgu/gsehen/style/tableTreeView-style.css");
   }
 
   @SuppressWarnings({"unused", "checkstyle:rightcurly"})
