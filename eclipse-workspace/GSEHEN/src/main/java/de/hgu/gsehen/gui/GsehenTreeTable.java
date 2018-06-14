@@ -16,6 +16,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -67,6 +68,7 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
 
   private TreeTableView<Drawable> farmTreeView;
   private TreeTableColumn<Drawable, String> column;
+  private TreeTableRow<Drawable> row;
   private TreeItem<Drawable> farmItem;
   private TreeItem<Drawable> fieldItem;
   @SuppressWarnings("unused")
@@ -75,6 +77,7 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
   private TreeItem<Drawable> item;
   private TreeItem<Drawable> rootItem;
   private List<Farm> farmsList = new ArrayList<>();
+  private TreeItem<Drawable> selectedItem;
 
   private ContextMenu menu = new ContextMenu();
   private MenuItem deleteItem;
@@ -110,6 +113,7 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
         }
       }
     });
+
     farmTreeView.setOnKeyPressed(new EventHandler<KeyEvent>() {
       @Override
       public void handle(final KeyEvent keyEvent) {
@@ -125,16 +129,21 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
       }
     });
 
-    farmTreeView.getSelectionModel().selectedItemProperty()
-        .addListener(new ChangeListener<Object>() {
-          @Override
-          public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
-            if (farmTreeView.getSelectionModel().getSelectedItem() != null) {
-              TreeItem<Drawable> selectedItem = farmTreeView.getSelectionModel().getSelectedItem();
-              gsehenInstance.sendDrawableSelected(selectedItem.getValue(), null);
-            }
-          }
-        });
+    // farmTreeView.getSelectionModel().selectedItemProperty()
+    // .addListener(new ChangeListener<Object>() {
+    // @Override
+    // public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
+    // if (newVal != null) {
+    // selectedItem = (TreeItem<Drawable>) newVal;
+    // Platform.runLater(new Runnable() {
+    // @Override
+    // public void run() {
+    // gsehenInstance.sendDrawableSelected(selectedItem.getValue(), null);
+    // }
+    // });
+    // }
+    // }
+    // });
 
     fillTreeView();
     setupScrolling();
@@ -146,7 +155,8 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
 
   @SuppressWarnings("unchecked")
   private TreeTableRow<Drawable> rowFactory(TreeTableView<Drawable> view) {
-    TreeTableRow<Drawable> row = new TreeTableRow<>();
+    row = new TreeTableRow<>();
+
     row.setOnDragDetected(event -> {
       if (!row.isEmpty()) {
         Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
@@ -486,7 +496,6 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
   }
 
   public void handle(GsehenViewEvent event) {
-    fillTreeView();
   }
 
 }
