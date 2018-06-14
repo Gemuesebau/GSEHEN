@@ -22,7 +22,7 @@ public class LogDataController {
   static String Zeile; 
  
   /**
-   * Read logfile
+   * Read logfile (tests)
    * @return 
    * 
    */
