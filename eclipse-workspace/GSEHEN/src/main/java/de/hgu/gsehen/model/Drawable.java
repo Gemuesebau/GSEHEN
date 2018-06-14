@@ -1,7 +1,8 @@
 package de.hgu.gsehen.model;
 
-import java.util.UUID;
 import de.hgu.gsehen.gui.GeoPolygon;
+import java.util.UUID;
+
 
 public abstract class Drawable {
   private final String uuid;
