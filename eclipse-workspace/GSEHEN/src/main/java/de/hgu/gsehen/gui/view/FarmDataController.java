@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import javafx.beans.value.ChangeListener;
+import javafx.scene.control.SplitPane;
 import javafx.scene.web.WebView;
 
 public abstract class FarmDataController extends WebController {
@@ -55,13 +57,7 @@ public abstract class FarmDataController extends WebController {
             drawables = flattenDrawables(farmsArray);
             Pair<GeoPoint> viewport = event.getViewport();
             lastViewport = viewport != null ? viewport : findBounds(drawables);
-            if (!isLoaded()) {
-              logAboutToReload(event.getClass().getSimpleName(), "reload");
-              reload();
-            } else {
-              logAboutToReload(event.getClass().getSimpleName(), "redraw");
-              redraw();
-            }
+            redrawOrReload(event);
           }
         });
     gsehenInstance.registerForEvent(DrawableSelected.class,
@@ -75,11 +71,47 @@ public abstract class FarmDataController extends WebController {
             Drawable drawable = event.getSubject();
             Pair<GeoPoint> viewport = event.getViewport();
             lastViewport = viewport != null ? viewport : findBounds(new Drawable[] { drawable });
-            logAboutToReload(event.getClass().getSimpleName(), "refocus");
-            engine.executeScript("if ((typeof clearAndSetViewportByController)==\"function\") "
-                + "clearAndSetViewportByController();");
+            refocusOrReload(event);
           }
         });
+  }
+
+  public Pair<GeoPoint> getLastViewport() {
+    return lastViewport;
+  }
+
+  public void reloadWithViewport(Pair<GeoPoint> lastViewport) {
+    this.lastViewport = lastViewport;
+    reload();
+  }
+
+  protected void setLastViewport(double north, double south, double east, double west) {
+    lastViewport = new Pair<>(new GeoPoint(south, west), new GeoPoint(north, east));
+  }
+
+  private void redraw() {
+    engine.executeScript("redraw();");
+  }
+
+  private void redrawOrReload(Object event) {
+    if (!isLoaded()) {
+      logAboutToReload(event.getClass().getSimpleName(), "reload");
+      reload();
+    } else {
+      logAboutToReload(event.getClass().getSimpleName(), "redraw");
+      redraw();
+    }
+  }
+
+  private void refocusOrReload(Object event) {
+    if (!isLoaded()) {
+      logAboutToReload(event.getClass().getSimpleName(), "reload");
+      reload();
+    } else {
+      logAboutToReload(event.getClass().getSimpleName(), "refocus");
+      engine.executeScript("if ((typeof clearAndSetViewportByController)==\"function\") "
+          + "clearAndSetViewportByController();");
+    }
   }
 
   private void logAboutToReload(String reason, String verb) {
@@ -98,6 +130,18 @@ public abstract class FarmDataController extends WebController {
    */
   public FarmDataController(Gsehen application, WebView webView) {
     super(application, webView);
+
+    ChangeListener<Number> splitPaneWidthHeightDividerPositionListener =
+        (observable, oldValue, newValue) -> redrawOrReload(observable);
+    SplitPane mainSplitPane = getMainSplitPane();
+    mainSplitPane.widthProperty().addListener(splitPaneWidthHeightDividerPositionListener);
+    mainSplitPane.heightProperty().addListener(splitPaneWidthHeightDividerPositionListener);
+    mainSplitPane.getDividers().get(0)
+        .positionProperty().addListener(splitPaneWidthHeightDividerPositionListener);
+  }
+
+  public SplitPane getMainSplitPane() {
+    return application.getMainSplitPane();
   }
 
   private Drawable[] flattenDrawables(Drawable... drawables) {
@@ -160,23 +204,6 @@ public abstract class FarmDataController extends WebController {
 
   public Drawable[] getDrawables() {
     return drawables;
-  }
-
-  public Pair<GeoPoint> getLastViewport() {
-    return lastViewport;
-  }
-
-  public void reloadWithViewport(Pair<GeoPoint> lastViewport) {
-    this.lastViewport = lastViewport;
-    reload();
-  }
-
-  protected void setLastViewport(double north, double south, double east, double west) {
-    lastViewport = new Pair<>(new GeoPoint(south, west), new GeoPoint(north, east));
-  }
-
-  private void redraw() {
-    engine.executeScript("redraw();");
   }
 
   /**

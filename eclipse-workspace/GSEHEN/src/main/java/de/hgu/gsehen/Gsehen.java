@@ -49,6 +49,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
@@ -68,11 +69,17 @@ import javax.script.ScriptEngineManager;
  */
 @SuppressWarnings({"checkstyle:commentsindentation"})
 public class Gsehen extends Application {
+  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+
   protected static final ResourceBundle mainBundle =
       ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
+
   private static final String GSEHEN_H2_LOCAL_DB = "gsehen-h2-local.db";
   private static final String DAYDATA_TABLE = "DAYDATA";
+
   private static final String MAIN_FXML = "main.fxml";
+
+  public static final String MAIN_SPLIT_PANE_ID = "#mainSplitPane";
   public static final String DEBUG_TEXTAREA_ID = "#debugTA";
   public static final String TAB_PANE_ID = "#tabPane";
   private static final String MAPS_WEB_VIEW_ID = "#mapsWebView";
@@ -81,7 +88,7 @@ public class Gsehen extends Application {
   private static final String PLOTS_VIEW_ID = "#plotsBorderPane";
   private static final String LOGS_VIEW_ID = "#logsBorderPane";
   private static final String IMAGE_VIEW_ID = "#imageView";
-  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+
   private static final String LOAD_USER_DATA_JS = "/de/hgu/gsehen/js/loadUserData.js";
   private static final String SAVE_USER_DATA_JS = "/de/hgu/gsehen/js/saveUserData.js";
 
@@ -91,6 +98,7 @@ public class Gsehen extends Application {
   private static Plots plots;
   private static Logs logs; 
   private GsehenTreeTable treeTable;
+
   private List<Farm> farmsList = new ArrayList<>();
 
   private Scene scene;
@@ -407,6 +415,10 @@ public class Gsehen extends Application {
   @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
   public void writeStringAsUTF8File(String data, String dataFileName) throws IOException {
     Files.write(Paths.get(dataFileName), data.getBytes("utf-8"));
+  }
+
+  public SplitPane getMainSplitPane() {
+    return (SplitPane) scene.lookup(MAIN_SPLIT_PANE_ID);
   }
 
   public static Gsehen getInstance() {

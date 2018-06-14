@@ -13,6 +13,10 @@ function redraw() {
   drawPoints(lastZoomParams.x, lastZoomParams.y, lastZoomParams.k);
 }
 
+function clearAndSetViewportByController() {
+  redraw();
+}
+
 canvas.call(d3.zoom()
   .scaleExtent([0.1, 10])
   .on("zoom", function () {
@@ -45,11 +49,14 @@ function lineAndLog(context, points, pointIndex, factor, canvasHeight, viewportL
 }
 
 function drawPoints(x, y, k) {
-  var canvasWidth = innerWidth * 0.96;
-  var canvasHeight = innerHeight * 0.96;
+  var splitPane = webController.getMainSplitPane();
+  var canvasWidth = Math.floor(splitPane.getWidth() * (1 - splitPane.getDividerPositions()[0]) * 0.95);
+  var canvasHeight = Math.floor(splitPane.getHeight() * 0.9);
+  alert("canvasWidth=" + canvasWidth + ", canvasHeight=" + canvasHeight);
   var canvasElement = document.getElementById("d3canvas");
   canvasElement.width = canvasWidth;
   canvasElement.height = canvasHeight;
+  alert("canvasWidth=" + canvasElement.width + ", canvasHeight=" + canvasElement.height);
 
   var viewport = webController.getLastViewport();
   var viewportLeftLng = viewport.getLeft().getLng();
