@@ -4,7 +4,6 @@ import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
 import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
 import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
-
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
@@ -89,7 +88,7 @@ public class Gsehen extends Application {
   private static Farms farms;
   private static Fields fields;
   private static Plots plots;
-  private static Logs logs; 
+  private static Logs logs;
   private GsehenTreeTable treeTable;
   private List<Farm> farmsList = new ArrayList<>();
 
@@ -153,7 +152,7 @@ public class Gsehen extends Application {
     fields = new Fields(this, (BorderPane) scene.lookup(FIELDS_VIEW_ID));
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
     logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
-    
+
     InputStream input =
         this.getClass().getResourceAsStream("/de/hgu/gsehen/images/Logo_UniGeisenheim.png");
     Image image = new Image(input);
@@ -175,7 +174,7 @@ public class Gsehen extends Application {
 
     treeTable = new GsehenTreeTable();
     treeTable.addFarmTreeView();
-    scene.getStylesheets().add("/de/hgu/gsehen/style/tableTreeView-style.css");
+    // scene.getStylesheets().add("/de/hgu/gsehen/style/tableTreeView-style.css");
   }
 
   @SuppressWarnings({"unused", "checkstyle:rightcurly"})
@@ -453,7 +452,7 @@ public class Gsehen extends Application {
   public static Plots getPlots() {
     return plots;
   }
-  
+
   public static Logs getLogs() {
     return logs;
   }
@@ -466,10 +465,8 @@ public class Gsehen extends Application {
   public static void jsPrompt(FarmDataController controller) {
     final String contentTextKey =
         "gui.dialog.developer.js.prompt." + controller.getClass().getSimpleName().toLowerCase();
-    String javaScript = textInputDialog(
-        contentTextKey,
-        instance.getBundle().getString("gui.dialog.developer.js.prompt.header")
-    );
+    String javaScript = textInputDialog(contentTextKey,
+        instance.getBundle().getString("gui.dialog.developer.js.prompt.header"));
     Object result;
     while (javaScript != null && (result = controller.runJavaScript(javaScript)) != null) {
       javaScript = textInputDialog(contentTextKey, String.valueOf(result));
