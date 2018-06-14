@@ -16,6 +16,7 @@ import de.hgu.gsehen.gui.controller.MainController;
 import de.hgu.gsehen.gui.view.FarmDataController;
 import de.hgu.gsehen.gui.view.Farms;
 import de.hgu.gsehen.gui.view.Fields;
+import de.hgu.gsehen.gui.view.Logs;
 import de.hgu.gsehen.gui.view.Maps;
 import de.hgu.gsehen.gui.view.Plots;
 import de.hgu.gsehen.model.Drawable;
@@ -78,6 +79,7 @@ public class Gsehen extends Application {
   private static final String FARMS_WEB_VIEW_ID = "#farmsWebView";
   private static final String FIELDS_VIEW_ID = "#fieldsBorderPane";
   private static final String PLOTS_VIEW_ID = "#plotsBorderPane";
+  private static final String LOGS_VIEW_ID = "#logsBorderPane";
   private static final String IMAGE_VIEW_ID = "#imageView";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private static final String LOAD_USER_DATA_JS = "/de/hgu/gsehen/js/loadUserData.js";
@@ -87,6 +89,7 @@ public class Gsehen extends Application {
   private static Farms farms;
   private static Fields fields;
   private static Plots plots;
+  private static Logs logs;
   private GsehenTreeTable treeTable;
   private List<Farm> farmsList = new ArrayList<>();
 
@@ -149,7 +152,8 @@ public class Gsehen extends Application {
     farms = new Farms(this, (WebView) scene.lookup(FARMS_WEB_VIEW_ID));
     fields = new Fields(this, (BorderPane) scene.lookup(FIELDS_VIEW_ID));
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
-
+    logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
+    
     InputStream input =
         this.getClass().getResourceAsStream("/de/hgu/gsehen/images/Logo_UniGeisenheim.png");
     Image image = new Image(input);
@@ -447,6 +451,10 @@ public class Gsehen extends Application {
 
   public static Plots getPlots() {
     return plots;
+  }
+  
+  public static Logs getLogs() {
+    return logs;
   }
 
   /**

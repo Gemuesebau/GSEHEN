@@ -44,6 +44,8 @@ public class MainController {
   @FXML
   private Tab plotViewTab;
   @FXML
+  private Tab logViewTab;
+  @FXML
   private Tab contactViewTab;
   @FXML
   private Tab aboutViewTab;
@@ -103,7 +105,7 @@ public class MainController {
   private void backToMainView(ActionEvent b) {
     accordion.setVisible(true);
     tabPane.getTabs().clear();
-    tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab);
+    tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab, logViewTab);
   }
 
   /**
