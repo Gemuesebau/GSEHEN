@@ -10,7 +10,7 @@ public class Logs extends LogDataController {
   *
   */
   public Logs(Gsehen application, BorderPane pane) {
-    super(application, pane);
+    super(application, pane); 
   }
 
 }

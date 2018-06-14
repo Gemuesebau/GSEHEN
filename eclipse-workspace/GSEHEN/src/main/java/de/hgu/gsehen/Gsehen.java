@@ -89,7 +89,7 @@ public class Gsehen extends Application {
   private static Farms farms;
   private static Fields fields;
   private static Plots plots;
-  private static Logs logs;
+  private static Logs logs; 
   private GsehenTreeTable treeTable;
   private List<Farm> farmsList = new ArrayList<>();
 

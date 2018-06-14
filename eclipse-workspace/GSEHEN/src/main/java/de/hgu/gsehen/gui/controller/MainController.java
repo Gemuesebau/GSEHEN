@@ -98,7 +98,7 @@ public class MainController {
         });
       }
     });
-  }
+  } 
 
   // Returns to Main-Menu.
   @FXML

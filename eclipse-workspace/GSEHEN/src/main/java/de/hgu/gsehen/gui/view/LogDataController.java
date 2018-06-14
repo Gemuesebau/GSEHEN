@@ -22,7 +22,7 @@ public class LogDataController {
   static String Zeile; 
  
   /**
-   * Read logfile (tests)
+   * Read logfile
    * @return 
    * 
    */
@@ -34,7 +34,7 @@ public class LogDataController {
           fileReader = new FileReader(file);
         } catch (FileNotFoundException e) {
           System.out.println("Datei könnte nicht geöffnet werden.");
-          e.printStackTrace();
+          e.printStackTrace(); 
           System.exit(0);
         }
         fileStream = new BufferedReader(fileReader);
