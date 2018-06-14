@@ -40,12 +40,17 @@ public class Maps extends FarmDataController {
       simpleClassMap(new Class[] {Farm.class, Field.class, Plot.class});
 
   /**
-   * Creates a new GeoPolygon; intended to be called from web JavaScript.
+   * Creates a new Drawable; intended to be called from web JavaScript.
    *
-   * @return a new, empty GeoPolygon
+   * @return a new drawable of the given type, with an empty GeoPolygon 
+   * @throws IllegalAccessException via Class.newInstance
+   * @throws InstantiationException via Class.newInstance
    */
-  public GeoPolygon getEmptyPolygon() {
-    return new GeoPolygon();
+  public Drawable getDrawableWithEmptyPolygon(String typeKey)
+      throws InstantiationException, IllegalAccessException {
+    Drawable drawable = (Drawable) typesMap.get(typeKey).newInstance();
+    drawable.setNameAndPolygon("Unbenannt", new GeoPolygon()); // FIXME localize!
+    return drawable;
   }
 
   /**
@@ -67,23 +72,12 @@ public class Maps extends FarmDataController {
   /**
    * Handles the event of a newly drawn polygon; intended to be called from web JavaScript.
    *
-   * @param polygon a GeoPolygon, usually first created via
-   *        de.hgu.gsehen.gui.view.Map.getEmptyPolygon() and with points then added as needed
-   * @see de.hgu.gsehen.gui.view.Maps.getEmptyPolygon
+   * @param drawable a Drawable (containing a GeoPolygon), usually first created via
+   *        de.hgu.gsehen.gui.view.Map.getDrawableWithEmptyPolygon() and with points added as needed
+   * @see de.hgu.gsehen.gui.view.Maps.getDrawableWithEmptyPolygon
    */
-  @SuppressWarnings("checkstyle:rightcurly")
-  public void polygonDrawn(GeoPolygon polygon, String typeKey) {
-    String name = "Unbenannt";
-    try {
-      if (name != null) {
-        Drawable object = (Drawable) typesMap.get(typeKey).newInstance();
-        object.setNameAndPolygon(name, polygon);
-        application.objectAdded(object, getEventListenerClass(FarmDataChanged.class));
-      }
-    } catch (Exception exception) {
-      // Java reflection stuff - exception should not happen, since all input comes from code
-      LOGGER.info(exception.getMessage());
-    }
+  public void drawableDone(Drawable drawable) {
+    application.drawableAdded(drawable, getEventListenerClass(FarmDataChanged.class));
   }
 
   /**
