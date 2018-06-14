@@ -284,7 +284,7 @@ public class Gsehen extends Application {
    * @param skipClass a listener class to skip when notifying; typically the class that originally
    *        created the new object
    */
-  public void objectAdded(Drawable object,
+  public void drawableAdded(Drawable object,
       Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
     if (object instanceof Farm) {
       farmsList.add((Farm) object);

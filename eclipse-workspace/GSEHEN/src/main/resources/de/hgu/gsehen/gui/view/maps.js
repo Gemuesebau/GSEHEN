@@ -48,12 +48,14 @@ function initialize(typeOptions) {
 function addEventListeners() {
   google.maps.event.addListener(
     drawingManager, 'overlaycomplete', function (polygon) {
-      var javaPolygon = webController.getEmptyPolygon();
+      var drawable = webController.getDrawableWithEmptyPolygon(selectedType);
+      var javaPolygon = drawable.getPolygon();
       var polygonLatLngArray = polygon.overlay.getPath().getArray();
       for (var i=0; i<polygonLatLngArray.length; i++) {
         javaPolygon.addGeoPointByCoords(polygonLatLngArray[i].lat(), polygonLatLngArray[i].lng());
       }
-      webController.polygonDrawn(javaPolygon, selectedType);
+      webController.drawableDone(drawable);
+      polygons[drawable.getUuid()] = polygon.overlay;
     }
   );
   google.maps.event.addListener(

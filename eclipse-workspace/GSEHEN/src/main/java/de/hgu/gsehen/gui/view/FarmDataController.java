@@ -76,7 +76,8 @@ public abstract class FarmDataController extends WebController {
             Pair<GeoPoint> viewport = event.getViewport();
             lastViewport = viewport != null ? viewport : findBounds(new Drawable[] { drawable });
             logAboutToReload(event.getClass().getSimpleName(), "refocus");
-            engine.executeScript("clearAndSetViewportByController();");
+            engine.executeScript("if ((typeof clearAndSetViewportByController)==\"function\") "
+                + "clearAndSetViewportByController();");
           }
         });
   }
