@@ -16,19 +16,19 @@ public class LogDataController {
   private BorderPane pane;
 
   // Path is hard coded
-  static String Path_to_file = "C:\\Users\\jganin\\GsehenIrrigationManager.log"; 
+  static String Path = "C:\\Users\\jganin\\GsehenIrrigationManager.log"; 
   static FileReader fileReader; 
   static BufferedReader fileStream; 
   static String Zeile; 
  
   /**
-   * 
+   * Read logfile
    * @return 
    * 
    */
   public String LogReader() {
 
-    File file = new File(Path_to_file); {
+    File file = new File(Path); {
       if (file.exists()) {
         try {
           fileReader = new FileReader(file);
