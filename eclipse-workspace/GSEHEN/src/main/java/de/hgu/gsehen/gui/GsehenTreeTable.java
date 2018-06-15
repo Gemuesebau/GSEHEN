@@ -68,7 +68,6 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
 
   private TreeTableView<Drawable> farmTreeView;
   private TreeTableColumn<Drawable, String> column;
-  private TreeTableRow<Drawable> row;
   private TreeItem<Drawable> farmItem;
   private TreeItem<Drawable> fieldItem;
   @SuppressWarnings("unused")
@@ -129,21 +128,21 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
       }
     });
 
-    // farmTreeView.getSelectionModel().selectedItemProperty()
-    // .addListener(new ChangeListener<Object>() {
-    // @Override
-    // public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
-    // if (newVal != null) {
-    // selectedItem = (TreeItem<Drawable>) newVal;
-    // Platform.runLater(new Runnable() {
-    // @Override
-    // public void run() {
-    // gsehenInstance.sendDrawableSelected(selectedItem.getValue(), null);
-    // }
-    // });
-    // }
-    // }
-    // });
+    farmTreeView.getSelectionModel().selectedItemProperty()
+        .addListener(new ChangeListener<Object>() {
+          @Override
+          public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
+            if (newVal != null) {
+              selectedItem = (TreeItem<Drawable>) newVal;
+              Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                  gsehenInstance.sendDrawableSelected(selectedItem.getValue(), null);
+                }
+              });
+            }
+          }
+        });
 
     fillTreeView();
     setupScrolling();
@@ -155,7 +154,7 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
 
   @SuppressWarnings("unchecked")
   private TreeTableRow<Drawable> rowFactory(TreeTableView<Drawable> view) {
-    row = new TreeTableRow<>();
+    TreeTableRow<Drawable> row = new TreeTableRow<>();
 
     row.setOnDragDetected(event -> {
       if (!row.isEmpty()) {
@@ -173,6 +172,7 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
       if (acceptable(db, row)) {
         event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
         event.consume();
+        farmTreeView.getSelectionModel().clearSelection();
       }
     });
 
