@@ -67,7 +67,7 @@ public class LogDataController {
    */
   public LogDataController(Gsehen application, BorderPane pane) {
     this.gsehenInstance = application;
-    this.pane = pane;
+    this.pane = pane; 
   }
 
 
