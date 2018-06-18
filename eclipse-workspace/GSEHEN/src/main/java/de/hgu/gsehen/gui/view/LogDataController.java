@@ -28,11 +28,11 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   static String Zeile; 
  
   /**
-   * Read logfile
+   * Read logfile.
    * @return 
    * 
    */
-  public String LogReader() {
+  public String logreader() {
 
     File file = new File(Path); {
       if (file.exists()) {
@@ -91,16 +91,16 @@ public void handle(FarmDataChanged event) {
 
   private void addColumn(TableView table) {
 
-    TableColumn date = new TableColumn<>("Datum");
-    TableColumn time = new TableColumn<>("Zeit");
-    TableColumn level = new TableColumn<>("Level");
-    TableColumn massage = new TableColumn<>("Nachricht");
+    TableColumn dateCol = new TableColumn<>("Datum");
+    TableColumn timeCol = new TableColumn<>("Zeit");
+    TableColumn levelCol = new TableColumn<>("Level");
+    TableColumn massageCol = new TableColumn<>("Nachricht");
 
-    table.getColumns().addAll(date, time, level, massage);
-    date.setMinWidth(130);
-    time.setMinWidth(130);
-    level.setMinWidth(75);
-    massage.setMinWidth(500);
+    table.getColumns().addAll(dateCol, timeCol, levelCol, massageCol);
+    dateCol.setMinWidth(130);
+    timeCol.setMinWidth(130);
+    levelCol.setMinWidth(75);
+    massageCol.setMinWidth(500);
 
   }
 
