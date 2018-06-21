@@ -43,7 +43,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 import javafx.util.Duration;
 
-//TODO: TreeView tut nix. Mach mal heile.
 public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
 
 	private Gsehen gsehenInstance;
@@ -136,7 +135,8 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
 					Platform.runLater(new Runnable() {
 						@Override
 						public void run() {
-							gsehenInstance.sendDrawableSelected(selectedItem.getValue(), null);
+							// gsehenInstance.sendDrawableSelected(selectedItem.getValue(), null);
+							// TODO skipClass
 						}
 					});
 				}
@@ -149,6 +149,8 @@ public class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
 		farmTreeView.setContextMenu(menu);
 		farmTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		farmTreeView.getSelectionModel().setCellSelectionEnabled(true);
+		// farmTreeView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+		// farmTreeView.getSelectionModel().setCellSelectionEnabled(false)
 	}
 
 	@SuppressWarnings("unchecked")
