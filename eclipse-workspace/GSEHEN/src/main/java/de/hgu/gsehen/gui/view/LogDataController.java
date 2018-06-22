@@ -1,17 +1,23 @@
 package de.hgu.gsehen.gui.view;
 
 import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.event.FarmDataChanged;
+import de.hgu.gsehen.event.GsehenEventListener;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 
 
 
 
-public class LogDataController {
+public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   private Gsehen gsehenInstance;
   private BorderPane pane;
 
@@ -22,11 +28,11 @@ public class LogDataController {
   static String Zeile; 
  
   /**
-   * Read logfile
+   * Read logfile.
    * @return 
    * 
    */
-  public String LogReader() {
+  public String logreader() {
 
     File file = new File(Path); {
       if (file.exists()) {
@@ -58,6 +64,7 @@ public class LogDataController {
 
   {
     gsehenInstance = Gsehen.getInstance();
+    gsehenInstance.registerForEvent(FarmDataChanged.class, this);
   }
 
   /**
@@ -67,7 +74,34 @@ public class LogDataController {
    */
   public LogDataController(Gsehen application, BorderPane pane) {
     this.gsehenInstance = application;
-    this.pane = pane;
+    this.pane = pane; 
+  }
+
+  @Override
+public void handle(FarmDataChanged event) {
+
+    pane.setVisible(true);
+    TableView table = new TableView();
+    pane.setTop(table);
+    table.setMinHeight(pane.getHeight());
+    addColumn(table);
+    
+  }
+
+
+  private void addColumn(TableView table) {
+
+    TableColumn dateCol = new TableColumn<>("Datum");
+    TableColumn timeCol = new TableColumn<>("Zeit");
+    TableColumn levelCol = new TableColumn<>("Level");
+    TableColumn massageCol = new TableColumn<>("Nachricht");
+
+    table.getColumns().addAll(dateCol, timeCol, levelCol, massageCol);
+    dateCol.setMinWidth(130);
+    timeCol.setMinWidth(130);
+    levelCol.setMinWidth(75);
+    massageCol.setMinWidth(500);
+
   }
 
 
