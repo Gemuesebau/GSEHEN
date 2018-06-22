@@ -17,15 +17,19 @@ function clearAndSetViewportByController() {
   redraw();
 }
 
-canvas.call(d3.zoom()
-  .scaleExtent([0.1, 10])
-  .on("zoom", function () {
-    lastZoomParams = {
-      x: d3.event.transform.x, y: d3.event.transform.y, k: d3.event.transform.k
-    };
-    redraw();
-  })
-);
+function initCanvasZoom() {
+  canvas.call(d3.zoom()
+    .scaleExtent([0.1, 10])
+    .on("zoom", function () {
+      lastZoomParams = {
+        x: d3.event.transform.x, y: d3.event.transform.y, k: d3.event.transform.k
+      };
+      redraw();
+    })
+  );
+}
+
+initCanvasZoom();
 redraw();
 
 function transform(pointCoordValue, viewportCoordValue, factor, flipHeightOrNull) {
@@ -52,11 +56,21 @@ function drawPoints(x, y, k) {
   var splitPane = webController.getMainSplitPane();
   var canvasWidth = Math.floor(splitPane.getWidth() * (1 - splitPane.getDividerPositions()[0]) * 0.95);
   var canvasHeight = Math.floor(splitPane.getHeight() * 0.9);
-  alert("canvasWidth=" + canvasWidth + ", canvasHeight=" + canvasHeight);
   var canvasElement = document.getElementById("d3canvas");
-  canvasElement.width = canvasWidth;
-  canvasElement.height = canvasHeight;
-  alert("canvasWidth=" + canvasElement.width + ", canvasHeight=" + canvasElement.height);
+  if (canvasWidth != canvasElement.width || canvasHeight != canvasElement.height) {
+//	  document.body.innerHTML = "";
+//	  alert("Creating new canvas...");
+//	  canvasElement = document.createElement("canvas");
+//	  canvasElement.id = "d3canvas";
+//	  document.body.appendChild(canvasElement);
+	  canvasElement.width = canvasWidth;
+	  canvasElement.height = canvasHeight;
+	  initCanvasZoom(); // FIXME erst alten Handler beseitigen? Ansonsten debounce + Java-seitig (nochmals entkoppelt + ) reload!!!
+//	  canvas = d3.select("#d3canvas");
+//	  context = canvas.node().getContext("2d");
+  }
+
+  alert("Canvas has dimensions: " + canvasElement.width + " x " + canvasElement.height);
 
   var viewport = webController.getLastViewport();
   var viewportLeftLng = viewport.getLeft().getLng();
