@@ -25,6 +25,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
@@ -43,6 +44,12 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
@@ -94,6 +101,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private static final DataFormat SERIALIZED_MIME_TYPE =
       new DataFormat("application/x-java-serialized-object");
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
+  private static final String DETAIL_BORDER_PANE_ID = "#detailBorderPane";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
   private List<Farm> newFarmsList;
@@ -115,6 +123,22 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
   private ContextMenu menu = new ContextMenu();
   private MenuItem deleteItem;
+
+  private BorderPane detailPane;
+  private Text nameLabel;
+  private Text name;
+  private Text typeLabel;
+  private Text type;
+  private Text attributeLabel1;
+  private Text attribute1;
+  private Text attributeLabel2;
+  private Text attribute2;
+  private Text attributeLabel3;
+  private Text attribute3;
+
+  private HBox attribute1Box;
+  private HBox attribute2Box;
+  private HBox attribute3Box;
 
   /**
    * Adds the FarmTreeView.
@@ -171,6 +195,131 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
             if (newVal != null) {
               selectedItem = (TreeItem<Drawable>) newVal;
+
+              // TODO: Aktuell Platzhalter, da keine Daten vorhanden sind.
+              nameLabel = new Text(mainBundle.getString("treetableview.name") + ": ");
+              nameLabel.setFont(Font.font("Arial", 12));
+              name = new Text(selectedItem.getValue().getName());
+              name.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+              HBox nameBox = new HBox();
+              nameBox.getChildren().addAll(nameLabel, name);
+
+              typeLabel = new Text(mainBundle.getString("treetableview.type") + ": ");
+              typeLabel.setFont(Font.font("Arial", 12));
+              type = new Text(selectedItem.getValue().getClass().getSimpleName());
+              type.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+              HBox locationBox = new HBox();
+              locationBox.getChildren().addAll(typeLabel, type);
+
+              VBox topBox = new VBox(10);
+              topBox.setPadding(new Insets(10, 10, 10, 10));
+              topBox.getChildren().addAll(nameBox, locationBox);
+              detailPane.setTop(topBox);
+
+              VBox centerBox = new VBox(10);
+              centerBox.setPadding(new Insets(10, 10, 10, 10));
+
+              if (selectedItem.getValue().getClass().getSimpleName()
+                  .equals(mainBundle.getString("gui.view.Map.drawableType.Farm"))) {
+                Farm farm = (Farm) selectedItem.getValue();
+
+                attributeLabel1 = new Text("Anzahl Felder: ");
+                attributeLabel1.setFont(Font.font("Arial", 12));
+                attribute1 = new Text(Integer.toString(farm.getFields().size()));
+                attribute1.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                attribute1Box = new HBox();
+                attribute1Box.getChildren().addAll(attributeLabel1, attribute1);
+
+                centerBox.getChildren().addAll(attribute1Box);
+                detailPane.setBottom(null);
+              } else if (selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
+                Field field = (Field) selectedItem.getValue();
+
+                attributeLabel1 = new Text("Anzahl Plots: ");
+                attributeLabel1.setFont(Font.font("Arial", 12));
+                attribute1 = new Text(Integer.toString(field.getPlots().size()));
+                attribute1.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                attribute1Box = new HBox();
+                attribute1Box.getChildren().addAll(attributeLabel1, attribute1);
+
+                attributeLabel2 = new Text("m²: ");
+                attributeLabel2.setFont(Font.font("Arial", 12));
+                attribute2 = new Text(Double.toString(field.getArea()));
+                attribute2.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                attribute2Box = new HBox();
+                attribute2Box.getChildren().addAll(attributeLabel2, attribute2);
+
+                attributeLabel3 = new Text("Bodenprofil: ");
+                attributeLabel3.setFont(Font.font("Arial", 12));
+                // attribute3 = new Text(field.getSoilProfile().toString());
+                attribute3 = new Text("~Platzhalter~");
+                attribute3.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                attribute3Box = new HBox();
+                attribute3Box.getChildren().addAll(attributeLabel3, attribute3);
+
+                centerBox.getChildren().addAll(attribute1Box, attribute2Box, attribute3Box);
+                detailPane.setBottom(null);
+              } else if (selectedItem.getValue().getClass().getSimpleName()
+                  .equals(mainBundle.getString("gui.view.Map.drawableType.Plot"))) {
+                Plot plot = (Plot) selectedItem.getValue();
+
+                attributeLabel1 = new Text("m²: ");
+                attributeLabel1.setFont(Font.font("Arial", 12));
+                attribute1 = new Text(Double.toString(plot.getArea()));
+                attribute1.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                attribute1Box = new HBox();
+                attribute1Box.getChildren().addAll(attributeLabel1, attribute1);
+
+                attributeLabel2 = new Text("Max. durchwurzelbare Zone: ");
+                attributeLabel2.setFont(Font.font("Arial", 12));
+                // attribute2 = new Text(Double.toString(plot.getRootingZone()));
+                attribute2 = new Text("~Platzhalter~");
+                attribute2.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                attribute2Box = new HBox();
+                attribute2Box.getChildren().addAll(attributeLabel2, attribute2);
+
+                attributeLabel3 = new Text("Kultur: ");
+                attributeLabel3.setFont(Font.font("Arial", 12));
+                // attribute3 = new Text(plot.getCrop().getName());
+                attribute3 = new Text("~Platzhalter~");
+                attribute3.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                attribute3Box = new HBox();
+                attribute3Box.getChildren().addAll(attributeLabel3, attribute3);
+
+                centerBox.getChildren().addAll(attribute1Box, attribute2Box, attribute3Box);
+
+                Text soilStartLabel = new Text("Start der Wasserbilanzierung: ");
+                soilStartLabel.setFont(Font.font("Arial", 12));
+                // Text action = new Text(plot.getSoilStartDate().toString());
+                Text soilStart = new Text("~Platzhalter~");
+                soilStart.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                HBox soilStartBox = new HBox();
+                soilStartBox.getChildren().addAll(soilStartLabel, soilStart);
+
+                Text soilValueLabel = new Text("Wert der Wasserbilanzierung: ");
+                soilValueLabel.setFont(Font.font("Arial", 12));
+                // Text action = new Text(plot.getSoilStartValue().toString());
+                Text soilValue = new Text("~Platzhalter~");
+                soilValue.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                HBox soilValueBox = new HBox();
+                soilValueBox.getChildren().addAll(soilValueLabel, soilValue);
+
+                Text actionLabel = new Text("Bewässerungsempfehlung: ");
+                actionLabel.setFont(Font.font("Arial", 14));
+                // Text action = new Text(plot.getRecommendedAction());
+                Text action = new Text("~Platzhalter~");
+                action.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+                HBox actionBox = new HBox();
+                actionBox.getChildren().addAll(actionLabel, action);
+
+                VBox bottomBox = new VBox(10);
+                bottomBox.setPadding(new Insets(10, 10, 10, 10));
+                bottomBox.getChildren().addAll(soilStartBox, soilValueBox, actionBox);
+                detailPane.setBottom(bottomBox);
+              }
+
+              detailPane.setCenter(centerBox);
+
               Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
@@ -188,6 +337,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     farmTreeView.setContextMenu(menu);
     farmTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     farmTreeView.getSelectionModel().setCellSelectionEnabled(true);
+
+    detailPane = (BorderPane) Gsehen.getInstance().getScene().lookup(DETAIL_BORDER_PANE_ID);
   }
 
   @SuppressWarnings("unchecked")
