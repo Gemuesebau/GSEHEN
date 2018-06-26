@@ -183,7 +183,7 @@ public class Gsehen extends Application {
 
     treeTable = new GsehenTreeTable() {
       @Override
-      public void handle(DrawableSelected event) {}
+      public void handle(GsehenViewEvent event) {}
     };
     treeTable.addFarmTreeView(GsehenTreeTable.class);
   }
@@ -353,9 +353,6 @@ public class Gsehen extends Application {
     dataChanged = true;
     FarmDataChanged event = new FarmDataChanged();
     event.setFarms(farmsList);
-    if (skipClass != null) {
-      System.out.println(skipClass.getName());
-    }
     sendViewEvent(object, skipClass, event);
   }
 
@@ -405,8 +402,8 @@ public class Gsehen extends Application {
     List<GsehenEventListener<?>> farmDataChgListeners = eventListeners.get(event.getClass());
     if (farmDataChgListeners != null) {
       farmDataChgListeners.forEach(listener -> {
-        if (skipClass != null && skipClass.equals(listener.getClass())) {
-          //TODO Hier ist's spannend!
+        if (skipClass != null && skipClass.equals(listener.getClass())
+            || skipClass != null && skipClass.equals(listener.getClass().getEnclosingClass())) {
           return;
         }
         ((GsehenEventListener<T>) listener).handle(event);

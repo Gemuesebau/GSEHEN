@@ -5,6 +5,7 @@ import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
+import de.hgu.gsehen.event.GsehenViewEvent;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
@@ -44,7 +45,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 import javafx.util.Duration;
 
-public abstract class GsehenTreeTable implements GsehenEventListener<DrawableSelected> {
+public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
 
   private Gsehen gsehenInstance;
 
@@ -71,7 +72,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<DrawableSel
           }
 
           @Override
-          public void handle(FarmDataChanged event) {}
+          public void handle(FarmDataChanged event) {
+            fillTreeView();
+          }
         });
     gsehenInstance.registerForEvent(DrawableSelected.class,
         new GsehenEventListener<DrawableSelected>() {
@@ -117,7 +120,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<DrawableSel
    * Adds the FarmTreeView.
    */
   @SuppressWarnings("unchecked")
-  public void addFarmTreeView(Class<? extends GsehenEventListener<DrawableSelected>> skipClass) {
+  public void addFarmTreeView(Class<? extends GsehenEventListener<GsehenViewEvent>> skipClass) {
     farmTreeView =
         (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
     rootItem = new TreeItem<Drawable>();
@@ -169,10 +172,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<DrawableSel
               Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                  System.out.println(skipClass.getName());
-                  gsehenInstance.sendDrawableSelected(selectedItem.getValue(), skipClass);
-                  /* TODO skipClass ist drin und scheint zu laufen.
-                   TTV ist dennoch nicht zu gebrauchen... */
+                  gsehenInstance.sendDrawableSelected(selectedItem.getValue(), 
+                      (Class<? extends GsehenEventListener<DrawableSelected>>) skipClass);
                 }
               });
             }
