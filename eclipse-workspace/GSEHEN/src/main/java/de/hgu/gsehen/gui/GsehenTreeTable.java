@@ -138,8 +138,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     deleteItem.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
-        for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedItems().size(); i++) {
-          farmTreeView.getSelectionModel().getSelectedItems().get(i).getValue().setName("del");
+        for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedCells().size(); i++) {
+          farmTreeView.getSelectionModel().getSelectedCells().get(i).getTreeItem().getValue()
+              .setName("del");
         }
         trash = farmTreeView.getSelectionModel().getSelectedItem();
         if (trash != null) {
@@ -152,8 +153,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
       @Override
       public void handle(final KeyEvent keyEvent) {
         if (keyEvent.getCode().equals(KeyCode.DELETE)) {
-          for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedItems().size(); i++) {
-            farmTreeView.getSelectionModel().getSelectedItems().get(i).getValue().setName("del");
+          for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedCells().size(); i++) {
+            farmTreeView.getSelectionModel().getSelectedCells().get(i).getTreeItem().getValue()
+                .setName("del");
           }
           trash = farmTreeView.getSelectionModel().getSelectedItem();
           if (trash != null) {
@@ -172,7 +174,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
               Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                  gsehenInstance.sendDrawableSelected(selectedItem.getValue(), 
+                  gsehenInstance.sendDrawableSelected(selectedItem.getValue(),
                       (Class<? extends GsehenEventListener<DrawableSelected>>) skipClass);
                 }
               });
