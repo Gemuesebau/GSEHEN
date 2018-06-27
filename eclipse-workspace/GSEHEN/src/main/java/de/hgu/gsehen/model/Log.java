@@ -36,7 +36,7 @@ public class Log {
         try {
           Zeile = fileStream.readLine();
           while (Zeile != null) {
-            for (int i = 0; i < Zeile.length(); i++) {
+            for (int i = 0; i < Zeile.length();) {
               parts = Zeile.split(" ", 4);
               datum = parts[0];
               zeit = parts[1];
