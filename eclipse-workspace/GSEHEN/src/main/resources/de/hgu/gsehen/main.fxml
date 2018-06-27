@@ -13,7 +13,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-<SplitPane id="mainSplitPane" dividerPositions="0.25039123630672927" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="800.0" minWidth="1280.0" prefHeight="800.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
+<SplitPane id="mainSplitPane" dividerPositions="0.2746478873239437" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="800.0" minWidth="1280.0" prefHeight="800.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
 	<items>
 		<BorderPane prefHeight="200.0" prefWidth="200.0">
 			<top>
@@ -46,62 +46,42 @@
 					</menus>
 				</MenuBar>
 			</top>
-			<center>
-				<Accordion fx:id="accordion" BorderPane.alignment="CENTER" expandedPane="$fieldsPane">
-					<panes>
-						<TitledPane fx:id="fieldsPane" animated="false" text="%accordion.pane.fields">
-							<content>
-								<AnchorPane prefHeight="200.0" prefWidth="200.0">
-                           <children>
-                              <TreeTableView id="farmTreeView" layoutX="32.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                           </children>
-								</AnchorPane>
-							</content>
-						</TitledPane>
-						<TitledPane animated="false" expanded="false" text="%accordion.pane.weather.stations">
-							<content>
-								<AnchorPane minHeight="0.0" minWidth="0.0">
-									<children>
-										<Button mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-										<Button layoutX="95.0" layoutY="25.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-									</children>
-								</AnchorPane>
-							</content>
-						</TitledPane>
-						<TitledPane animated="false" expanded="false" text="%accordion.pane.settings">
-							<content>
-								<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-									<children>
-										<Button mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-										<Button layoutX="95.0" layoutY="25.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-									</children>
-								</AnchorPane>
-							</content>
-						</TitledPane>
-						<TitledPane animated="false" expanded="false" text="%accordion.pane.farm.company">
-							<content>
-								<AnchorPane prefHeight="200.0" prefWidth="200.0">
-									<children>
-										<Button layoutX="10.0" layoutY="2.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
-										<Button layoutX="10.0" layoutY="27.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
-										<Button layoutX="10.0" layoutY="52.0" mnemonicParsing="false" text="Button" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.800000000000011" />
-									</children>
-								</AnchorPane>
-							</content>
-						</TitledPane>
-					</panes>
-				</Accordion>
-			</center>
          <bottom>
             <AnchorPane BorderPane.alignment="CENTER">
                <children>
-      				<ImageView id="imageView" fx:id="imageView" disable="true" fitHeight="460.0" fitWidth="317.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+      				<ImageView id="imageView" fx:id="imageView" disable="true" fitHeight="180.0" fitWidth="348.0" layoutY="280.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children>
-               <padding>
-                  <Insets bottom="100.0" top="100.0" />
-               </padding>
             </AnchorPane>
          </bottom>
+         <center>
+								<AnchorPane BorderPane.alignment="CENTER">
+               <children>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <top>
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <TreeTableView id="farmTreeView" prefHeight="291.0" prefWidth="348.0" />
+                           </children>
+                        </AnchorPane>
+                     </top>
+                     <center>
+                        <AnchorPane prefHeight="36.0" prefWidth="275.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <ScrollPane prefHeight="301.0" prefWidth="317.0" AnchorPane.bottomAnchor="-301.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <content>
+                                  <AnchorPane prefHeight="299.0" prefWidth="346.0">
+                                       <children>
+                                          <BorderPane id="detailBorderPane" prefHeight="300.0" prefWidth="348.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                       </children></AnchorPane>
+                                </content>
+                              </ScrollPane>
+                           </children>
+                        </AnchorPane>
+                     </center>
+                  </BorderPane>
+               </children>
+								</AnchorPane>
+         </center>
 		</BorderPane>
 		<TabPane id="tabPane" fx:id="tabPane" prefHeight="398.0" prefWidth="431.0" tabClosingPolicy="UNAVAILABLE">
 			<tabs>
