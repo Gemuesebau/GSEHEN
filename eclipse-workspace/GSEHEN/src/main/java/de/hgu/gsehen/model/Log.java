@@ -36,29 +36,21 @@ public class Log {
         try {
           Zeile = fileStream.readLine();
           while (Zeile != null) {
-            for (int i = 0; i < Zeile.length();) {
-              parts = Zeile.split(" ", 4);
-              datum = parts[0];
-              zeit = parts[1];
-              level = parts[2];
-              nachricht = parts[3];
-              System.out.println(datum + " datum");
-              System.out.println(zeit + " zeit");
-              System.out.println(level + " levle");
-              System.out.println(nachricht + " nachricht");
-              Zeile = fileStream.readLine();
-              return;
-            }
+            parts = Zeile.split(" ", 4);
+            datum = parts[0];
+            zeit = parts[1];
+            level = parts[2];
+            nachricht = parts[3];
             Zeile = fileStream.readLine();
-            System.out.println(datum + "dasdadadadadadada");
           }
+          Zeile = fileStream.readLine();
         } catch (IOException e) {
           System.out.println("Datei kann nicht gelesen werden.");
           e.printStackTrace();
         }
       } else {
         System.out.println("Datei wurde nicht gefunden.");
-      }
+      }   
     }
   }
 
