@@ -3,64 +3,21 @@ package de.hgu.gsehen.gui.view;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-
+import de.hgu.gsehen.model.Log;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
+import javafx.scene.Parent;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-
-
 
 
 public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   private Gsehen gsehenInstance;
   private BorderPane pane;
-
-  // Path is hard coded
-  static String Path = "C:\\Users\\jganin\\GsehenIrrigationManager.log"; 
-  static FileReader fileReader; 
-  static BufferedReader fileStream; 
-  static String Zeile; 
- 
-  /**
-   * Read logfile.
-   * @return 
-   * 
-   */
-  public String logreader() {
-
-    File file = new File(Path); {
-      if (file.exists()) {
-        try {
-          fileReader = new FileReader(file);
-        } catch (FileNotFoundException e) {
-          System.out.println("Datei könnte nicht geöffnet werden.");
-          e.printStackTrace(); 
-          System.exit(0);
-        }
-        fileStream = new BufferedReader(fileReader);
-        try {
-          Zeile = fileStream.readLine();
-          while (Zeile != null) {
-            System.out.println(Zeile);
-            Zeile = fileStream.readLine();
-            return Zeile;
-          }
-        } catch (IOException e) {
-          System.out.println("Datei kann nicht gelesen werden.");
-          e.printStackTrace();
-        }
-      } else {
-        System.out.println("Datei wurde nicht gefunden.");
-      }
-    }
-    return null;
-  }
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -77,32 +34,49 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
     this.pane = pane; 
   }
 
+  
   @Override
 public void handle(FarmDataChanged event) {
 
     pane.setVisible(true);
-    TableView table = new TableView();
-    pane.setTop(table);
-    table.setMinHeight(pane.getHeight());
-    addColumn(table);
+    createContent();
+  }
+
+  /**
+   * TODO.
+   * @return
+   */
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+public Parent createContent() {
+    final ObservableList<Log> data = FXCollections.observableArrayList(new Log());
     
+    TableColumn dateCol = new TableColumn("Datum");
+    dateCol.setSortable(false);
+    dateCol.setCellValueFactory(new PropertyValueFactory("datum"));
+    TableColumn timeCol = new TableColumn("Zeit");
+    timeCol.setSortable(false);
+    timeCol.setCellValueFactory(new PropertyValueFactory("zeit"));
+    TableColumn levelCol = new TableColumn("Level");
+    levelCol.setSortable(false);
+    levelCol.setCellValueFactory(new PropertyValueFactory("level"));
+    TableColumn massageCol = new TableColumn("Nachricht");
+    massageCol.setSortable(false);
+    massageCol.setCellValueFactory(new PropertyValueFactory("nachricht"));
+    TableView tableView = new TableView();
+    tableView.getColumns().addAll(dateCol, timeCol, levelCol, massageCol);
+    tableView.setItems(data);
+
+    EventHandler<? super MouseEvent> handler = event -> {
+      System.out.println("Column clicked " + (event.getTarget() + " || " 
+          + event.getPickResult().getIntersectedNode()));   
+    };
+
+    tableView.addEventHandler(MouseEvent.MOUSE_CLICKED, handler);
+
+    pane.setTop(tableView);
+    tableView.setMinHeight(pane.getHeight());
+
+    return tableView;
+  
   }
-
-
-  private void addColumn(TableView table) {
-
-    TableColumn dateCol = new TableColumn<>("Datum");
-    TableColumn timeCol = new TableColumn<>("Zeit");
-    TableColumn levelCol = new TableColumn<>("Level");
-    TableColumn massageCol = new TableColumn<>("Nachricht");
-
-    table.getColumns().addAll(dateCol, timeCol, levelCol, massageCol);
-    dateCol.setMinWidth(130);
-    timeCol.setMinWidth(130);
-    levelCol.setMinWidth(75);
-    massageCol.setMinWidth(500);
-
-  }
-
-
 }
