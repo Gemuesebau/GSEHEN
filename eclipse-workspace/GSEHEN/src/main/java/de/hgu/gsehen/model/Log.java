@@ -20,7 +20,7 @@ public class Log {
   /**
    * Read the Log.
    */
-  public Log() {
+  public Log() { 
     String[] parts = null;
     File file = new File(Path);
     {

@@ -41,7 +41,7 @@ public void handle(FarmDataChanged event) {
     pane.setVisible(true);
     createContent();
   }
-
+ 
   /**
    * TODO.
    * @return
