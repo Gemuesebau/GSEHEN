@@ -15,7 +15,9 @@ public class Log {
   static String Path = "C:\\Users\\jganin\\GsehenIrrigationManager.log";
   static FileReader fileReader;
   static BufferedReader fileStream;
-  static String Zeile;
+  public static String Zeile;
+  public static int counter;
+  public String[] test;
 
   /**
    * Read the Log.
@@ -28,7 +30,7 @@ public class Log {
         try {
           fileReader = new FileReader(file);
         } catch (FileNotFoundException e) {
-          System.out.println("Datei könnte nicht geöffnet werden.");
+          // System.out.println("Datei kÃ¶nnte nicht geÃ¶ffnet werden.");
           e.printStackTrace();
           System.exit(0);
         }
@@ -42,16 +44,18 @@ public class Log {
             level = parts[2];
             nachricht = parts[3];
             Zeile = fileStream.readLine();
+            counter++;
           }
           Zeile = fileStream.readLine();
         } catch (IOException e) {
-          System.out.println("Datei kann nicht gelesen werden.");
+          //System.out.println("Datei kann nicht gelesen werden.");
           e.printStackTrace();
         }
       } else {
-        System.out.println("Datei wurde nicht gefunden.");
+       // System.out.println("Datei wurde nicht gefunden.");
       }   
     }
+
   }
 
 
