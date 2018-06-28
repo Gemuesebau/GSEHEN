@@ -19,7 +19,8 @@ public class Plot extends Drawable {
   private Boolean calculationPaused;
   private Crop crop;
   private Date cropStart; 
-  private Date cropEnd; 
+  private Date cropEnd;
+  private Boolean isActive;
 
   public Plot() {
     super();
@@ -155,6 +156,14 @@ public class Plot extends Drawable {
 
   public void setCropEnd(Date cropEnd) {
     this.cropEnd = cropEnd;
+  }
+  
+  public Boolean getIsActive() {
+    return isActive;
+  }
+
+  public void setIsActive(Boolean isActive) {
+    this.isActive = isActive;
   }
 
   public void visualize(){}
