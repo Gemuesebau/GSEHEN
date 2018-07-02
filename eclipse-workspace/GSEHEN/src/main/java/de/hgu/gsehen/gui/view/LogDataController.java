@@ -19,6 +19,7 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   private Gsehen gsehenInstance;
   private BorderPane pane;
 
+
   {
     gsehenInstance = Gsehen.getInstance();
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
@@ -46,29 +47,34 @@ public void handle(FarmDataChanged event) {
    * TODO.
    * @return
    */
-  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @SuppressWarnings({ "unchecked", "rawtypes" })
 public Parent createContent() {
-    final ObservableList<Log> data = FXCollections.observableArrayList(new Log());
+
+    ObservableList<Log> data = FXCollections.observableArrayList();
+
+    Log log = new Log(Log.datumliste, Log.zeitliste, Log.levelliste, Log.nachrichtliste);
+    data.add(log);
     
     TableColumn dateCol = new TableColumn("Datum");
     dateCol.setSortable(false);
-    dateCol.setCellValueFactory(new PropertyValueFactory("datum"));
+    dateCol.setCellValueFactory(new PropertyValueFactory<Log, String>("datum"));
     TableColumn timeCol = new TableColumn("Zeit");
     timeCol.setSortable(false);
-    timeCol.setCellValueFactory(new PropertyValueFactory("zeit"));
+    timeCol.setCellValueFactory(new PropertyValueFactory<Log, String>("zeit"));
     TableColumn levelCol = new TableColumn("Level");
     levelCol.setSortable(false);
-    levelCol.setCellValueFactory(new PropertyValueFactory("level"));
+    levelCol.setCellValueFactory(new PropertyValueFactory<Log, String>("level"));
     TableColumn massageCol = new TableColumn("Nachricht");
     massageCol.setSortable(false);
-    massageCol.setCellValueFactory(new PropertyValueFactory("nachricht"));
+    massageCol.setCellValueFactory(new PropertyValueFactory<Log, String>("nachricht"));
     TableView tableView = new TableView();
     tableView.getColumns().addAll(dateCol, timeCol, levelCol, massageCol);
-    tableView.setItems(data);
+    tableView.getItems().setAll(data);
+
+
 
     EventHandler<? super MouseEvent> handler = event -> {
-      System.out.println("Column clicked " + (event.getTarget() + " || " 
-          + event.getPickResult().getIntersectedNode()));   
+      
     };
 
     tableView.addEventHandler(MouseEvent.MOUSE_CLICKED, handler);
