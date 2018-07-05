@@ -21,19 +21,19 @@ public class LogEntry {
     this.massage = massage;
   }
 
-  public String getDatum() {
+  public String getDate() {
     return date;
   }
 
-  public void setDatum(String date) {
+  public void setDate(String date) {
     this.date = date;
   }
 
-  public String getZeit() {
+  public String getTime() {
     return time;
   }
 
-  public void setZeit(String time) {
+  public void setTime(String time) {
     this.time = time;
   }
 
@@ -45,11 +45,11 @@ public class LogEntry {
     this.level = level;
   }
 
-  public String getNachricht() {
+  public String getMassage() {
     return massage;
   }
 
-  public void setNachricht(String nachricht) {
-    this.massage = nachricht;
+  public void setMassage(String massage) {
+    this.massage = massage;
   }
 }
