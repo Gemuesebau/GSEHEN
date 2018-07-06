@@ -1,4 +1,3 @@
-
 package de.hgu.gsehen.gui.view;
 
 import de.hgu.gsehen.Gsehen;
@@ -13,24 +12,43 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.scene.Group;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.stage.Stage;
+
 
 public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private Gsehen gsehenInstance;
   private BorderPane pane;
   private ObservableList<LogEntry> data;
+  private MenuBar datePickerMenuBar = null;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -78,7 +96,9 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
 
   /**
    * Read Log.
-   * @param path from the log file.
+   * 
+   * @param path
+   *          from the log file.
    * @return
    */
   protected ArrayList<LogEntry> readLog(String path) {
@@ -114,7 +134,7 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   }
 
   /**
-   * generate TableView and TableColumns also fill TableCells.
+   * Generate TableView and TableColumns also fill TableCells.
    * 
    * @return
    */
@@ -142,15 +162,102 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
     tableView.setItems(data);
 
     EventHandler<? super MouseEvent> handler = event -> {
-
     };
 
     tableView.addEventHandler(MouseEvent.MOUSE_CLICKED, handler);
 
+    tableView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent mouseEvent) {
+        if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+          if (mouseEvent.getClickCount() == 2) {
+            popupfilter();
+          }
+
+        }
+      }
+
+    });
     pane.setTop(tableView);
     tableView.setMinHeight(pane.getHeight());
-
     return tableView;
+  }
+
+  /**
+   * Popup-Window for Filtering the entries.
+   */
+  public void popupfilter() {
+
+    Stage stage = new Stage();
+    stage.setTitle("Filteroptionen");
+
+    // DatePicker and Label for Filter Date
+    DatePicker startdatepicker = null;
+    Label startLabel = new Label("Von: ");
+    startLabel.setFont(Font.font("Arial", 14));
+    startdatepicker = createDatePicker(startdatepicker);
+
+    HBox startBox = new HBox();
+    startBox.getChildren().addAll(startLabel, startdatepicker);
+
+    DatePicker enddatepicker = null;
+    Label endLabel = new Label("Bis:  ");
+    endLabel.setFont(Font.font("Arial", 14));
+    enddatepicker = createDatePicker(enddatepicker);
+
+    HBox endBox = new HBox();
+    endBox.getChildren().addAll(endLabel, enddatepicker);
+
+    VBox upBox = new VBox(20);
+    upBox.setPadding(new Insets(10, 10, 10, 10));
+    upBox.setSpacing(10);
+    upBox.getChildren().addAll(startBox, endBox);
+
+    Group rootGroup = new Group();
+    Scene scene = new Scene(rootGroup, 400, 600);
+    rootGroup.getChildren().addAll(upBox);
+    stage.setScene(scene);
+    stage.centerOnScreen();
+    stage.show();
+  }
+
+  /**
+   * Datepicker.
+   * 
+   * @param datePicker
+   *          take Date
+   * @return
+   */
+  public DatePicker createDatePicker(DatePicker datePicker) {
+
+    LocalDate value = null;
+    if (datePicker != null) {
+      value = datePicker.getValue();
+    }
+    DatePicker picker = new DatePicker();
+    // Listen for DatePicker actions
+    picker.setOnAction((ActionEvent t) -> {
+      LocalDate isoDate = picker.getValue();
+      if ((isoDate != null) && (!isoDate.equals(LocalDate.now()))) {
+        for (Menu menu : datePickerMenuBar.getMenus()) {
+          if (menu.getText().equals("Options for Locale")) {
+            for (MenuItem menuItem : menu.getItems()) {
+              if (menuItem.getText().equals("Set date to today")) {
+                if ((menuItem instanceof CheckMenuItem)
+                    && ((CheckMenuItem) menuItem).isSelected()) {
+                  ((CheckMenuItem) menuItem).setSelected(false);
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+    // hbox.getChildren().add(picker);
+    if (value != null) {
+      picker.setValue(value);
+    }
+    return picker;
   }
 
   /**
