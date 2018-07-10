@@ -56,8 +56,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
   private Gsehen gsehenInstance;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener
-      <? extends GsehenEvent>>> eventListeners = new HashMap<>();
+  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>> eventListeners =
+      new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -251,8 +251,11 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 attributeLabel3 = new Text("Bodenprofil: ");
                 attributeLabel3.setFont(Font.font("Arial", 12));
-                // attribute3 = new Text(field.getSoilProfile().toString());
-                attribute3 = new Text("~Platzhalter~");
+                if (field.getSoilProfile() != null) {
+                  attribute3 = new Text(field.getSoilProfile().toString());
+                } else {
+                  attribute3 = new Text("");
+                }
                 attribute3.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 attribute3Box = new HBox();
                 attribute3Box.getChildren().addAll(attributeLabel3, attribute3);
@@ -272,16 +275,22 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 attributeLabel2 = new Text("Max. durchwurzelbare Zone: ");
                 attributeLabel2.setFont(Font.font("Arial", 12));
-                // attribute2 = new Text(Double.toString(plot.getRootingZone()));
-                attribute2 = new Text("~Platzhalter~");
+                if (plot.getRootingZone() != null) {
+                  attribute2 = new Text(Double.toString(plot.getRootingZone()));
+                } else {
+                  attribute2 = new Text("0.0");
+                }
                 attribute2.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 attribute2Box = new HBox();
                 attribute2Box.getChildren().addAll(attributeLabel2, attribute2);
 
                 attributeLabel3 = new Text("Kultur: ");
                 attributeLabel3.setFont(Font.font("Arial", 12));
-                // attribute3 = new Text(plot.getCrop().getName());
-                attribute3 = new Text("~Platzhalter~");
+                if (plot.getCrop() != null) {
+                  attribute3 = new Text(plot.getCrop().getName());
+                } else {
+                  attribute3 = new Text("");
+                }
                 attribute3.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 attribute3Box = new HBox();
                 attribute3Box.getChildren().addAll(attributeLabel3, attribute3);
@@ -290,24 +299,36 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 Text soilStartLabel = new Text("Start der Wasserbilanzierung: ");
                 soilStartLabel.setFont(Font.font("Arial", 12));
-                // Text action = new Text(plot.getSoilStartDate().toString());
-                Text soilStart = new Text("~Platzhalter~");
+                Text soilStart;
+                if (plot.getSoilStartDate() != null) {
+                  soilStart = new Text(plot.getSoilStartDate().toString());
+                } else {
+                  soilStart = new Text("");
+                }
                 soilStart.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 HBox soilStartBox = new HBox();
                 soilStartBox.getChildren().addAll(soilStartLabel, soilStart);
 
                 Text soilValueLabel = new Text("Wert der Wasserbilanzierung: ");
                 soilValueLabel.setFont(Font.font("Arial", 12));
-                // Text action = new Text(plot.getSoilStartValue().toString());
-                Text soilValue = new Text("~Platzhalter~");
+                Text soilValue;
+                if (plot.getSoilStartValue() != null) {
+                  soilValue = new Text(plot.getSoilStartValue().toString());
+                } else {
+                  soilValue = new Text("");
+                }
                 soilValue.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 HBox soilValueBox = new HBox();
                 soilValueBox.getChildren().addAll(soilValueLabel, soilValue);
 
                 Text actionLabel = new Text("Bewässerungsempfehlung: ");
                 actionLabel.setFont(Font.font("Arial", 14));
-                // Text action = new Text(plot.getRecommendedAction());
-                Text action = new Text("~Platzhalter~");
+                Text action;
+                if (plot.getSoilStartValue() != null) {
+                  action = new Text(plot.getRecommendedAction());
+                } else {
+                  action = new Text("");
+                }
                 action.setFont(Font.font("Arial", FontWeight.BOLD, 14));
                 HBox actionBox = new HBox();
                 actionBox.getChildren().addAll(actionLabel, action);

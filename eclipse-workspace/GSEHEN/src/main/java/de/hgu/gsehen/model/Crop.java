@@ -26,6 +26,14 @@ public class Crop {
   private Integer rootingZone4;
   private String description;
 
+  public Crop() {
+    super();
+  }
+
+  public Crop(String name) {
+    this.name = name;
+  }
+
   public String getName() {
     return name;
   }

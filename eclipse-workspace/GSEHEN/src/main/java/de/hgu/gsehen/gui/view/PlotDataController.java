@@ -5,13 +5,12 @@ import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Drawable;
-import de.hgu.gsehen.model.Farm;
-import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
-
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.logging.Logger;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -19,14 +18,13 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.BorderPane;
@@ -36,26 +34,29 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
   private final Timeline timeline = new Timeline();
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
+  private TreeItem<Drawable> selectedItem;
+  private Plot plot;
+
   private Gsehen gsehenInstance;
   private BorderPane pane;
   private TreeTableView<Drawable> treeTableView;
 
   private Text nameLabel;
-  private Text locationLabel;
-  private Text cropStartLabel;
-  private Text cropEndLabel;
+  private Text areaLabel;
+  private Text soilStartLabel;
+  private Text soilStartValueLabel;
 
-  private Text name;
-  private Text location;
-  private DatePicker cropStart;
-  private DatePicker cropEnd;
-  private MenuBar datePickerMenuBar;
+  private TextField name;
+  private Text area;
+  private DatePicker soilStart;
+  private Text soilStartValue;
 
   private Text waterBalanceLabel;
 
@@ -87,21 +88,20 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // TOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     nameLabel = new Text("Name: ");
     nameLabel.setFont(Font.font("Arial", 14));
-    name = new Text("");
-    name.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+    name = new TextField("");
 
     HBox nameBox = new HBox();
     // nameBox.setStyle("-fx-background-color: #d39494;"); // Nur zur Übersicht!
     nameBox.getChildren().addAll(nameLabel, name);
 
-    locationLabel = new Text("Location: ");
-    locationLabel.setFont(Font.font("Arial", 14));
-    location = new Text("");
-    location.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+    areaLabel = new Text("m²: ");
+    areaLabel.setFont(Font.font("Arial", 14));
+    area = new Text("");
+    area.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
     HBox locationBox = new HBox();
     // locationBox.setStyle("-fx-background-color: #acd293;"); // Nur zur Übersicht!
-    locationBox.getChildren().addAll(locationLabel, location);
+    locationBox.getChildren().addAll(areaLabel, area);
 
     VBox topBox = new VBox(25);
     // topBox.setStyle("-fx-background-color: #f4ec46;"); // Nur zur Übersicht!
@@ -114,61 +114,105 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     Text crop = new Text("Kultur: ");
     crop.setFont(Font.font("Arial", 14));
     // Dummy-Liste
-    ChoiceBox<String> cropChoiceBox = new ChoiceBox<String>();
-    cropChoiceBox.getItems().addAll("Apfel", "Birne", "Löwenzahn", "Tomate", "Zwiebel");
+    ChoiceBox<Crop> cropChoiceBox = new ChoiceBox<Crop>();
+    cropChoiceBox.getItems().addAll(new Crop("Apfel"), new Crop("Birne"), new Crop("Löwenzahn"),
+        new Crop("Tomate"), new Crop("Zwiebel"));
+    cropChoiceBox.setConverter(new StringConverter<Crop>() {
 
-    cropChoiceBox.valueProperty().addListener(new ChangeListener<String>() {
       @Override
-      public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-        Drawable obj = null;
-        Crop crop = new Crop();
-        crop.setName(cropChoiceBox.getValue().toString());
+      public String toString(Crop object) {
+        return object.getName();
+      }
 
-        for (Farm farm : gsehenInstance.getFarmsList()) {
-          for (Field field : farm.getFields()) {
-            for (Plot plot : field.getPlots()) {
-              obj = plot;
-              for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells()
-                  .size(); i++) {
-                if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null
-                    && plot.getName().equals(treeTableView.getSelectionModel().getSelectedCells()
-                        .get(i).getTreeItem().getValue().getName())) {
-                  plot.setCrop(crop);
-                  LOGGER.info("'" + crop.getName() + "' was set as crop in" + obj);
-                }
-              }
-            }
-          }
-        }
-        gsehenInstance.sendFarmDataChanged(obj, null);
+      @Override
+      public Crop fromString(String string) {
+        return cropChoiceBox.getItems().stream().filter(ap -> ap.getName().equals(string))
+            .findFirst().orElse(null);
       }
     });
+
+    // cropChoiceBox.valueProperty().addListener(new ChangeListener<String>() {
+    // @Override
+    // public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
+    // Drawable obj = null;
+    // Crop crop = new Crop();
+    // crop.setName(cropChoiceBox.getValue().toString());
+    //
+    // for (Farm farm : gsehenInstance.getFarmsList()) {
+    // for (Field field : farm.getFields()) {
+    // for (Plot plot : field.getPlots()) {
+    // obj = plot;
+    // Crop dummyCrop = new Crop();
+    // dummyCrop.setName("");
+    // plot.setCrop(dummyCrop);
+    // for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells()
+    // .size(); i++) {
+    // if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null
+    // && plot.getName().equals(treeTableView.getSelectionModel().getSelectedCells()
+    // .get(i).getTreeItem().getValue().getName())) {
+    // plot.setCrop(crop);
+    // LOGGER.info("'" + crop.getName() + "' was set as crop in" + obj);
+    // }
+    // }
+    // }
+    // }
+    // }
+    // gsehenInstance.sendFarmDataChanged(obj, null);
+    // }
+    // });
 
     HBox cropBox = new HBox();
     // cropBox.setStyle("-fx-background-color: #d39494;"); // Nur zur Übersicht!
     cropBox.getChildren().addAll(crop, cropChoiceBox);
 
-    cropStartLabel = new Text("Start am: ");
-    cropStartLabel.setFont(Font.font("Arial", 14));
-    cropStart = createDatePicker(cropStart);
+    soilStartLabel = new Text("Start der Wasserbilanz: ");
+    soilStartLabel.setFont(Font.font("Arial", 14));
+    soilStart = new DatePicker();
+    soilStart.setShowWeekNumbers(true);
 
-    HBox cropStartBox = new HBox();
+    // Converter
+    StringConverter<LocalDate> converter = new StringConverter<LocalDate>() {
+      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+      @Override
+      public String toString(LocalDate date) {
+        if (date != null) {
+          return dateFormatter.format(date);
+        } else {
+          return "";
+        }
+      }
+
+      @Override
+      public LocalDate fromString(String string) {
+        if (string != null && !string.isEmpty()) {
+          return LocalDate.parse(string, dateFormatter);
+        } else {
+          return null;
+        }
+      }
+    };
+    soilStart.setConverter(converter);
+    soilStart.setPromptText("dd-MM-yyyy");
+
+    HBox soilStartBox = new HBox();
     // cropStartBox.setStyle("-fx-background-color: #acd293;"); // Nur zur
     // Übersicht!
-    cropStartBox.getChildren().addAll(cropStartLabel, cropStart);
+    soilStartBox.getChildren().addAll(soilStartLabel, soilStart);
 
-    cropEndLabel = new Text("Ende am: ");
-    cropEndLabel.setFont(Font.font("Arial", 14));
-    cropEnd = createDatePicker(cropEnd);
+    soilStartValueLabel = new Text("Startwert der Wasserbilanz: ");
+    soilStartValueLabel.setFont(Font.font("Arial", 14));
+    soilStartValue = new Text("");
+    soilStartValue.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
-    HBox cropEndBox = new HBox();
+    HBox soilStartValueBox = new HBox();
     // cropEndBox.setStyle("-fx-background-color: #466bf4;"); // Nur zur Übersicht!
-    cropEndBox.getChildren().addAll(cropEndLabel, cropEnd);
+    soilStartValueBox.getChildren().addAll(soilStartValueLabel, soilStartValue);
 
     VBox leftBox = new VBox(50);
     // leftBox.setStyle("-fx-background-color: #f4ba46;"); // Nur zur Übersicht!
     leftBox.setPadding(new Insets(20, 20, 20, 20));
-    leftBox.getChildren().addAll(cropBox, cropStartBox, cropEndBox);
+    leftBox.getChildren().addAll(cropBox, soilStartBox, soilStartValueBox);
     pane.setLeft(leftBox);
     // LEFT END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -243,6 +287,25 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     play();
     // CENTER END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    Button save = new Button("Speichern");
+    save.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent e) {
+        // TODO
+        // Name
+        plot.setName(name.getText());
+        // Crop
+        plot.setCrop(cropChoiceBox.getValue());
+        // Date (SoilStart)
+        LocalDate localDate = soilStart.getValue();
+        Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        plot.setSoilStartDate(date);
+        
+        gsehenInstance.sendFarmDataChanged(plot, null);
+      }
+    });
+    pane.setBottom(save);
+
     treeTableView =
         (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
     treeTableView.getSelectionModel().selectedItemProperty()
@@ -251,13 +314,31 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
             for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
               if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
-                TreeItem<Drawable> selectedItem =
+                selectedItem =
                     treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
                 if (selectedItem != null
                     && selectedItem.getValue().getClass().getSimpleName().equals("Plot")) {
+                  // TODO
+
                   pane.setVisible(true);
-                  name.setText(selectedItem.getValue().getName());
-                  cropChoiceBox.getSelectionModel().select(cropChoiceBox.getValue());
+                  plot = (Plot) selectedItem.getValue();
+
+                  name.setText(plot.getName());
+
+                  area.setText(String.valueOf(plot.getArea()));
+
+                  cropChoiceBox.getSelectionModel().select(plot.getCrop());
+
+                  Date date = plot.getSoilStartDate();
+                  if (date != null) {
+                    LocalDate localDate =
+                        date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    soilStart.setValue(localDate);
+                  } else {
+                    soilStart.setValue(null);
+                  }
+
+                  soilStartValue.setText(String.valueOf(plot.getSoilStartValue()));
 
                   // String geoPolygon = "";
                   // DecimalFormat decimal = new DecimalFormat("#.#####");
@@ -277,37 +358,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             }
           }
         });
-  }
-
-  private DatePicker createDatePicker(DatePicker datePicker) {
-    LocalDate value = null;
-    if (datePicker != null) {
-      value = datePicker.getValue();
-    }
-    DatePicker picker = new DatePicker();
-    // Listen for DatePicker actions
-    picker.setOnAction((ActionEvent t) -> {
-      LocalDate isoDate = picker.getValue();
-      if ((isoDate != null) && (!isoDate.equals(LocalDate.now()))) {
-        for (Menu menu : datePickerMenuBar.getMenus()) {
-          if (menu.getText().equals("Options for Locale")) {
-            for (MenuItem menuItem : menu.getItems()) {
-              if (menuItem.getText().equals("Set date to today")) {
-                if ((menuItem instanceof CheckMenuItem)
-                    && ((CheckMenuItem) menuItem).isSelected()) {
-                  ((CheckMenuItem) menuItem).setSelected(false);
-                }
-              }
-            }
-          }
-        }
-      }
-    });
-    // hbox.getChildren().add(picker);
-    if (value != null) {
-      picker.setValue(value);
-    }
-    return picker;
   }
 
   public void play() {
