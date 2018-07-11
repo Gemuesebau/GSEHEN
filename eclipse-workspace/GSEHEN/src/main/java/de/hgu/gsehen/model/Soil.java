@@ -10,6 +10,10 @@ public class Soil {
   private double availableWaterCapacity;
   private String description;
 
+  public Soil(String name) {
+    this.name = name;
+  }
+
   public String getName() {
     return name;
   }
