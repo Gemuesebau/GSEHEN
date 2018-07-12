@@ -245,7 +245,7 @@ public class Gsehen extends Application {
     final String url = "jdbc:postgresql:"
         + "//hs-geisenheim.cwliowbz3tsc.eu-west-1.rds.amazonaws.com/standard";
     final String user = "GSEHEN_user";
-    final String password = "Yp4NiYiHYfmcHs7Fe2CEmTpLv";
+    final String password = "siehe drive";
     Connection connection = null;
     {
       try {
@@ -256,9 +256,7 @@ public class Gsehen extends Application {
     }
     try (PreparedStatement selectcrop = connection.prepareStatement("SELECT * FROM crop;")) {
       ResultSet rs = executeQuery(selectcrop);
-
-      // Statement stmt = connection.createStatement();
-      // ResultSet rs = stmt.executeQuery("SELECT * FROM crop;");
+      
       while (rs.next()) {
         rs.getString("cName");
         rs.getBoolean("cActive");
