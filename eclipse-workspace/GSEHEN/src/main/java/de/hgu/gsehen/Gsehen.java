@@ -24,6 +24,7 @@ import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.util.Pair;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,12 +68,12 @@ import javax.script.ScriptEngineManager;
  *
  * @author MO, AT, CW
  */
-@SuppressWarnings({"checkstyle:commentsindentation"})
+@SuppressWarnings({ "checkstyle:commentsindentation" })
 public class Gsehen extends Application {
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
-  protected static final ResourceBundle mainBundle =
-      ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
+  protected static final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
+      Locale.GERMAN);
 
   private static final String GSEHEN_H2_LOCAL_DB = "gsehen-h2-local.db";
   private static final String DAYDATA_TABLE = "DAYDATA";
@@ -104,8 +105,8 @@ public class Gsehen extends Application {
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners =
-      new HashMap<>();
+  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>>
+      eventListeners = new HashMap<>();
   private boolean dataChanged;
 
   private static Gsehen instance;
@@ -117,9 +118,10 @@ public class Gsehen extends Application {
   /**
    * Main method.
    *
-   * @param args the command line arguments
+   * @param args
+   *          the command line arguments
    */
-  @SuppressWarnings({"checkstyle:rightcurly"})
+  @SuppressWarnings({ "checkstyle:rightcurly" })
   public static void main(String[] args) {
     System.setProperty("java.util.logging.config.class", "de.hgu.gsehen.logging.Configurator");
     try {
@@ -135,7 +137,7 @@ public class Gsehen extends Application {
    *
    * @see javafx.application.Application#start(javafx.stage.Stage)
    */
-  @SuppressWarnings({"checkstyle:rightcurly"})
+  @SuppressWarnings({ "checkstyle:rightcurly" })
   @Override
   public void start(Stage stage) {
     Parent root;
@@ -162,8 +164,8 @@ public class Gsehen extends Application {
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
     logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
 
-    InputStream input =
-        this.getClass().getResourceAsStream("/de/hgu/gsehen/images/Logo_UniGeisenheim.png");
+    InputStream input = this.getClass()
+        .getResourceAsStream("/de/hgu/gsehen/images/Logo_UniGeisenheim.png");
     Image image = new Image(input);
     ImageView imageView = (ImageView) scene.lookup(IMAGE_VIEW_ID);
     imageView.setImage(image);
@@ -183,18 +185,20 @@ public class Gsehen extends Application {
 
     treeTable = new GsehenTreeTable() {
       @Override
-      public void handle(GsehenViewEvent event) {}
+      public void handle(GsehenViewEvent event) {
+      }
     };
     treeTable.addFarmTreeView(GsehenTreeTable.class);
   }
 
-  @SuppressWarnings({"unused", "checkstyle:rightcurly"})
+  @SuppressWarnings({ "unused", "checkstyle:rightcurly" })
   private void testDatabase(TextArea debugTextArea) {
     Connection con = null;
     try {
       String jdbcUrl = "jdbc:h2:./" + GSEHEN_H2_LOCAL_DB + ";CIPHER=AES";
       con = DriverManager.getConnection(jdbcUrl, "", "OCddpvUe ");
-      // PW: space is important! But this is just a test, must be supplied by user or the like
+      // PW: space is important! But this is just a test, must be supplied by user or
+      // the like
       LOGGER.info("Opened local H2 database at url " + jdbcUrl);
     } catch (SQLException e) {
       throw new RuntimeException(GSEHEN_H2_LOCAL_DB + " couldn't be opened", e);
@@ -204,8 +208,8 @@ public class Gsehen extends Application {
     executeUpdate(con,
         "CREATE TABLE IF NOT EXISTS " + DAYDATA_TABLE + "(id IDENTITY, date DATE, t_min DOUBLE)",
         DAYDATA_TABLE + " couldn't be created");
-    try (PreparedStatement insertDayData =
-        con.prepareStatement("INSERT INTO " + DAYDATA_TABLE + " (date, t_min)" + " VALUES(?, ?)")) {
+    try (PreparedStatement insertDayData = con
+        .prepareStatement("INSERT INTO " + DAYDATA_TABLE + " (date, t_min)" + " VALUES(?, ?)")) {
       executeUpdate(insertDayData, parseYmd("2018-01-21"), 12.1);
       executeUpdate(insertDayData, parseYmd("2018-01-22"), 12.2);
       executeUpdate(insertDayData, parseYmd("2018-01-23"), 12.3);
@@ -213,8 +217,8 @@ public class Gsehen extends Application {
     } catch (SQLException e) {
       throw new RuntimeException(DAYDATA_TABLE + " values couldn't be inserted", e);
     }
-    try (PreparedStatement selectDayData =
-        con.prepareStatement("SELECT * FROM " + DAYDATA_TABLE + " WHERE date > ?")) {
+    try (PreparedStatement selectDayData = con
+        .prepareStatement("SELECT * FROM " + DAYDATA_TABLE + " WHERE date > ?")) {
       ResultSet rs = executeQuery(selectDayData, parseYmd("2018-01-20"));
       while (rs.next()) {
         debugTextArea.appendText("[" + rs.getInt("id") + ", " + rs.getDate("date") + ", "
@@ -230,6 +234,54 @@ public class Gsehen extends Application {
       } catch (SQLException e) {
         throw new RuntimeException("DB connection couldn't be closed", e);
       }
+    }
+  }
+
+  /**
+   * PostgreSQL DB connection.
+   */
+  public static void postgreSql() {
+
+    final String url = "jdbc:postgresql:"
+        + "//hs-geisenheim.cwliowbz3tsc.eu-west-1.rds.amazonaws.com/standard";
+    final String user = "GSEHEN_user";
+    final String password = "Yp4NiYiHYfmcHs7Fe2CEmTpLv";
+    Connection connection = null;
+    {
+      try {
+        connection = DriverManager.getConnection(url, user, password);
+      } catch (SQLException e) {
+        System.out.println(e.getMessage());
+      }
+    }
+    try (PreparedStatement selectcrop = connection.prepareStatement("SELECT * FROM crop;")) {
+      ResultSet rs = executeQuery(selectcrop);
+
+      // Statement stmt = connection.createStatement();
+      // ResultSet rs = stmt.executeQuery("SELECT * FROM crop;");
+      while (rs.next()) {
+        rs.getString("cName");
+        rs.getBoolean("cActive");
+        rs.getDouble("cKC1");
+        rs.getDouble("cKC2");
+        rs.getDouble("cKC3");
+        rs.getDouble("cKC4");
+        rs.getDouble("cPhase1");
+        rs.getDouble("cPhase2");
+        rs.getDouble("cPhase3");
+        rs.getDouble("cPhase4");
+        rs.getString("cBBCH1");
+        rs.getString("cBBCH2");
+        rs.getString("cBBCH3");
+        rs.getString("cBBCH4");
+        rs.getDouble("cRooting_Zone1");
+        rs.getDouble("cRooting_Zone2");
+        rs.getDouble("cRooting_Zone3");
+        rs.getDouble("cRooting_Zone4");
+        rs.getString("cDescription");
+      }
+    } catch (SQLException e) {
+      System.out.println("geht nicht");
     }
   }
 
@@ -272,9 +324,11 @@ public class Gsehen extends Application {
   /**
    * Reads the contents of a given utf-8-encoded resource as one String.
    *
-   * @param resourceName the name of the resource to read
+   * @param resourceName
+   *          the name of the resource to read
    * @return a String containing the given resource's contents
-   * @throws IOException if the resource can't be read (as utf-8)
+   * @throws IOException
+   *           if the resource can't be read (as utf-8)
    */
   public String getUtf8ResourceAsOneString(String resourceName) throws IOException {
     try (BufferedReader buffer = new BufferedReader(getReaderForUtf8(resourceName))) {
@@ -290,9 +344,11 @@ public class Gsehen extends Application {
   /**
    * Notifies the application about a newly added object (farm, field, ..).
    *
-   * @param object the newly added object
-   * @param skipClass a listener class to skip when notifying; typically the class that originally
-   *        created the new object
+   * @param object
+   *          the newly added object
+   * @param skipClass
+   *          a listener class to skip when notifying; typically the class that originally created
+   *          the new object
    */
   public void drawableAdded(Drawable object,
       Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
@@ -345,8 +401,10 @@ public class Gsehen extends Application {
    * Sends a "FarmDataChanged" event to all listeners registered for that kind of event, except the
    * listeners that belong to the given "skipClass".
    *
-   * @param object the object that initially caused the event to be sent, or null
-   * @param skipClass the event listener class to skip when iterating the listeners, or null
+   * @param object
+   *          the object that initially caused the event to be sent, or null
+   * @param skipClass
+   *          the event listener class to skip when iterating the listeners, or null
    */
   public void sendFarmDataChanged(Drawable object,
       Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
@@ -360,8 +418,10 @@ public class Gsehen extends Application {
    * Sends a "DrawableSelected" event to all listeners registered for that kind of event, except the
    * listeners that belong to the given "skipClass".
    *
-   * @param subject the "Drawable" that initially caused the event to be sent
-   * @param skipClass the event listener class to skip when iterating the listeners, or null
+   * @param subject
+   *          the "Drawable" that initially caused the event to be sent
+   * @param skipClass
+   *          the event listener class to skip when iterating the listeners, or null
    */
   public void sendDrawableSelected(Drawable subject,
       Class<? extends GsehenEventListener<DrawableSelected>> skipClass) {
@@ -373,9 +433,12 @@ public class Gsehen extends Application {
   /**
    * Delegate method for sending prepared "view" events.
    *
-   * @param drawable the "Drawable" that is subject of the event, or null
-   * @param skipClass the event listener class to skip when iterating the listeners, or null
-   * @param event the prepared event, lacking viewport data, which is determined here
+   * @param drawable
+   *          the "Drawable" that is subject of the event, or null
+   * @param skipClass
+   *          the event listener class to skip when iterating the listeners, or null
+   * @param event
+   *          the prepared event, lacking viewport data, which is determined here
    */
   public void sendViewEvent(Drawable drawable,
       Class<? extends GsehenEventListener<? extends GsehenViewEvent>> skipClass,
@@ -393,10 +456,12 @@ public class Gsehen extends Application {
   /**
    * Notifies listeners registered for the (type of) event supplied by the given supplier.
    *
-   * @param event the actual event to be sent to the registered listeners
-   * @param skipClass a listener class that shall be skipped when iterating the listeners, or null
+   * @param event
+   *          the actual event to be sent to the registered listeners
+   * @param skipClass
+   *          a listener class that shall be skipped when iterating the listeners, or null
    */
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings({ "unchecked" })
   private <T extends GsehenEvent> void notifyEventListeners(T event,
       Class<? extends GsehenEventListener<? extends T>> skipClass) {
     List<GsehenEventListener<?>> farmDataChgListeners = eventListeners.get(event.getClass());
@@ -411,12 +476,12 @@ public class Gsehen extends Application {
     }
   }
 
-  @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
+  @SuppressWarnings({ "checkstyle:abbreviationaswordinname" })
   public String readUTF8FileAsOneString(String dataFileName) throws IOException {
     return new String(Files.readAllBytes(Paths.get(dataFileName)), "utf-8");
   }
 
-  @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
+  @SuppressWarnings({ "checkstyle:abbreviationaswordinname" })
   public void writeStringAsUTF8File(String data, String dataFileName) throws IOException {
     Files.write(Paths.get(dataFileName), data.getBytes("utf-8"));
   }
@@ -476,11 +541,12 @@ public class Gsehen extends Application {
   /**
    * Prompts for JavaScript to be run in a WebView.
    *
-   * @param controller the controller that belongs to the target web view
+   * @param controller
+   *          the controller that belongs to the target web view
    */
   public static void jsPrompt(FarmDataController controller) {
-    final String contentTextKey =
-        "gui.dialog.developer.js.prompt." + controller.getClass().getSimpleName().toLowerCase();
+    final String contentTextKey = "gui.dialog.developer.js.prompt."
+        + controller.getClass().getSimpleName().toLowerCase();
     String javaScript = textInputDialog(contentTextKey,
         instance.getBundle().getString("gui.dialog.developer.js.prompt.header"));
     Object result;
