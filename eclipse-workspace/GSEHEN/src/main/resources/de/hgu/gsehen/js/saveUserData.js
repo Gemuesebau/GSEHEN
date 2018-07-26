@@ -9,7 +9,12 @@ for each (var javaFarm in farms) {
   jsonFarm.fields = [];
   for each (var javaField in javaFarm.getFields()) {
     LOGGER.info("  Processing field '" + javaField.getName() + "'");
-    var jsonField = { name: javaField.getName(), polygon: buildJavaScriptPolygon(javaField.getPolygon(), "  ") };
+    var jsonField = {
+      name: javaField.getName(),
+      area: javaField.getArea(),
+      rootingZone: javaField.getRootingZone(),
+      polygon: buildJavaScriptPolygon(javaField.getPolygon(), "  ")
+    };
     jsonField.plots = [];
     for each (var javaPlot in javaField.getPlots()) {
       LOGGER.info("    Processing plot '" + javaPlot.getName() + "'");

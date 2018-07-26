@@ -47,6 +47,8 @@ try {
       LOGGER.info("  Found field '" + jsonField.name + "'");
       var javaField = new Field();
       javaField.setName(jsonField.name);
+      javaField.setArea(jsonField.area);
+      javaField.setRootingZone(jsonField.rootingZone);
       javaField.setPolygon(updateBoundsAndBuildJavaPolygon(bounds, jsonField.polygon, "  "));
       var plotList = new ArrayList();
       for each (var jsonPlot in jsonField.plots) {
