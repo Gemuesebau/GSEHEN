@@ -1,7 +1,5 @@
 package de.hgu.gsehen.model;
 
-import java.io.Serializable;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -13,6 +11,10 @@ public class test{
   private String name;
 
   
+
+  public test(String name) {
+   this.name= name;
+  }
 
   public String getName() {
     return name;

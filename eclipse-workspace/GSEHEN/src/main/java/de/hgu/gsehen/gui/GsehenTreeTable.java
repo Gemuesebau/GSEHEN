@@ -10,7 +10,6 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
-import de.hgu.gsehen.util.HibernateUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

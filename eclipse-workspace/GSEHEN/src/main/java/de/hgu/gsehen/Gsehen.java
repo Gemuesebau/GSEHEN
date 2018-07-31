@@ -10,6 +10,7 @@ import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.GsehenViewEvent;
 import de.hgu.gsehen.gui.GeoPoint;
+import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
 import de.hgu.gsehen.gui.view.FarmDataController;
@@ -22,6 +23,7 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.test;
 import de.hgu.gsehen.util.Pair;
 import org.hibernate.*;
@@ -124,7 +126,7 @@ public class Gsehen extends Application {
   private MainController mainController;
 
   private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
-  private boolean dataChanged;
+  private boolean dataChanged;  
 
   private static Gsehen instance;
 
@@ -150,7 +152,7 @@ public class Gsehen extends Application {
     }
 
     h2db();
-    gettest();
+    test();
     Application.launch(args);
   }
 
@@ -265,6 +267,10 @@ public class Gsehen extends Application {
             + "BBCH1 VARCHAR,BBCH2 VARCHAR,BBCH3 VARCHAR,BBCH4 VARCHAR,ROOTINGZONE1 INTEGER,"
             + "ROOTINGZONE2 INTEGER,ROOTINGZONE3 INTEGER,ROOTINGZONE4 INTEGER,DESCRIPTION VARCHAR)",
         CROP_TABLE + " couldn't be created");
+    executeUpdate(con,
+        "CREATE TABLE IF NOT EXISTS TEST"
+            + "(NAME VARCHAR)",
+        " couldn't be created");
 
     if (con != null) {
       try {
@@ -322,7 +328,29 @@ public class Gsehen extends Application {
       System.out.println("geht nicht");
     }
   }
+  
+  public static void test() {
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
+    EntityManager em = emf.createEntityManager();
 
+    EntityTransaction tx = em.getTransaction();
+    tx.begin();
+    try {
+
+        em.persist(new test("test"));
+
+        tx.commit();
+    } catch (Exception e) {
+        tx.rollback();
+    } finally {
+        em.close();
+        emf.close();
+    }
+
+  System.out.println(em.getTransaction());
+   
+}
+  
   /**
    * Loads the user-created data (farms, fields, plots, ..)
    */
@@ -416,31 +444,9 @@ public class Gsehen extends Application {
       newPlotsField = new Field(newPlotsFieldName, null);
       farm.getFields().add(newPlotsField);
     }
-    System.out.println(newPlotsField);
     return newPlotsField;
   }
   
-private static void gettest() {
-
-  
-  SessionFactory sessionFactory;
-
-  sessionFactory = new Configuration().configure("de/hgu/gsehen/util/hibernate.cfg.xml").buildSessionFactory();
-  Session session = sessionFactory.openSession();
-  test t1 = new test();
-  t1.setName("name");
-  
-  session.beginTransaction();
-  session.save(t1);
-  
-  session.getTransaction().commit();
-  session.close();
-  sessionFactory.close();
-
-  
- 
-  
-}
   private Farm getNewFieldsFarm() {
     String newFieldsFarmName = mainBundle.getString("gui.control.objectTree.newFieldsFarmName");
     Farm newFieldsFarm = null;
