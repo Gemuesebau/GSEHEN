@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/persistence 
+                      http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+  version="2.0" xmlns="http://java.sun.com/xml/ns/persistence">
+  
+  <persistence-unit name="user-unit" transaction-type="RESOURCE_LOCAL">
+ <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+    <class>de.hgu.gsehen.model.Plot</class>
+    <class>de.hgu.gsehen.model.Crop</class>
+    <class>de.hgu.gsehen.model.Farm</class>
+    <class>de.hgu.gsehen.model.Field</class>
+    <class>de.hgu.gsehen.model.Soil</class>
+    <class>de.hgu.gsehen.model.SoilProfile</class>
+    <class>de.hgu.gsehen.model.SoilProfileDepth</class>
+    <class>de.hgu.gsehen.model.test</class>
+    <properties>
+    <property name="hibernate.archive.autodetection" value="class" />
+      <property name="hibernate.connection.driver_class" value="org.h2.Driver" />
+      <property name="javax.persistence.jdbc.url"    value="jdbc:h2:./gsehen-h2-local.db" />
+      <property name="javax.persistence.jdbc.user" value="" />
+      <property name="javax.persistence.jdbc.password" value="OCddpvUe " />
+      <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+      <property name="hibernate.hbm2ddl.auto" value="create" />
+      <property name="show_sql" value="true"/>
+      <property name="hibernate.temp.use_jdbc_metadata_defaults" value="true"/>
+    </properties>
+  </persistence-unit>
+</persistence>

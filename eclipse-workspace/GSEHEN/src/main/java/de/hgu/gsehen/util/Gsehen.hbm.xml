@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+  "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="de.hgu.gsehen.model">
+  <class name="Crop" table="CROP">
+    <id name="name" column="NAME" />
+    <property name="active" column="ACTIVE" />
+    <property name="kc1" column="KC1" />
+    <property name="kc2" column="KC2" />
+    <property name="kc3" column="KC3" />
+    <property name="kc4" column="KC4" />
+    <property name="phase1" column="PHASE1" />
+    <property name="phase2" column="PHASE2" />
+    <property name="phase3" column="PHASE3" />
+    <property name="phase4" column="PHASE4" />
+    <property name="bbch1" column="BBCH1" />
+    <property name="bbch2" column="BBCH2" />
+    <property name="bbch3" column="BBCH3" />
+    <property name="bbch4" column="BBCH4" />
+    <property name="rootingZone1" column="ROOTINGZONE1" />
+    <property name="rootingZone2" column="ROOTINGZONE2" />
+    <property name="rootingZone3" column="ROOTINGZONE3" />
+    <property name="rootingZone4" column="ROOTINGZONE4" />
+    <property name="description" column="DESCRIPTION" />
+  </class>
+  <class name="Farm" table="FARM">
+    <id name="name" column="NAME" />
+    <property name="polygon" column="GEOPOLYGON" />
+    <property name="fields" column="FIELDS" />
+  </class>
+    <class name="Field" table="FIELD">
+    <id name="name" column="NAME" />
+    <property name="weatherDataSource" column="WEATHER" />
+    <property name="soilProfile" column="SOILPROFILE" />
+    <property name="rootingZone" column="ROOTINGZONE" />
+    <property name="location" column="LOCATION" />
+    <property name="polygon" column="POLYGON" />
+    <property name="plots" column="PLOTS" />
+    <property name="area" column="AREA" />
+  </class>
+    <class name="Plot" table="PLOT">
+    <id name="name" column="NAME" />
+    <property name="waterBalance" column="WATERBALANCE" />
+    <property name="weatherData" column="WEATHERDATA" />
+    <property name="soilStartDate" column="SOILSTART" />
+    <property name="soilStartValue" column="SOILSTARTVALUE" />
+    <property name="rootingZone" column="ROOTINGZONE" />
+    <property name="location" column="LOCATION" />
+    <property name="polygon" column="POLYGON" />
+    <property name="crop" column="CROP" />
+    <property name="cropStart" column="CROPSTART" />
+    <property name="cropEnd" column="CROPEND" />
+    <property name="scalingFactor" column="SCALINGFACTOR" />
+    <property name="recommendedAction" column="RECOMACTION" />
+    <property name="calculationPaused" column="CALCPAUSE" />
+    <property name="isActive" column="ACTIVE" />
+    <property name="area" column="AREA" />
+  </class>
+      <class name="Soil" table="SOIL">
+    <id name="name" column="NAME" />
+    <property name="availableWaterCapacity" column="WATERCAPACITY" />
+    <property name="description" column="DESCRIPTION" />
+  </class>
+      <class name="SoilProfile" table="SOILPROFILE">
+    <id name="soilType" column="SOILTYPE" />
+    <property name="profileDepth" column="PROFILEDEPTH" />
+    <property name="description" column="DESCRIPTION" />
+  </class>
+      <class name="SoilProfileDepth" table="SOILPROFILEDEPTH">
+    <id name="depthStart" column="DEPTHSTART" />
+    <property name="depthEnd" column="DEPTHEND" />
+  </class> 
+        <class name="test" table="TEST">
+    <id name="name" column="NAME" />
+  </class> 
+</hibernate-mapping>
+
+

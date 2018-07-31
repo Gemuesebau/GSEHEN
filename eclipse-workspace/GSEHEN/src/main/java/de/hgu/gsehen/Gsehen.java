@@ -3,7 +3,6 @@ package de.hgu.gsehen;
 import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
 import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
-import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
 
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
@@ -23,7 +22,10 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.model.test;
 import de.hgu.gsehen.util.Pair;
+import org.hibernate.*;
+import org.hibernate.cfg.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,7 +54,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -60,8 +61,18 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
 
 /**
  * The GSEHEN main application.
@@ -76,7 +87,14 @@ public class Gsehen extends Application {
       Locale.GERMAN);
 
   private static final String GSEHEN_H2_LOCAL_DB = "gsehen-h2-local.db";
-  private static final String DAYDATA_TABLE = "DAYDATA";
+  private static final String FARM_TABLE = "FARM";
+  private static final String FIELD_TABLE = "FIELD";
+  private static final String PLOT_TABLE = "PLOT";
+  private static final String CROP_TABLE = "CROP";
+  private static final String SOIL_TABLE = "SOIL";
+  private static final String SOILPROFILE_TABLE = "SOILPROFILE";
+  private static final String SOILPROFILEDEPTH_TABLE = "SOILPROFILEDEPTH";
+
 
   private static final String MAIN_FXML = "main.fxml";
 
@@ -105,14 +123,15 @@ public class Gsehen extends Application {
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>>
-      eventListeners = new HashMap<>();
+  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
   private boolean dataChanged;
 
   private static Gsehen instance;
 
   {
+
     instance = this;
+
   }
 
   /**
@@ -129,12 +148,15 @@ public class Gsehen extends Application {
     } catch (Exception e) {
       e.printStackTrace();
     }
+
+    h2db();
+    gettest();
     Application.launch(args);
   }
 
-  /*
-   * (non-Javadoc)
-   *
+  /**
+   * Generate the Mainframe.
+   * 
    * @see javafx.application.Application#start(javafx.stage.Stage)
    */
   @SuppressWarnings({ "checkstyle:rightcurly" })
@@ -183,6 +205,9 @@ public class Gsehen extends Application {
 
     loadUserData();
 
+    
+
+    
     treeTable = new GsehenTreeTable() {
       @Override
       public void handle(GsehenViewEvent event) {
@@ -192,7 +217,7 @@ public class Gsehen extends Application {
   }
 
   @SuppressWarnings({ "unused", "checkstyle:rightcurly" })
-  private void testDatabase(TextArea debugTextArea) {
+  private static void h2db() {
     Connection con = null;
     try {
       String jdbcUrl = "jdbc:h2:./" + GSEHEN_H2_LOCAL_DB + ";CIPHER=AES";
@@ -206,27 +231,40 @@ public class Gsehen extends Application {
     // in h2, the DATE column type has no time information!
     // id: http://www.h2database.com/html/datatypes.html#identity_type
     executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + DAYDATA_TABLE + "(id IDENTITY, date DATE, t_min DOUBLE)",
-        DAYDATA_TABLE + " couldn't be created");
-    try (PreparedStatement insertDayData = con
-        .prepareStatement("INSERT INTO " + DAYDATA_TABLE + " (date, t_min)" + " VALUES(?, ?)")) {
-      executeUpdate(insertDayData, parseYmd("2018-01-21"), 12.1);
-      executeUpdate(insertDayData, parseYmd("2018-01-22"), 12.2);
-      executeUpdate(insertDayData, parseYmd("2018-01-23"), 12.3);
-      con.commit();
-    } catch (SQLException e) {
-      throw new RuntimeException(DAYDATA_TABLE + " values couldn't be inserted", e);
-    }
-    try (PreparedStatement selectDayData = con
-        .prepareStatement("SELECT * FROM " + DAYDATA_TABLE + " WHERE date > ?")) {
-      ResultSet rs = executeQuery(selectDayData, parseYmd("2018-01-20"));
-      while (rs.next()) {
-        debugTextArea.appendText("[" + rs.getInt("id") + ", " + rs.getDate("date") + ", "
-            + rs.getDouble("t_min") + "]\n");
-      }
-    } catch (SQLException e) {
-      throw new RuntimeException(DAYDATA_TABLE + " values couldn't be selected", e);
-    }
+        "CREATE TABLE IF NOT EXISTS " + FARM_TABLE
+            + "(NAME VARCHAR, GEOPOLYGON DOUBLE , FIELDS VARCHAR)",
+        FARM_TABLE + " couldn't be created");
+    executeUpdate(con,
+        "CREATE TABLE IF NOT EXISTS " + FIELD_TABLE
+            + "(WEATHER VARCHAR, SOILPROFILE VARCHAR , ROOTINGZONE DOUBLE , LOCATION DOUBLE ,"
+            + " POLYGON DOUBLE , PLOTS VARCHAR , AREA DOUBLE)",
+        FIELD_TABLE + " couldn't be created");
+    executeUpdate(con,
+        "CREATE TABLE IF NOT EXISTS " + PLOT_TABLE
+            + "(WATERBALANCE VARCHAR, WEATHERDATA DOUBLE , SOILSTART DATE ,SOILSTARTVALUE DOUBLE ,"
+            + "ROOTINGZONE DOUBLE ,LOCATION DOUBLE ,POLYGON DOUBLE,CROP VARCHAR,CROPSTART DATE ,"
+            + "CROPEND DATE ,SCALINGFACTOR DOUBLE,RECOMACTION VARCHAR,"
+            + "CALCPAUSE BOOLEAN,ACTIVE BOOLEAN ,AREA DOUBLE)",
+        PLOT_TABLE + " couldn't be created");
+    executeUpdate(con,
+        "CREATE TABLE IF NOT EXISTS " + SOIL_TABLE
+            + "(NAME VARCHAR, WATERCAPACITY DOUBLE , DESCRIPTION VARCHAR)",
+        SOIL_TABLE + " couldn't be created");
+    executeUpdate(con,
+        "CREATE TABLE IF NOT EXISTS " + SOILPROFILE_TABLE
+            + "(SOILTYPE VARCHAR, PROFILEDEPTH DOUBLE , DESCRIPTION VARCHAR)",
+        SOILPROFILE_TABLE + " couldn't be created");
+    executeUpdate(con,
+        "CREATE TABLE IF NOT EXISTS " + SOILPROFILEDEPTH_TABLE
+            + "(DEPTHSTART DOUBLE, DEPTHEND DOUBLE)",
+        SOILPROFILEDEPTH_TABLE + " couldn't be created");
+    executeUpdate(con,
+        "CREATE TABLE IF NOT EXISTS " + CROP_TABLE
+            + "(NAME VARCHAR, ACTIVE BOOLEAN,KC1 DOUBLE ,KC2 DOUBLE ,KC3 DOUBLE ,"
+            + "KC4 DOUBLE ,PHASE1 INTEGER,PHASE2 INTEGER ,PHASE3 INTEGER ,PHASE4 INTEGER ,"
+            + "BBCH1 VARCHAR,BBCH2 VARCHAR,BBCH3 VARCHAR,BBCH4 VARCHAR,ROOTINGZONE1 INTEGER,"
+            + "ROOTINGZONE2 INTEGER,ROOTINGZONE3 INTEGER,ROOTINGZONE4 INTEGER,DESCRIPTION VARCHAR)",
+        CROP_TABLE + " couldn't be created");
 
     if (con != null) {
       try {
@@ -245,7 +283,7 @@ public class Gsehen extends Application {
     final String url = "jdbc:postgresql:"
         + "//hs-geisenheim.cwliowbz3tsc.eu-west-1.rds.amazonaws.com/standard";
     final String user = "GSEHEN_user";
-    final String password = "siehe drive";
+    final String password = "siehe Drive";
     Connection connection = null;
     {
       try {
@@ -256,7 +294,9 @@ public class Gsehen extends Application {
     }
     try (PreparedStatement selectcrop = connection.prepareStatement("SELECT * FROM crop;")) {
       ResultSet rs = executeQuery(selectcrop);
-      
+
+      // Statement stmt = connection.createStatement();
+      // ResultSet rs = stmt.executeQuery("SELECT * FROM crop;");
       while (rs.next()) {
         rs.getString("cName");
         rs.getBoolean("cActive");
@@ -362,7 +402,7 @@ public class Gsehen extends Application {
     }
     sendFarmDataChanged(object, skipClass);
   }
-
+  
   private Field getNewPlotsField(Farm farm) {
     String newPlotsFieldName = mainBundle.getString("gui.control.objectTree.newPlotsFieldName");
     Field newPlotsField = null;
@@ -376,9 +416,31 @@ public class Gsehen extends Application {
       newPlotsField = new Field(newPlotsFieldName, null);
       farm.getFields().add(newPlotsField);
     }
+    System.out.println(newPlotsField);
     return newPlotsField;
   }
+  
+private static void gettest() {
 
+  
+  SessionFactory sessionFactory;
+
+  sessionFactory = new Configuration().configure("de/hgu/gsehen/util/hibernate.cfg.xml").buildSessionFactory();
+  Session session = sessionFactory.openSession();
+  test t1 = new test();
+  t1.setName("name");
+  
+  session.beginTransaction();
+  session.save(t1);
+  
+  session.getTransaction().commit();
+  session.close();
+  sessionFactory.close();
+
+  
+ 
+  
+}
   private Farm getNewFieldsFarm() {
     String newFieldsFarmName = mainBundle.getString("gui.control.objectTree.newFieldsFarmName");
     Farm newFieldsFarm = null;

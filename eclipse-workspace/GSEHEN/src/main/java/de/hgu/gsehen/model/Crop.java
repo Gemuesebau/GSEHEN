@@ -1,12 +1,19 @@
 package de.hgu.gsehen.model;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
 /**
  * Class representing a crop.
  *
  * @author AT
  */
+@Entity
 public class Crop {
+  
+  @Id
   private String name;
+ 
   private boolean active;
   private double kc1;
   private Double kc2;

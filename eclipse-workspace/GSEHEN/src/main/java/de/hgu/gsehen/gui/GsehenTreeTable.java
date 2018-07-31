@@ -10,6 +10,7 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.util.HibernateUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+
+import javax.persistence.Persistence;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+import org.omg.CORBA.PERSIST_STORE;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -56,8 +66,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
   private Gsehen gsehenInstance;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>> eventListeners =
-      new HashMap<>();
+  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener
+      <? extends GsehenEvent>>> eventListeners = new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -96,10 +106,10 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         });
   }
 
-  protected static final ResourceBundle mainBundle =
-      ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
-  private static final DataFormat SERIALIZED_MIME_TYPE =
-      new DataFormat("application/x-java-serialized-object");
+  protected static final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
+      Locale.GERMAN);
+  private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat(
+      "application/x-java-serialized-object");
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   private static final String DETAIL_BORDER_PANE_ID = "#detailBorderPane";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
@@ -145,8 +155,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
    */
   @SuppressWarnings("unchecked")
   public void addFarmTreeView(Class<? extends GsehenEventListener<GsehenViewEvent>> skipClass) {
-    farmTreeView =
-        (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
+    farmTreeView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
+        .lookup(FARM_TREE_VIEW_ID);
     rootItem = new TreeItem<Drawable>();
     farmTreeView.setRoot(rootItem);
     farmTreeView.setShowRoot(false);
@@ -423,7 +433,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           GeoPolygon plotGeo;
           Plot plot;
 
-          // Updates the farmList.
+          // Updates the farmList
+
+
           for (int i = 0; i < farmTreeView.getRoot().getChildren().size(); i++) {
             farmName = (String) farmTreeView.getRoot().getChildren().get(i).getValue().getName();
             farmGeo = farmTreeView.getRoot().getChildren().get(i).getValue().getPolygon();
@@ -435,14 +447,23 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   .getValue().getName();
               fieldGeo = farmTreeView.getRoot().getChildren().get(i).getChildren().get(j).getValue()
                   .getPolygon();
+                  
+                  
+
+              
+
               field = new Field(fieldName, fieldGeo);
+              System.out.println(field);
               object = field;
+
               if (j == 0) {
                 farm.setFields(field);
               } else {
                 List<Field> fields = farm.getFields();
                 fields.add(field);
               }
+              
+
               for (int k = 0; k < farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
                   .getChildren().size(); k++) {
                 plotName = (String) farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
@@ -464,6 +485,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           farmsList.clear();
           farmsList.addAll(newFarmsList);
           gsehenInstance.sendFarmDataChanged(object, null);
+          
         } else {
           LOGGER.info(itemType + " can't be stack on " + destinationType);
         }
@@ -509,10 +531,13 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   /**
    * Adds the columns to the TreeTableView.
    * 
-   * @param label - Name of the column.
-   * @param dataIndex - Content of the column.
+   * @param label
+   *          - Name of the column.
+   * @param dataIndex
+   *          - Content of the column.
    */
   public void addColumn(String label, String dataIndex) {
+
     column = new TreeTableColumn<>(label);
     column.setCellValueFactory((TreeTableColumn.CellDataFeatures<Drawable, String> param) -> {
       ObservableValue<String> result = new ReadOnlyStringWrapper("");
@@ -524,7 +549,10 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         if (param.getValue().getValue().getClass().getSimpleName().equals("Farm")) {
           result = new ReadOnlyStringWrapper("/");
         } else if (param.getValue().getValue().getClass().getSimpleName().equals("Field")) {
+
+          
           Field field = (Field) param.getValue().getValue();
+
           if (field.getSoilProfile() != null) {
             result = new ReadOnlyStringWrapper(field.getSoilProfile().getSoilType().toString());
             // TODO: Passt das so?
@@ -649,6 +677,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
       if (farm.getFields() != null) {
         for (Field field : farm.getFields()) {
           fieldItem = createItem(farmItem, field);
+          System.out.println(fieldItem.getValue());
           if (field.getPlots() != null) {
             for (Plot plot : field.getPlots()) {
               plotItem = createItem(fieldItem, plot);
@@ -704,4 +733,5 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     farmsList.removeAll(delFarm);
     gsehenInstance.sendFarmDataChanged(object, null);
   }
+  
 }

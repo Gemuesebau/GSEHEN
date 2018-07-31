@@ -4,7 +4,15 @@ import de.hgu.gsehen.gui.GeoPolygon;
 
 import java.util.Date;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+import org.hibernate.annotations.Table;
+
+@Entity
 public class Plot extends Drawable {
+  
+  @Id
   private String name;
   private double area;
   private GeoPolygon polygon;

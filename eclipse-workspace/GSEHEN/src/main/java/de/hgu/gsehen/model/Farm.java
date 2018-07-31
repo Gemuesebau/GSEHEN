@@ -5,9 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+
+@Entity
 public class Farm extends Drawable implements DrawableParent {
+
   private String name;
   private GeoPolygon polygon;
+  @OneToMany
   private List<Field> fields;
 
   public Farm() {

@@ -5,6 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.persistence.Entity;
+
+import org.hibernate.annotations.Table;
+
+@Entity
 public class Field extends Drawable implements DrawableParent {
   private WeatherDataSource weatherDataSource;
   private SoilProfile soilProfile;

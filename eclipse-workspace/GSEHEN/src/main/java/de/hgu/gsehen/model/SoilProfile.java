@@ -2,9 +2,15 @@ package de.hgu.gsehen.model;
 
 import java.util.Set;
 
-public class SoilProfile {
-  // TODO Sets auf drei Elemente beschränken?!
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
+import org.hibernate.annotations.Table;
+
+@Entity
+public class SoilProfile {
+
+  @Id
   private Set<Soil> soilType;
   private Set<SoilProfileDepth> profileDepth;
 
