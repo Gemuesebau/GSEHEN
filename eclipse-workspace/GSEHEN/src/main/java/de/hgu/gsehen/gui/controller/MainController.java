@@ -20,7 +20,7 @@ import javafx.stage.Stage;
  *
  * @author CWI
  */
-@SuppressWarnings({"checkstyle:commentsindentation"})
+@SuppressWarnings({ "checkstyle:commentsindentation" })
 public class MainController {
   private Gsehen gsehenInstance;
 
@@ -98,7 +98,7 @@ public class MainController {
         });
       }
     });
-  } 
+  }
 
   // Returns to Main-Menu.
   @FXML
