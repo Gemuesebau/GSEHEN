@@ -1,18 +1,20 @@
 package de.hgu.gsehen.model;
 
-import de.hgu.gsehen.gui.GeoPolygon;
-
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-import org.hibernate.annotations.Table;
+import de.hgu.gsehen.gui.GeoPolygon;
 
-@Entity
+
+
 public class Plot extends Drawable {
+
+
+  private int id;
   
-  @Id
   private String name;
   private double area;
   private GeoPolygon polygon;

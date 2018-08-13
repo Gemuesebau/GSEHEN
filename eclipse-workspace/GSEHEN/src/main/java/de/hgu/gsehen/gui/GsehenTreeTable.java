@@ -18,14 +18,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
-import javax.persistence.Persistence;
-
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.cfg.Configuration;
-import org.omg.CORBA.PERSIST_STORE;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -446,13 +438,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   .getValue().getName();
               fieldGeo = farmTreeView.getRoot().getChildren().get(i).getChildren().get(j).getValue()
                   .getPolygon();
-                  
-                  
-
-              
 
               field = new Field(fieldName, fieldGeo);
-              System.out.println(field);
               object = field;
 
               if (j == 0) {
@@ -676,7 +663,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
       if (farm.getFields() != null) {
         for (Field field : farm.getFields()) {
           fieldItem = createItem(farmItem, field);
-          System.out.println(fieldItem.getValue());
           if (field.getPlots() != null) {
             for (Plot plot : field.getPlots()) {
               plotItem = createItem(fieldItem, plot);

@@ -1,13 +1,8 @@
 package de.hgu.gsehen.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
 
-import org.hibernate.annotations.Table;
-
-@Entity
 public class SoilProfileDepth {
-  @Id
+  
   private double depthStart;
   private double depthEnd;
 

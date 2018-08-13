@@ -1,16 +1,15 @@
 package de.hgu.gsehen.model;
 
-import de.hgu.gsehen.gui.GeoPolygon;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.persistence.Entity;
+import de.hgu.gsehen.gui.GeoPolygon;
 
-import org.hibernate.annotations.Table;
 
-@Entity
+
 public class Field extends Drawable implements DrawableParent {
+
   private WeatherDataSource weatherDataSource;
   private SoilProfile soilProfile;
   private Double rootingZone;

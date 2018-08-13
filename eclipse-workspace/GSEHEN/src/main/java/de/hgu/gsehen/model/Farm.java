@@ -1,20 +1,16 @@
 package de.hgu.gsehen.model;
 
-import de.hgu.gsehen.gui.GeoPolygon;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
+import de.hgu.gsehen.gui.GeoPolygon;
 
-@Entity
 public class Farm extends Drawable implements DrawableParent {
-
+ 
+  private int id;
   private String name;
   private GeoPolygon polygon;
-  @OneToMany
   private List<Field> fields;
 
   public Farm() {

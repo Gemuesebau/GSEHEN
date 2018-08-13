@@ -1,6 +1,7 @@
 package de.hgu.gsehen.model;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 /**
@@ -8,12 +9,13 @@ import javax.persistence.Id;
  *
  * @author AT
  */
-@Entity
+
 public class Crop {
-  
-  @Id
+
+
+  private int id;
   private String name;
- 
+
   private boolean active;
   private double kc1;
   private Double kc2;
@@ -28,6 +30,39 @@ public class Crop {
   private String bbch3;
   private String bbch4;
   private int rootingZone1;
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + id;
+    long temp;
+    temp = Double.doubleToLongBits(kc1);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    Crop other = (Crop) obj;
+    if (id != other.id) {
+      return false;
+    }
+    if (Double.doubleToLongBits(kc1) != Double.doubleToLongBits(other.kc1)) {
+      return false;
+    }
+    return true;
+  }
+
   private Integer rootingZone2;
   private Integer rootingZone3;
   private Integer rootingZone4;
@@ -37,6 +72,14 @@ public class Crop {
     super();
   }
 
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
+  
   public Crop(String name) {
     this.name = name;
   }

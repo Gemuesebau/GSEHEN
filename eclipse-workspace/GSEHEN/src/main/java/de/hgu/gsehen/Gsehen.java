@@ -4,31 +4,6 @@ import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
 import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
 
-import de.hgu.gsehen.event.DrawableSelected;
-import de.hgu.gsehen.event.FarmDataChanged;
-import de.hgu.gsehen.event.GsehenEvent;
-import de.hgu.gsehen.event.GsehenEventListener;
-import de.hgu.gsehen.event.GsehenViewEvent;
-import de.hgu.gsehen.gui.GeoPoint;
-import de.hgu.gsehen.gui.GeoPolygon;
-import de.hgu.gsehen.gui.GsehenTreeTable;
-import de.hgu.gsehen.gui.controller.MainController;
-import de.hgu.gsehen.gui.view.FarmDataController;
-import de.hgu.gsehen.gui.view.Farms;
-import de.hgu.gsehen.gui.view.Fields;
-import de.hgu.gsehen.gui.view.Logs;
-import de.hgu.gsehen.gui.view.Maps;
-import de.hgu.gsehen.gui.view.Plots;
-import de.hgu.gsehen.model.Drawable;
-import de.hgu.gsehen.model.Farm;
-import de.hgu.gsehen.model.Field;
-import de.hgu.gsehen.model.Plot;
-import de.hgu.gsehen.model.Soil;
-import de.hgu.gsehen.model.test;
-import de.hgu.gsehen.util.Pair;
-import org.hibernate.*;
-import org.hibernate.cfg.*;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,6 +24,34 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.criteria.Order;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
+import de.hgu.gsehen.event.DrawableSelected;
+import de.hgu.gsehen.event.FarmDataChanged;
+import de.hgu.gsehen.event.GsehenEvent;
+import de.hgu.gsehen.event.GsehenEventListener;
+import de.hgu.gsehen.event.GsehenViewEvent;
+import de.hgu.gsehen.gui.GeoPoint;
+import de.hgu.gsehen.gui.GsehenTreeTable;
+import de.hgu.gsehen.gui.controller.MainController;
+import de.hgu.gsehen.gui.view.FarmDataController;
+import de.hgu.gsehen.gui.view.Farms;
+import de.hgu.gsehen.gui.view.Fields;
+import de.hgu.gsehen.gui.view.Logs;
+import de.hgu.gsehen.gui.view.Maps;
+import de.hgu.gsehen.gui.view.Plots;
+import de.hgu.gsehen.model.Drawable;
+import de.hgu.gsehen.model.Farm;
+import de.hgu.gsehen.model.Field;
+import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.model.test;
+import de.hgu.gsehen.util.Pair;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -63,18 +66,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.cfg.Configuration;
 
 /**
  * The GSEHEN main application.
@@ -96,7 +87,6 @@ public class Gsehen extends Application {
   private static final String SOIL_TABLE = "SOIL";
   private static final String SOILPROFILE_TABLE = "SOILPROFILE";
   private static final String SOILPROFILEDEPTH_TABLE = "SOILPROFILEDEPTH";
-
 
   private static final String MAIN_FXML = "main.fxml";
 
@@ -126,7 +116,7 @@ public class Gsehen extends Application {
   private MainController mainController;
 
   private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
-  private boolean dataChanged;  
+  private boolean dataChanged;
 
   private static Gsehen instance;
 
@@ -150,8 +140,6 @@ public class Gsehen extends Application {
     } catch (Exception e) {
       e.printStackTrace();
     }
-
-    h2db();
     test();
     Application.launch(args);
   }
@@ -207,9 +195,6 @@ public class Gsehen extends Application {
 
     loadUserData();
 
-    
-
-    
     treeTable = new GsehenTreeTable() {
       @Override
       public void handle(GsehenViewEvent event) {
@@ -267,9 +252,7 @@ public class Gsehen extends Application {
             + "BBCH1 VARCHAR,BBCH2 VARCHAR,BBCH3 VARCHAR,BBCH4 VARCHAR,ROOTINGZONE1 INTEGER,"
             + "ROOTINGZONE2 INTEGER,ROOTINGZONE3 INTEGER,ROOTINGZONE4 INTEGER,DESCRIPTION VARCHAR)",
         CROP_TABLE + " couldn't be created");
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS TEST"
-            + "(NAME VARCHAR)",
+    executeUpdate(con, "CREATE TABLE IF NOT EXISTS TEST" + "(NAME VARCHAR)",
         " couldn't be created");
 
     if (con != null) {
@@ -325,32 +308,27 @@ public class Gsehen extends Application {
         rs.getString("cDescription");
       }
     } catch (SQLException e) {
-      System.out.println("geht nicht");
+      System.out.println("no connection");
     }
   }
-  
+
   public static void test() {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
     EntityManager em = emf.createEntityManager();
 
-    EntityTransaction tx = em.getTransaction();
-    tx.begin();
+    
     try {
-
-        em.persist(new test("test"));
-
-        tx.commit();
+      em.getTransaction().begin();
+      test student = new test("test");
+      em.persist(student);
+      em.getTransaction().commit();
+      em.close();
+      emf.close();
     } catch (Exception e) {
-        tx.rollback();
-    } finally {
-        em.close();
-        emf.close();
+      em.getTransaction().rollback();
     }
+  }
 
-  System.out.println(em.getTransaction());
-   
-}
-  
   /**
    * Loads the user-created data (farms, fields, plots, ..)
    */
@@ -430,7 +408,7 @@ public class Gsehen extends Application {
     }
     sendFarmDataChanged(object, skipClass);
   }
-  
+
   private Field getNewPlotsField(Farm farm) {
     String newPlotsFieldName = mainBundle.getString("gui.control.objectTree.newPlotsFieldName");
     Field newPlotsField = null;
@@ -446,7 +424,7 @@ public class Gsehen extends Application {
     }
     return newPlotsField;
   }
-  
+
   private Farm getNewFieldsFarm() {
     String newFieldsFarmName = mainBundle.getString("gui.control.objectTree.newFieldsFarmName");
     Farm newFieldsFarm = null;
