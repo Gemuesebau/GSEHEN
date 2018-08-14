@@ -25,6 +25,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -140,6 +141,7 @@ public class Gsehen extends Application {
     } catch (Exception e) {
       e.printStackTrace();
     }
+
     test();
     Application.launch(args);
   }
@@ -319,7 +321,7 @@ public class Gsehen extends Application {
     
     try {
       em.getTransaction().begin();
-      test student = new test("test");
+      test student = new test("das");
       em.persist(student);
       em.getTransaction().commit();
       em.close();
@@ -328,6 +330,7 @@ public class Gsehen extends Application {
       em.getTransaction().rollback();
     }
   }
+ 
 
   /**
    * Loads the user-created data (farms, fields, plots, ..)

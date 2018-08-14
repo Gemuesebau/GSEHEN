@@ -1,13 +1,23 @@
 package de.hgu.gsehen.model;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
 /**
  * Class representing a type of soil.
  *
  * @author AT
  */
-
+@Entity
 public class Soil {
   
+  public Soil() {
+  }
+  
+  @Id
+  @GeneratedValue
+  private long id;
   private String name;
   private double availableWaterCapacity;
   private String description;

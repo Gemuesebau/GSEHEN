@@ -14,7 +14,10 @@
        <property name="hibernte.connection.username" value= "" />
        <property name="hibernate.connection.password" value = "OCddpvUe "/>
        <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect" />
-       <property name="hibernate.hbm2ddl.auto" value="create" />
+       <property name="connection.pool_size" value="1"/>
+       <property name="hbm2ddl.auto" value="create" />
+       <property name="connection.autocommit" value = "true" />  
+       <property name="show_sql" value = "true"/>  
     </properties>
   </persistence-unit>
 </persistence>

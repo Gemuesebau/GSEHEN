@@ -2,31 +2,41 @@ package de.hgu.gsehen.model;
 
 import java.util.Date;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import de.hgu.gsehen.gui.GeoPolygon;
 
 
-
+@Entity
 public class Plot extends Drawable {
 
-
-  private int id;
+  @Id
+  @GeneratedValue
+  private long id;
   
   private String name;
   private double area;
+  @OneToOne
   private GeoPolygon polygon;
+  @OneToOne
   private Location location;
   private Double scalingFactor;
+  @OneToOne
   private WeatherData weatherData;
   private Double rootingZone;
+  @OneToOne
   private WaterBalance waterBalance;
   private String recommendedAction;
   private Date soilStartDate;
   private Double soilStartValue;
   private Boolean calculationPaused;
+  @OneToOne
   private Crop crop;
   private Date cropStart; 
   private Date cropEnd;

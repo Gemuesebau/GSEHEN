@@ -3,10 +3,22 @@ package de.hgu.gsehen.gui;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+
+@Entity
 public class GeoPolygon {
 
   private static final String POLYGON_MUST_HAVE_AT_LEAST_ONE_POINT =
       "the polygon must have at least one point";
+  
+  @Id
+  @GeneratedValue
+  private int id;
+  @OneToMany
   private List<GeoPoint> geoPoints;
 
   public GeoPolygon() {
