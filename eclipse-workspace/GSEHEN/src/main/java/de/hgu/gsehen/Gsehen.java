@@ -327,6 +327,7 @@ public class Gsehen extends Application {
       em.close();
       emf.close();
     } catch (Exception e) {
+      System.out.println("Problem: " + e.getMessage());
       em.getTransaction().rollback();
     }
   }
