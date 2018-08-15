@@ -205,67 +205,6 @@ public class Gsehen extends Application {
     treeTable.addFarmTreeView(GsehenTreeTable.class);
   }
 
-  @SuppressWarnings({ "unused", "checkstyle:rightcurly" })
-  private static void h2db() {
-    Connection con = null;
-    try {
-      String jdbcUrl = "jdbc:h2:./" + GSEHEN_H2_LOCAL_DB + ";CIPHER=AES";
-      con = DriverManager.getConnection(jdbcUrl, "", "OCddpvUe ");
-      // PW: space is important! But this is just a test, must be supplied by user or
-      // the like
-      LOGGER.info("Opened local H2 database at url " + jdbcUrl);
-    } catch (SQLException e) {
-      throw new RuntimeException(GSEHEN_H2_LOCAL_DB + " couldn't be opened", e);
-    }
-    // in h2, the DATE column type has no time information!
-    // id: http://www.h2database.com/html/datatypes.html#identity_type
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + FARM_TABLE
-            + "(NAME VARCHAR, GEOPOLYGON DOUBLE , FIELDS VARCHAR)",
-        FARM_TABLE + " couldn't be created");
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + FIELD_TABLE
-            + "(WEATHER VARCHAR, SOILPROFILE VARCHAR , ROOTINGZONE DOUBLE , LOCATION DOUBLE ,"
-            + " POLYGON DOUBLE , PLOTS VARCHAR , AREA DOUBLE)",
-        FIELD_TABLE + " couldn't be created");
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + PLOT_TABLE
-            + "(WATERBALANCE VARCHAR, WEATHERDATA DOUBLE , SOILSTART DATE ,SOILSTARTVALUE DOUBLE ,"
-            + "ROOTINGZONE DOUBLE ,LOCATION DOUBLE ,POLYGON DOUBLE,CROP VARCHAR,CROPSTART DATE ,"
-            + "CROPEND DATE ,SCALINGFACTOR DOUBLE,RECOMACTION VARCHAR,"
-            + "CALCPAUSE BOOLEAN,ACTIVE BOOLEAN ,AREA DOUBLE)",
-        PLOT_TABLE + " couldn't be created");
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + SOIL_TABLE
-            + "(NAME VARCHAR, WATERCAPACITY DOUBLE , DESCRIPTION VARCHAR)",
-        SOIL_TABLE + " couldn't be created");
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + SOILPROFILE_TABLE
-            + "(SOILTYPE VARCHAR, PROFILEDEPTH DOUBLE , DESCRIPTION VARCHAR)",
-        SOILPROFILE_TABLE + " couldn't be created");
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + SOILPROFILEDEPTH_TABLE
-            + "(DEPTHSTART DOUBLE, DEPTHEND DOUBLE)",
-        SOILPROFILEDEPTH_TABLE + " couldn't be created");
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + CROP_TABLE
-            + "(NAME VARCHAR, ACTIVE BOOLEAN,KC1 DOUBLE ,KC2 DOUBLE ,KC3 DOUBLE ,"
-            + "KC4 DOUBLE ,PHASE1 INTEGER,PHASE2 INTEGER ,PHASE3 INTEGER ,PHASE4 INTEGER ,"
-            + "BBCH1 VARCHAR,BBCH2 VARCHAR,BBCH3 VARCHAR,BBCH4 VARCHAR,ROOTINGZONE1 INTEGER,"
-            + "ROOTINGZONE2 INTEGER,ROOTINGZONE3 INTEGER,ROOTINGZONE4 INTEGER,DESCRIPTION VARCHAR)",
-        CROP_TABLE + " couldn't be created");
-    executeUpdate(con, "CREATE TABLE IF NOT EXISTS TEST" + "(NAME VARCHAR)",
-        " couldn't be created");
-
-    if (con != null) {
-      try {
-        con.close();
-      } catch (SQLException e) {
-        throw new RuntimeException("DB connection couldn't be closed", e);
-      }
-    }
-  }
-
   /**
    * PostgreSQL DB connection.
    */
@@ -324,6 +263,9 @@ public class Gsehen extends Application {
       test student = new test("das");
       em.persist(student);
       em.getTransaction().commit();
+      test t = em.find(test.class, 1L);
+      System.out.println(t);
+      
       em.close();
       emf.close();
     } catch (Exception e) {

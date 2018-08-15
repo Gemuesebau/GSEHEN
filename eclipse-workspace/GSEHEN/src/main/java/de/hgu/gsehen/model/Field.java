@@ -4,18 +4,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+
 import de.hgu.gsehen.gui.GeoPolygon;
 
 
-
+@Entity
 public class Field extends Drawable implements DrawableParent {
 
+  @Id
+  @GeneratedValue
+  private long id;
+  @OneToOne
   private WeatherDataSource weatherDataSource;
+  @OneToOne
   private SoilProfile soilProfile;
   private Double rootingZone;
+  @OneToOne
   private Location location;
+  @OneToOne
   private GeoPolygon polygon;
   private String name;
+  @OneToMany
   private List<Plot> plots;
   private double area;
 

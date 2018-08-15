@@ -4,13 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+
 import de.hgu.gsehen.gui.GeoPolygon;
 
+@Entity
 public class Farm extends Drawable implements DrawableParent {
- 
-  private int id;
+  @Id
+  @GeneratedValue
+  private long id;
   private String name;
+  @OneToOne
   private GeoPolygon polygon;
+  @OneToMany
   private List<Field> fields;
 
   public Farm() {
