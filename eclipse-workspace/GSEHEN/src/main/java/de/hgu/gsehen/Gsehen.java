@@ -80,15 +80,6 @@ public class Gsehen extends Application {
   protected static final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
       Locale.GERMAN);
 
-  private static final String GSEHEN_H2_LOCAL_DB = "gsehen-h2-local.db";
-  private static final String FARM_TABLE = "FARM";
-  private static final String FIELD_TABLE = "FIELD";
-  private static final String PLOT_TABLE = "PLOT";
-  private static final String CROP_TABLE = "CROP";
-  private static final String SOIL_TABLE = "SOIL";
-  private static final String SOILPROFILE_TABLE = "SOILPROFILE";
-  private static final String SOILPROFILEDEPTH_TABLE = "SOILPROFILEDEPTH";
-
   private static final String MAIN_FXML = "main.fxml";
 
   public static final String MAIN_SPLIT_PANE_ID = "#mainSplitPane";
@@ -116,7 +107,8 @@ public class Gsehen extends Application {
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
+  private java.util.Map<Class<? extends GsehenEvent>, 
+      List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
   private boolean dataChanged;
 
   private static Gsehen instance;
@@ -257,7 +249,6 @@ public class Gsehen extends Application {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
     EntityManager em = emf.createEntityManager();
 
-    
     try {
       em.getTransaction().begin();
       test student = new test("das");
@@ -265,7 +256,7 @@ public class Gsehen extends Application {
       em.getTransaction().commit();
       test t = em.find(test.class, 1L);
       System.out.println(t);
-      
+
       em.close();
       emf.close();
     } catch (Exception e) {
@@ -273,7 +264,6 @@ public class Gsehen extends Application {
       em.getTransaction().rollback();
     }
   }
- 
 
   /**
    * Loads the user-created data (farms, fields, plots, ..)
