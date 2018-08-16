@@ -23,8 +23,7 @@
 							<items>
 								<MenuItem mnemonicParsing="false" onAction="#loadUserData" text="%menu.file.load" />
 								<MenuItem mnemonicParsing="false" onAction="#saveUserData" text="%menu.file.save" />
-								<MenuItem mnemonicParsing="false" onAction="#csv" text="%menu.file.csv" />
-                        <MenuItem mnemonicParsing="false" onAction="#exit" text="%menu.file.exit" />
+								<MenuItem mnemonicParsing="false" onAction="#exit" text="%menu.file.exit" />
 							</items>
 						</Menu>
 						<Menu mnemonicParsing="false" text="%menu.view">

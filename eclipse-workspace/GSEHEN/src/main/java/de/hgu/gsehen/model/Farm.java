@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -18,9 +20,9 @@ public class Farm extends Drawable implements DrawableParent {
   @GeneratedValue
   private long id;
   private String name;
-  @OneToOne
+  @OneToOne(cascade = CascadeType.ALL)
   private GeoPolygon polygon;
-  @OneToMany
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private List<Field> fields;
 
   public Farm() {

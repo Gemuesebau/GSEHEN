@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -27,10 +29,10 @@ public class Field extends Drawable implements DrawableParent {
   private Double rootingZone;
   @OneToOne
   private Location location;
-  @OneToOne
+  @OneToOne(cascade = {CascadeType.ALL})
   private GeoPolygon polygon;
   private String name;
-  @OneToMany
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private List<Plot> plots;
   private double area;
 

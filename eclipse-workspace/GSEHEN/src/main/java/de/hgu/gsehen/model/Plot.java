@@ -2,6 +2,7 @@ package de.hgu.gsehen.model;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -22,21 +23,21 @@ public class Plot extends Drawable {
   
   private String name;
   private double area;
-  @OneToOne
+  @OneToOne(cascade = {CascadeType.ALL})
   private GeoPolygon polygon;
-  @OneToOne
+  @OneToOne(cascade = {CascadeType.ALL})
   private Location location;
   private Double scalingFactor;
-  @OneToOne
+  @OneToOne(cascade = {CascadeType.ALL})
   private WeatherData weatherData;
   private Double rootingZone;
-  @OneToOne
+  @OneToOne(cascade = {CascadeType.ALL})
   private WaterBalance waterBalance;
   private String recommendedAction;
   private Date soilStartDate;
   private Double soilStartValue;
   private Boolean calculationPaused;
-  @OneToOne
+  @OneToOne(cascade = {CascadeType.ALL})
   private Crop crop;
   private Date cropStart; 
   private Date cropEnd;

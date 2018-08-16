@@ -714,6 +714,10 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
       }
       farm.getFields().removeAll(delField);
     }
+    
+    // liste gelöschter farms, wird beim Speichern verarbeitet
+    gsehenInstance.getDeletedFarms().addAll(delFarm);
+    
     LOGGER.info(object + " deleted.");
     farmsList.removeAll(delFarm);
     gsehenInstance.sendFarmDataChanged(object, null);

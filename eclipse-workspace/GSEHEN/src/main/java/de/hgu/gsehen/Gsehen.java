@@ -33,6 +33,10 @@ import javax.persistence.criteria.Order;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
+
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
@@ -103,12 +107,12 @@ public class Gsehen extends Application {
   private GsehenTreeTable treeTable;
 
   private List<Farm> farmsList = new ArrayList<>();
+  private List<Farm> deletedFarms = new ArrayList<>();
 
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<Class<? extends GsehenEvent>, 
-      List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
+  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
   private boolean dataChanged;
 
   private static Gsehen instance;
@@ -117,6 +121,10 @@ public class Gsehen extends Application {
 
     instance = this;
 
+  }
+
+  public List<Farm> getDeletedFarms() {
+    return this.deletedFarms;
   }
 
   /**
@@ -133,8 +141,6 @@ public class Gsehen extends Application {
     } catch (Exception e) {
       e.printStackTrace();
     }
-
-    test();
     Application.launch(args);
   }
 
@@ -269,16 +275,37 @@ public class Gsehen extends Application {
    * Loads the user-created data (farms, fields, plots, ..)
    */
   public void loadUserData() {
-    ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
+    EntityManager em = emf.createEntityManager();
     try {
-      engine.put("instance", this);
-      engine.put("LOGGER", LOGGER);
-      engine.put("farms", farmsList);
-      engine.eval(getReaderForUtf8(LOAD_USER_DATA_JS));
-      dataChanged = false;
-    } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Can't evaluate " + LOAD_USER_DATA_JS, e);
+
+      // möglichkeit 1, mit bekannter ID
+      // em.getTransaction();
+      // Farm testfarm = em.find(Farm.class, 132l);
+      // if(testfarm != null) {
+      // System.out.print(testfarm.getName());
+      // }
+
+      // möglichkeit 2, alle möglichen objekte
+      Session session = em.unwrap(Session.class);
+      Query query = session.createQuery("from Farm"); // You will get Weayher object
+      farmsList = query.list(); // You are accessing as list<WeatherModel>
+    } finally {
+      em.close();
     }
+
+    // ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+    // try {
+    // engine.put("instance", this);
+    // engine.put("LOGGER", LOGGER);
+    // engine.put("farms", farmsList);
+    // engine.eval(getReaderForUtf8(LOAD_USER_DATA_JS));
+
+    dataChanged = false;
+    // } catch (Exception e) {
+    // LOGGER.log(Level.SEVERE, "Can't evaluate " + LOAD_USER_DATA_JS, e);
+    sendFarmDataChanged(null, null);
+    // }
   }
 
   /**
@@ -287,10 +314,36 @@ public class Gsehen extends Application {
   public void saveUserData() {
     ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
     try {
-      engine.put("instance", this);
-      engine.put("LOGGER", LOGGER);
-      engine.put("farms", farmsList);
-      engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
+
+      EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
+      EntityManager em = emf.createEntityManager();
+
+      try {
+        em.getTransaction().begin();
+        for (Farm farm : farmsList) {
+          em.merge(farm);
+        }
+
+        for (Farm deletedFarm : this.getDeletedFarms()) {
+          em.remove(em.contains(deletedFarm) ? deletedFarm : em.merge(deletedFarm));
+        }
+        this.getDeletedFarms().clear();
+
+        em.getTransaction().commit();
+      } catch (Exception e) {
+        System.out.println("Problem: " + e.getMessage());
+        em.getTransaction().rollback();
+      } finally {
+        em.close();
+      }
+
+      // speichern in datei wird ersetzt durch speichern in DB
+      // engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
+      // engine.put("instance", this);
+      // engine.put("LOGGER", LOGGER);
+      // engine.put("farms", farmsList);
+
+      // engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
       dataChanged = false;
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Can't evaluate " + SAVE_USER_DATA_JS, e);

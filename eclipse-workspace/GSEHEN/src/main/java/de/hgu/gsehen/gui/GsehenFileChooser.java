@@ -53,14 +53,16 @@ public final class GsehenFileChooser extends Application {
     saveButton.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(final ActionEvent e) {
-        configureFileChooser(fileChooser);
-        File file = fileChooser.showSaveDialog(stage);
-        if (file != null) {
-          for (Farm farm : gsehenInstance.getFarmsList()) {
-            data = ""; // TODO: .js im Stil der vorhandenen erstellen.
-          }
-          saveFile(data, file);
-        }
+    	  
+    	  
+//        configureFileChooser(fileChooser);
+//        File file = fileChooser.showSaveDialog(stage);
+//        if (file != null) {
+//          for (Farm farm : gsehenInstance.getFarmsList()) {
+//            data = ""; // TODO: .js im Stil der vorhandenen erstellen.
+//          }
+//          saveFile(data, file);
+//        }
         gsehenInstance.saveUserData();
         Platform.exit();
         System.exit(0);
