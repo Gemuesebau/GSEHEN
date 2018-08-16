@@ -24,6 +24,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -196,15 +197,19 @@ public class MainController {
     tableView.getColumns().addAll(columnF1, columnF2, columnF3, columnF4, columnF5, columnF6,
         columnF7, columnF8, columnF9, columnF10, columnF11, columnF12, columnF13);
 
+    Group root = new Group();
+    Scene scene = new Scene(root, 1100, 450);
     VBox vBox = new VBox();
+    VBox.setVgrow(tableView, Priority.ALWAYS);
     vBox.setSpacing(10);
     vBox.setPadding(new Insets(20, 20, 20, 20));
+    vBox.prefWidthProperty().bind(scene.widthProperty());
+    vBox.prefHeightProperty().bind(scene.heightProperty());
     vBox.getChildren().add(tableView);
 
-    Group root = new Group();
     root.getChildren().add(vBox);
 
-    primaryStage.setScene(new Scene(root, 1100, 450));
+    primaryStage.setScene(scene);
     primaryStage.show();
 
   }
