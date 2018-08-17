@@ -1,33 +1,22 @@
 package de.hgu.gsehen.gui.view;
 
 import de.hgu.gsehen.Gsehen;
-
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.logging.Configurator;
 import de.hgu.gsehen.logging.LogDataHandler;
 import de.hgu.gsehen.model.LogEntry;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -375,7 +364,8 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
           System.out.println("Exception found in :" + ex);
         }
 
-    }});
+      }
+      });
     
 
     System.out.println(arr);

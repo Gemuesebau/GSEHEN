@@ -1,5 +1,7 @@
 package de.hgu.gsehen.model;
 
+import de.hgu.gsehen.gui.GeoPolygon;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -9,11 +11,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-
-import de.hgu.gsehen.gui.GeoPolygon;
 
 
 @Entity

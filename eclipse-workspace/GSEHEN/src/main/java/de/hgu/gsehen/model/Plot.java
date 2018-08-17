@@ -1,17 +1,14 @@
 package de.hgu.gsehen.model;
 
+import de.hgu.gsehen.gui.GeoPolygon;
+
 import java.util.Date;
 
 import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-
-import de.hgu.gsehen.gui.GeoPolygon;
 
 
 @Entity

@@ -198,16 +198,16 @@ public class MainController {
         columnF7, columnF8, columnF9, columnF10, columnF11, columnF12, columnF13);
 
     Group root = new Group();
-    Scene scene = new Scene(root, 1100, 450);
-    VBox vBox = new VBox();
+    VBox vbox = new VBox();
     VBox.setVgrow(tableView, Priority.ALWAYS);
-    vBox.setSpacing(10);
-    vBox.setPadding(new Insets(20, 20, 20, 20));
-    vBox.prefWidthProperty().bind(scene.widthProperty());
-    vBox.prefHeightProperty().bind(scene.heightProperty());
-    vBox.getChildren().add(tableView);
+    vbox.setSpacing(10);
+    Scene scene = new Scene(root, 1100, 450);
+    vbox.setPadding(new Insets(20, 20, 20, 20));
+    vbox.prefWidthProperty().bind(scene.widthProperty());
+    vbox.prefHeightProperty().bind(scene.heightProperty());
+    vbox.getChildren().add(tableView);
 
-    root.getChildren().add(vBox);
+    root.getChildren().add(vbox);
 
     primaryStage.setScene(scene);
     primaryStage.show();

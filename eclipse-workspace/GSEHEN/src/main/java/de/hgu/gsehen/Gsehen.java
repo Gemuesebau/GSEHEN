@@ -62,8 +62,6 @@ import javafx.stage.WindowEvent;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -92,9 +90,6 @@ public class Gsehen extends Application {
   private static final String LOGS_VIEW_ID = "#logsBorderPane";
   private static final String IMAGE_VIEW_ID = "#imageView";
 
-  private static final String LOAD_USER_DATA_JS = "/de/hgu/gsehen/js/loadUserData.js";
-  private static final String SAVE_USER_DATA_JS = "/de/hgu/gsehen/js/saveUserData.js";
-
   private static Maps maps;
   private static Farms farms;
   private static Fields fields;
@@ -108,7 +103,8 @@ public class Gsehen extends Application {
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
+  private java.util.Map<Class<? extends GsehenEvent>,
+      List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
   private boolean dataChanged;
 
   private static Gsehen instance;
@@ -250,7 +246,8 @@ public class Gsehen extends Application {
   /**
    * Loads the user-created data (farms, fields, plots, ..)
    */
-  public void loadUserData() {
+  @SuppressWarnings("unchecked")
+public void loadUserData() {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
     EntityManager em = emf.createEntityManager();
     try {
@@ -264,7 +261,7 @@ public class Gsehen extends Application {
 
       // möglichkeit 2, alle möglichen objekte
       Session session = em.unwrap(Session.class);
-      Query query = session.createQuery("from Farm"); // You will get Weayher object
+      Query<Farm> query = session.createQuery("from Farm"); // You will get Weayher object
       farmsList = query.list(); // You are accessing as list<WeatherModel>
     } finally {
       em.close();
@@ -288,7 +285,7 @@ public class Gsehen extends Application {
    * Saves the user-created data (farms, fields, plots, ..)
    */
   public void saveUserData() {
-    ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+
     try {
 
       EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
@@ -322,7 +319,7 @@ public class Gsehen extends Application {
       // engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
       dataChanged = false;
     } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Can't evaluate " + SAVE_USER_DATA_JS, e);
+      LOGGER.log(Level.SEVERE, "Can't evaluate ", e);
     }
   }
 
