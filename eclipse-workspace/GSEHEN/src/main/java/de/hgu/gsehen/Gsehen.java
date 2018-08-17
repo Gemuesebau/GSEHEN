@@ -2,7 +2,27 @@ package de.hgu.gsehen;
 
 import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
-import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
+
+import de.hgu.gsehen.event.DrawableSelected;
+import de.hgu.gsehen.event.FarmDataChanged;
+import de.hgu.gsehen.event.GsehenEvent;
+import de.hgu.gsehen.event.GsehenEventListener;
+import de.hgu.gsehen.event.GsehenViewEvent;
+import de.hgu.gsehen.gui.GeoPoint;
+import de.hgu.gsehen.gui.GsehenTreeTable;
+import de.hgu.gsehen.gui.controller.MainController;
+import de.hgu.gsehen.gui.view.FarmDataController;
+import de.hgu.gsehen.gui.view.Farms;
+import de.hgu.gsehen.gui.view.Fields;
+import de.hgu.gsehen.gui.view.Logs;
+import de.hgu.gsehen.gui.view.Maps;
+import de.hgu.gsehen.gui.view.Plots;
+import de.hgu.gsehen.model.Drawable;
+import de.hgu.gsehen.model.Farm;
+import de.hgu.gsehen.model.Field;
+import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.model.test;
+import de.hgu.gsehen.util.Pair;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,38 +45,6 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.criteria.Order;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.query.Query;
-
-import de.hgu.gsehen.event.DrawableSelected;
-import de.hgu.gsehen.event.FarmDataChanged;
-import de.hgu.gsehen.event.GsehenEvent;
-import de.hgu.gsehen.event.GsehenEventListener;
-import de.hgu.gsehen.event.GsehenViewEvent;
-import de.hgu.gsehen.gui.GeoPoint;
-import de.hgu.gsehen.gui.GsehenTreeTable;
-import de.hgu.gsehen.gui.controller.MainController;
-import de.hgu.gsehen.gui.view.FarmDataController;
-import de.hgu.gsehen.gui.view.Farms;
-import de.hgu.gsehen.gui.view.Fields;
-import de.hgu.gsehen.gui.view.Logs;
-import de.hgu.gsehen.gui.view.Maps;
-import de.hgu.gsehen.gui.view.Plots;
-import de.hgu.gsehen.model.Drawable;
-import de.hgu.gsehen.model.Farm;
-import de.hgu.gsehen.model.Field;
-import de.hgu.gsehen.model.Plot;
-import de.hgu.gsehen.model.test;
-import de.hgu.gsehen.util.Pair;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -71,6 +59,15 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 
 /**
  * The GSEHEN main application.

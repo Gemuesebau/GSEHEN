@@ -1,7 +1,7 @@
 package de.hgu.gsehen.gui.controller;
 
 import de.hgu.gsehen.Gsehen;
-import de.hgu.gsehen.gui.GsehenFileChooser;
+import de.hgu.gsehen.gui.GsehenSave;
 import de.hgu.gsehen.model.CsvItem;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -244,8 +244,8 @@ public class MainController {
   public void exit() {
     if (gsehenInstance.isDataChanged()) {
       Stage stage = new Stage();
-      GsehenFileChooser fileChooser = new GsehenFileChooser();
-      fileChooser.start(stage);
+      GsehenSave save = new GsehenSave();
+      save.start(stage);
     } else {
       Platform.exit();
       System.exit(0);

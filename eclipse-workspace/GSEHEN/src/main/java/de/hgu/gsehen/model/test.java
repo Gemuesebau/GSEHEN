@@ -15,7 +15,7 @@ public class test{
      }
   
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue
   private long id;
   @Column(name = "NAME")
   private String name;
