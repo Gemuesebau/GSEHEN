@@ -21,7 +21,6 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
-import de.hgu.gsehen.model.test;
 import de.hgu.gsehen.util.Pair;
 
 import java.io.BufferedReader;
@@ -245,26 +244,6 @@ public class Gsehen extends Application {
       }
     } catch (SQLException e) {
       System.out.println("no connection");
-    }
-  }
-
-  public static void test() {
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
-    EntityManager em = emf.createEntityManager();
-
-    try {
-      em.getTransaction().begin();
-      test student = new test("das");
-      em.persist(student);
-      em.getTransaction().commit();
-      test t = em.find(test.class, 1L);
-      System.out.println(t);
-
-      em.close();
-      emf.close();
-    } catch (Exception e) {
-      System.out.println("Problem: " + e.getMessage());
-      em.getTransaction().rollback();
     }
   }
 
