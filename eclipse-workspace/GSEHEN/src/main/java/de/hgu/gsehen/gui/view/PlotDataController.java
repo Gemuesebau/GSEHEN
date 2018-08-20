@@ -16,10 +16,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Logger;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -44,6 +40,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
   private final Timeline timeline = new Timeline();
