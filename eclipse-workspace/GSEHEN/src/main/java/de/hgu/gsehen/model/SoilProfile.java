@@ -1,7 +1,7 @@
 package de.hgu.gsehen.model;
 
 import java.util.Set;
-
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -13,9 +13,9 @@ public class SoilProfile {
   @Id
   @GeneratedValue
   private long id;
-  @OneToMany
+  @OneToMany (cascade = {CascadeType.ALL})
   private Set<Soil> soilType;
-  @OneToMany
+  @OneToMany(cascade = {CascadeType.ALL})
   private Set<SoilProfileDepth> profileDepth;
 
   public Set<Soil> getSoilType() {
