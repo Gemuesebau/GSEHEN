@@ -1,11 +1,14 @@
 package de.hgu.gsehen.gsbalance;
 
-import de.hgu.gsehen.evapotranspiration.DayData;
-import de.hgu.gsehen.model.Crop;
+import de.hgu.gsehen.evapotranspiration.DayData;import
+
 import de.hgu.gsehen.model.Plot;
 
+
+
 public class DailyBalance {
-  public static void determineCurrentKc(DayData dayData, Plot plot, Crop crop) {
+  public static void determineCurrentKc(DayData dayData, Plot plot) {
+    Date date = dayData.getDate();
 
     Double currentKc = 1.3;
     dayData.setCurrentKc(currentKc);
