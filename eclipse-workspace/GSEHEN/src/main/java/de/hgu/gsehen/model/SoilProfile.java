@@ -13,10 +13,19 @@ public class SoilProfile {
   @Id
   @GeneratedValue
   private long id;
+  private String name;
   @OneToMany (cascade = {CascadeType.ALL})
   private Set<Soil> soilType;
   @OneToMany(cascade = {CascadeType.ALL})
   private Set<SoilProfileDepth> profileDepth;
+  
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
 
   public Set<Soil> getSoilType() {
     return soilType;

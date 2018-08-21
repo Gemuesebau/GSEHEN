@@ -251,7 +251,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 attributeLabel3 = new Text("Bodenprofil: ");
                 attributeLabel3.setFont(Font.font("Arial", 12));
                 if (field.getSoilProfile() != null) {
-                  // attribute3 = new Text(field.getSoilProfile().); TODO: Name!
+                  attribute3 = new Text(field.getSoilProfile().getName());
                 } else {
                   attribute3 = new Text("");
                 }
@@ -536,9 +536,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           Field field = (Field) param.getValue().getValue();
 
           if (field.getSoilProfile() != null) {
-            // result = new ReadOnlyStringWrapper(
-            // field.getSoilProfile().getSoilType().);
-            // TODO: Name bekommen!
+            result = new ReadOnlyStringWrapper(field.getSoilProfile().getName());
           } else {
             result = new ReadOnlyStringWrapper("/");
           }
