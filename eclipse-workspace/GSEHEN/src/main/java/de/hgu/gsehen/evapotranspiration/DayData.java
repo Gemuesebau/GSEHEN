@@ -19,9 +19,38 @@ public class DayData {
   private Double airHumidityRelMin;
   private Double airHumidityRelMax;
   private double globalRad;
-  private double precipitation; // ausgliedern in ein anders objekt?
+  private Double precipitation; // ausgliedern in ein anders objekt?
   private double windspeed2m;
   private Double et0;
+  private Double etc;
+
+  public Double getEtc() {
+    return etc;
+  }
+
+  public void setEtc(Double etc) {
+    this.etc = etc;
+  }
+
+  private Double irrigation;
+
+  public Double getIrrigation() {
+    return irrigation;
+  }
+
+  public void setIrrigation(Double irrigation) {
+    this.irrigation = irrigation;
+  }
+
+  private Double dailyBalance;
+
+  public Double getDailyBalance() {
+    return dailyBalance;
+  }
+
+  public void setDailyBalance(Double dailyBalance) {
+    this.dailyBalance = dailyBalance;
+  }
 
   public Date getDate() {
     return date;
@@ -87,11 +116,11 @@ public class DayData {
     this.globalRad = globalRad;
   }
 
-  public double getPrecipitation() {
+  public Double getPrecipitation() {
     return precipitation;
   }
 
-  public void setPrecipitation(double precipitation) {
+  public void setPrecipitation(Double precipitation) {
     this.precipitation = precipitation;
   }
 
@@ -103,11 +132,11 @@ public class DayData {
     this.windspeed2m = windspeed2m;
   }
 
-  public double getEt0() {
+  public Double getEt0() {
     return et0;
   }
 
-  public void setEt0(double et0) {
+  public void setEt0(Double et0) {
     this.et0 = et0;
   }
 
@@ -125,10 +154,13 @@ public class DayData {
    * @param globalRad Global radiation in MJ
    * @param precipitation Rainfall
    * @param windspeed2m Mean windspeed at 2 meters above ground level in m/s
+   * @param et0 daily evapotranspiration in mm
+   * @param dailyBalance is the daily Water blance in mm
    */
   public DayData(Date date, double tempMean, Double tempMin, Double tempMax,
       double airHumidityRelMean, Double airHumidityRelMin, Double airHumidityRelMax,
-      double globalRad, double precipitation, double windspeed2m, Double et0) {
+      double globalRad, Double precipitation, double windspeed2m, Double et0, Double etc,
+      Double irrigation, Double dailyBalance) {
     super();
     this.date = date;
     this.tempMean = tempMean;
@@ -141,6 +173,9 @@ public class DayData {
     this.precipitation = precipitation;
     this.windspeed2m = windspeed2m;
     this.et0 = et0;
+    this.etc = etc;
+    this.irrigation = irrigation;
+    this.dailyBalance = dailyBalance;
   }
 
 }
