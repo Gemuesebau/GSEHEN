@@ -1,7 +1,5 @@
 package de.hgu.gsehen.model;
 
-import de.hgu.gsehen.gui.GeoPolygon;
-
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -10,6 +8,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
+import de.hgu.gsehen.gui.GeoPolygon;
+
 
 @Entity
 public class Plot extends Drawable {
@@ -17,7 +17,7 @@ public class Plot extends Drawable {
   @Id
   @GeneratedValue
   private long id;
-  
+
   private String name;
   private double area;
   @OneToOne(cascade = {CascadeType.ALL})
@@ -36,7 +36,7 @@ public class Plot extends Drawable {
   private Boolean calculationPaused;
   @OneToOne(cascade = {CascadeType.ALL})
   private Crop crop;
-  private Date cropStart; 
+  private Date cropStart;
   private Date cropEnd;
   private Boolean isActive;
 
@@ -175,7 +175,7 @@ public class Plot extends Drawable {
   public void setCropEnd(Date cropEnd) {
     this.cropEnd = cropEnd;
   }
-  
+
   public Boolean getIsActive() {
     return isActive;
   }
@@ -184,13 +184,13 @@ public class Plot extends Drawable {
     this.isActive = isActive;
   }
 
-  public void visualize(){}
+  public void visualize() {}
 
-  public void configure(){}
+  public void configure() {}
 
-  public void modify(){}
+  public void modify() {}
 
-  public void archive(){}
+  public void archive() {}
 
   @Override
   public String toString() {
