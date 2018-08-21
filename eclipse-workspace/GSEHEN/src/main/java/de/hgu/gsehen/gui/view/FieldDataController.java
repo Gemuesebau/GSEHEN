@@ -4,18 +4,15 @@ import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.model.Drawable;
-import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -23,7 +20,6 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
@@ -35,10 +31,17 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 
 public class FieldDataController implements GsehenEventListener<FarmDataChanged> {
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+
+  private List<SoilProfile> soilList = new ArrayList<>();
 
   private TreeItem<Drawable> selectedItem;
   private Field field;
@@ -49,14 +52,12 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
   private Text nameLabel;
   private Text areaLabel;
-  private Text rootingZoneLabel;
 
   private TextField name;
   private Text area;
-  private TextField rootingZone;
 
   private Button createSoil;
-  private SoilProfile soilProfile;
+  private SoilProfile soilProfileItem;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -101,31 +102,43 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // LEFT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Text soil = new Text("Bodentyp: ");
-    soil.setFont(Font.font("Arial", 14));
-    // Dummy-Liste
-    ChoiceBox<Soil> soilChoiceBox = new ChoiceBox<Soil>();
-    soilChoiceBox.getItems().addAll(new Soil("A"), new Soil("B"), new Soil("C"));
-    soilChoiceBox.setConverter(new StringConverter<Soil>() {
+    Text soilProfile = new Text("Bodenprofil: ");
+    soilProfile.setFont(Font.font("Arial", 14));
 
-      @Override
-      public String toString(Soil object) {
-        return object.getName();
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
+    EntityManager em = emf.createEntityManager();
+    if (soilList.isEmpty()) {
+      try {
+        Session session = em.unwrap(Session.class);
+        Query<SoilProfile> query = session.createQuery("from SoilProfile");
+        soilList = query.list();
+      } finally {
+        em.close();
       }
+    }
 
-      @Override
-      public Soil fromString(String string) {
-        return soilChoiceBox.getItems().stream().filter(ap -> ap.getName().equals(string))
-            .findFirst().orElse(null);
+    ChoiceBox<SoilProfile> soilChoiceBox = new ChoiceBox<SoilProfile>();
+    if (!soilList.isEmpty()) {
+      for (SoilProfile s : soilList) {
+        soilChoiceBox.getItems().add(s);
       }
-    });
+      soilChoiceBox.setConverter(new StringConverter<SoilProfile>() {
+
+        @Override
+        public String toString(SoilProfile object) {
+          return object.getName();
+        }
+
+        @Override
+        public SoilProfile fromString(String string) {
+          return soilChoiceBox.getItems().stream().filter(ap -> ap.getName().equals(string))
+              .findFirst().orElse(null);
+        }
+      });
+    }
 
     HBox soilBox = new HBox();
-    soilBox.getChildren().addAll(soil, soilChoiceBox);
-
-    rootingZoneLabel = new Text("Maximal durchwurzelbare Zone: ");
-    rootingZoneLabel.setFont(Font.font("Arial", 14));
-    rootingZone = new TextField("");
+    soilBox.getChildren().addAll(soilProfile, soilChoiceBox);
 
     createSoil = new Button("Bodentyp ertsellen");
     createSoil.setOnAction(new EventHandler<ActionEvent>() {
@@ -142,31 +155,84 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         TextField dStart = new TextField(mdEnd.getText());
         TextField dEnd = new TextField("150");
 
-        Text soilNameLabel = new Text("Name: ");
+        Text soilNameLabel = new Text("Name des Profils: ");
         soilNameLabel.setFont(Font.font("Arial", 14));
-        TextField soilName = new TextField("");
+        TextField soilProfileName = new TextField("");
 
         HBox nameBox = new HBox();
-        nameBox.getChildren().addAll(soilNameLabel, soilName);
+        nameBox.getChildren().addAll(soilNameLabel, soilProfileName);
 
-        Text descriptionLabel = new Text("Beschreibung: ");
-        descriptionLabel.setFont(Font.font("Arial", 14));
-        TextArea descriptionArea = new TextArea("");
+        Text soil = new Text("Bodentyp: ");
+        soil.setFont(Font.font("Arial", 14));
 
-        HBox descriptionBox = new HBox();
-        descriptionBox.getChildren().addAll(descriptionLabel, descriptionArea);
+        // TODO: Hardcoded.
+        Soil sand = new Soil();
+        sand.setName("Sand");
+        sand.setAvailableWaterCapacity(8);
+        Soil sandyLoam = new Soil();
+        sandyLoam.setName("Sandiger Lehm");
+        sandyLoam.setAvailableWaterCapacity(12);
+        Soil loam = new Soil();
+        loam.setName("Lehm");
+        loam.setAvailableWaterCapacity(17);
+        Soil clayLoam = new Soil();
+        clayLoam.setName("Toniger Lehm");
+        clayLoam.setAvailableWaterCapacity(18);
+        Soil siltyClay = new Soil();
+        siltyClay.setName("Schluffiger Ton");
+        siltyClay.setAvailableWaterCapacity(20);
+        Soil clay = new Soil();
+        clay.setName("Ton");
+        clay.setAvailableWaterCapacity(23);
+
+        List<Soil> soils = new ArrayList<Soil>();
+        soils.add(sand);
+        soils.add(sandyLoam);
+        soils.add(loam);
+        soils.add(clayLoam);
+        soils.add(siltyClay);
+        soils.add(clay);
+
+        ChoiceBox<Soil> soilChoiceBox = new ChoiceBox<Soil>();
+        soilChoiceBox.getItems().addAll(soils);
+        soilChoiceBox.setConverter(new StringConverter<Soil>() {
+
+          @Override
+          public String toString(Soil object) {
+            return object.getName();
+          }
+
+          @Override
+          public Soil fromString(String string) {
+            return soilChoiceBox.getItems().stream().filter(ap -> ap.getName().equals(string))
+                .findFirst().orElse(null);
+          }
+        });
+
+        HBox soilBox = new HBox();
+        soilBox.getChildren().addAll(soil, soilChoiceBox);
 
         Text soilAwcLabel = new Text("Verfügbare Wasserkapazität: ");
         soilAwcLabel.setFont(Font.font("Arial", 14));
-        Text soilAwc = new Text("0.0"); // TODO berechnen!
-        soilAwc.setFont(Font.font("Arial", 14));
+        TextField soilAwc = new TextField();
+
+        ChangeListener<Soil> changeListener = new ChangeListener<Soil>() {
+          @Override
+          public void changed(ObservableValue<? extends Soil> observable, //
+              Soil oldValue, Soil newValue) {
+            if (newValue != null) {
+              soilAwc.setText(String.valueOf(soilChoiceBox.getValue().getAvailableWaterCapacity()));
+            }
+          }
+        };
+        soilChoiceBox.getSelectionModel().selectedItemProperty().addListener(changeListener);
 
         HBox awcBox = new HBox();
         awcBox.getChildren().addAll(soilAwcLabel, soilAwc);
 
         VBox topBox = new VBox(25);
         topBox.setPadding(new Insets(20, 20, 20, 20));
-        topBox.getChildren().addAll(nameBox, descriptionBox, awcBox);
+        topBox.getChildren().addAll(nameBox, soilBox, awcBox);
         pane.setTop(topBox);
 
         Text depth = new Text("Tiefe");
@@ -356,8 +422,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
               pane.getChildren().clear();
 
               Soil soil = new Soil();
-              soil.setName(soilName.getText());
-              soil.setDescription(descriptionArea.getText());
+              soil.setName(soilChoiceBox.getValue().getName());
               soil.setAvailableWaterCapacity(Double.parseDouble(soilAwc.getText()));
 
               SoilProfileDepth spd1 = new SoilProfileDepth();
@@ -383,10 +448,13 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
               spdSet.add(spd2);
               spdSet.add(spd3);
               spdSet.add(spd4);
-              soilProfile = new SoilProfile();
-              soilProfile.setSoilType(soilSet);
-              soilProfile.setProfileDepth(spdSet);
+              soilProfileItem = new SoilProfile();
+              soilProfileItem.setSoilType(soilSet);
+              soilProfileItem.setProfileDepth(spdSet);
+              soilProfileItem.setName(soilProfileName.getText());
 
+              soilList.add(soilProfileItem);
+              pane.getChildren().clear();
               gsehenInstance.sendFarmDataChanged(field, null);
             }
           }
@@ -402,12 +470,9 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
       }
     });
 
-    HBox soilStartBox = new HBox();
-    soilStartBox.getChildren().addAll(rootingZoneLabel, rootingZone);
-
     VBox leftBox = new VBox(50);
     leftBox.setPadding(new Insets(20, 20, 20, 20));
-    leftBox.getChildren().addAll(soilBox, soilStartBox, createSoil);
+    leftBox.getChildren().addAll(soilBox, createSoil);
     pane.setLeft(leftBox);
     // LEFT END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -415,10 +480,16 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
-        field.setName(name.getText());
         field.setArea(Double.valueOf(area.getText()));
-        field.setSoilProfile(soilProfile);
-        field.setRootingZone(Double.valueOf(rootingZone.getText()));
+        System.out.println(soilList.size());
+        for (SoilProfile sp : soilList) {
+          System.out.println(sp);
+          System.out.println(soilChoiceBox.getValue());
+          if (sp == soilChoiceBox.getValue()) {
+            field.setSoilProfile(sp);
+            System.out.println(sp.getName());
+          }
+        }
 
         gsehenInstance.sendFarmDataChanged(field, null);
       }
@@ -437,8 +508,6 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
                     treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
                 if (selectedItem != null
                     && selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
-                  // TODO
-
                   pane.setVisible(true);
                   field = (Field) selectedItem.getValue();
 
@@ -446,9 +515,12 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
                   area.setText(String.valueOf(field.getArea()));
 
-                  // soilChoiceBox.getSelectionModel().select(field.getSoilProfile().getSoilType());
+                  for (SoilProfile soPr : soilList) {
+                    if (soPr.getName().equals(field.getSoilProfile().getName())) {
+                      soilChoiceBox.getSelectionModel().select(soPr);
+                    }
+                  }
 
-                  rootingZone.setText(String.valueOf(field.getRootingZone()));
                 } else {
                   pane.setVisible(false);
                 }
