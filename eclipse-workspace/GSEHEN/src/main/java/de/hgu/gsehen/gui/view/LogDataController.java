@@ -1,18 +1,19 @@
 package de.hgu.gsehen.gui.view;
 
 import de.hgu.gsehen.Gsehen;
-
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.logging.Configurator;
 import de.hgu.gsehen.logging.LogDataHandler;
 import de.hgu.gsehen.model.LogEntry;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -25,12 +26,12 @@ import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -40,16 +41,22 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
-
+import javafx.util.StringConverter;
 
 public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private Gsehen gsehenInstance;
   private BorderPane pane;
   private ObservableList<LogEntry> data;
-  private MenuBar datePickerMenuBar = null;
-
+  public static LocalDate arr;
+  private static LocalDate startDate;
+  private static LocalDate endDate;
+  
+  DatePicker startpicker = new DatePicker();
+  DatePicker endpicker = new DatePicker();
+  
   {
     gsehenInstance = Gsehen.getInstance();
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
@@ -171,9 +178,8 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
       public void handle(MouseEvent mouseEvent) {
         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
           if (mouseEvent.getClickCount() == 2) {
-            popupfilter();
+            popupfilteroptions();
           }
-
         }
       }
 
@@ -186,32 +192,72 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   /**
    * Popup-Window for Filtering the entries.
    */
-  public void popupfilter() {
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  public void popupfilteroptions() {
 
     Stage stage = new Stage();
     stage.setTitle("Filteroptionen");
+    Label titleTime = new Label("Zeit : ");
+    titleTime.setFont(Font.font("Arial", 14));
 
     // DatePicker and Label for Filter Date
-    DatePicker startdatepicker = null;
     Label startLabel = new Label("Von: ");
     startLabel.setFont(Font.font("Arial", 14));
-    startdatepicker = createDatePicker(startdatepicker);
 
-    HBox startBox = new HBox();
-    startBox.getChildren().addAll(startLabel, startdatepicker);
-
-    DatePicker enddatepicker = null;
     Label endLabel = new Label("Bis:  ");
     endLabel.setFont(Font.font("Arial", 14));
-    enddatepicker = createDatePicker(enddatepicker);
+
+    Label titledate = new Label("Datum :  ");
+    titledate.setFont(Font.font("Arial", 14));
+
+    // Converter
+    StringConverter<LocalDate> converter = new StringConverter<LocalDate>() {
+      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+      @Override
+      public String toString(LocalDate date) {
+        if (date != null) {
+          return dateFormatter.format(date);
+        } else {
+          return "";
+        }
+      }
+
+      @Override
+      public LocalDate fromString(String string) {
+        if (string != null && !string.isEmpty()) {
+          return LocalDate.parse(string, dateFormatter);
+        } else {
+          return null;
+        }
+      }
+    };
+    startpicker.setShowWeekNumbers(true);
+    startpicker.setConverter(converter);
+    startpicker.setPromptText("dd-MM-yyyy");
+
+    endpicker.setShowWeekNumbers(true);
+    endpicker.setConverter(converter);
+    endpicker.setPromptText("dd-MM-yyyy");
+
+    HBox startBox = new HBox();
+    startBox.getChildren().addAll(startLabel, startpicker);
 
     HBox endBox = new HBox();
-    endBox.getChildren().addAll(endLabel, enddatepicker);
+    endBox.getChildren().addAll(endLabel, endpicker);
+
+    HBox dateBox = new HBox();
+    dateBox.getChildren().addAll(titledate);
 
     VBox upBox = new VBox(20);
     upBox.setPadding(new Insets(10, 10, 10, 10));
     upBox.setSpacing(10);
-    upBox.getChildren().addAll(startBox, endBox);
+    upBox.getChildren().addAll(dateBox, startBox, endBox);
+
+    HBox titlebox = new HBox();
+    titlebox.setCenterShape(true);
+    titlebox.getChildren().add(titleTime);
+    upBox.getChildren().add(titlebox);
 
     Group rootGroup = new Group();
     Scene scene = new Scene(rootGroup, 400, 600);
@@ -219,47 +265,123 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
     stage.setScene(scene);
     stage.centerOnScreen();
     stage.show();
-  }
 
-  /**
-   * Datepicker.
-   * 
-   * @param datePicker
-   *          take Date
-   * @return
-   */
-  public DatePicker createDatePicker(DatePicker datePicker) {
+    String[] startstyles = { "spinner1", "spinner2", "spinner3" };
 
-    LocalDate value = null;
-    if (datePicker != null) {
-      value = datePicker.getValue();
-    }
-    DatePicker picker = new DatePicker();
-    // Listen for DatePicker actions
-    picker.setOnAction((ActionEvent t) -> {
-      LocalDate isoDate = picker.getValue();
-      if ((isoDate != null) && (!isoDate.equals(LocalDate.now()))) {
-        for (Menu menu : datePickerMenuBar.getMenus()) {
-          if (menu.getText().equals("Options for Locale")) {
-            for (MenuItem menuItem : menu.getItems()) {
-              if (menuItem.getText().equals("Set date to today")) {
-                if ((menuItem instanceof CheckMenuItem)
-                    && ((CheckMenuItem) menuItem).isSelected()) {
-                  ((CheckMenuItem) menuItem).setSelected(false);
-                }
-              }
-            }
+    // Spinner von
+    SpinnerValueFactory hour = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23);
+    Spinner ssp = new Spinner();
+    ssp.setValueFactory(hour);
+    ssp.getStyleClass().add(startstyles[0]);
+    ssp.setPrefWidth(60);
+    SpinnerValueFactory minute = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59);
+    Spinner ssp1 = new Spinner();
+    ssp1.setPrefWidth(60);
+    ssp1.setValueFactory(minute);
+    ssp1.getStyleClass().add(startstyles[1]);
+    SpinnerValueFactory sec = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59);
+    Spinner ssp2 = new Spinner();
+    ssp2.setPrefWidth(60);
+    ssp2.setValueFactory(sec);
+    ssp2.getStyleClass().add(startstyles[2]);
+
+    // Spinner bis
+    SpinnerValueFactory hours = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23);
+    Spinner esp = new Spinner();
+    esp.setValueFactory(hours);
+    esp.getStyleClass().add(startstyles[0]);
+    esp.setPrefWidth(60);
+    SpinnerValueFactory minutes = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59);
+    Spinner esp1 = new Spinner();
+    esp1.setPrefWidth(60);
+    esp1.setValueFactory(minutes);
+    esp1.getStyleClass().add(startstyles[1]);
+    SpinnerValueFactory seconds = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59);
+    Spinner esp2 = new Spinner();
+    esp2.setPrefWidth(60);
+    esp2.setValueFactory(seconds);
+    esp2.getStyleClass().add(startstyles[2]);
+
+    Label slabel = new Label(" : ");
+    slabel.setFont(Font.font("Arial", 14));
+    Label slLabel = new Label(" : ");
+    slLabel.setFont(Font.font("Arial", 14));
+    Label elabel = new Label(" : ");
+    elabel.setFont(Font.font("Arial", 14));
+    Label elLabel = new Label(" : ");
+    elLabel.setFont(Font.font("Arial", 14));
+
+    HBox startSpinnerBox = new HBox();
+    startSpinnerBox.getChildren().addAll(ssp, slabel, ssp1, slLabel, ssp2);
+    HBox endSpinnerBox = new HBox();
+    endSpinnerBox.getChildren().addAll(esp, elabel, esp1, elLabel, esp2);
+
+    upBox.getChildren().addAll(startSpinnerBox, endSpinnerBox);
+
+    Text slevel = new Text("Von: ");
+    slevel.setFont(Font.font("Arial", 14));
+    ChoiceBox stratcb = new ChoiceBox();
+    stratcb.getItems().addAll("SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINEST");
+    stratcb.getSelectionModel().selectFirst();
+
+    HBox slev = new HBox();
+    slev.getChildren().addAll(slevel, stratcb);
+
+    Text elevel = new Text("Bis:  ");
+    elevel.setFont(Font.font("Arial", 14));
+    ChoiceBox endcb = new ChoiceBox();
+    endcb.getItems().addAll("SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINEST");
+    endcb.getSelectionModel().selectFirst();
+
+    Label levlabel = new Label("Level : ");
+    levlabel.setFont(Font.font("Arial", 14));
+
+    HBox levelBox = new HBox();
+    levelBox.getChildren().addAll(levlabel);
+
+    HBox elev = new HBox();
+    elev.getChildren().addAll(elevel, endcb);
+
+    upBox.getChildren().addAll(levelBox, slev, elev);
+
+    Button save = new Button("Speichern");
+    save.setPrefSize(76, 45);
+
+    save.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent e) {
+
+        startDate = startpicker.getValue();
+        endDate = endpicker.getValue();
+        
+        try {
+          while (!startDate.isAfter(endDate)) {
+            System.out.println(startDate);
+            arr = startDate;
+            startDate = startDate.plusDays(1);
           }
+        } catch (Exception ex) {
+          System.out.println("Exception found in :" + ex);
         }
-      }
-    });
-    // hbox.getChildren().add(picker);
-    if (value != null) {
-      picker.setValue(value);
-    }
-    return picker;
-  }
 
+      }
+      });
+    
+
+    System.out.println(arr);
+
+
+    HBox button = new HBox();
+    button.getChildren().addAll(save);
+
+    upBox.getChildren().add(button);
+
+  }
+  
+  
+
+  
+  
   /**
    * Reload Log.
    */

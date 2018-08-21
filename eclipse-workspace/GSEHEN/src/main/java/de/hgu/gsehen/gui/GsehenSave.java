@@ -1,17 +1,8 @@
 package de.hgu.gsehen.gui;
 
 import de.hgu.gsehen.Gsehen;
-import de.hgu.gsehen.model.Farm;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -23,15 +14,12 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-public final class GsehenFileChooser extends Application {
+public final class GsehenSave extends Application {
   private Gsehen gsehenInstance;
-  private String data;
   protected static final ResourceBundle mainBundle =
       ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
-  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -39,28 +27,19 @@ public final class GsehenFileChooser extends Application {
 
   @Override
   public void start(final Stage stage) {
-    stage.setTitle(mainBundle.getString("filechooser.saveandexit"));
+    stage.setTitle(mainBundle.getString("save.titel"));
     stage.getIcons().add(new Image("/de/hgu/gsehen/images/Logo_UniGeisenheim_36x36.png"));
     stage.setAlwaysOnTop(true);
     stage.setHeight(100);
-    stage.setWidth(300);
+    stage.setWidth(420);
 
-    final FileChooser fileChooser = new FileChooser();
-    final Button saveButton = new Button(mainBundle.getString("menu.file.save"));
-    final Button exitButton = new Button(mainBundle.getString("menu.file.exit"));
-    final Button cancelButton = new Button(mainBundle.getString("filechooser.cancel"));
+    final Button saveButton = new Button(mainBundle.getString("save.saveandexit"));
+    final Button exitButton = new Button(mainBundle.getString("save.exitwithoutsave"));
+    final Button cancelButton = new Button(mainBundle.getString("save.cancel"));
 
     saveButton.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(final ActionEvent e) {
-        configureFileChooser(fileChooser);
-        File file = fileChooser.showSaveDialog(stage);
-        if (file != null) {
-          for (Farm farm : gsehenInstance.getFarmsList()) {
-            data = ""; // TODO: .js im Stil der vorhandenen erstellen.
-          }
-          saveFile(data, file);
-        }
         gsehenInstance.saveUserData();
         Platform.exit();
         System.exit(0);
@@ -101,25 +80,5 @@ public final class GsehenFileChooser extends Application {
 
   public static void main(String[] args) {
     Application.launch(args);
-  }
-
-  private static void configureFileChooser(final FileChooser fileChooser) {
-    fileChooser.setTitle(mainBundle.getString("menu.file.save") + "...");
-    fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-    fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("JSON", "*.json"));
-
-    DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-    Date date = new Date();
-    fileChooser.setInitialFileName("MeineFarm_" + dateFormat.format(date));
-  }
-
-  private void saveFile(String content, File file) {
-    try {
-      FileWriter fileWriter = new FileWriter(file);
-      fileWriter.write(content);
-      fileWriter.close();
-    } catch (IOException ex) {
-      LOGGER.log(Level.SEVERE, null, ex);
-    }
   }
 }

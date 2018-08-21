@@ -2,8 +2,6 @@ package de.hgu.gsehen;
 
 import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
-import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
-import static de.hgu.gsehen.util.JDBCUtil.parseYmd;
 
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
@@ -45,6 +43,7 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -52,7 +51,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -60,8 +58,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 
 /**
  * The GSEHEN main application.
@@ -75,9 +78,6 @@ public class Gsehen extends Application {
   protected static final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
       Locale.GERMAN);
 
-  private static final String GSEHEN_H2_LOCAL_DB = "gsehen-h2-local.db";
-  private static final String DAYDATA_TABLE = "DAYDATA";
-
   private static final String MAIN_FXML = "main.fxml";
 
   public static final String MAIN_SPLIT_PANE_ID = "#mainSplitPane";
@@ -90,9 +90,6 @@ public class Gsehen extends Application {
   private static final String LOGS_VIEW_ID = "#logsBorderPane";
   private static final String IMAGE_VIEW_ID = "#imageView";
 
-  private static final String LOAD_USER_DATA_JS = "/de/hgu/gsehen/js/loadUserData.js";
-  private static final String SAVE_USER_DATA_JS = "/de/hgu/gsehen/js/saveUserData.js";
-
   private static Maps maps;
   private static Farms farms;
   private static Fields fields;
@@ -101,18 +98,25 @@ public class Gsehen extends Application {
   private GsehenTreeTable treeTable;
 
   private List<Farm> farmsList = new ArrayList<>();
+  private List<Farm> deletedFarms = new ArrayList<>();
 
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>>
-      eventListeners = new HashMap<>();
+  private java.util.Map<Class<? extends GsehenEvent>,
+      List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
   private boolean dataChanged;
 
   private static Gsehen instance;
 
   {
+
     instance = this;
+
+  }
+
+  public List<Farm> getDeletedFarms() {
+    return this.deletedFarms;
   }
 
   /**
@@ -132,9 +136,9 @@ public class Gsehen extends Application {
     Application.launch(args);
   }
 
-  /*
-   * (non-Javadoc)
-   *
+  /**
+   * Generate the Mainframe.
+   * 
    * @see javafx.application.Application#start(javafx.stage.Stage)
    */
   @SuppressWarnings({ "checkstyle:rightcurly" })
@@ -191,52 +195,6 @@ public class Gsehen extends Application {
     treeTable.addFarmTreeView(GsehenTreeTable.class);
   }
 
-  @SuppressWarnings({ "unused", "checkstyle:rightcurly" })
-  private void testDatabase(TextArea debugTextArea) {
-    Connection con = null;
-    try {
-      String jdbcUrl = "jdbc:h2:./" + GSEHEN_H2_LOCAL_DB + ";CIPHER=AES";
-      con = DriverManager.getConnection(jdbcUrl, "", "OCddpvUe ");
-      // PW: space is important! But this is just a test, must be supplied by user or
-      // the like
-      LOGGER.info("Opened local H2 database at url " + jdbcUrl);
-    } catch (SQLException e) {
-      throw new RuntimeException(GSEHEN_H2_LOCAL_DB + " couldn't be opened", e);
-    }
-    // in h2, the DATE column type has no time information!
-    // id: http://www.h2database.com/html/datatypes.html#identity_type
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + DAYDATA_TABLE + "(id IDENTITY, date DATE, t_min DOUBLE)",
-        DAYDATA_TABLE + " couldn't be created");
-    try (PreparedStatement insertDayData = con
-        .prepareStatement("INSERT INTO " + DAYDATA_TABLE + " (date, t_min)" + " VALUES(?, ?)")) {
-      executeUpdate(insertDayData, parseYmd("2018-01-21"), 12.1);
-      executeUpdate(insertDayData, parseYmd("2018-01-22"), 12.2);
-      executeUpdate(insertDayData, parseYmd("2018-01-23"), 12.3);
-      con.commit();
-    } catch (SQLException e) {
-      throw new RuntimeException(DAYDATA_TABLE + " values couldn't be inserted", e);
-    }
-    try (PreparedStatement selectDayData = con
-        .prepareStatement("SELECT * FROM " + DAYDATA_TABLE + " WHERE date > ?")) {
-      ResultSet rs = executeQuery(selectDayData, parseYmd("2018-01-20"));
-      while (rs.next()) {
-        debugTextArea.appendText("[" + rs.getInt("id") + ", " + rs.getDate("date") + ", "
-            + rs.getDouble("t_min") + "]\n");
-      }
-    } catch (SQLException e) {
-      throw new RuntimeException(DAYDATA_TABLE + " values couldn't be selected", e);
-    }
-
-    if (con != null) {
-      try {
-        con.close();
-      } catch (SQLException e) {
-        throw new RuntimeException("DB connection couldn't be closed", e);
-      }
-    }
-  }
-
   /**
    * PostgreSQL DB connection.
    */
@@ -245,7 +203,7 @@ public class Gsehen extends Application {
     final String url = "jdbc:postgresql:"
         + "//hs-geisenheim.cwliowbz3tsc.eu-west-1.rds.amazonaws.com/standard";
     final String user = "GSEHEN_user";
-    final String password = "siehe drive";
+    final String password = "siehe Drive";
     Connection connection = null;
     {
       try {
@@ -256,7 +214,9 @@ public class Gsehen extends Application {
     }
     try (PreparedStatement selectcrop = connection.prepareStatement("SELECT * FROM crop;")) {
       ResultSet rs = executeQuery(selectcrop);
-      
+
+      // Statement stmt = connection.createStatement();
+      // ResultSet rs = stmt.executeQuery("SELECT * FROM crop;");
       while (rs.next()) {
         rs.getString("cName");
         rs.getBoolean("cActive");
@@ -279,39 +239,87 @@ public class Gsehen extends Application {
         rs.getString("cDescription");
       }
     } catch (SQLException e) {
-      System.out.println("geht nicht");
+      System.out.println("no connection");
     }
   }
 
   /**
    * Loads the user-created data (farms, fields, plots, ..)
    */
-  public void loadUserData() {
-    ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+  @SuppressWarnings("unchecked")
+public void loadUserData() {
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
+    EntityManager em = emf.createEntityManager();
     try {
-      engine.put("instance", this);
-      engine.put("LOGGER", LOGGER);
-      engine.put("farms", farmsList);
-      engine.eval(getReaderForUtf8(LOAD_USER_DATA_JS));
-      dataChanged = false;
-    } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Can't evaluate " + LOAD_USER_DATA_JS, e);
+
+      // möglichkeit 1, mit bekannter ID
+      // em.getTransaction();
+      // Farm testfarm = em.find(Farm.class, 132l);
+      // if(testfarm != null) {
+      // System.out.print(testfarm.getName());
+      // }
+
+      // möglichkeit 2, alle möglichen objekte
+      Session session = em.unwrap(Session.class);
+      Query<Farm> query = session.createQuery("from Farm"); // You will get Weayher object
+      farmsList = query.list(); // You are accessing as list<WeatherModel>
+    } finally {
+      em.close();
     }
+
+    // ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+    // try {
+    // engine.put("instance", this);
+    // engine.put("LOGGER", LOGGER);
+    // engine.put("farms", farmsList);
+    // engine.eval(getReaderForUtf8(LOAD_USER_DATA_JS));
+
+    dataChanged = false;
+    // } catch (Exception e) {
+    // LOGGER.log(Level.SEVERE, "Can't evaluate " + LOAD_USER_DATA_JS, e);
+    sendFarmDataChanged(null, null);
+    // }
   }
 
   /**
    * Saves the user-created data (farms, fields, plots, ..)
    */
   public void saveUserData() {
-    ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+
     try {
-      engine.put("instance", this);
-      engine.put("LOGGER", LOGGER);
-      engine.put("farms", farmsList);
-      engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
+
+      EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
+      EntityManager em = emf.createEntityManager();
+
+      try {
+        em.getTransaction().begin();
+        for (Farm farm : farmsList) {
+          em.merge(farm);
+        }
+
+        for (Farm deletedFarm : this.getDeletedFarms()) {
+          em.remove(em.contains(deletedFarm) ? deletedFarm : em.merge(deletedFarm));
+        }
+        this.getDeletedFarms().clear();
+
+        em.getTransaction().commit();
+      } catch (Exception e) {
+        System.out.println("Problem: " + e.getMessage());
+        em.getTransaction().rollback();
+      } finally {
+        em.close();
+      }
+
+      // speichern in datei wird ersetzt durch speichern in DB
+      // engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
+      // engine.put("instance", this);
+      // engine.put("LOGGER", LOGGER);
+      // engine.put("farms", farmsList);
+
+      // engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
       dataChanged = false;
     } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Can't evaluate " + SAVE_USER_DATA_JS, e);
+      LOGGER.log(Level.SEVERE, "Can't evaluate ", e);
     }
   }
 

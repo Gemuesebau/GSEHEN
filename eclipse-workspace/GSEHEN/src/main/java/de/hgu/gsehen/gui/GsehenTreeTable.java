@@ -196,7 +196,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
             if (newVal != null) {
               selectedItem = (TreeItem<Drawable>) newVal;
 
-              // TODO: Aktuell Platzhalter, da keine Daten vorhanden sind.
               nameLabel = new Text(mainBundle.getString("treetableview.name") + ": ");
               nameLabel.setFont(Font.font("Arial", 12));
               name = new Text(selectedItem.getValue().getName());
@@ -252,7 +251,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 attributeLabel3 = new Text("Bodenprofil: ");
                 attributeLabel3.setFont(Font.font("Arial", 12));
                 if (field.getSoilProfile() != null) {
-                  attribute3 = new Text(field.getSoilProfile().toString());
+                  // attribute3 = new Text(field.getSoilProfile().); TODO: Name!
                 } else {
                   attribute3 = new Text("");
                 }
@@ -423,7 +422,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           GeoPolygon plotGeo;
           Plot plot;
 
-          // Updates the farmList.
+          // Updates the farmList
+
+
           for (int i = 0; i < farmTreeView.getRoot().getChildren().size(); i++) {
             farmName = (String) farmTreeView.getRoot().getChildren().get(i).getValue().getName();
             farmGeo = farmTreeView.getRoot().getChildren().get(i).getValue().getPolygon();
@@ -435,14 +436,18 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   .getValue().getName();
               fieldGeo = farmTreeView.getRoot().getChildren().get(i).getChildren().get(j).getValue()
                   .getPolygon();
+
               field = new Field(fieldName, fieldGeo);
               object = field;
+
               if (j == 0) {
                 farm.setFields(field);
               } else {
                 List<Field> fields = farm.getFields();
                 fields.add(field);
               }
+
+
               for (int k = 0; k < farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
                   .getChildren().size(); k++) {
                 plotName = (String) farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
@@ -464,6 +469,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           farmsList.clear();
           farmsList.addAll(newFarmsList);
           gsehenInstance.sendFarmDataChanged(object, null);
+
         } else {
           LOGGER.info(itemType + " can't be stack on " + destinationType);
         }
@@ -513,6 +519,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
    * @param dataIndex - Content of the column.
    */
   public void addColumn(String label, String dataIndex) {
+
     column = new TreeTableColumn<>(label);
     column.setCellValueFactory((TreeTableColumn.CellDataFeatures<Drawable, String> param) -> {
       ObservableValue<String> result = new ReadOnlyStringWrapper("");
@@ -524,10 +531,14 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         if (param.getValue().getValue().getClass().getSimpleName().equals("Farm")) {
           result = new ReadOnlyStringWrapper("/");
         } else if (param.getValue().getValue().getClass().getSimpleName().equals("Field")) {
+
+
           Field field = (Field) param.getValue().getValue();
+
           if (field.getSoilProfile() != null) {
-            result = new ReadOnlyStringWrapper(field.getSoilProfile().getSoilType().toString());
-            // TODO: Passt das so?
+            // result = new ReadOnlyStringWrapper(
+            // field.getSoilProfile().getSoilType().);
+            // TODO: Name bekommen!
           } else {
             result = new ReadOnlyStringWrapper("/");
           }
@@ -700,8 +711,13 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
       }
       farm.getFields().removeAll(delField);
     }
+
+    // liste gelöschter farms, wird beim Speichern verarbeitet
+    gsehenInstance.getDeletedFarms().addAll(delFarm);
+
     LOGGER.info(object + " deleted.");
     farmsList.removeAll(delFarm);
     gsehenInstance.sendFarmDataChanged(object, null);
   }
+
 }

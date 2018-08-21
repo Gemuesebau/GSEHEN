@@ -1,17 +1,37 @@
 package de.hgu.gsehen.model;
 
+import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+
+@Entity
 public class Field extends Drawable implements DrawableParent {
+
+  @Id
+  @GeneratedValue
+  private long id;
+  @OneToOne
   private WeatherDataSource weatherDataSource;
+  @OneToOne (cascade = {CascadeType.ALL})
   private SoilProfile soilProfile;
   private Double rootingZone;
-  private Location location;
+  @OneToOne
+  private GeoPoint location;
+  @OneToOne(cascade = {CascadeType.ALL})
   private GeoPolygon polygon;
   private String name;
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private List<Plot> plots;
   private double area;
 
@@ -80,11 +100,11 @@ public class Field extends Drawable implements DrawableParent {
     this.rootingZone = rootingZone;
   }
 
-  public Location getLocation() {
+  public GeoPoint getLocation() {
     return location;
   }
 
-  public void setLocation(Location location) {
+  public void setGeoPoint(GeoPoint location) {
     this.location = location;
   }
 
