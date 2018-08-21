@@ -4,27 +4,37 @@ import de.hgu.gsehen.gui.GeoPolygon;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
-import org.hibernate.annotations.Table;
 
 @Entity
 public class Plot extends Drawable {
-  
+
   @Id
+  @GeneratedValue
+  private long id;
+  
   private String name;
   private double area;
+  @OneToOne(cascade = {CascadeType.ALL})
   private GeoPolygon polygon;
+  @OneToOne(cascade = {CascadeType.ALL})
   private Location location;
   private Double scalingFactor;
+  @OneToOne(cascade = {CascadeType.ALL})
   private WeatherData weatherData;
   private Double rootingZone;
+  @OneToOne(cascade = {CascadeType.ALL})
   private WaterBalance waterBalance;
   private String recommendedAction;
   private Date soilStartDate;
   private Double soilStartValue;
   private Boolean calculationPaused;
+  @OneToOne(cascade = {CascadeType.ALL})
   private Crop crop;
   private Date cropStart; 
   private Date cropEnd;

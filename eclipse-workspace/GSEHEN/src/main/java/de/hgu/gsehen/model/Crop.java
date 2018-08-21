@@ -1,6 +1,7 @@
 package de.hgu.gsehen.model;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 /**
@@ -10,10 +11,12 @@ import javax.persistence.Id;
  */
 @Entity
 public class Crop {
-  
+
   @Id
+  @GeneratedValue
+  private int id;
   private String name;
- 
+
   private boolean active;
   private double kc1;
   private Double kc2;
@@ -32,11 +35,20 @@ public class Crop {
   private Integer rootingZone3;
   private Integer rootingZone4;
   private String description;
-
+  
+ 
   public Crop() {
     super();
   }
 
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
+  
   public Crop(String name) {
     this.name = name;
   }

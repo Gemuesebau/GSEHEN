@@ -1,9 +1,8 @@
 package de.hgu.gsehen.model;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-
-import org.hibernate.annotations.Table;
 
 /**
  * Class representing a type of soil.
@@ -13,7 +12,12 @@ import org.hibernate.annotations.Table;
 @Entity
 public class Soil {
   
+  public Soil() {
+  }
+  
   @Id
+  @GeneratedValue
+  private long id;
   private String name;
   private double availableWaterCapacity;
   private String description;

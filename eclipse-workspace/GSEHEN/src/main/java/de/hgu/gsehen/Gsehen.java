@@ -2,7 +2,6 @@ package de.hgu.gsehen;
 
 import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
-import static de.hgu.gsehen.util.JDBCUtil.executeUpdate;
 
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
@@ -10,7 +9,6 @@ import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.GsehenViewEvent;
 import de.hgu.gsehen.gui.GeoPoint;
-import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
 import de.hgu.gsehen.gui.view.FarmDataController;
@@ -23,11 +21,7 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
-import de.hgu.gsehen.model.Soil;
-import de.hgu.gsehen.model.test;
 import de.hgu.gsehen.util.Pair;
-import org.hibernate.*;
-import org.hibernate.cfg.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -49,6 +43,7 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -66,15 +61,10 @@ import javafx.stage.WindowEvent;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.cfg.Configuration;
+import org.hibernate.query.Query;
 
 /**
  * The GSEHEN main application.
@@ -88,16 +78,6 @@ public class Gsehen extends Application {
   protected static final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
       Locale.GERMAN);
 
-  private static final String GSEHEN_H2_LOCAL_DB = "gsehen-h2-local.db";
-  private static final String FARM_TABLE = "FARM";
-  private static final String FIELD_TABLE = "FIELD";
-  private static final String PLOT_TABLE = "PLOT";
-  private static final String CROP_TABLE = "CROP";
-  private static final String SOIL_TABLE = "SOIL";
-  private static final String SOILPROFILE_TABLE = "SOILPROFILE";
-  private static final String SOILPROFILEDEPTH_TABLE = "SOILPROFILEDEPTH";
-
-
   private static final String MAIN_FXML = "main.fxml";
 
   public static final String MAIN_SPLIT_PANE_ID = "#mainSplitPane";
@@ -110,9 +90,6 @@ public class Gsehen extends Application {
   private static final String LOGS_VIEW_ID = "#logsBorderPane";
   private static final String IMAGE_VIEW_ID = "#imageView";
 
-  private static final String LOAD_USER_DATA_JS = "/de/hgu/gsehen/js/loadUserData.js";
-  private static final String SAVE_USER_DATA_JS = "/de/hgu/gsehen/js/saveUserData.js";
-
   private static Maps maps;
   private static Farms farms;
   private static Fields fields;
@@ -121,12 +98,14 @@ public class Gsehen extends Application {
   private GsehenTreeTable treeTable;
 
   private List<Farm> farmsList = new ArrayList<>();
+  private List<Farm> deletedFarms = new ArrayList<>();
 
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
-  private boolean dataChanged;  
+  private java.util.Map<Class<? extends GsehenEvent>,
+      List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
+  private boolean dataChanged;
 
   private static Gsehen instance;
 
@@ -134,6 +113,10 @@ public class Gsehen extends Application {
 
     instance = this;
 
+  }
+
+  public List<Farm> getDeletedFarms() {
+    return this.deletedFarms;
   }
 
   /**
@@ -150,9 +133,6 @@ public class Gsehen extends Application {
     } catch (Exception e) {
       e.printStackTrace();
     }
-
-    h2db();
-    test();
     Application.launch(args);
   }
 
@@ -207,78 +187,12 @@ public class Gsehen extends Application {
 
     loadUserData();
 
-    
-
-    
     treeTable = new GsehenTreeTable() {
       @Override
       public void handle(GsehenViewEvent event) {
       }
     };
     treeTable.addFarmTreeView(GsehenTreeTable.class);
-  }
-
-  @SuppressWarnings({ "unused", "checkstyle:rightcurly" })
-  private static void h2db() {
-    Connection con = null;
-    try {
-      String jdbcUrl = "jdbc:h2:./" + GSEHEN_H2_LOCAL_DB + ";CIPHER=AES";
-      con = DriverManager.getConnection(jdbcUrl, "", "OCddpvUe ");
-      // PW: space is important! But this is just a test, must be supplied by user or
-      // the like
-      LOGGER.info("Opened local H2 database at url " + jdbcUrl);
-    } catch (SQLException e) {
-      throw new RuntimeException(GSEHEN_H2_LOCAL_DB + " couldn't be opened", e);
-    }
-    // in h2, the DATE column type has no time information!
-    // id: http://www.h2database.com/html/datatypes.html#identity_type
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + FARM_TABLE
-            + "(NAME VARCHAR, GEOPOLYGON DOUBLE , FIELDS VARCHAR)",
-        FARM_TABLE + " couldn't be created");
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + FIELD_TABLE
-            + "(WEATHER VARCHAR, SOILPROFILE VARCHAR , ROOTINGZONE DOUBLE , LOCATION DOUBLE ,"
-            + " POLYGON DOUBLE , PLOTS VARCHAR , AREA DOUBLE)",
-        FIELD_TABLE + " couldn't be created");
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + PLOT_TABLE
-            + "(WATERBALANCE VARCHAR, WEATHERDATA DOUBLE , SOILSTART DATE ,SOILSTARTVALUE DOUBLE ,"
-            + "ROOTINGZONE DOUBLE ,LOCATION DOUBLE ,POLYGON DOUBLE,CROP VARCHAR,CROPSTART DATE ,"
-            + "CROPEND DATE ,SCALINGFACTOR DOUBLE,RECOMACTION VARCHAR,"
-            + "CALCPAUSE BOOLEAN,ACTIVE BOOLEAN ,AREA DOUBLE)",
-        PLOT_TABLE + " couldn't be created");
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + SOIL_TABLE
-            + "(NAME VARCHAR, WATERCAPACITY DOUBLE , DESCRIPTION VARCHAR)",
-        SOIL_TABLE + " couldn't be created");
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + SOILPROFILE_TABLE
-            + "(SOILTYPE VARCHAR, PROFILEDEPTH DOUBLE , DESCRIPTION VARCHAR)",
-        SOILPROFILE_TABLE + " couldn't be created");
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + SOILPROFILEDEPTH_TABLE
-            + "(DEPTHSTART DOUBLE, DEPTHEND DOUBLE)",
-        SOILPROFILEDEPTH_TABLE + " couldn't be created");
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS " + CROP_TABLE
-            + "(NAME VARCHAR, ACTIVE BOOLEAN,KC1 DOUBLE ,KC2 DOUBLE ,KC3 DOUBLE ,"
-            + "KC4 DOUBLE ,PHASE1 INTEGER,PHASE2 INTEGER ,PHASE3 INTEGER ,PHASE4 INTEGER ,"
-            + "BBCH1 VARCHAR,BBCH2 VARCHAR,BBCH3 VARCHAR,BBCH4 VARCHAR,ROOTINGZONE1 INTEGER,"
-            + "ROOTINGZONE2 INTEGER,ROOTINGZONE3 INTEGER,ROOTINGZONE4 INTEGER,DESCRIPTION VARCHAR)",
-        CROP_TABLE + " couldn't be created");
-    executeUpdate(con,
-        "CREATE TABLE IF NOT EXISTS TEST"
-            + "(NAME VARCHAR)",
-        " couldn't be created");
-
-    if (con != null) {
-      try {
-        con.close();
-      } catch (SQLException e) {
-        throw new RuntimeException("DB connection couldn't be closed", e);
-      }
-    }
   }
 
   /**
@@ -325,61 +239,87 @@ public class Gsehen extends Application {
         rs.getString("cDescription");
       }
     } catch (SQLException e) {
-      System.out.println("geht nicht");
+      System.out.println("no connection");
     }
   }
-  
-  public static void test() {
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
-    EntityManager em = emf.createEntityManager();
 
-    EntityTransaction tx = em.getTransaction();
-    tx.begin();
-    try {
-
-        em.persist(new test("test"));
-
-        tx.commit();
-    } catch (Exception e) {
-        tx.rollback();
-    } finally {
-        em.close();
-        emf.close();
-    }
-
-  System.out.println(em.getTransaction());
-   
-}
-  
   /**
    * Loads the user-created data (farms, fields, plots, ..)
    */
-  public void loadUserData() {
-    ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+  @SuppressWarnings("unchecked")
+public void loadUserData() {
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
+    EntityManager em = emf.createEntityManager();
     try {
-      engine.put("instance", this);
-      engine.put("LOGGER", LOGGER);
-      engine.put("farms", farmsList);
-      engine.eval(getReaderForUtf8(LOAD_USER_DATA_JS));
-      dataChanged = false;
-    } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Can't evaluate " + LOAD_USER_DATA_JS, e);
+
+      // möglichkeit 1, mit bekannter ID
+      // em.getTransaction();
+      // Farm testfarm = em.find(Farm.class, 132l);
+      // if(testfarm != null) {
+      // System.out.print(testfarm.getName());
+      // }
+
+      // möglichkeit 2, alle möglichen objekte
+      Session session = em.unwrap(Session.class);
+      Query<Farm> query = session.createQuery("from Farm"); // You will get Weayher object
+      farmsList = query.list(); // You are accessing as list<WeatherModel>
+    } finally {
+      em.close();
     }
+
+    // ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+    // try {
+    // engine.put("instance", this);
+    // engine.put("LOGGER", LOGGER);
+    // engine.put("farms", farmsList);
+    // engine.eval(getReaderForUtf8(LOAD_USER_DATA_JS));
+
+    dataChanged = false;
+    // } catch (Exception e) {
+    // LOGGER.log(Level.SEVERE, "Can't evaluate " + LOAD_USER_DATA_JS, e);
+    sendFarmDataChanged(null, null);
+    // }
   }
 
   /**
    * Saves the user-created data (farms, fields, plots, ..)
    */
   public void saveUserData() {
-    ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+
     try {
-      engine.put("instance", this);
-      engine.put("LOGGER", LOGGER);
-      engine.put("farms", farmsList);
-      engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
+
+      EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
+      EntityManager em = emf.createEntityManager();
+
+      try {
+        em.getTransaction().begin();
+        for (Farm farm : farmsList) {
+          em.merge(farm);
+        }
+
+        for (Farm deletedFarm : this.getDeletedFarms()) {
+          em.remove(em.contains(deletedFarm) ? deletedFarm : em.merge(deletedFarm));
+        }
+        this.getDeletedFarms().clear();
+
+        em.getTransaction().commit();
+      } catch (Exception e) {
+        System.out.println("Problem: " + e.getMessage());
+        em.getTransaction().rollback();
+      } finally {
+        em.close();
+      }
+
+      // speichern in datei wird ersetzt durch speichern in DB
+      // engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
+      // engine.put("instance", this);
+      // engine.put("LOGGER", LOGGER);
+      // engine.put("farms", farmsList);
+
+      // engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
       dataChanged = false;
     } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Can't evaluate " + SAVE_USER_DATA_JS, e);
+      LOGGER.log(Level.SEVERE, "Can't evaluate ", e);
     }
   }
 
@@ -430,7 +370,7 @@ public class Gsehen extends Application {
     }
     sendFarmDataChanged(object, skipClass);
   }
-  
+
   private Field getNewPlotsField(Farm farm) {
     String newPlotsFieldName = mainBundle.getString("gui.control.objectTree.newPlotsFieldName");
     Field newPlotsField = null;
@@ -446,7 +386,7 @@ public class Gsehen extends Application {
     }
     return newPlotsField;
   }
-  
+
   private Farm getNewFieldsFarm() {
     String newFieldsFarmName = mainBundle.getString("gui.control.objectTree.newFieldsFarmName");
     Farm newFieldsFarm = null;
