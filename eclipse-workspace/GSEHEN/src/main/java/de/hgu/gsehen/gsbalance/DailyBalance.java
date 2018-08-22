@@ -1,11 +1,16 @@
 package de.hgu.gsehen.gsbalance;
 
+<<<<<<< HEAD
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Crop;
+=======
+import java.util.Date;
+import de.hgu.gsehen.evapotranspiration.DayData;
+>>>>>>> branch 'master' of git@github.com:Gemuesebau/GSEHEN.git
 import de.hgu.gsehen.model.Plot;
 
 
