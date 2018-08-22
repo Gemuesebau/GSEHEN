@@ -1,7 +1,7 @@
 package de.hgu.gsehen.gsbalance;
 
-import de.hgu.gsehen.evapotranspiration.DayData;import
-
+import java.util.Date;
+import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Plot;
 
 
