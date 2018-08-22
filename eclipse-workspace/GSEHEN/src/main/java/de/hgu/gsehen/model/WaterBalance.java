@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import de.hgu.gsehen.evapotranspiration.DayData;
 
@@ -16,6 +17,7 @@ public class WaterBalance {
   @Id
   @GeneratedValue
   private long id;
+  @OneToMany
   private List<DayData> dailyBalances = new ArrayList<>();
 
   public List<DayData> getDailyBalances() {
