@@ -11,16 +11,22 @@ import javax.persistence.Id;
  */
 @Entity
 public class Soil {
-  
-  public Soil() {
-  }
-  
+
+  public Soil() {}
+
   @Id
   @GeneratedValue
   private long id;
   private String name;
   private double availableWaterCapacity;
   private String description;
+
+  public Soil(String name, double availableWaterCapacity, String description) {
+    super();
+    this.name = name;
+    this.availableWaterCapacity = availableWaterCapacity;
+    this.description = description;
+  }
 
   public Soil(String name) {
     this.name = name;

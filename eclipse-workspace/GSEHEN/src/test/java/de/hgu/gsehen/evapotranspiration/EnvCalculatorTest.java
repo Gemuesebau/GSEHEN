@@ -33,8 +33,5 @@ public class EnvCalculatorTest {
     System.out.println(today.getEt0());
     assertEquals(currentEt0, calculatedEt0, 0.1);
 
-    de.hgu.gsehen.gsbalance.DailyBalance.calculateDailyBalance(today);
-    System.out.println(today.getDailyBalance());
-
   }
 }

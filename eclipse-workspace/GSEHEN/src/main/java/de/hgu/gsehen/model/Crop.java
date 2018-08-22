@@ -35,8 +35,34 @@ public class Crop {
   private Integer rootingZone3;
   private Integer rootingZone4;
   private String description;
-  
- 
+
+
+  public Crop(String name, boolean active, double kc1, Double kc2, Double kc3, Double kc4,
+      int phase1, Integer phase2, Integer phase3, Integer phase4, String bbch1, String bbch2,
+      String bbch3, String bbch4, int rootingZone1, Integer rootingZone2, Integer rootingZone3,
+      Integer rootingZone4, String description) {
+    super();
+    this.name = name;
+    this.active = active;
+    this.kc1 = kc1;
+    this.kc2 = kc2;
+    this.kc3 = kc3;
+    this.kc4 = kc4;
+    this.phase1 = phase1;
+    this.phase2 = phase2;
+    this.phase3 = phase3;
+    this.phase4 = phase4;
+    this.bbch1 = bbch1;
+    this.bbch2 = bbch2;
+    this.bbch3 = bbch3;
+    this.bbch4 = bbch4;
+    this.rootingZone1 = rootingZone1;
+    this.rootingZone2 = rootingZone2;
+    this.rootingZone3 = rootingZone3;
+    this.rootingZone4 = rootingZone4;
+    this.description = description;
+  }
+
   public Crop() {
     super();
   }
@@ -48,7 +74,7 @@ public class Crop {
   public void setId(int id) {
     this.id = id;
   }
-  
+
   public Crop(String name) {
     this.name = name;
   }

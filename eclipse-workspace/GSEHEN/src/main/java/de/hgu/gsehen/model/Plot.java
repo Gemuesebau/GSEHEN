@@ -192,6 +192,29 @@ public class Plot extends Drawable {
 
   public void archive() {}
 
+  public Plot(String name, double area, GeoPolygon polygon, Location location, Double scalingFactor,
+      WeatherData weatherData, Double rootingZone, WaterBalance waterBalance,
+      String recommendedAction, Date soilStartDate, Double soilStartValue,
+      Boolean calculationPaused, Crop crop, Date cropStart, Date cropEnd, Boolean isActive) {
+    super();
+    this.name = name;
+    this.area = area;
+    this.polygon = polygon;
+    this.location = location;
+    this.scalingFactor = scalingFactor;
+    this.weatherData = weatherData;
+    this.rootingZone = rootingZone;
+    this.waterBalance = waterBalance;
+    this.recommendedAction = recommendedAction;
+    this.soilStartDate = soilStartDate;
+    this.soilStartValue = soilStartValue;
+    this.calculationPaused = calculationPaused;
+    this.crop = crop;
+    this.cropStart = cropStart;
+    this.cropEnd = cropEnd;
+    this.isActive = isActive;
+  }
+
   @Override
   public String toString() {
     return " " + getClass().getSimpleName() + " '" + getName() + "'";

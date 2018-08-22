@@ -31,20 +31,25 @@ public class DailyBalance {
     if (today.compareTo(cropStart) >= 0 && today.compareTo(cropEnd) <= 0) {
       LocalDate localToday = today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
       LocalDate localCropStart = cropStart.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      if (localToday.compareTo(localCropStart.plusDays(phase1)) >= 0) {
+      LocalDate localCropEnd = cropEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+      if (localToday.compareTo(localCropStart.plusDays(phase1)) < 0
+          | (localToday.compareTo(localCropEnd) <= 0 && phase2 == null)) {
         currentKc = kc1;
-      } else if (localToday.compareTo(localCropStart.plusDays(phase1 + phase2)) >= 0) {
+      } else if (localToday.compareTo(localCropStart.plusDays(phase1 + phase2)) < 0
+          | (localToday.compareTo(localCropEnd) <= 0 && phase3 == null)) {
         if (kc2 == null) {
           throw new NullPointerException();
         }
         currentKc = kc2;
-      } else if (localToday.compareTo(localCropStart.plusDays(phase1 + phase2 + phase3)) >= 0) {
+      } else if (localToday.compareTo(localCropStart.plusDays(phase1 + phase2 + phase3)) < 0
+          | (localToday.compareTo(localCropEnd) <= 0 && phase4 == null)) {
         if (kc3 == null) {
           throw new NullPointerException();
         }
         currentKc = kc3;
       } else if (localToday
-          .compareTo(localCropStart.plusDays(phase1 + phase2 + phase3 + phase4)) >= 0) {
+          .compareTo(localCropStart.plusDays(phase1 + phase2 + phase3 + phase4)) < 0
+          | localToday.compareTo(localCropEnd) <= 0) {
         if (kc4 == null) {
           throw new NullPointerException();
         }
@@ -54,6 +59,7 @@ public class DailyBalance {
 
     }
     dayData.setCurrentKc(currentKc);
+
   }
 
 
@@ -72,12 +78,12 @@ public class DailyBalance {
     if (precipitation == null) {
       throw new IllegalStateException("Precipitation has net been provided");
     } ;
-    Double et0 = dayData.getEt0();
-    if (et0 == null) {
-      throw new IllegalStateException("Et0 has not been calculated");
+    Double etc = dayData.getEtc();
+    if (etc == null) {
+      throw new IllegalStateException("Etc has not been calculated");
     } ;
     Double irrigation = dayData.getIrrigation();
-    dayData.setDailyBalance(et0 - precipitation - irrigation);
+    dayData.setDailyBalance(etc - precipitation - irrigation);
 
   }
 }
