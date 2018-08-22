@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
+// import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -39,7 +39,7 @@ import org.hibernate.query.Query;
 
 public class FieldDataController implements GsehenEventListener<FarmDataChanged> {
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
-  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+  // private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
   private List<SoilProfile> soilList = new ArrayList<>();
 
@@ -58,6 +58,10 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
   private Button createSoil;
   private SoilProfile soilProfileItem;
+  private Button save;
+  private Button back;
+  private int layer;
+  private HBox buttonBox;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -146,21 +150,17 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
       public void handle(ActionEvent e) {
         pane.getChildren().clear();
 
-        TextField vsStart = new TextField("0");
-        TextField vsEnd = new TextField("25");
-        TextField sStart = new TextField(vsEnd.getText());
-        TextField sEnd = new TextField("50");
-        TextField mdStart = new TextField(sEnd.getText());
-        TextField mdEnd = new TextField("90");
-        TextField dStart = new TextField(mdEnd.getText());
-        TextField dEnd = new TextField("150");
-
         Text soilNameLabel = new Text("Name des Profils: ");
         soilNameLabel.setFont(Font.font("Arial", 14));
         TextField soilProfileName = new TextField("");
 
         HBox nameBox = new HBox();
         nameBox.getChildren().addAll(soilNameLabel, soilProfileName);
+
+        layer = 1;
+
+        Text depth = new Text("Schicht #" + layer);
+        depth.setFont(Font.font("Arial", FontWeight.BOLD, 18));
 
         Text soil = new Text("Bodentyp: ");
         soil.setFont(Font.font("Arial", 14));
@@ -212,7 +212,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         HBox soilBox = new HBox();
         soilBox.getChildren().addAll(soil, soilChoiceBox);
 
-        Text soilAwcLabel = new Text("Verfügbare Wasserkapazität: ");
+        Text soilAwcLabel = new Text("Verfügbare Wasserhaltekapazität: ");
         soilAwcLabel.setFont(Font.font("Arial", 14));
         TextField soilAwc = new TextField();
 
@@ -232,167 +232,102 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
         VBox topBox = new VBox(25);
         topBox.setPadding(new Insets(20, 20, 20, 20));
-        topBox.getChildren().addAll(nameBox, soilBox, awcBox);
+        topBox.getChildren().addAll(nameBox, depth, soilBox, awcBox);
         pane.setTop(topBox);
 
-        Text depth = new Text("Tiefe");
-        depth.setFont(Font.font("Arial", FontWeight.BOLD, 16));
-
-        Text vsStartLabel = new Text("Sehr flach (min.): ");
-        vsStartLabel.setFont(Font.font("Arial", 14));
-        vsStart.textProperty().addListener(new ChangeListener<String>() {
+        TextField depthStart = new TextField("0");
+        Text depthStartLabel = new Text("Tiefe (min.): ");
+        depthStartLabel.setFont(Font.font("Arial", 14));
+        depthStart.textProperty().addListener(new ChangeListener<String>() {
           @Override
           public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
-            if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")
-                || Double.parseDouble(newValue) > Double.parseDouble(vsEnd.getText())) {
-              vsStart.setText(oldValue);
+            if (newValue != null) {
+              if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+                depthStart.setText(oldValue);
+              }
             }
           }
         });
 
-        HBox vsStartBox = new HBox();
-        vsStartBox.getChildren().addAll(vsStartLabel, vsStart);
+        HBox depthStartBox = new HBox();
+        depthStartBox.getChildren().addAll(depthStartLabel, depthStart);
 
-        Text vsEndLabel = new Text("Sehr flach (max.): ");
-        vsEndLabel.setFont(Font.font("Arial", 14));
-        vsEnd.textProperty().addListener(new ChangeListener<String>() {
+        TextField depthEnd = new TextField("25");
+        Text depthEndLabel = new Text("Tiefe (max.): ");
+        depthEndLabel.setFont(Font.font("Arial", 14));
+        depthEnd.textProperty().addListener(new ChangeListener<String>() {
           @Override
           public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
-            if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")
-                || Double.parseDouble(newValue) < Double.parseDouble(vsEnd.getText())) {
-              vsEnd.setText(oldValue);
-            } else {
-              sStart.setText(vsEnd.getText());
+            if (newValue != null) {
+              if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+                depthEnd.setText(oldValue);
+              }
             }
           }
         });
 
-        HBox vsEndBox = new HBox();
-        vsEndBox.getChildren().addAll(vsEndLabel, vsEnd);
+        Set<Soil> soilSet = new HashSet<Soil>();
+        Set<SoilProfileDepth> spdSet = new HashSet<SoilProfileDepth>();
 
-        Text sStartLabel = new Text("Flach (min.): ");
-        sStartLabel.setFont(Font.font("Arial", 14));
-        sStart.textProperty().addListener(new ChangeListener<String>() {
-          @Override
-          public void changed(ObservableValue<? extends String> observable, String oldValue,
-              String newValue) {
-            if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
-              sStart.setText(oldValue);
-            } else {
-              vsEnd.setText(sStart.getText());
-            }
-          }
-        });
-
-        HBox sStartBox = new HBox();
-        sStartBox.getChildren().addAll(sStartLabel, sStart);
-
-        Text sEndLabel = new Text("Flach (max.): ");
-        sEndLabel.setFont(Font.font("Arial", 14));
-        sEnd.textProperty().addListener(new ChangeListener<String>() {
-          @Override
-          public void changed(ObservableValue<? extends String> observable, String oldValue,
-              String newValue) {
-            if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
-              sEnd.setText(oldValue);
-            } else {
-              mdStart.setText(sEnd.getText());
-            }
-          }
-        });
-
-        HBox sEndBox = new HBox();
-        sEndBox.getChildren().addAll(sEndLabel, sEnd);
-
-        Text mdStartLabel = new Text("Mäßig tief (min.): ");
-        mdStartLabel.setFont(Font.font("Arial", 14));
-        mdStart.textProperty().addListener(new ChangeListener<String>() {
-          @Override
-          public void changed(ObservableValue<? extends String> observable, String oldValue,
-              String newValue) {
-            if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
-              mdStart.setText(oldValue);
-            } else {
-              sEnd.setText(mdStart.getText());
-            }
-          }
-        });
-
-        HBox mdStartBox = new HBox();
-        mdStartBox.getChildren().addAll(mdStartLabel, mdStart);
-
-        Text mdEndLabel = new Text("Mäßig tief (max.): ");
-        mdEndLabel.setFont(Font.font("Arial", 14));
-        mdEnd.textProperty().addListener(new ChangeListener<String>() {
-          @Override
-          public void changed(ObservableValue<? extends String> observable, String oldValue,
-              String newValue) {
-            if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
-              mdEnd.setText(oldValue);
-            } else {
-              dStart.setText(mdEnd.getText());
-            }
-          }
-        });
-
-        HBox mdEndBox = new HBox();
-        mdEndBox.getChildren().addAll(mdEndLabel, mdEnd);
-
-        Text dStartLabel = new Text("Tief (min.): ");
-        dStartLabel.setFont(Font.font("Arial", 14));
-        dStart.textProperty().addListener(new ChangeListener<String>() {
-          @Override
-          public void changed(ObservableValue<? extends String> observable, String oldValue,
-              String newValue) {
-            if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
-              dStart.setText(oldValue);
-            } else {
-              mdEnd.setText(dStart.getText());
-            }
-          }
-        });
-
-        HBox dStartBox = new HBox();
-        dStartBox.getChildren().addAll(dStartLabel, dStart);
-
-        Text dEndLabel = new Text("Tief (max.): ");
-        dEndLabel.setFont(Font.font("Arial", 14));
-        dStart.textProperty().addListener(new ChangeListener<String>() {
-          @Override
-          public void changed(ObservableValue<? extends String> observable, String oldValue,
-              String newValue) {
-            if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")
-                || Double.parseDouble(newValue) < Double.parseDouble(dStart.getText())) {
-              dStart.setText(oldValue);
-            }
-          }
-        });
-
-        HBox dEndBox = new HBox();
-        dEndBox.getChildren().addAll(dEndLabel, dEnd);
-
-        Text vdStartLabel = new Text("Sehr tief (min.): > \"Tief (max.)\"");
-        vdStartLabel.setFont(Font.font("Arial", 14));
-
-        HBox vdStartBox = new HBox();
-        vdStartBox.getChildren().addAll(vdStartLabel);
-
+        soilProfileItem = new SoilProfile();
         VBox leftBox = new VBox(25);
+
+        Button setSoil = new Button("Schicht abschließen");
+        setSoil.setOnAction(new EventHandler<ActionEvent>() {
+          @Override
+          public void handle(ActionEvent arg0) {
+
+            if (Double.parseDouble(depthStart.getText()) > Double.parseDouble(depthEnd.getText())) {
+              Text error = new Text("Ein Minimum kann nicht größer, als ein Maximum sein!");
+              error.setFont(Font.font("Verdana", 20));
+              error.setFill(Color.RED);
+              buttonBox.getChildren().clear();
+              buttonBox.getChildren().addAll(back, save, error);
+            } else if (soilChoiceBox.getValue() != null && depthStart.getText() != null
+                && depthEnd.getText() != null && soilProfileName.getText() != null) {
+              Soil soil = new Soil();
+              soil.setName(soilChoiceBox.getValue().getName());
+              soil.setAvailableWaterCapacity(Double.parseDouble(soilAwc.getText()));
+
+              SoilProfileDepth spd = new SoilProfileDepth();
+              spd.setDepthStart(Double.parseDouble(depthStart.getText()));
+              spd.setDepthEnd(Double.parseDouble(depthEnd.getText()));
+
+              soilSet.add(soil);
+              spdSet.add(spd);
+
+              soilChoiceBox.setValue(null);
+              soilAwc.setText(null);
+              depthStart.setText(String.valueOf(spd.getDepthEnd()));
+              depthEnd.setText(String.valueOf(spd.getDepthEnd() + 25));
+
+              Text createdSoil = new Text("Schicht #" + layer + ": \n" + "Bodentyp: "
+                  + soil.getName() + ", Wasserhaltekapazität: " + soil.getAvailableWaterCapacity()
+                  + ", Tiefe(min.):" + spd.getDepthStart() + ", Tiefe(max.): " + spd.getDepthEnd()
+                  + "\n\n");
+              createdSoil.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+              leftBox.getChildren().add(createdSoil);
+              depth.setText("Schicht #" + (layer += 1));
+            } else {
+              Text error = new Text("Es wurden nicht alle Felder ausgefüllt!");
+              error.setFont(Font.font("Verdana", 20));
+              error.setFill(Color.RED);
+              buttonBox.getChildren().clear();
+              buttonBox.getChildren().addAll(back, save, error);
+            }
+          }
+        });
+
+        HBox depthEndBox = new HBox();
+        depthEndBox.getChildren().addAll(depthEndLabel, depthEnd);
+
         leftBox.setPadding(new Insets(20, 20, 20, 20));
-        leftBox.getChildren().addAll(depth, vsStartBox, vsEndBox, sStartBox, sEndBox);
+        leftBox.getChildren().addAll(depthStartBox, depthEndBox, setSoil);
         pane.setLeft(leftBox);
 
-        Text placeholder = new Text("");
-
-        VBox rightBox = new VBox(25);
-        rightBox.setPadding(new Insets(20, 20, 20, 20));
-        rightBox.getChildren().addAll(placeholder, mdStartBox, mdEndBox, dStartBox, dEndBox,
-            vdStartBox);
-        pane.setRight(rightBox);
-
-        Button back = new Button("Zurück");
+        back = new Button("Zurück");
         back.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent arg0) {
@@ -401,62 +336,21 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           }
         });
 
-        HBox buttonBox = new HBox();
+        buttonBox = new HBox();
 
-        Button save = new Button("Speichern");
+        save = new Button("Speichern");
         save.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent arg0) {
+            pane.getChildren().clear();
+            soilProfileItem = new SoilProfile();
+            soilProfileItem.setSoilType(soilSet);
+            soilProfileItem.setProfileDepth(spdSet);
+            soilProfileItem.setName(soilProfileName.getText());
 
-            if (Double.parseDouble(dStart.getText()) > Double.parseDouble(dEnd.getText())
-                || Double.parseDouble(mdStart.getText()) > Double.parseDouble(mdEnd.getText())
-                || Double.parseDouble(vsStart.getText()) > Double.parseDouble(vsEnd.getText())
-                || Double.parseDouble(sStart.getText()) > Double.parseDouble(sEnd.getText())) {
-              Text error = new Text("Ein Minimum kann nicht größer, als ein Maximum sein!");
-              error.setFont(Font.font("Verdana", 20));
-              error.setFill(Color.RED);
-              buttonBox.getChildren().clear();
-              buttonBox.getChildren().addAll(back, save, error);
-            } else {
-
-              pane.getChildren().clear();
-
-              Soil soil = new Soil();
-              soil.setName(soilChoiceBox.getValue().getName());
-              soil.setAvailableWaterCapacity(Double.parseDouble(soilAwc.getText()));
-
-              SoilProfileDepth spd1 = new SoilProfileDepth();
-              spd1.setDepthStart(Double.parseDouble(vsStart.getText()));
-              spd1.setDepthEnd(Double.parseDouble(vsEnd.getText()));
-
-              SoilProfileDepth spd2 = new SoilProfileDepth();
-              spd2.setDepthStart(Double.parseDouble(sStart.getText()));
-              spd2.setDepthEnd(Double.parseDouble(sEnd.getText()));
-
-              SoilProfileDepth spd3 = new SoilProfileDepth();
-              spd3.setDepthStart(Double.parseDouble(mdStart.getText()));
-              spd3.setDepthEnd(Double.parseDouble(mdEnd.getText()));
-
-              SoilProfileDepth spd4 = new SoilProfileDepth();
-              spd4.setDepthStart(Double.parseDouble(dStart.getText()));
-              spd4.setDepthEnd(Double.parseDouble(dEnd.getText()));
-
-              Set<Soil> soilSet = new HashSet<Soil>();
-              soilSet.add(soil);
-              Set<SoilProfileDepth> spdSet = new HashSet<SoilProfileDepth>();
-              spdSet.add(spd1);
-              spdSet.add(spd2);
-              spdSet.add(spd3);
-              spdSet.add(spd4);
-              soilProfileItem = new SoilProfile();
-              soilProfileItem.setSoilType(soilSet);
-              soilProfileItem.setProfileDepth(spdSet);
-              soilProfileItem.setName(soilProfileName.getText());
-
-              soilList.add(soilProfileItem);
-              pane.getChildren().clear();
-              gsehenInstance.sendFarmDataChanged(field, null);
-            }
+            soilList.add(soilProfileItem);
+            pane.getChildren().clear();
+            gsehenInstance.sendFarmDataChanged(field, null);
           }
         });
 
@@ -476,25 +370,21 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     pane.setLeft(leftBox);
     // LEFT END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Button save = new Button("Speichern");
-    save.setOnAction(new EventHandler<ActionEvent>() {
+    Button saveField = new Button("Speichern");
+    saveField.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
         field.setArea(Double.valueOf(area.getText()));
-        System.out.println(soilList.size());
         for (SoilProfile sp : soilList) {
-          System.out.println(sp);
-          System.out.println(soilChoiceBox.getValue());
           if (sp == soilChoiceBox.getValue()) {
             field.setSoilProfile(sp);
-            System.out.println(sp.getName());
           }
         }
 
         gsehenInstance.sendFarmDataChanged(field, null);
       }
     });
-    pane.setBottom(save);
+    pane.setBottom(saveField);
 
     treeTableView =
         (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
@@ -516,7 +406,8 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
                   area.setText(String.valueOf(field.getArea()));
 
                   for (SoilProfile soPr : soilList) {
-                    if (soPr.getName().equals(field.getSoilProfile().getName())) {
+                    if (field.getSoilProfile() != null
+                        && soPr.getName().equals(field.getSoilProfile().getName())) {
                       soilChoiceBox.getSelectionModel().select(soPr);
                     }
                   }
