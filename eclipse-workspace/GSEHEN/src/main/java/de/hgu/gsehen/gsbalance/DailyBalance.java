@@ -1,16 +1,58 @@
 package de.hgu.gsehen.gsbalance;
 
-import de.hgu.gsehen.evapotranspiration.DayData;import
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 
+import de.hgu.gsehen.evapotranspiration.DayData;
+import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Plot;
-
 
 
 public class DailyBalance {
   public static void determineCurrentKc(DayData dayData, Plot plot) {
-    Date date = dayData.getDate();
+    Date today = dayData.getDate();
+    Date cropStart = plot.getCropStart();
+    Date cropEnd = plot.getCropEnd();
+    Date soilStart = plot.getSoilStartDate();
+    Crop crop = plot.getCrop();
+    Double kc1 = crop.getKc1();
+    Double kc2 = crop.getKc2();
+    Double kc3 = crop.getKc3();
+    Double kc4 = crop.getKc4();
+    Double currentKc = null;
+    int phase1 = crop.getPhase1();
+    Integer phase2 = crop.getPhase2();
+    Integer phase3 = crop.getPhase3();
+    Integer phase4 = crop.getPhase4();
+    if (today.compareTo(soilStart) >= 0 && today.compareTo(cropStart) < 0) {
+      currentKc = 0.3;
+    }
+    if (today.compareTo(cropStart) >= 0 && today.compareTo(cropEnd) <= 0) {
+      LocalDate localToday = today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+      LocalDate localCropStart = cropStart.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+      if (localToday.compareTo(localCropStart.plusDays(phase1)) >= 0) {
+        currentKc = kc1;
+      } else if (localToday.compareTo(localCropStart.plusDays(phase1 + phase2)) >= 0) {
+        if (kc2 == null) {
+          throw new NullPointerException();
+        }
+        currentKc = kc2;
+      } else if (localToday.compareTo(localCropStart.plusDays(phase1 + phase2 + phase3)) >= 0) {
+        if (kc3 == null) {
+          throw new NullPointerException();
+        }
+        currentKc = kc3;
+      } else if (localToday
+          .compareTo(localCropStart.plusDays(phase1 + phase2 + phase3 + phase4)) >= 0) {
+        if (kc4 == null) {
+          throw new NullPointerException();
+        }
+        currentKc = kc4;
+      }
 
-    Double currentKc = 1.3;
+
+    }
     dayData.setCurrentKc(currentKc);
   }
 

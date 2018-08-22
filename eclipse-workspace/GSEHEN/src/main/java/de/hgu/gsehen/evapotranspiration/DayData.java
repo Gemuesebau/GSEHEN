@@ -13,7 +13,7 @@ import javax.persistence.Id;
  *
  */
 @Entity
-public class DayData {
+public class DayData implements Comparable<DayData> {
 
   @Id
   @GeneratedValue
@@ -157,6 +157,11 @@ public class DayData {
     this.et0 = et0;
   }
 
+  @Override
+  public int compareTo(DayData o) {
+    return getDate().compareTo(o.getDate());
+  }
+
   /**
    * Constructor DayData class.
    *
@@ -196,6 +201,8 @@ public class DayData {
     this.irrigation = irrigation;
     this.dailyBalance = dailyBalance;
   }
+
+  public DayData() {};
 
 }
 
