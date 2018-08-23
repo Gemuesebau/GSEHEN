@@ -9,14 +9,13 @@ import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 // import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -24,7 +23,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -101,6 +104,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
     VBox topBox = new VBox(25);
     topBox.setPadding(new Insets(20, 20, 20, 20));
+    topBox.setSpacing(5);
     topBox.getChildren().addAll(nameBox, locationBox);
     pane.setTop(topBox);
     // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -141,13 +145,14 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
       });
     }
 
-    HBox soilBox = new HBox();
-    soilBox.getChildren().addAll(soilProfile, soilChoiceBox);
+    HBox soilProfileBox = new HBox();
+    soilProfileBox.getChildren().addAll(soilProfile, soilChoiceBox);
 
     createSoil = new Button("Bodentyp ertsellen");
     createSoil.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
+        // CREATE SOILPROFILE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         pane.getChildren().clear();
 
         Text soilNameLabel = new Text("Name des Profils: ");
@@ -209,9 +214,6 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           }
         });
 
-        HBox soilBox = new HBox();
-        soilBox.getChildren().addAll(soil, soilChoiceBox);
-
         Text soilAwcLabel = new Text("Verfügbare Wasserhaltekapazität: ");
         soilAwcLabel.setFont(Font.font("Arial", 14));
         TextField soilAwc = new TextField();
@@ -227,12 +229,9 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         };
         soilChoiceBox.getSelectionModel().selectedItemProperty().addListener(changeListener);
 
-        HBox awcBox = new HBox();
-        awcBox.getChildren().addAll(soilAwcLabel, soilAwc);
-
         VBox topBox = new VBox(25);
         topBox.setPadding(new Insets(20, 20, 20, 20));
-        topBox.getChildren().addAll(nameBox, depth, soilBox, awcBox);
+        topBox.getChildren().addAll(nameBox);
         pane.setTop(topBox);
 
         TextField depthStart = new TextField("0");
@@ -250,9 +249,6 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           }
         });
 
-        HBox depthStartBox = new HBox();
-        depthStartBox.getChildren().addAll(depthStartLabel, depthStart);
-
         TextField depthEnd = new TextField("25");
         Text depthEndLabel = new Text("Tiefe (max.): ");
         depthEndLabel.setFont(Font.font("Arial", 14));
@@ -268,11 +264,31 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           }
         });
 
-        Set<Soil> soilSet = new HashSet<Soil>();
-        Set<SoilProfileDepth> spdSet = new HashSet<SoilProfileDepth>();
+        // GridPane - Center Section
+        GridPane center = new GridPane();
+
+        // GridPane Configuration (Padding, Gaps, etc.)
+        center.setPadding(new Insets(20, 20, 20, 20));
+        center.setHgap(15);
+        center.setVgap(15);
+        center.setGridLinesVisible(false);
+
+        // Set Column and Row Constraints
+        ColumnConstraints column1 = new ColumnConstraints(200, 100, 300);
+        ColumnConstraints column2 = new ColumnConstraints(200, 100, 100);
+        column1.setHgrow(Priority.ALWAYS);
+        column2.setHgrow(Priority.ALWAYS);
+        RowConstraints rowEmpty = new RowConstraints();
+
+        // Add Constraints to Columns & Rows
+        center.getColumnConstraints().addAll(column1, column2);
+        center.getRowConstraints().add(0, rowEmpty);
+        center.getRowConstraints().add(1, rowEmpty);
+
+        List<Soil> soilSet = new ArrayList<Soil>();
+        List<SoilProfileDepth> spdSet = new ArrayList<SoilProfileDepth>();
 
         soilProfileItem = new SoilProfile();
-        VBox leftBox = new VBox(25);
 
         Button setSoil = new Button("Schicht abschließen");
         setSoil.setOnAction(new EventHandler<ActionEvent>() {
@@ -304,11 +320,13 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
               depthEnd.setText(String.valueOf(spd.getDepthEnd() + 25));
 
               Text createdSoil = new Text("Schicht #" + layer + ": \n" + "Bodentyp: "
-                  + soil.getName() + ", Wasserhaltekapazität: " + soil.getAvailableWaterCapacity()
-                  + ", Tiefe(min.):" + spd.getDepthStart() + ", Tiefe(max.): " + spd.getDepthEnd()
+                  + soil.getName() + "; Wasserhaltekapazität: " + soil.getAvailableWaterCapacity()
+                  + "; Tiefe(min.): " + spd.getDepthStart() + "; Tiefe(max.): " + spd.getDepthEnd()
                   + "\n\n");
               createdSoil.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-              leftBox.getChildren().add(createdSoil);
+              GridPane.setHalignment(createdSoil, HPos.LEFT);
+              GridPane.setConstraints(createdSoil, 0, 5 + layer);
+              center.getChildren().add(createdSoil);
               depth.setText("Schicht #" + (layer += 1));
             } else {
               Text error = new Text("Es wurden nicht alle Felder ausgefüllt!");
@@ -320,12 +338,34 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           }
         });
 
-        HBox depthEndBox = new HBox();
-        depthEndBox.getChildren().addAll(depthEndLabel, depthEnd);
+        // Set Nodes Vertical & Horizontal Alignment
+        GridPane.setHalignment(depth, HPos.LEFT);
+        GridPane.setHalignment(soil, HPos.LEFT);
+        GridPane.setHalignment(soilChoiceBox, HPos.LEFT);
+        GridPane.setHalignment(soilAwcLabel, HPos.LEFT);
+        GridPane.setHalignment(soilAwc, HPos.LEFT);
+        GridPane.setHalignment(depthStartLabel, HPos.LEFT);
+        GridPane.setHalignment(depthStart, HPos.LEFT);
+        GridPane.setHalignment(depthEndLabel, HPos.LEFT);
+        GridPane.setHalignment(depthEnd, HPos.LEFT);
+        GridPane.setHalignment(setSoil, HPos.LEFT);
 
-        leftBox.setPadding(new Insets(20, 20, 20, 20));
-        leftBox.getChildren().addAll(depthStartBox, depthEndBox, setSoil);
-        pane.setLeft(leftBox);
+        // Set Row & Column Index for Nodes
+        GridPane.setConstraints(depth, 0, 0, 2, 1);
+        GridPane.setConstraints(soil, 0, 1);
+        GridPane.setConstraints(soilChoiceBox, 1, 1);
+        GridPane.setConstraints(soilAwcLabel, 0, 2);
+        GridPane.setConstraints(soilAwc, 1, 2);
+        GridPane.setConstraints(depthStartLabel, 0, 3);
+        GridPane.setConstraints(depthStart, 1, 3);
+        GridPane.setConstraints(depthEndLabel, 0, 4);
+        GridPane.setConstraints(depthEnd, 1, 4);
+        GridPane.setConstraints(setSoil, 0, 5);
+
+        center.getChildren().addAll(depth, soil, soilChoiceBox, soilAwcLabel, soilAwc,
+            depthStartLabel, depthStart, depthEndLabel, depthEnd, setSoil);
+        pane.setCenter(center);
+        // CREATE SOILPROFILE END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         back = new Button("Zurück");
         back.setOnAction(new EventHandler<ActionEvent>() {
@@ -366,7 +406,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
     VBox leftBox = new VBox(50);
     leftBox.setPadding(new Insets(20, 20, 20, 20));
-    leftBox.getChildren().addAll(soilBox, createSoil);
+    leftBox.getChildren().addAll(soilProfileBox, createSoil);
     pane.setLeft(leftBox);
     // LEFT END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
