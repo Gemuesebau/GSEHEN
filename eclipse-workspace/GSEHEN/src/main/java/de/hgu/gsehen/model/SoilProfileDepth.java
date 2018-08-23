@@ -10,22 +10,13 @@ public class SoilProfileDepth {
   @Id
   @GeneratedValue
   private long id;
-  private double depthStart;
-  private double depthEnd;
+  private double depth;
 
-  public double getDepthStart() {
-    return depthStart;
+  public double getDepth() {
+    return depth;
   }
 
-  public void setDepthStart(double depthStart) {
-    this.depthStart = depthStart;
-  }
-
-  public double getDepthEnd() {
-    return depthEnd;
-  }
-
-  public void setDepthEnd(double depthEnd) {
-    this.depthEnd = depthEnd;
+  public void setDepth(double depth) {
+    this.depth = depth;
   }
 }
