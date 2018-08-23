@@ -63,8 +63,9 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
   private SoilProfile soilProfileItem;
   private Button save;
   private Button back;
-  private int layer;
   private HBox buttonBox;
+  private List<Text> layorList;
+  private int index;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -85,6 +86,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
   @Override
   public void handle(FarmDataChanged event) {
     pane.setVisible(false);
+    index = 1;
 
     // TOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     nameLabel = new Text("Name: ");
@@ -162,10 +164,10 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         HBox nameBox = new HBox();
         nameBox.getChildren().addAll(soilNameLabel, soilProfileName);
 
-        layer = 1;
+        layorList = new ArrayList<Text>();
 
-        Text depth = new Text("Schicht #" + layer);
-        depth.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        Text layorText = new Text("Schicht #" + (layorList.size() + 1));
+        layorText.setFont(Font.font("Arial", FontWeight.BOLD, 18));
 
         Text soil = new Text("Bodentyp: ");
         soil.setFont(Font.font("Arial", 14));
@@ -234,31 +236,16 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         topBox.getChildren().addAll(nameBox);
         pane.setTop(topBox);
 
-        TextField depthStart = new TextField("0");
-        Text depthStartLabel = new Text("Tiefe (min.): ");
-        depthStartLabel.setFont(Font.font("Arial", 14));
-        depthStart.textProperty().addListener(new ChangeListener<String>() {
+        TextField depth = new TextField("25");
+        Text depthLabel = new Text("Tiefe (in cm): ");
+        depthLabel.setFont(Font.font("Arial", 14));
+        depth.textProperty().addListener(new ChangeListener<String>() {
           @Override
           public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
             if (newValue != null) {
               if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
-                depthStart.setText(oldValue);
-              }
-            }
-          }
-        });
-
-        TextField depthEnd = new TextField("25");
-        Text depthEndLabel = new Text("Tiefe (max.): ");
-        depthEndLabel.setFont(Font.font("Arial", 14));
-        depthEnd.textProperty().addListener(new ChangeListener<String>() {
-          @Override
-          public void changed(ObservableValue<? extends String> observable, String oldValue,
-              String newValue) {
-            if (newValue != null) {
-              if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
-                depthEnd.setText(oldValue);
+                depth.setText(oldValue);
               }
             }
           }
@@ -295,39 +282,53 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           @Override
           public void handle(ActionEvent arg0) {
 
-            if (Double.parseDouble(depthStart.getText()) > Double.parseDouble(depthEnd.getText())) {
-              Text error = new Text("Ein Minimum kann nicht größer, als ein Maximum sein!");
-              error.setFont(Font.font("Verdana", 20));
-              error.setFill(Color.RED);
-              buttonBox.getChildren().clear();
-              buttonBox.getChildren().addAll(back, save, error);
-            } else if (soilChoiceBox.getValue() != null && depthStart.getText() != null
-                && depthEnd.getText() != null && soilProfileName.getText() != null) {
+            if (soilChoiceBox.getValue() != null && depth.getText() != null
+                && soilProfileName.getText() != null) {
               Soil soil = new Soil();
               soil.setName(soilChoiceBox.getValue().getName());
               soil.setAvailableWaterCapacity(Double.parseDouble(soilAwc.getText()));
 
               SoilProfileDepth spd = new SoilProfileDepth();
-              spd.setDepthStart(Double.parseDouble(depthStart.getText()));
-              spd.setDepthEnd(Double.parseDouble(depthEnd.getText()));
+              spd.setDepth(Double.parseDouble(depth.getText()));
 
               soilSet.add(soil);
               spdSet.add(spd);
 
               soilChoiceBox.setValue(null);
               soilAwc.setText(null);
-              depthStart.setText(String.valueOf(spd.getDepthEnd()));
-              depthEnd.setText(String.valueOf(spd.getDepthEnd() + 25));
+              depth.setText(String.valueOf(spd.getDepth()));
 
-              Text createdSoil = new Text("Schicht #" + layer + ": \n" + "Bodentyp: "
-                  + soil.getName() + "; Wasserhaltekapazität: " + soil.getAvailableWaterCapacity()
-                  + "; Tiefe(min.): " + spd.getDepthStart() + "; Tiefe(max.): " + spd.getDepthEnd()
-                  + "\n\n");
+              Text createdSoil = new Text(
+                  "Schicht #" + (layorList.size() + 1) + ": \n" + "Bodentyp: " + soil.getName()
+                      + "; Wasserhaltekapazität: " + soil.getAvailableWaterCapacity()
+                      + "; Tiefe (in cm): " + spd.getDepth() + "\n\n");
               createdSoil.setFont(Font.font("Arial", FontWeight.BOLD, 14));
               GridPane.setHalignment(createdSoil, HPos.LEFT);
-              GridPane.setConstraints(createdSoil, 0, 5 + layer);
-              center.getChildren().add(createdSoil);
-              depth.setText("Schicht #" + (layer += 1));
+              GridPane.setConstraints(createdSoil, 0, 4 + layorList.size() + 1);
+              layorList.add(createdSoil);
+
+              Button delSoil = new Button("Schicht löschen");
+              delSoil.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent arg0) {
+                  // TODO: #xy nach dem Löschen und Layout (Text/Button) anpassen!
+                  soilSet.remove(soil);
+                  spdSet.remove(spd);
+                  layorList.remove(createdSoil);
+                  center.getChildren().removeAll(createdSoil, delSoil);
+                  depth.setText("Schicht #" + (layorList.size() - 1));
+
+                  for (Text t : layorList) {
+                    t.setText(t.getText().substring(0, 9) + index + t.getText().substring(10));
+                    index += 1;
+                  }
+                }
+              });
+              GridPane.setHalignment(delSoil, HPos.LEFT);
+              GridPane.setConstraints(delSoil, 1, 4 + layorList.size());
+
+              center.getChildren().addAll(createdSoil, delSoil);
+              depth.setText("Schicht #" + (layorList.size() + 1));
             } else {
               Text error = new Text("Es wurden nicht alle Felder ausgefüllt!");
               error.setFont(Font.font("Verdana", 20));
@@ -339,31 +340,27 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         });
 
         // Set Nodes Vertical & Horizontal Alignment
-        GridPane.setHalignment(depth, HPos.LEFT);
+        GridPane.setHalignment(layorText, HPos.LEFT);
         GridPane.setHalignment(soil, HPos.LEFT);
         GridPane.setHalignment(soilChoiceBox, HPos.LEFT);
         GridPane.setHalignment(soilAwcLabel, HPos.LEFT);
         GridPane.setHalignment(soilAwc, HPos.LEFT);
-        GridPane.setHalignment(depthStartLabel, HPos.LEFT);
-        GridPane.setHalignment(depthStart, HPos.LEFT);
-        GridPane.setHalignment(depthEndLabel, HPos.LEFT);
-        GridPane.setHalignment(depthEnd, HPos.LEFT);
+        GridPane.setHalignment(depthLabel, HPos.LEFT);
+        GridPane.setHalignment(depth, HPos.LEFT);
         GridPane.setHalignment(setSoil, HPos.LEFT);
 
         // Set Row & Column Index for Nodes
-        GridPane.setConstraints(depth, 0, 0, 2, 1);
+        GridPane.setConstraints(layorText, 0, 0, 2, 1);
         GridPane.setConstraints(soil, 0, 1);
         GridPane.setConstraints(soilChoiceBox, 1, 1);
         GridPane.setConstraints(soilAwcLabel, 0, 2);
         GridPane.setConstraints(soilAwc, 1, 2);
-        GridPane.setConstraints(depthStartLabel, 0, 3);
-        GridPane.setConstraints(depthStart, 1, 3);
-        GridPane.setConstraints(depthEndLabel, 0, 4);
-        GridPane.setConstraints(depthEnd, 1, 4);
-        GridPane.setConstraints(setSoil, 0, 5);
+        GridPane.setConstraints(depthLabel, 0, 3);
+        GridPane.setConstraints(depth, 1, 3);
+        GridPane.setConstraints(setSoil, 0, 4);
 
-        center.getChildren().addAll(depth, soil, soilChoiceBox, soilAwcLabel, soilAwc,
-            depthStartLabel, depthStart, depthEndLabel, depthEnd, setSoil);
+        center.getChildren().addAll(layorText, soil, soilChoiceBox, soilAwcLabel, soilAwc,
+            depthLabel, depth, setSoil);
         pane.setCenter(center);
         // CREATE SOILPROFILE END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
