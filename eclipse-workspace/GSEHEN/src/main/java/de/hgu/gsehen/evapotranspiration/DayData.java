@@ -31,6 +31,11 @@ public class DayData implements Comparable<DayData> {
   private Double et0;
   private Double currentKc;
   private Double etc;
+  private Double irrigation;
+  private Double dailyBalance;
+  private Integer currentRootingZone;
+  private Double currentAvailableSoilWater;
+  private Double currentTotalWaterBalance;
 
   public Double getCurrentKc() {
     return currentKc;
@@ -49,7 +54,6 @@ public class DayData implements Comparable<DayData> {
     this.etc = etc;
   }
 
-  private Double irrigation;
 
   public Double getIrrigation() {
     return irrigation;
@@ -59,7 +63,6 @@ public class DayData implements Comparable<DayData> {
     this.irrigation = irrigation;
   }
 
-  private Double dailyBalance;
 
   public Double getDailyBalance() {
     return dailyBalance;
@@ -157,6 +160,30 @@ public class DayData implements Comparable<DayData> {
     this.et0 = et0;
   }
 
+  public Integer getCurrentRootingZone() {
+    return currentRootingZone;
+  }
+
+  public void setCurrentRootingZone(Integer currentRootingZone) {
+    this.currentRootingZone = currentRootingZone;
+  }
+
+  public Double getCurrentAvailableSoilWater() {
+    return currentAvailableSoilWater;
+  }
+
+  public void setCurrentAvailableSoilWater(Double currentAvailableSoilWater) {
+    this.currentAvailableSoilWater = currentAvailableSoilWater;
+  }
+
+  public Double getCurrentTotalWaterBalance() {
+    return currentTotalWaterBalance;
+  }
+
+  public void setCurrentTotalWaterBalance(Double currentTotalWaterBalance) {
+    this.currentTotalWaterBalance = currentTotalWaterBalance;
+  }
+
   @Override
   public int compareTo(DayData o) {
     return getDate().compareTo(o.getDate());
@@ -200,9 +227,13 @@ public class DayData implements Comparable<DayData> {
     this.etc = etc;
     this.irrigation = irrigation;
     this.dailyBalance = dailyBalance;
+    this.currentRootingZone = currentRootingZone;
+    this.currentAvailableSoilWater = currentAvailableSoilWater;
+    this.currentTotalWaterBalance = currentTotalWaterBalance;
   }
 
-  public DayData() {};
+  public DayData() {}
+
 
 }
 

@@ -1,7 +1,7 @@
 package de.hgu.gsehen.model;
 
 import java.util.List;
-import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,11 +15,21 @@ public class SoilProfile {
   @GeneratedValue
   private long id;
   private String name;
-  @OneToMany (cascade = {CascadeType.ALL})
+
+  @OneToMany(cascade = {CascadeType.ALL})
   private List<Soil> soilType;
   @OneToMany(cascade = {CascadeType.ALL})
   private List<SoilProfileDepth> profileDepth;
-  
+
+  public SoilProfile(String name, List<Soil> soilType, List<SoilProfileDepth> profileDepth) {
+    super();
+    this.name = name;
+    this.soilType = soilType;
+    this.profileDepth = profileDepth;
+  }
+
+  public SoilProfile() {}
+
   public String getName() {
     return name;
   }
@@ -44,9 +54,9 @@ public class SoilProfile {
     this.profileDepth = profileDepth;
   }
 
-  public void configure(){}
+  public void configure() {}
 
-  public void visualize(){}
+  public void visualize() {}
 
-  public void modify(){}
+  public void modify() {}
 }

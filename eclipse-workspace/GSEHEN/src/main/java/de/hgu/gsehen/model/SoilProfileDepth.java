@@ -6,11 +6,18 @@ import javax.persistence.Id;
 
 @Entity
 public class SoilProfileDepth {
-  
+
   @Id
   @GeneratedValue
   private long id;
   private double depth;
+
+  public SoilProfileDepth() {}
+
+  public SoilProfileDepth(double depth) {
+    super();
+    this.depth = depth;
+  }
 
   public double getDepth() {
     return depth;
