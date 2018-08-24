@@ -70,19 +70,12 @@ public class TotalBalance {
     Integer currentRootingZone = dayData.getCurrentRootingZone();
     Double currentAvailableSoilWater = 0.0;
     Integer remaningRootingZone = currentRootingZone;
-    // currenAvailableSoilWater = sum(soilProfile.Soil)
     List<Soil> soils = soilProfile.getSoilType();
     List<SoilProfileDepth> profiles = soilProfile.getProfileDepth();
-
-    // if (soils.size() == 1) {
-    // Double availableWaterCapacity = soils.get(0).getAvailableWaterCapacity();
-    // currentAvailableSoilWater =
-    // currentRootingZone.doubleValue() * 100.0 * 100.0 * (availableWaterCapacity / 100) / 1000;
-    // } else {
     int i;
     for (i = 0; i < soils.size(); i++) {
       Double rest = (profiles.get(i).getDepth() - remaningRootingZone);
-      if (rest >= 0 | rest < 0 && i + 1 == soils.size() - 1) {
+      if (rest >= 0 || rest < 0 && i + 1 == soils.size()) {
         currentAvailableSoilWater += remaningRootingZone * 100.0 * 100.0
             * (soils.get(i).getAvailableWaterCapacity() / 100) / 1000;
         break;
@@ -96,9 +89,7 @@ public class TotalBalance {
 
     }
 
-    // }
     dayData.setCurrentAvailableSoilWater(currentAvailableSoilWater);
-
-
   }
+
 }

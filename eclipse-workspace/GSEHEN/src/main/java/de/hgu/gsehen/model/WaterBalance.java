@@ -20,6 +20,13 @@ public class WaterBalance {
   @OneToMany
   private List<DayData> dailyBalances = new ArrayList<>();
 
+  public WaterBalance() {}
+
+  public WaterBalance(List<DayData> dailyBalances) {
+    super();
+    this.dailyBalances = dailyBalances;
+  }
+
   public List<DayData> getDailyBalances() {
     return dailyBalances;
   }
