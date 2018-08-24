@@ -92,4 +92,49 @@ public class TotalBalance {
     dayData.setCurrentAvailableSoilWater(currentAvailableSoilWater);
   }
 
+  // TODO: Starkregenereignis und dauer der Pause konfigurierbar machen.
+  public static void calculateTotalWaterBalance(Plot plot) {
+    Double rainMax = 30.0;
+    Integer daysPause = 2;
+    plot.setCalculationPaused(false);
+    Double startValue;
+    if (plot.getSoilStartValue() != null) {
+      startValue = plot.getSoilStartValue();
+    } else {
+      startValue = plot.getWaterBalance().getDailyBalances().get(0).getCurrentAvailableSoilWater();
+    }
+    int i;
+    for (i = 0; i == plot.getWaterBalance().getDailyBalances().size(); i++) {
+      Double currentTotalWaterBalance;
+      if (i == 0) {
+        currentTotalWaterBalance =
+            startValue + plot.getWaterBalance().getDailyBalances().get(0).getDailyBalance();
+        plot.getWaterBalance().getDailyBalances().get(0)
+            .setCurrentTotalWaterBalance(currentTotalWaterBalance);
+      } else {
+        currentTotalWaterBalance =
+            plot.getWaterBalance().getDailyBalances().get(i - 1).getDailyBalance()
+                + plot.getWaterBalance().getDailyBalances().get(i).getDailyBalance();;
+        plot.getWaterBalance().getDailyBalances().get(i)
+            .setCurrentTotalWaterBalance(currentTotalWaterBalance);
+      }
+      // Calculation Pause
+      if (currentTotalWaterBalance > plot.getWaterBalance().getDailyBalances().get(i)
+          .getCurrentAvailableSoilWater()
+          && plot.getWaterBalance().getDailyBalances().get(i).getPrecipitation() > rainMax) {
+        plot.setCalculationPaused(true);
+        int k;
+        for (k = 1; k > daysPause
+            || i + k > plot.getWaterBalance().getDailyBalances().size(); k++) {
+          Double lastWaterBalance =
+              plot.getWaterBalance().getDailyBalances().get(i).getCurrentAvailableSoilWater();
+          plot.getWaterBalance().getDailyBalances().get(i + k)
+              .setCurrentTotalWaterBalance(lastWaterBalance);
+        }
+
+      }
+
+
+    }
+  }
 }
