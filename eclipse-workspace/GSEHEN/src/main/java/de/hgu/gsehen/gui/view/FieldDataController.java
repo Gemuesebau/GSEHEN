@@ -19,6 +19,7 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
@@ -31,6 +32,7 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
@@ -40,6 +42,7 @@ import javax.persistence.Persistence;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+// TODO - Texte in main_de.properties einsetzen!
 public class FieldDataController implements GsehenEventListener<FarmDataChanged> {
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   // private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
@@ -300,23 +303,25 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
               Text createdSoil = new Text(
                   "Schicht #" + (layorList.size() + 1) + ": \n" + "Bodentyp: " + soil.getName()
-                      + "; Wasserhaltekapazität: " + soil.getAvailableWaterCapacity()
-                      + "; Tiefe (in cm): " + spd.getDepth() + "\n\n");
-              createdSoil.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+                      + ";\nWasserhaltekapazität: " + soil.getAvailableWaterCapacity()
+                      + ";\nTiefe (in cm): " + spd.getDepth() + "\n\n");
+              createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
               GridPane.setHalignment(createdSoil, HPos.LEFT);
               GridPane.setConstraints(createdSoil, 0, 4 + layorList.size() + 1);
               layorList.add(createdSoil);
+
+              layorText.setText("Schicht #" + (layorList.size() + 1));
 
               Button delSoil = new Button("Schicht löschen");
               delSoil.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent arg0) {
-                  // TODO: #xy nach dem Löschen und Layout (Text/Button) anpassen!
                   soilSet.remove(soil);
                   spdSet.remove(spd);
                   layorList.remove(createdSoil);
                   center.getChildren().removeAll(createdSoil, delSoil);
                   depth.setText("Schicht #" + (layorList.size() - 1));
+                  layorText.setText("Schicht #" + (layorList.size() + 1));
 
                   for (Text t : layorList) {
                     t.setText(t.getText().substring(0, 9) + index + t.getText().substring(10));
@@ -361,7 +366,10 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
         center.getChildren().addAll(layorText, soil, soilChoiceBox, soilAwcLabel, soilAwc,
             depthLabel, depth, setSoil);
-        pane.setCenter(center);
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(center);
+        scrollPane.setPannable(true);
+        pane.setCenter(scrollPane);
         // CREATE SOILPROFILE END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         back = new Button("Zurück");
@@ -407,6 +415,33 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     pane.setLeft(leftBox);
     // LEFT END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    // CENTER ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    BorderPane center = new BorderPane();
+    center.setPadding(new Insets(20, 20, 20, 20));
+
+    // TODO - Bearbeiten des Profils ermöglichen!
+    Text createdSoil = new Text();
+    soilChoiceBox.getSelectionModel().selectedIndexProperty()
+        .addListener(new ChangeListener<Number>() {
+          @Override
+          public void changed(ObservableValue<? extends Number> observableValue, Number number,
+              Number number2) {
+            for (SoilProfile sp : soilList) {
+              if (sp == soilChoiceBox.getValue()) {
+                System.out.println(sp.getName());
+                for (Soil soil : sp.getSoilType()) {
+                  for (SoilProfileDepth spd : sp.getProfileDepth()) {
+                    createdSoil.setText("Schicht #" + (layorList.size() + 1) + ": \n" + "Bodentyp: "
+                        + soil.getName() + ";\nWasserhaltekapazität: "
+                        + soil.getAvailableWaterCapacity() + ";\nTiefe (in cm): " + spd.getDepth()
+                        + "\n\n");
+                    createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
+                  }
+                }
+              }
+            }
+          }
+        });
     Button saveField = new Button("Speichern");
     saveField.setOnAction(new EventHandler<ActionEvent>() {
       @Override
@@ -421,7 +456,13 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         gsehenInstance.sendFarmDataChanged(field, null);
       }
     });
+    center.getChildren().addAll(createdSoil, saveField);
+    ScrollPane scrollPane = new ScrollPane();
+    scrollPane.setContent(center);
+    scrollPane.setPannable(true);
+    // TODO - ScrollPane einsetzen, sobald funktionsfähig!
     pane.setBottom(saveField);
+    // CENTER END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     treeTableView =
         (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
