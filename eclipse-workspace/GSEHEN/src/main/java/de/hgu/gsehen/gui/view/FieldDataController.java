@@ -150,7 +150,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     HBox soilProfileBox = new HBox();
     soilProfileBox.getChildren().addAll(soilProfile, soilChoiceBox);
 
-    createSoil = new Button("Bodentyp ertsellen");
+    createSoil = new Button("Bodenprofil erstellen");
     createSoil.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
