@@ -222,7 +222,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   .equals(mainBundle.getString("gui.view.Map.drawableType.Farm"))) {
                 Farm farm = (Farm) selectedItem.getValue();
 
-                attributeLabel1 = new Text("Anzahl Felder: ");
+                attributeLabel1 = new Text(mainBundle.getString("treetableview.fieldnumber"));
                 attributeLabel1.setFont(Font.font("Arial", 12));
                 attribute1 = new Text(Integer.toString(farm.getFields().size()));
                 attribute1.setFont(Font.font("Arial", FontWeight.BOLD, 12));
@@ -234,21 +234,21 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
               } else if (selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
                 Field field = (Field) selectedItem.getValue();
 
-                attributeLabel1 = new Text("Anzahl Plots: ");
+                attributeLabel1 = new Text(mainBundle.getString("treetableview.plotnumber"));
                 attributeLabel1.setFont(Font.font("Arial", 12));
                 attribute1 = new Text(Integer.toString(field.getPlots().size()));
                 attribute1.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 attribute1Box = new HBox();
                 attribute1Box.getChildren().addAll(attributeLabel1, attribute1);
 
-                attributeLabel2 = new Text("m²: ");
+                attributeLabel2 = new Text(mainBundle.getString("fieldview.area"));
                 attributeLabel2.setFont(Font.font("Arial", 12));
-                attribute2 = new Text(Double.toString(field.getArea()));
+                attribute2 = new Text(Double.toString(field.getPolygon().calculateArea()));
                 attribute2.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 attribute2Box = new HBox();
                 attribute2Box.getChildren().addAll(attributeLabel2, attribute2);
 
-                attributeLabel3 = new Text("Bodenprofil: ");
+                attributeLabel3 = new Text(mainBundle.getString("fieldview.soilprofile"));
                 attributeLabel3.setFont(Font.font("Arial", 12));
                 if (field.getSoilProfile() != null) {
                   attribute3 = new Text(field.getSoilProfile().getName());
@@ -265,14 +265,14 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   .equals(mainBundle.getString("gui.view.Map.drawableType.Plot"))) {
                 Plot plot = (Plot) selectedItem.getValue();
 
-                attributeLabel1 = new Text("m²: ");
+                attributeLabel1 = new Text(mainBundle.getString("fieldview.area"));
                 attributeLabel1.setFont(Font.font("Arial", 12));
-                attribute1 = new Text(Double.toString(plot.getArea()));
+                attribute1 = new Text(Double.toString(plot.getPolygon().calculateArea()));
                 attribute1.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 attribute1Box = new HBox();
                 attribute1Box.getChildren().addAll(attributeLabel1, attribute1);
 
-                attributeLabel2 = new Text("Max. durchwurzelbare Zone: ");
+                attributeLabel2 = new Text(mainBundle.getString("plotview.rootingzone"));
                 attributeLabel2.setFont(Font.font("Arial", 12));
                 if (plot.getRootingZone() != null) {
                   attribute2 = new Text(Double.toString(plot.getRootingZone()));
@@ -283,50 +283,51 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 attribute2Box = new HBox();
                 attribute2Box.getChildren().addAll(attributeLabel2, attribute2);
 
-                attributeLabel3 = new Text("Kultur: ");
+                attributeLabel3 = new Text(mainBundle.getString("plotview.crop"));
                 attributeLabel3.setFont(Font.font("Arial", 12));
                 if (plot.getCrop() != null) {
                   attribute3 = new Text(plot.getCrop().getName());
                 } else {
-                  attribute3 = new Text("");
+                  attribute3 = new Text(mainBundle.getString("treetableview.nocrop"));
                 }
                 attribute3.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 attribute3Box = new HBox();
                 attribute3Box.getChildren().addAll(attributeLabel3, attribute3);
 
-                centerBox.getChildren().addAll(attribute1Box, attribute2Box, attribute3Box);
-
-                Text soilStartLabel = new Text("Start der Wasserbilanzierung: ");
+                Text soilStartLabel = new Text(mainBundle.getString("plotview.soilstart"));
                 soilStartLabel.setFont(Font.font("Arial", 12));
                 Text soilStart;
                 if (plot.getSoilStartDate() != null) {
                   soilStart = new Text(plot.getSoilStartDate().toString());
                 } else {
-                  soilStart = new Text("");
+                  soilStart = new Text("/");
                 }
                 soilStart.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 HBox soilStartBox = new HBox();
                 soilStartBox.getChildren().addAll(soilStartLabel, soilStart);
 
-                Text soilValueLabel = new Text("Wert der Wasserbilanzierung: ");
+                Text soilValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
                 soilValueLabel.setFont(Font.font("Arial", 12));
                 Text soilValue;
                 if (plot.getSoilStartValue() != null) {
                   soilValue = new Text(plot.getSoilStartValue().toString());
                 } else {
-                  soilValue = new Text("");
+                  soilValue = new Text("/");
                 }
-                soilValue.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                soilValue.setFont(Font.font("Arial", FontWeight.BOLD, 14));
                 HBox soilValueBox = new HBox();
                 soilValueBox.getChildren().addAll(soilValueLabel, soilValue);
 
-                Text actionLabel = new Text("Bewässerungsempfehlung: ");
+                centerBox.getChildren().addAll(attribute1Box, attribute2Box, attribute3Box,
+                    soilStartBox, soilValueBox);
+
+                Text actionLabel = new Text(mainBundle.getString("treetableview.watering"));
                 actionLabel.setFont(Font.font("Arial", 14));
                 Text action;
                 if (plot.getSoilStartValue() != null) {
                   action = new Text(plot.getRecommendedAction());
                 } else {
-                  action = new Text("");
+                  action = new Text("/");
                 }
                 action.setFont(Font.font("Arial", FontWeight.BOLD, 14));
                 HBox actionBox = new HBox();
@@ -334,7 +335,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 VBox bottomBox = new VBox(10);
                 bottomBox.setPadding(new Insets(10, 10, 10, 10));
-                bottomBox.getChildren().addAll(soilStartBox, soilValueBox, actionBox);
+                bottomBox.getChildren().addAll(actionBox);
                 detailPane.setBottom(bottomBox);
               }
 

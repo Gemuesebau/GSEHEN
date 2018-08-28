@@ -399,7 +399,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
                   name.setText(plot.getName());
 
-                  area.setText(String.valueOf(plot.getArea()));
+                  area.setText(String.valueOf(plot.getPolygon().calculateArea()));
 
                   if (plot.getCrop() != null && cropList.size() != 0) {
                     cropChoiceBox.getSelectionModel().select(plot.getCrop());

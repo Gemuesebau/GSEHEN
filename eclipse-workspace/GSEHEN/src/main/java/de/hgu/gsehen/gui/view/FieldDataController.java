@@ -3,11 +3,13 @@ package de.hgu.gsehen.gui.view;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
+import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
+import de.hgu.gsehen.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -158,6 +160,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
     createSoil = new Button(mainBundle.getString("fieldview.createprofile"));
     createSoil.setOnAction(new EventHandler<ActionEvent>() {
+
       @Override
       public void handle(ActionEvent e) {
         // CREATE SOILPROFILE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -315,7 +318,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
               layorText.setText(mainBundle.getString("fieldview.layor") + (layorList.size() + 1));
 
-              Button delSoil = new Button(mainBundle.getString("fieldview.delSoil"));
+              Button delSoil = new Button(mainBundle.getString("fieldview.delsoil"));
               delSoil.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent arg0) {
@@ -448,6 +451,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     // });
     Button saveField = new Button(mainBundle.getString("menu.file.save"));
     saveField.setOnAction(new EventHandler<ActionEvent>() {
+
       @Override
       public void handle(ActionEvent e) {
         field.setName(name.getText());
@@ -485,7 +489,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
                   name.setText(field.getName());
 
-                  area.setText(String.valueOf(field.getArea()));
+                  area.setText(String.valueOf(field.getPolygon().calculateArea()));
 
                   for (SoilProfile soPr : soilList) {
                     if (field.getSoilProfile() != null
