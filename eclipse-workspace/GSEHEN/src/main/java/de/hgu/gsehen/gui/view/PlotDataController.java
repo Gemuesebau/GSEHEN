@@ -6,7 +6,6 @@ import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Plot;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -14,8 +13,9 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.logging.Logger;
-
+import java.util.Locale;
+import java.util.ResourceBundle;
+// import java.util.logging.Logger;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -40,7 +40,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -48,7 +47,9 @@ import javax.persistence.Persistence;
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
   private final Timeline timeline = new Timeline();
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
-  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+  protected static final ResourceBundle mainBundle =
+      ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
+  // private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
   private TreeItem<Drawable> selectedItem;
   private Plot plot;
@@ -59,15 +60,17 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   private Text nameLabel;
   private Text areaLabel;
+  private Text rootingZoneLabel;
   private Text soilStartLabel;
   private Text soilStartValueLabel;
   private Text cropStartLabel;
 
   private TextField name;
+  private TextField rootingZone;
   private Text area;
   private DatePicker soilStart;
   private DatePicker cropStart;
-  private Text soilStartValue;
+  private TextField soilStartValue;
 
   private Text waterBalanceLabel;
   private boolean isActive = true;
@@ -80,15 +83,14 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   /**
    * Constructs a new plot data controller associated with the given BorderPane.
    *
-   * @param pane
-   *          - the associated BorderPane.
+   * @param pane - the associated BorderPane.
    */
   public PlotDataController(Gsehen application, BorderPane pane) {
     this.gsehenInstance = application;
     this.pane = pane;
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void handle(FarmDataChanged event) {
     /*
@@ -99,34 +101,31 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     pane.setVisible(false);
 
     // TOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nameLabel = new Text("Name: ");
+    nameLabel = new Text(mainBundle.getString("fieldview.name"));
     nameLabel.setFont(Font.font("Arial", 14));
     name = new TextField("");
 
     HBox nameBox = new HBox();
-    // nameBox.setStyle("-fx-background-color: #d39494;"); // Nur zur Übersicht!
     nameBox.getChildren().addAll(nameLabel, name);
 
-    areaLabel = new Text("m²: ");
+    areaLabel = new Text(mainBundle.getString("fieldview.area"));
     areaLabel.setFont(Font.font("Arial", 14));
     area = new Text("");
     area.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
     HBox locationBox = new HBox();
-    // locationBox.setStyle("-fx-background-color: #acd293;"); // Nur zur Übersicht!
     locationBox.getChildren().addAll(areaLabel, area);
 
     VBox topBox = new VBox(25);
-    // topBox.setStyle("-fx-background-color: #f4ec46;"); // Nur zur Übersicht!
     topBox.setPadding(new Insets(20, 20, 20, 20));
     topBox.getChildren().addAll(nameBox, locationBox);
     pane.setTop(topBox);
     // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // LEFT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Text crop = new Text("Kultur: ");
+    Text crop = new Text(mainBundle.getString("plotview.crop"));
     crop.setFont(Font.font("Arial", 14));
-    // Dummy-Liste
+    // Dummy-Liste TODO
     ChoiceBox<Crop> cropChoiceBox = new ChoiceBox<Crop>();
     cropChoiceBox.getItems().addAll(new Crop("Apfel"), new Crop("Birne"), new Crop("Löwenzahn"),
         new Crop("Tomate"), new Crop("Zwiebel"));
@@ -144,37 +143,14 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
-    // cropChoiceBox.valueProperty().addListener(new ChangeListener<String>() {
-    // @Override
-    // public void changed(ObservableValue<? extends String> arg0, String arg1,
-    // String arg2) {
-    // Drawable obj = null;
-    // Crop crop = new Crop();
-    // crop.setName(cropChoiceBox.getValue().toString());
-    //
-    // for (Farm farm : gsehenInstance.getFarmsList()) {
-    // for (Field field : farm.getFields()) {
-    // for (Plot plot : field.getPlots()) {
-    // obj = plot;
-    // Crop dummyCrop = new Crop();
-    // dummyCrop.setName("");
-    // plot.setCrop(dummyCrop);
-    // for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells()
-    // .size(); i++) {
-    // if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null
-    // && plot.getName().equals(treeTableView.getSelectionModel().getSelectedCells()
-    // .get(i).getTreeItem().getValue().getName())) {
-    // plot.setCrop(crop);
-    // LOGGER.info("'" + crop.getName() + "' was set as crop in" + obj);
-    // }
-    // }
-    // }
-    // }
-    // }
-    // gsehenInstance.sendFarmDataChanged(obj, null);
-    // }
-    // });
-    cropStartLabel = new Text("Start der Pflanzung: ");
+    rootingZoneLabel = new Text(mainBundle.getString("plotview.rootingzone"));
+    rootingZoneLabel.setFont(Font.font("Arial", 14));
+    rootingZone = new TextField("");
+
+    HBox rootingZoneBox = new HBox();
+    rootingZoneBox.getChildren().addAll(rootingZoneLabel, rootingZone);
+
+    cropStartLabel = new Text(mainBundle.getString("plotview.cropstart"));
     cropStartLabel.setFont(Font.font("Arial", 14));
     cropStart = new DatePicker();
     cropStart.setShowWeekNumbers(true);
@@ -201,16 +177,14 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     };
     cropStart.setConverter(convert);
     cropStart.setPromptText("dd-MM-yyyy");
-    
+
     HBox cropStartBox = new HBox();
-    // cropEndBox.setStyle("-fx-background-color: #466bf4;"); // Nur zur Übersicht!
     cropStartBox.getChildren().addAll(cropStartLabel, cropStart);
 
     HBox cropBox = new HBox();
-    // cropBox.setStyle("-fx-background-color: #d39494;"); // Nur zur Übersicht!
     cropBox.getChildren().addAll(crop, cropChoiceBox);
 
-    soilStartLabel = new Text("Start der Wasserbilanz: ");
+    soilStartLabel = new Text(mainBundle.getString("plotview.soilstart"));
     soilStartLabel.setFont(Font.font("Arial", 14));
     soilStart = new DatePicker();
     soilStart.setShowWeekNumbers(true);
@@ -237,11 +211,11 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         }
       }
     };
-    
+
     soilStart.setConverter(converter);
     soilStart.setPromptText("dd-MM-yyyy");
 
-    Button b1 = new Button("Pause");
+    Button b1 = new Button(mainBundle.getString("plotview.pause"));
     b1.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
@@ -249,21 +223,27 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
     HBox soilStartBox = new HBox();
-    // cropStartBox.setStyle("-fx-background-color: #acd293;"); // Nur zur
-    // Übersicht!
     soilStartBox.getChildren().addAll(soilStartLabel, soilStart, b1);
 
-    soilStartValueLabel = new Text("Startwert der Wasserbilanz: ");
+    soilStartValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
     soilStartValueLabel.setFont(Font.font("Arial", 14));
-    soilStartValue = new Text("");
-    soilStartValue.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+    soilStartValue = new TextField("");
+    soilStartValue.textProperty().addListener(new ChangeListener<String>() {
+      @Override
+      public void changed(ObservableValue<? extends String> observable, String oldValue,
+          String newValue) {
+        if (newValue != null) {
+          if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+            soilStartValue.setText(oldValue);
+          }
+        }
+      }
+    });
     HBox soilStartValueBox = new HBox();
-    // cropEndBox.setStyle("-fx-background-color: #466bf4;"); // Nur zur Übersicht!
     soilStartValueBox.getChildren().addAll(soilStartValueLabel, soilStartValue);
 
-    //get Date vom today
     HBox cropEndBox = new HBox();
-    Button b2 = new Button("Ernte");
+    Button b2 = new Button(mainBundle.getString("plotview.harvest"));
     b2.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
@@ -271,55 +251,47 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         Date date = Calendar.getInstance().getTime();
         DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         String enddate = formatter.format(date);
-        
       }
     });
     cropEndBox.getChildren().addAll(b2);
-    
-    VBox leftBox = new VBox(50);
-    // leftBox.setStyle("-fx-background-color: #f4ba46;"); // Nur zur Übersicht!
-    leftBox.setPadding(new Insets(20, 20, 20, 20));
-    leftBox.getChildren().addAll(cropBox, cropStartBox,
-        soilStartBox, soilStartValueBox, cropEndBox);
-    pane.setLeft(leftBox);
-    
 
+    VBox leftBox = new VBox(50);
+    leftBox.setPadding(new Insets(20, 20, 20, 20));
+    leftBox.getChildren().addAll(cropBox, rootingZoneBox, cropStartBox, soilStartBox,
+        soilStartValueBox, cropEndBox);
+    pane.setLeft(leftBox);
     // LEFT END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // CENTER ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    waterBalanceLabel = new Text("Wasserbilanz: ");
+    waterBalanceLabel = new Text(mainBundle.getString("plotview.waterbalance"));
     waterBalanceLabel.setFont(Font.font("Arial", 14));
 
     // Balkendiagramm Wasserbillanz TODO: Farben einbauen/Wassertiefe in scala
-
     CategoryAxis xaxis;
     NumberAxis yaxis;
-    String[] plote = { "Plot" };
+    String[] plote = {"Plot"};
     xaxis = new CategoryAxis();
     xaxis.setCategories(FXCollections.<String>observableArrayList(plote));
     yaxis = new NumberAxis("cm", 0.0d, 25.0d, 1);
     ObservableList<BarChart.Series> barChartData = FXCollections
-        .observableArrayList(new BarChart.Series("Wasser im Boden",
+        .observableArrayList(new BarChart.Series(mainBundle.getString("plotview.waterinsoil"),
             FXCollections.observableArrayList(new BarChart.Data(plote[0], 7.0d))));
     BarChart chart;
     chart = new BarChart(xaxis, yaxis, barChartData, 25.0d);
 
     HBox waterBalanceBox = new HBox();
-    // waterBalanceBox.setStyle("-fx-background-color: #466bf4;"); // Nur zur
-    // Übersicht!
     waterBalanceBox.getChildren().addAll(waterBalanceLabel, chart);
 
     VBox centerBox = new VBox();
-    // leftBox.setStyle("-fx-background-color: #917d57;"); // Nur zur Übersicht!
     centerBox.setPadding(new Insets(20, 20, 20, 20));
     centerBox.getChildren().addAll(waterBalanceBox);
     pane.setCenter(centerBox);
-   
+
     play();
     // CENTER END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Button save = new Button("Speichern");
+    Button save = new Button(mainBundle.getString("menu.file.save"));
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
@@ -333,38 +305,42 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             em.getTransaction().begin();
             plot.setName(name.getText());
             plot.setCrop(cropChoiceBox.getValue());
+
             LocalDate localDate = soilStart.getValue();
             LocalDate cropDate = cropStart.getValue();
             Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             Date cropdate = Date.from(cropDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
             plot.setSoilStartDate(date);
             plot.setCropStart(cropdate);
-            plot.getIsActive();
+            plot.setRootingZone(Double.valueOf(rootingZone.getText()));
+            plot.setSoilStartValue(Double.valueOf(soilStartValue.getText()));
+            // plot.setCalculationPaused(calculationPaused); TODO
+            plot.setIsActive(isActive);
+
             em.getTransaction().commit();
           } catch (Exception d) {
-            System.out.println("Problem: " + d.getMessage());
             em.getTransaction().rollback();
           } finally {
             em.close();
           }
-            
         } finally {
           gsehenInstance.sendFarmDataChanged(plot, null);
         }
-        }
-      });
+      }
+    });
     pane.setBottom(save);
 
-    treeTableView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
-        .lookup(FARM_TREE_VIEW_ID);
+    treeTableView =
+        (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
     treeTableView.getSelectionModel().selectedItemProperty()
         .addListener(new ChangeListener<Object>() {
           @Override
           public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
             for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
               if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
-                selectedItem = treeTableView.getSelectionModel().getSelectedCells().get(i)
-                    .getTreeItem();
+                selectedItem =
+                    treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
                 if (selectedItem != null
                     && selectedItem.getValue().getClass().getSimpleName().equals("Plot")) {
                   // TODO
@@ -381,10 +357,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                   Date date = plot.getSoilStartDate();
                   Date cropdate = plot.getCropStart();
                   if (date != null) {
-                    LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault())
-                        .toLocalDate();
-                    LocalDate cropDate = date.toInstant().atZone(ZoneId.systemDefault())
-                        .toLocalDate();
+                    LocalDate localDate =
+                        date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    LocalDate cropDate =
+                        date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                     soilStart.setValue(localDate);
                     cropStart.setValue(cropDate);
                   } else {
@@ -392,26 +368,22 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                     cropStart.setValue(null);
                   }
                   if (cropdate != null) {
-                    LocalDate cropDate = cropdate.toInstant().atZone(ZoneId.systemDefault())
-                        .toLocalDate();
+                    LocalDate cropDate =
+                        cropdate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                     cropStart.setValue(cropDate);
                   } else {
                     cropStart.setValue(null);
                   }
-
-                  soilStartValue.setText(String.valueOf(plot.getSoilStartValue()));
-
-                  // String geoPolygon = "";
-                  // DecimalFormat decimal = new DecimalFormat("#.#####");
-                  // for (double dx : selectedItem.getValue().getPolygon().getPolygonData()
-                  // .getPointsX()) {
-                  // for (double dy : selectedItem.getValue().getPolygon().getPolygonData()
-                  // .getPointsY()) {
-                  // geoPolygon += "[X: " + decimal.format(dx) + " / Y: " + decimal.format(dy)
-                  // + "] \n\t\t\t\t";
-                  // }
-                  // }
-                  // geopolygon.setText("GeoPolygon:\t\t" + geoPolygon);
+                  if (plot.getRootingZone() == null) {
+                    rootingZone.setText(String.valueOf(0.0));
+                  } else {
+                    rootingZone.setText(String.valueOf(plot.getRootingZone()));
+                  }
+                  if (plot.getSoilStartValue() == null) {
+                    soilStartValue.setText(String.valueOf(0.0));
+                  } else {
+                    soilStartValue.setText(String.valueOf(plot.getSoilStartValue()));
+                  }
                 } else {
                   pane.setVisible(false);
                 }
