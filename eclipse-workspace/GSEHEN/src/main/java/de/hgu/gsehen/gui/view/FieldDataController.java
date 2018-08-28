@@ -10,6 +10,8 @@ import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 // import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -42,9 +44,10 @@ import javax.persistence.Persistence;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
-// TODO - Texte in main_de.properties einsetzen!
 public class FieldDataController implements GsehenEventListener<FarmDataChanged> {
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
+  protected static final ResourceBundle mainBundle =
+      ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
   // private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
   private List<SoilProfile> soilList = new ArrayList<>();
@@ -92,14 +95,14 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     index = 1;
 
     // TOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nameLabel = new Text("Name: ");
+    nameLabel = new Text(mainBundle.getString("fieldview.name"));
     nameLabel.setFont(Font.font("Arial", 14));
     name = new TextField("");
 
     HBox nameBox = new HBox();
     nameBox.getChildren().addAll(nameLabel, name);
 
-    areaLabel = new Text("m²: ");
+    areaLabel = new Text(mainBundle.getString("fieldview.area"));
     areaLabel.setFont(Font.font("Arial", 14));
     area = new Text("");
     area.setFont(Font.font("Arial", FontWeight.BOLD, 14));
@@ -115,7 +118,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // LEFT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Text soilProfile = new Text("Bodenprofil: ");
+    Text soilProfile = new Text(mainBundle.getString("fieldview.soilprofile"));
     soilProfile.setFont(Font.font("Arial", 14));
 
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
@@ -153,14 +156,14 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     HBox soilProfileBox = new HBox();
     soilProfileBox.getChildren().addAll(soilProfile, soilChoiceBox);
 
-    createSoil = new Button("Bodenprofil erstellen");
+    createSoil = new Button(mainBundle.getString("fieldview.createprofile"));
     createSoil.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
         // CREATE SOILPROFILE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         pane.getChildren().clear();
 
-        Text soilNameLabel = new Text("Name des Profils: ");
+        Text soilNameLabel = new Text(mainBundle.getString("fieldview.profilename"));
         soilNameLabel.setFont(Font.font("Arial", 14));
         TextField soilProfileName = new TextField("");
 
@@ -169,30 +172,29 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
         layorList = new ArrayList<Text>();
 
-        Text layorText = new Text("Schicht #" + (layorList.size() + 1));
+        Text layorText = new Text(mainBundle.getString("fieldview.layor") + (layorList.size() + 1));
         layorText.setFont(Font.font("Arial", FontWeight.BOLD, 18));
 
-        Text soil = new Text("Bodentyp: ");
+        Text soil = new Text(mainBundle.getString("fieldview.soiltype"));
         soil.setFont(Font.font("Arial", 14));
 
-        // TODO: Hardcoded.
         Soil sand = new Soil();
-        sand.setName("Sand");
+        sand.setName(mainBundle.getString("fieldview.sand"));
         sand.setAvailableWaterCapacity(8);
         Soil sandyLoam = new Soil();
-        sandyLoam.setName("Sandiger Lehm");
+        sandyLoam.setName(mainBundle.getString("fieldview.sandyloam"));
         sandyLoam.setAvailableWaterCapacity(12);
         Soil loam = new Soil();
-        loam.setName("Lehm");
+        loam.setName(mainBundle.getString("fieldview.loam"));
         loam.setAvailableWaterCapacity(17);
         Soil clayLoam = new Soil();
-        clayLoam.setName("Toniger Lehm");
+        clayLoam.setName(mainBundle.getString("fieldview.clayloam"));
         clayLoam.setAvailableWaterCapacity(18);
         Soil siltyClay = new Soil();
-        siltyClay.setName("Schluffiger Ton");
+        siltyClay.setName(mainBundle.getString("fieldview.siltyclay"));
         siltyClay.setAvailableWaterCapacity(20);
         Soil clay = new Soil();
-        clay.setName("Ton");
+        clay.setName(mainBundle.getString("fieldview.clay"));
         clay.setAvailableWaterCapacity(23);
 
         List<Soil> soils = new ArrayList<Soil>();
@@ -219,7 +221,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           }
         });
 
-        Text soilAwcLabel = new Text("Verfügbare Wasserhaltekapazität: ");
+        Text soilAwcLabel = new Text(mainBundle.getString("fieldview.soilawc"));
         soilAwcLabel.setFont(Font.font("Arial", 14));
         TextField soilAwc = new TextField();
 
@@ -240,7 +242,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         pane.setTop(topBox);
 
         TextField depth = new TextField("25");
-        Text depthLabel = new Text("Tiefe (in cm): ");
+        Text depthLabel = new Text(mainBundle.getString("fieldview.depth"));
         depthLabel.setFont(Font.font("Arial", 14));
         depth.textProperty().addListener(new ChangeListener<String>() {
           @Override
@@ -280,7 +282,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
         soilProfileItem = new SoilProfile();
 
-        Button setSoil = new Button("Schicht abschließen");
+        Button setSoil = new Button(mainBundle.getString("fieldview.setsoil"));
         setSoil.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent arg0) {
@@ -301,18 +303,19 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
               soilAwc.setText(null);
               depth.setText(String.valueOf(spd.getDepth()));
 
-              Text createdSoil = new Text(
-                  "Schicht #" + (layorList.size() + 1) + ": \n" + "Bodentyp: " + soil.getName()
-                      + ";\nWasserhaltekapazität: " + soil.getAvailableWaterCapacity()
-                      + ";\nTiefe (in cm): " + spd.getDepth() + "\n\n");
+              Text createdSoil =
+                  new Text(mainBundle.getString("fieldview.layor") + (layorList.size() + 1) + ": \n"
+                      + mainBundle.getString("fieldview.soiltype") + soil.getName() + ";\n"
+                      + mainBundle.getString("fieldview.awc") + soil.getAvailableWaterCapacity()
+                      + ";\n" + mainBundle.getString("fieldview.depth") + spd.getDepth() + "\n\n");
               createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
               GridPane.setHalignment(createdSoil, HPos.LEFT);
               GridPane.setConstraints(createdSoil, 0, 4 + layorList.size() + 1);
               layorList.add(createdSoil);
 
-              layorText.setText("Schicht #" + (layorList.size() + 1));
+              layorText.setText(mainBundle.getString("fieldview.layor") + (layorList.size() + 1));
 
-              Button delSoil = new Button("Schicht löschen");
+              Button delSoil = new Button(mainBundle.getString("fieldview.delSoil"));
               delSoil.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent arg0) {
@@ -320,8 +323,9 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
                   spdSet.remove(spd);
                   layorList.remove(createdSoil);
                   center.getChildren().removeAll(createdSoil, delSoil);
-                  depth.setText("Schicht #" + (layorList.size() - 1));
-                  layorText.setText("Schicht #" + (layorList.size() + 1));
+                  depth.setText(mainBundle.getString("fieldview.layor") + (layorList.size() - 1));
+                  layorText
+                      .setText(mainBundle.getString("fieldview.layor") + (layorList.size() + 1));
 
                   for (Text t : layorList) {
                     t.setText(t.getText().substring(0, 9) + index + t.getText().substring(10));
@@ -333,9 +337,9 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
               GridPane.setConstraints(delSoil, 1, 4 + layorList.size());
 
               center.getChildren().addAll(createdSoil, delSoil);
-              depth.setText("Schicht #" + (layorList.size() + 1));
+              depth.setText(mainBundle.getString("fieldview.layor") + (layorList.size() + 1));
             } else {
-              Text error = new Text("Es wurden nicht alle Felder ausgefüllt!");
+              Text error = new Text(mainBundle.getString("fieldview.error"));
               error.setFont(Font.font("Verdana", 20));
               error.setFill(Color.RED);
               buttonBox.getChildren().clear();
@@ -372,7 +376,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         pane.setCenter(scrollPane);
         // CREATE SOILPROFILE END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        back = new Button("Zurück");
+        back = new Button(mainBundle.getString("fieldview.back"));
         back.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent arg0) {
@@ -383,7 +387,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
         buttonBox = new HBox();
 
-        save = new Button("Speichern");
+        save = new Button(mainBundle.getString("menu.file.save"));
         save.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent arg0) {
@@ -421,28 +425,28 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
     // TODO - Bearbeiten des Profils ermöglichen!
     Text createdSoil = new Text();
-    soilChoiceBox.getSelectionModel().selectedIndexProperty()
-        .addListener(new ChangeListener<Number>() {
-          @Override
-          public void changed(ObservableValue<? extends Number> observableValue, Number number,
-              Number number2) {
-            for (SoilProfile sp : soilList) {
-              if (sp == soilChoiceBox.getValue()) {
-                System.out.println(sp.getName());
-                for (Soil soil : sp.getSoilType()) {
-                  for (SoilProfileDepth spd : sp.getProfileDepth()) {
-                    createdSoil.setText("Schicht #" + (layorList.size() + 1) + ": \n" + "Bodentyp: "
-                        + soil.getName() + ";\nWasserhaltekapazität: "
-                        + soil.getAvailableWaterCapacity() + ";\nTiefe (in cm): " + spd.getDepth()
-                        + "\n\n");
-                    createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
-                  }
-                }
-              }
-            }
-          }
-        });
-    Button saveField = new Button("Speichern");
+    // soilChoiceBox.getSelectionModel().selectedIndexProperty()
+    // .addListener(new ChangeListener<Number>() {
+    // @Override
+    // public void changed(ObservableValue<? extends Number> observableValue, Number number,
+    // Number number2) {
+    // for (SoilProfile sp : soilList) {
+    // if (sp == soilChoiceBox.getValue()) {
+    // System.out.println(sp.getName());
+    // for (Soil soil : sp.getSoilType()) {
+    // for (SoilProfileDepth spd : sp.getProfileDepth()) {
+    // createdSoil.setText("Schicht #" + (layorList.size() + 1) + ": \n" + "Bodentyp: "
+    // + soil.getName() + ";\nWasserhaltekapazität: "
+    // + soil.getAvailableWaterCapacity() + ";\nTiefe (in cm): " + spd.getDepth()
+    // + "\n\n");
+    // createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
+    // }
+    // }
+    // }
+    // }
+    // }
+    // });
+    Button saveField = new Button(mainBundle.getString("menu.file.save"));
     saveField.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
@@ -489,6 +493,22 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
                       soilChoiceBox.getSelectionModel().select(soPr);
                     }
                   }
+
+                  // SoilProfile sp = field.getSoilProfile();
+                  // if (sp != null) {
+                  // for (Soil soil : sp.getSoilType()) {
+                  // System.out.println(soil.getName());
+                  // for (SoilProfileDepth spd : sp.getProfileDepth()) {
+                  // createdSoil.setText(mainBundle.getString("fieldview.layor")
+                  // + (layorList.size() + 1) + ": \n"
+                  // + mainBundle.getString("fieldview.soiltype") + soil.getName() + ";\n"
+                  // + mainBundle.getString("fieldview.awc")
+                  // + soil.getAvailableWaterCapacity() + ";\n"
+                  // + mainBundle.getString("fieldview.depth") + spd.getDepth() + "\n\n");
+                  // createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
+                  // }
+                  // }
+                  // }
 
                 } else {
                   pane.setVisible(false);
