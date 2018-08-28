@@ -194,6 +194,7 @@ public class DayData implements Comparable<DayData> {
    *
    * @author MO
    *
+   * @param date is the actual date
    * @param tempMean Temperature mean in °C
    * @param tempMin Temperature minimum in °C
    * @param tempMax Temperature maximum in °C
@@ -206,11 +207,15 @@ public class DayData implements Comparable<DayData> {
    * @param et0 daily evapotranspiration in mm
    * @param currentKc is the days kc value
    * @param dailyBalance is the daily Water blance in mm
+   * @param currentRootingZone is the current rooting zone of the subordinated crop
+   * @param currentAvailableSoilWater is the available soil water at this state
+   * @param currentTotalWaterBalance is the current totla water blance of the crop
    */
   public DayData(Date date, double tempMean, Double tempMin, Double tempMax,
       double airHumidityRelMean, Double airHumidityRelMin, Double airHumidityRelMax,
       double globalRad, Double precipitation, double windspeed2m, Double et0, Double currentKc,
-      Double etc, Double irrigation, Double dailyBalance) {
+      Double etc, Double irrigation, Double dailyBalance, Integer currentRootingZone,
+      Double currentAvailableSoilWater, Double currentTotalWaterBalance) {
     super();
     this.date = date;
     this.tempMean = tempMean;

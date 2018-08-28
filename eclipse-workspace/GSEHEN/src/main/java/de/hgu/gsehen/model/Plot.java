@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
+import de.hgu.gsehen.gsbalance.RecommendedAction;
 import de.hgu.gsehen.gui.GeoPolygon;
 
 
@@ -30,7 +31,7 @@ public class Plot extends Drawable {
   private Double rootingZone;
   @OneToOne(cascade = {CascadeType.ALL})
   private WaterBalance waterBalance;
-  private String recommendedAction;
+  private RecommendedAction recommendedAction;
   private Date soilStartDate;
   private Double soilStartValue;
   private Boolean calculationPaused;
@@ -120,11 +121,11 @@ public class Plot extends Drawable {
     this.waterBalance = waterBalance;
   }
 
-  public String getRecommendedAction() {
+  public RecommendedAction getRecommendedAction() {
     return recommendedAction;
   }
 
-  public void setRecommendedAction(String recommendedAction) {
+  public void setRecommendedAction(RecommendedAction recommendedAction) {
     this.recommendedAction = recommendedAction;
   }
 
@@ -192,9 +193,29 @@ public class Plot extends Drawable {
 
   public void archive() {}
 
+  /**
+   * Constructor for Plot.
+   * 
+   * @param name Plot name
+   * @param area Plot area in m²
+   * @param polygon Subordinated polygon
+   * @param location Subordinated location
+   * @param scalingFactor Individual kc scaling factor
+   * @param weatherData Subordianted weather Data source
+   * @param rootingZone Maximum rooting zone for the plot
+   * @param waterBalance WaterBalance containing, DayData
+   * @param recommendedAction RecommendedAction Irrigation recommendation
+   * @param soilStartDate Start of waterbalancing for soil, Date
+   * @param soilStartValue Water content in mm for first soillayer 10cm
+   * @param calculationPaused Is the calculation paused due to heavy rainfall
+   * @param crop Subordinated crop
+   * @param cropStart Start date of the crop
+   * @param cropEnd End date of the crop
+   * @param isActive Is the plot active and not archived
+   */
   public Plot(String name, double area, GeoPolygon polygon, Location location, Double scalingFactor,
       WeatherData weatherData, Double rootingZone, WaterBalance waterBalance,
-      String recommendedAction, Date soilStartDate, Double soilStartValue,
+      RecommendedAction recommendedAction, Date soilStartDate, Double soilStartValue,
       Boolean calculationPaused, Crop crop, Date cropStart, Date cropEnd, Boolean isActive) {
     super();
     this.name = name;
