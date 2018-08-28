@@ -450,13 +450,13 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     saveField.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
+        field.setName(name.getText());
         field.setArea(Double.valueOf(area.getText()));
         for (SoilProfile sp : soilList) {
           if (sp == soilChoiceBox.getValue()) {
             field.setSoilProfile(sp);
           }
         }
-
         gsehenInstance.sendFarmDataChanged(field, null);
       }
     });
