@@ -25,6 +25,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -36,7 +37,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -101,74 +106,40 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   public void handle(FarmDataChanged event) {
     pane.setVisible(false);
 
-    // TOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // GridPane - Center Section
+    GridPane top = new GridPane();
+
+    // GridPane Configuration (Padding, Gaps, etc.)
+    top.setPadding(new Insets(20, 20, 20, 20));
+    top.setHgap(15);
+    top.setVgap(15);
+    top.setGridLinesVisible(false);
+
+    // Set Column and Row Constraints
+    ColumnConstraints column1 = new ColumnConstraints(200, 100, 300);
+    ColumnConstraints column2 = new ColumnConstraints(200, 100, 100);
+    column1.setHgrow(Priority.ALWAYS);
+    column2.setHgrow(Priority.ALWAYS);
+    RowConstraints rowEmpty = new RowConstraints();
+
+    // Add Constraints to Columns & Rows
+    top.getColumnConstraints().addAll(column1, column2);
+    top.getRowConstraints().add(0, rowEmpty);
+    top.getRowConstraints().add(1, rowEmpty);
+
+    // TOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     nameLabel = new Text(mainBundle.getString("fieldview.name"));
     nameLabel.setFont(Font.font("Arial", 14));
     name = new TextField("");
-
-    HBox nameBox = new HBox();
-    nameBox.getChildren().addAll(nameLabel, name);
 
     areaLabel = new Text(mainBundle.getString("fieldview.area"));
     areaLabel.setFont(Font.font("Arial", 14));
     area = new Text("");
     area.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
-    HBox locationBox = new HBox();
-    locationBox.getChildren().addAll(areaLabel, area);
-
-    VBox topBox = new VBox(25);
-    topBox.setPadding(new Insets(20, 20, 20, 20));
-    topBox.getChildren().addAll(nameBox, locationBox);
-    pane.setTop(topBox);
-    // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // LEFT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Gsehen.crop(); TODO: Schauen, ob's läuft, sobald die Methode funktioniert.
-
-    Text crop = new Text(mainBundle.getString("plotview.crop"));
-    crop.setFont(Font.font("Arial", 14));
-
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
-    EntityManager em = emf.createEntityManager();
-    if (cropList.isEmpty()) {
-      try {
-        Session session = em.unwrap(Session.class);
-        Query<Crop> query = session.createQuery("from Crop");
-        cropList = query.list();
-      } finally {
-        em.close();
-      }
-    }
-
-    ChoiceBox<Crop> cropChoiceBox = new ChoiceBox<Crop>();
-    if (!cropList.isEmpty()) {
-      for (Crop c : cropList) {
-        cropChoiceBox.getItems().add(c);
-      }
-    } else {
-      cropChoiceBox.getItems().addAll(new Crop("Liste leer!", true, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0,
-          "", "", "", "", 0, 0, 0, 0, ""));
-    }
-    cropChoiceBox.setConverter(new StringConverter<Crop>() {
-      @Override
-      public String toString(Crop object) {
-        return object.getName();
-      }
-
-      @Override
-      public Crop fromString(String string) {
-        return cropChoiceBox.getItems().stream().filter(ap -> ap.getName().equals(string))
-            .findFirst().orElse(null);
-      }
-    });
-
     rootingZoneLabel = new Text(mainBundle.getString("plotview.rootingzone"));
     rootingZoneLabel.setFont(Font.font("Arial", 14));
     rootingZone = new TextField("");
-
-    HBox rootingZoneBox = new HBox();
-    rootingZoneBox.getChildren().addAll(rootingZoneLabel, rootingZone);
 
     cropStartLabel = new Text(mainBundle.getString("plotview.cropstart"));
     cropStartLabel.setFont(Font.font("Arial", 14));
@@ -197,12 +168,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     };
     cropStart.setConverter(convert);
     cropStart.setPromptText("dd-MM-yyyy");
-
-    HBox cropStartBox = new HBox();
-    cropStartBox.getChildren().addAll(cropStartLabel, cropStart);
-
-    HBox cropBox = new HBox();
-    cropBox.getChildren().addAll(crop, cropChoiceBox);
 
     soilStartLabel = new Text(mainBundle.getString("plotview.soilstart"));
     soilStartLabel.setFont(Font.font("Arial", 14));
@@ -242,8 +207,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         // TODO: pausieren der berechnung
       }
     });
-    HBox soilStartBox = new HBox();
-    soilStartBox.getChildren().addAll(soilStartLabel, soilStart, b1);
 
     soilStartValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
     soilStartValueLabel.setFont(Font.font("Arial", 14));
@@ -259,10 +222,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         }
       }
     });
-    HBox soilStartValueBox = new HBox();
-    soilStartValueBox.getChildren().addAll(soilStartValueLabel, soilStartValue);
 
-    HBox cropEndBox = new HBox();
     Button b2 = new Button(mainBundle.getString("plotview.harvest"));
     b2.setOnAction(new EventHandler<ActionEvent>() {
       @Override
@@ -273,14 +233,88 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         String enddate = formatter.format(date);
       }
     });
-    cropEndBox.getChildren().addAll(b2);
 
-    VBox leftBox = new VBox(50);
-    leftBox.setPadding(new Insets(20, 20, 20, 20));
-    leftBox.getChildren().addAll(cropBox, rootingZoneBox, cropStartBox, soilStartBox,
-        soilStartValueBox, cropEndBox);
-    pane.setLeft(leftBox);
-    // LEFT END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Gsehen.crop(); TODO: Schauen, ob's läuft, sobald die Methode funktioniert.
+
+    Text crop = new Text(mainBundle.getString("plotview.crop"));
+    crop.setFont(Font.font("Arial", 14));
+
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
+    EntityManager em = emf.createEntityManager();
+    if (cropList.isEmpty()) {
+      try {
+        Session session = em.unwrap(Session.class);
+        Query<Crop> query = session.createQuery("from Crop");
+        cropList = query.list();
+      } finally {
+        em.close();
+      }
+    }
+
+    ChoiceBox<Crop> cropChoiceBox = new ChoiceBox<Crop>();
+    if (!cropList.isEmpty()) {
+      for (Crop c : cropList) {
+        cropChoiceBox.getItems().add(c);
+      }
+    } else {
+      cropChoiceBox.getItems().addAll(new Crop("Liste leer!", true, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0,
+          "", "", "", "", 0, 0, 0, 0, ""));
+    }
+    cropChoiceBox.setConverter(new StringConverter<Crop>() {
+      @Override
+      public String toString(Crop object) {
+        return object.getName();
+      }
+
+      @Override
+      public Crop fromString(String string) {
+        return cropChoiceBox.getItems().stream().filter(ap -> ap.getName().equals(string))
+            .findFirst().orElse(null);
+      }
+    });
+
+    // Set Nodes Vertical & Horizontal Alignment
+    GridPane.setHalignment(nameLabel, HPos.LEFT);
+    GridPane.setHalignment(name, HPos.LEFT);
+    GridPane.setHalignment(areaLabel, HPos.LEFT);
+    GridPane.setHalignment(area, HPos.LEFT);
+    GridPane.setHalignment(rootingZoneLabel, HPos.LEFT);
+    GridPane.setHalignment(rootingZone, HPos.LEFT);
+    GridPane.setHalignment(cropStartLabel, HPos.LEFT);
+    GridPane.setHalignment(cropStart, HPos.LEFT);
+    GridPane.setHalignment(soilStartLabel, HPos.LEFT);
+    GridPane.setHalignment(soilStart, HPos.LEFT);
+    GridPane.setHalignment(b1, HPos.LEFT);
+    GridPane.setHalignment(soilStartValueLabel, HPos.LEFT);
+    GridPane.setHalignment(soilStartValue, HPos.LEFT);
+    GridPane.setHalignment(b2, HPos.LEFT);
+    GridPane.setHalignment(crop, HPos.LEFT);
+    GridPane.setHalignment(cropChoiceBox, HPos.LEFT);
+
+    // Set Row & Column Index for Nodes
+    GridPane.setConstraints(nameLabel, 0, 0);
+    GridPane.setConstraints(name, 1, 0);
+    GridPane.setConstraints(areaLabel, 0, 1);
+    GridPane.setConstraints(area, 1, 1);
+    GridPane.setConstraints(rootingZoneLabel, 0, 2);
+    GridPane.setConstraints(rootingZone, 1, 2);
+    GridPane.setConstraints(cropStartLabel, 0, 3);
+    GridPane.setConstraints(cropStart, 1, 3);
+    GridPane.setConstraints(soilStartLabel, 0, 4);
+    GridPane.setConstraints(soilStart, 1, 4);
+    GridPane.setConstraints(b1, 2, 4);
+    GridPane.setConstraints(soilStartValueLabel, 0, 5);
+    GridPane.setConstraints(soilStartValue, 1, 5);
+    GridPane.setConstraints(b2, 2, 5);
+    GridPane.setConstraints(crop, 0, 6);
+    GridPane.setConstraints(cropChoiceBox, 1, 6);
+
+    top.getChildren().addAll(nameLabel, name, areaLabel, area, rootingZoneLabel, rootingZone,
+        cropStartLabel, cropStart, soilStartLabel, soilStart, b1, soilStartValueLabel,
+        soilStartValue, b2, crop, cropChoiceBox);
+
+    pane.setTop(top);
+    // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // CENTER ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
