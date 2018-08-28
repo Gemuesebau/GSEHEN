@@ -17,6 +17,7 @@ import de.hgu.gsehen.gui.view.Fields;
 import de.hgu.gsehen.gui.view.Logs;
 import de.hgu.gsehen.gui.view.Maps;
 import de.hgu.gsehen.gui.view.Plots;
+import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
@@ -43,11 +44,7 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import org.hibernate.query.Query;
-import org.hibernate.Session;
+
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -63,6 +60,15 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
+import org.hibernate.Session;
+import org.hibernate.query.Query;
+
+
+
 /**
  * The GSEHEN main application.
  *
@@ -74,7 +80,7 @@ public class Gsehen extends Application {
 
   protected static final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
       Locale.GERMAN);
-
+  
   private static final String MAIN_FXML = "main.fxml";
 
   public static final String MAIN_SPLIT_PANE_ID = "#mainSplitPane";
@@ -193,14 +199,18 @@ public class Gsehen extends Application {
   }
 
   /**
-   * PostgreSQL DB connection.
+   * PostgreSQL DB connection and storing in Persistence.
    */
-  public static void postgreSql() {
-
+  public static void crop() {
+    Crop crops = new Crop();
     final String url = "jdbc:postgresql:"
         + "//hs-geisenheim.cwliowbz3tsc.eu-west-1.rds.amazonaws.com/standard";
     final String user = "GSEHEN_user";
-    final String password = "siehe Drive";
+    final String password = "Yp4NiYiHYfmcHs7Fe2CEmTpLv";
+
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
+    EntityManager em = emf.createEntityManager();
+
     Connection connection = null;
     {
       try {
@@ -208,43 +218,45 @@ public class Gsehen extends Application {
       } catch (SQLException e) {
         System.out.println(e.getMessage());
       }
-    }
-    try (PreparedStatement selectcrop = connection.prepareStatement("SELECT * FROM crop;")) {
-      ResultSet rs = executeQuery(selectcrop);
+      try (PreparedStatement selectcrop = connection.prepareStatement("SELECT * FROM crop;")) {
+        ResultSet rs = executeQuery(selectcrop);
+        
+//        em.getTransaction().begin();
+//        javax.persistence.Query query = em.createQuery("DELETE FROM Crop e ");
+//        int rowsDeleted = query.executeUpdate();
+//        em.getTransaction().commit();
+        while (rs.next()) {
 
-      // Statement stmt = connection.createStatement();
-      // ResultSet rs = stmt.executeQuery("SELECT * FROM crop;");
-      while (rs.next()) {
-        rs.getString("cName");
-        rs.getBoolean("cActive");
-        rs.getDouble("cKC1");
-        rs.getDouble("cKC2");
-        rs.getDouble("cKC3");
-        rs.getDouble("cKC4");
-        rs.getDouble("cPhase1");
-        rs.getDouble("cPhase2");
-        rs.getDouble("cPhase3");
-        rs.getDouble("cPhase4");
-        rs.getString("cBBCH1");
-        rs.getString("cBBCH2");
-        rs.getString("cBBCH3");
-        rs.getString("cBBCH4");
-        rs.getDouble("cRooting_Zone1");
-        rs.getDouble("cRooting_Zone2");
-        rs.getDouble("cRooting_Zone3");
-        rs.getDouble("cRooting_Zone4");
-        rs.getString("cDescription");
+          em.getTransaction().begin();
+
+          crops = new Crop(rs.getString("cName"), rs.getBoolean("cActive"), rs.getDouble("cKC1"),
+              rs.getDouble("cKC2"), rs.getDouble("cKC3"), rs.getDouble("cKC4"),
+              rs.getInt("cPhase1"), rs.getInt("cPhase2"), rs.getInt("cPhase3"),
+              rs.getInt("cPhase4"), rs.getString("cBBCH1"), rs.getString("cBBCH2"),
+              rs.getString("cBBCH3"), rs.getString("cBBCH4"), rs.getInt("cRooting_Zone1"),
+              rs.getInt("cRooting_Zone2"), rs.getInt("cRooting_Zone3"), rs.getInt("cRooting_Zone4"),
+              rs.getString("cDescription"));
+
+          em.merge(crops);
+          em.getTransaction().commit();
+
+        } 
+
+        
+      } catch (SQLException e) {
+        System.out.println("no connection" + e.getLocalizedMessage());
       }
-    } catch (SQLException e) {
-      System.out.println("no connection");
+
+      em.close();
     }
   }
 
+  
   /**
    * Loads the user-created data (farms, fields, plots, ..)
    */
   @SuppressWarnings("unchecked")
-public void loadUserData() {
+  public void loadUserData() {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
     EntityManager em = emf.createEntityManager();
     try {
@@ -278,6 +290,9 @@ public void loadUserData() {
     // }
   }
 
+  
+
+    
   /**
    * Saves the user-created data (farms, fields, plots, ..)
    */

@@ -14,9 +14,8 @@ public class Crop {
 
   @Id
   @GeneratedValue
-  private int id;
+  private long id;
   private String name;
-
   private boolean active;
   private double kc1;
   private Double kc2;
@@ -36,12 +35,19 @@ public class Crop {
   private Integer rootingZone4;
   private String description;
 
+  public Crop() {
+    super();
+  }
+  
+  public Crop(String string) {
+    
+  }
 
   public Crop(String name, boolean active, double kc1, Double kc2, Double kc3, Double kc4,
       int phase1, Integer phase2, Integer phase3, Integer phase4, String bbch1, String bbch2,
       String bbch3, String bbch4, int rootingZone1, Integer rootingZone2, Integer rootingZone3,
       Integer rootingZone4, String description) {
-    super();
+
     this.name = name;
     this.active = active;
     this.kc1 = kc1;
@@ -55,28 +61,22 @@ public class Crop {
     this.bbch1 = bbch1;
     this.bbch2 = bbch2;
     this.bbch3 = bbch3;
-    this.bbch4 = bbch4;
+    this.bbch4 = bbch3;
     this.rootingZone1 = rootingZone1;
     this.rootingZone2 = rootingZone2;
     this.rootingZone3 = rootingZone3;
     this.rootingZone4 = rootingZone4;
     this.description = description;
+
   }
 
-  public Crop() {
-    super();
-  }
 
-  public int getId() {
+  public long getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(long id) {
     this.id = id;
-  }
-
-  public Crop(String name) {
-    this.name = name;
   }
 
   public String getName() {
@@ -230,4 +230,5 @@ public class Crop {
   public void setDescription(String description) {
     this.description = description;
   }
+
 }
