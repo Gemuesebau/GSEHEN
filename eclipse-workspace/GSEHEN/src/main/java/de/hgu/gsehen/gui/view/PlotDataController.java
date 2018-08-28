@@ -11,8 +11,10 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 // import java.util.logging.Logger;
@@ -43,6 +45,8 @@ import javafx.util.StringConverter;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
   private final Timeline timeline = new Timeline();
@@ -50,6 +54,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   protected static final ResourceBundle mainBundle =
       ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
   // private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+
+  private List<Crop> cropList = new ArrayList<>();
 
   private TreeItem<Drawable> selectedItem;
   private Plot plot;
@@ -93,11 +99,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void handle(FarmDataChanged event) {
-    /*
-     * TODO: Alles noch sehr wild auf einen Haufen geworfen. Hier wird also noch aufgeräumt! 1)
-     * Echte Daten erstellen. 2) Schauen, was sinnvoll ist und was nicht.
-     */
-
     pane.setVisible(false);
 
     // TOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -123,14 +124,33 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // LEFT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Gsehen.crop(); TODO: Schauen, ob's läuft, sobald die Methode funktioniert.
+
     Text crop = new Text(mainBundle.getString("plotview.crop"));
     crop.setFont(Font.font("Arial", 14));
-    // Dummy-Liste TODO
-    ChoiceBox<Crop> cropChoiceBox = new ChoiceBox<Crop>();
-    cropChoiceBox.getItems().addAll(new Crop("Apfel"), new Crop("Birne"), new Crop("Löwenzahn"),
-        new Crop("Tomate"), new Crop("Zwiebel"));
-    cropChoiceBox.setConverter(new StringConverter<Crop>() {
 
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
+    EntityManager em = emf.createEntityManager();
+    if (cropList.isEmpty()) {
+      try {
+        Session session = em.unwrap(Session.class);
+        Query<Crop> query = session.createQuery("from Crop");
+        cropList = query.list();
+      } finally {
+        em.close();
+      }
+    }
+
+    ChoiceBox<Crop> cropChoiceBox = new ChoiceBox<Crop>();
+    if (!cropList.isEmpty()) {
+      for (Crop c : cropList) {
+        cropChoiceBox.getItems().add(c);
+      }
+    } else {
+      cropChoiceBox.getItems().addAll(new Crop("Liste leer!", true, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0,
+          "", "", "", "", 0, 0, 0, 0, ""));
+    }
+    cropChoiceBox.setConverter(new StringConverter<Crop>() {
       @Override
       public String toString(Crop object) {
         return object.getName();
@@ -295,12 +315,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
-        // TODO
         try {
-
           EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
           EntityManager em = emf.createEntityManager();
-
           try {
             em.getTransaction().begin();
             plot.setName(name.getText());
@@ -343,8 +360,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                     treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
                 if (selectedItem != null
                     && selectedItem.getValue().getClass().getSimpleName().equals("Plot")) {
-                  // TODO
-
                   pane.setVisible(true);
                   plot = (Plot) selectedItem.getValue();
 
@@ -352,7 +367,11 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
                   area.setText(String.valueOf(plot.getArea()));
 
-                  cropChoiceBox.getSelectionModel().select(plot.getCrop());
+                  if (plot.getCrop() != null && cropList.size() != 0) {
+                    cropChoiceBox.getSelectionModel().select(plot.getCrop());
+                  } else {
+                    cropChoiceBox.getSelectionModel().selectFirst();
+                  }
 
                   Date date = plot.getSoilStartDate();
                   Date cropdate = plot.getCropStart();
