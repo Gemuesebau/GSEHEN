@@ -69,6 +69,9 @@ function calculateWindspeed2m(windspeed, windspeedMeasHeightMeters) {
 	if (windspeedMeasHeightMeters == 2) {
 		return windspeed;
 	}
+	else {
+		// TODO calculate wind speed!
+	}
 }
 
 function updateDayData() {

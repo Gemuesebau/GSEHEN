@@ -613,6 +613,7 @@ public class Gsehen extends Application {
   @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
   public static void updateDayData() {
     final Date today = DateUtil.truncToDay(new Date());
+    // TODO for each weatherDataSource!
     dayData = loadDayDataForDay(today, true);
     boolean success = false;
     ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
