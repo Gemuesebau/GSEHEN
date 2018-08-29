@@ -16,9 +16,10 @@ public class EnvCalculatorTest {
     SimpleDateFormat tag = new SimpleDateFormat("yyyy-MM-dd");
 
     DayData today = new DayData(tag.parse("2016-06-06"), 20.91875, 13.7, 28.4, 87.2708333333, null,
-        null, 28.32588, 1.0, 1.0381944444, 0.0, null, null, 2.2, null);
-    DayData todayBrussels = new DayData(tag.parse("2015-07-06"), 16.9, 12.3, 21.5,
-        ((84.0 + 63.0) / 2.0), 63.0, 84.0, 22.07, 0.0, 2.078, null, null, null, null, null);
+        null, 28.32588, 1.0, 1.0381944444, 0.0, null, null, 2.2, null, null, null, null);
+    DayData todayBrussels =
+        new DayData(tag.parse("2015-07-06"), 16.9, 12.3, 21.5, ((84.0 + 63.0) / 2.0), 63.0, 84.0,
+            22.07, 0.0, 2.078, null, null, null, null, null, null, null, null);
 
 
     double etoBrussels = 3.9;
