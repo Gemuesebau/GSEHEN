@@ -1,5 +1,9 @@
 package de.hgu.gsehen.model;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -11,6 +15,8 @@ import javax.persistence.Id;
  */
 @Entity
 public class Soil {
+  protected static final ResourceBundle mainBundle =
+      ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
 
   public Soil() {}
 
@@ -21,6 +27,13 @@ public class Soil {
   private double availableWaterCapacity;
   private String description;
 
+  /**
+   * Soil, that is given in a field.
+   * 
+   * @param name - Name of the soil.
+   * @param availableWaterCapacity - Available water capacity of the soil.
+   * @param description - Description of the soil.
+   */
   public Soil(String name, double availableWaterCapacity, String description) {
     super();
     this.name = name;
@@ -54,5 +67,32 @@ public class Soil {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  /**
+   * Creates the given soils.
+   */
+  public List<Soil> soils() {
+    List<Soil> soils = new ArrayList<Soil>();
+
+    Soil sand = new Soil(mainBundle.getString("fieldview.sand"), 8, "");
+    soils.add(sand);
+
+    Soil sandyLoam = new Soil(mainBundle.getString("fieldview.sandyloam"), 12, "");
+    soils.add(sandyLoam);
+
+    Soil loam = new Soil(mainBundle.getString("fieldview.loam"), 17, "");
+    soils.add(loam);
+
+    Soil clayLoam = new Soil(mainBundle.getString("fieldview.clayloam"), 18, "");
+    soils.add(clayLoam);
+
+    Soil siltyClay = new Soil(mainBundle.getString("fieldview.siltyclay"), 20, "");
+    soils.add(siltyClay);
+
+    Soil clay = new Soil(mainBundle.getString("fieldview.clay"), 23, "");
+    soils.add(clay);
+
+    return soils;
   }
 }
