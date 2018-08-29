@@ -18,12 +18,13 @@ import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
+import de.hgu.gsehen.model.WaterBalance;
 
 class TotalBalanceTest {
   GeoData location;
   SimpleDateFormat tag;
 
-  DayData today;
+  DayData today, today2, today3, today4;
   Plot plot;
   Crop crop;
   SoilProfile soilProfile;
@@ -47,14 +48,23 @@ class TotalBalanceTest {
     cropEnd = new SimpleDateFormat("yyyy-MM-dd");
 
     today = new DayData(tag.parse("2016-06-06"), 20.91875, 13.7, 28.4, 87.2708333333, null, null,
-        28.32588, 1.0, 1.0381944444, 2.3, null, null, 2.2, null);
+        28.32588, 0.0, 1.0381944444, 2.3, null, null, 0.0, null, null, null, null);
 
+    today2 = new DayData(tag.parse("2016-06-07"), 20.91875, 13.7, 28.4, 87.2708333333, null, null,
+        28.32588, 0.0, 1.0381944444, 2.3, null, null, 0.0, null, null, null, null);
+
+
+    today3 = new DayData(tag.parse("2016-06-08"), 20.91875, 13.7, 28.4, 87.2708333333, null, null,
+        28.32588, 0.0, 1.0381944444, 2.3, null, null, 0.0, null, null, null, null);
+
+    today4 = new DayData(tag.parse("2016-06-08"), 20.91875, 13.7, 28.4, 87.2708333333, null, null,
+        28.32588, 0.0, 1.0381944444, 2.3, null, null, 0.0, null, null, null, null);
 
     crop = new Crop("Salat", true, 0.6, 0.8, 1.3, null, 10, 20, 30, null, "Pflanzung",
         "30% Bedeckung", "80%Bedeckunng", null, 10, 20, 30, null, "Toller Salat");
 
-    plot = new Plot("Feld2", 200, null, null, 1.0, null, 120.0, null, "bla",
-        soilStartDate.parse("2016-06-04"), 100.0, false, crop, cropStart.parse("2016-06-06"),
+    plot = new Plot("Feld2", 200, null, null, 1.0, null, 120.0, null, null,
+        soilStartDate.parse("2016-06-04"), null, false, crop, cropStart.parse("2016-06-06"),
         cropEnd.parse("2016-09-06"), true);
     soil1 = new Soil("Sand", 8.0, null);
     soil2 = new Soil("SandyLoam", 12.0, null);
@@ -68,6 +78,12 @@ class TotalBalanceTest {
     profileList.addAll(Arrays.asList(depth1, depth2, depth3));
     soilProfile = new SoilProfile("Feld2", soilList, profileList);
 
+    List<DayData> dailyBalances = new ArrayList<DayData>();
+    // dailyBalances.addAll(Arrays.asList(today));
+    dailyBalances.addAll(Arrays.asList(today, today2, today3, today4));
+    // dailyBalances.addAll(Arrays.asList(today, today2));
+    WaterBalance waterBalance = new WaterBalance(dailyBalances);
+    plot.setWaterBalance(waterBalance);
 
   }
 
@@ -123,7 +139,7 @@ class TotalBalanceTest {
     today.setDate(tag.parse("2016-06-16"));
     TotalBalance.determineCurrentRootingZone(today, plot);
     TotalBalance.calculateCurrentAvailableSoilWater(today, soilProfile);
-    System.out.println(today.getCurrentAvailableSoilWater());
+    // System.out.println(today.getCurrentAvailableSoilWater());
     assertEquals(today.getCurrentAvailableSoilWater(), 20.1, 0.01);
 
     today.setDate(tag.parse("2016-09-06"));
@@ -148,4 +164,30 @@ class TotalBalanceTest {
     TotalBalance.calculateCurrentAvailableSoilWater(today, soilProfile);
     assertEquals(today.getCurrentAvailableSoilWater(), 8.0 * 3, 0.01);
   }
+
+  @Test
+  void testCalculateTotalWaterBalanceAndrecommendIrrigation() {
+
+    for (DayData elem : plot.getWaterBalance().getDailyBalances()) {
+      System.out.println(elem);
+      System.out.println("Et0 is " + elem.getEt0());
+      DailyBalance.determineCurrentKc(elem, plot);
+      System.out.println("Current kc " + elem.getCurrentKc());
+      DailyBalance.calculateEtc(elem, plot);
+      System.out.println("Current Etc " + elem.getEtc());
+      DailyBalance.calculateDailyBalance(elem);
+      System.out.println("Daily Balance " + elem.getDailyBalance());
+      TotalBalance.determineCurrentRootingZone(elem, plot);
+      System.out.println("Current rooting zone" + elem.getCurrentRootingZone());
+      TotalBalance.calculateCurrentAvailableSoilWater(elem, soilProfile);
+      System.out.println("Availabe Soil water " + elem.getCurrentAvailableSoilWater());
+    }
+    TotalBalance.calculateTotalWaterBalance(plot);
+
+    TotalBalance.recommendIrrigation(plot);
+    System.out.println(plot.getRecommendedAction().getRecommendation());
+  }
+
+
+
 }

@@ -18,7 +18,7 @@ public class WaterBalance {
   @GeneratedValue
   private long id;
   @OneToMany
-  private List<DayData> dailyBalances = new ArrayList<>();
+  private List<DayData> dailyBalances = new ArrayList<DayData>();
 
   public WaterBalance() {}
 
