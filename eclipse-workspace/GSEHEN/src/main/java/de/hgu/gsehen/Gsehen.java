@@ -4,6 +4,7 @@ import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.DBUtil.executeQuery;
 
 import de.hgu.gsehen.evapotranspiration.DayData;
+import de.hgu.gsehen.event.DayDataChanged;
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
@@ -483,6 +484,22 @@ public class Gsehen extends Application {
   }
 
   /**
+   * Sends a "DayDataChanged" event to all listeners registered for that kind of event, except the
+   * listeners that belong to the given "skipClass".
+   *
+   * @param dayData
+   *          the current "DayData"
+   * @param skipClass
+   *          the event listener class to skip when iterating the listeners, or null
+   */
+  public void sendDayDataChanged(DayData dayData,
+      Class<? extends GsehenEventListener<DayDataChanged>> skipClass) {
+    DayDataChanged event = new DayDataChanged();
+    event.setDayData(dayData);
+    notifyEventListeners(event, skipClass);
+  }
+
+  /**
    * Notifies listeners registered for the (type of) event supplied by the given supplier.
    *
    * @param event
@@ -617,7 +634,7 @@ public class Gsehen extends Application {
       dayData = loadDayDataForDay(today, false);
     }
     if (dayData != null) {
-      //     sendDayDataChanged(..); ---> water balance algorithm should listen to that event!
+      instance.sendDayDataChanged(dayData, null);
     }
   }
 
