@@ -162,10 +162,9 @@ public class TotalBalance {
         .get(plot.getWaterBalance().getDailyBalances().size() - 1);
     Double currentAvailableSoilWater = currentDay.getCurrentAvailableSoilWater();
     Double currentTotalWaterBalance = currentDay.getCurrentTotalWaterBalance();
-    Double waterContentAim = currentAvailableSoilWater * 0.9;// 7.2
-    Double waterContentTrigger = currentAvailableSoilWater * 0.6;// 4.8
-    Double waterContentToAim = waterContentAim - currentTotalWaterBalance;// 7.2 - 6.62
-    if (waterContentToAim < 0) {
+    Double waterContentAim = currentAvailableSoilWater * 0.9;
+    Double waterContentToAim = waterContentAim - currentTotalWaterBalance;
+    if (waterContentToAim > currentAvailableSoilWater) {
       System.out.println("Error");
       throw new UnsupportedOperationException(
           "The water balance exceedes the total available soil water \n "
@@ -176,7 +175,7 @@ public class TotalBalance {
 
     recommendedAction.setAvailableWater(availableWater);
     recommendedAction
-        .setAvailableWaterPercent(currentAvailableSoilWater * 0.3 / availableWater * 100);
+        .setAvailableWaterPercent(availableWater / currentAvailableSoilWater * 0.3 * 100);
 
     Double projectedDaysToIrrigation = Math.floor(availableWater / currentDay.getEtc());
 

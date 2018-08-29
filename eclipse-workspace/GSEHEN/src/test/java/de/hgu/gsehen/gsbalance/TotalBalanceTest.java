@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import de.hgu.gsehen.evapotranspiration.DayData;
+import de.hgu.gsehen.evapotranspiration.EnvCalculator;
 import de.hgu.gsehen.evapotranspiration.GeoData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Plot;
@@ -38,6 +39,7 @@ class TotalBalanceTest {
   SimpleDateFormat cropStart;
   SimpleDateFormat cropEnd;
 
+
   @Test
   @BeforeEach
   void onCreate() throws ParseException {
@@ -51,14 +53,14 @@ class TotalBalanceTest {
         28.32588, 0.0, 1.0381944444, 2.3, null, null, 0.0, null, null, null, null);
 
     today2 = new DayData(tag.parse("2016-06-07"), 20.91875, 13.7, 28.4, 87.2708333333, null, null,
-        28.32588, 0.0, 1.0381944444, 2.3, null, null, 0.0, null, null, null, null);
+        28.32588, 0.0, 1.0381944444, 2.3, null, null, 2.0, null, null, null, null);
 
 
     today3 = new DayData(tag.parse("2016-06-08"), 20.91875, 13.7, 28.4, 87.2708333333, null, null,
         28.32588, 0.0, 1.0381944444, 2.3, null, null, 0.0, null, null, null, null);
 
     today4 = new DayData(tag.parse("2016-06-08"), 20.91875, 13.7, 28.4, 87.2708333333, null, null,
-        28.32588, 0.0, 1.0381944444, 2.3, null, null, 0.0, null, null, null, null);
+        28.32588, 0.0, 1.0381944444, 2.3, null, null, 1.0, null, null, null, null);
 
     crop = new Crop("Salat", true, 0.6, 0.8, 1.3, null, 10, 20, 30, null, "Pflanzung",
         "30% Bedeckung", "80%Bedeckunng", null, 10, 20, 30, null, "Toller Salat");
@@ -80,10 +82,11 @@ class TotalBalanceTest {
 
     List<DayData> dailyBalances = new ArrayList<DayData>();
     // dailyBalances.addAll(Arrays.asList(today));
-    dailyBalances.addAll(Arrays.asList(today, today2, today3, today4));
-    // dailyBalances.addAll(Arrays.asList(today, today2));
+    // dailyBalances.addAll(Arrays.asList(today, today2, today3, today4));
+    dailyBalances.addAll(Arrays.asList(today, today2));
     WaterBalance waterBalance = new WaterBalance(dailyBalances);
     plot.setWaterBalance(waterBalance);
+    // plot.setLocation(location); //TODO: After Merge of GeoPoint Location etc.
 
   }
 
@@ -170,6 +173,7 @@ class TotalBalanceTest {
 
     for (DayData elem : plot.getWaterBalance().getDailyBalances()) {
       System.out.println(elem);
+      EnvCalculator.calculateEt0(elem, location);
       System.out.println("Et0 is " + elem.getEt0());
       DailyBalance.determineCurrentKc(elem, plot);
       System.out.println("Current kc " + elem.getCurrentKc());
@@ -184,8 +188,16 @@ class TotalBalanceTest {
     }
     TotalBalance.calculateTotalWaterBalance(plot);
 
-    TotalBalance.recommendIrrigation(plot);
-    System.out.println(plot.getRecommendedAction().getRecommendation());
+    try {
+      TotalBalance.recommendIrrigation(plot);
+      System.out.println(plot.getRecommendedAction().getRecommendation());
+      System.out
+          .println("There is " + plot.getRecommendedAction().getAvailableWater() + "mm water left");
+      System.out
+          .println("This is " + plot.getRecommendedAction().getAvailableWaterPercent() + " %");
+    } catch (UnsupportedOperationException e) {
+      System.out.println(e);
+    } ;
   }
 
 
