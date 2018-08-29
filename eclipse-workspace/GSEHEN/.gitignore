@@ -1,7 +1,3 @@
 /bin/
-
-/gsehen-h2-local.db.mv.db
+/gsehen-h2-local.db*
 /.checkstyle
-/gsehen-h2-local.db.mv.db.mv.db
-/gsehen-h2-local.db.mv.db.trace.db
-/gsehen-h2-local.db.trace.db
