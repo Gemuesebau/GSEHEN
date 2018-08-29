@@ -65,6 +65,8 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
   private TextField name;
   private Text area;
 
+  private ChoiceBox<SoilProfile> currentSoilBox;
+  private SoilProfile sp;
   private Button createSoil;
   private SoilProfile soilProfileItem;
   private Button save;
@@ -72,6 +74,8 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
   private HBox buttonBox;
   private List<Text> layorList;
   private int index;
+  private VBox center;
+  private Button saveField;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -95,29 +99,32 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     index = 1;
 
     // TOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    GridPane grid = new GridPane();
+
+    grid.setPadding(new Insets(20, 20, 20, 20));
+    grid.setHgap(15);
+    grid.setVgap(15);
+    grid.setGridLinesVisible(false);
+
+    ColumnConstraints column1 = new ColumnConstraints(200, 100, 300);
+    ColumnConstraints column2 = new ColumnConstraints(200, 100, 100);
+    column1.setHgrow(Priority.ALWAYS);
+    column2.setHgrow(Priority.ALWAYS);
+    RowConstraints rowEmpty = new RowConstraints();
+
+    grid.getColumnConstraints().addAll(column1, column2);
+    grid.getRowConstraints().add(0, rowEmpty);
+    grid.getRowConstraints().add(1, rowEmpty);
+
     nameLabel = new Text(mainBundle.getString("fieldview.name"));
     nameLabel.setFont(Font.font("Arial", 14));
     name = new TextField("");
-
-    HBox nameBox = new HBox();
-    nameBox.getChildren().addAll(nameLabel, name);
 
     areaLabel = new Text(mainBundle.getString("fieldview.area"));
     areaLabel.setFont(Font.font("Arial", 14));
     area = new Text("");
     area.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
-    HBox locationBox = new HBox();
-    locationBox.getChildren().addAll(areaLabel, area);
-
-    VBox topBox = new VBox(25);
-    topBox.setPadding(new Insets(20, 20, 20, 20));
-    topBox.setSpacing(5);
-    topBox.getChildren().addAll(nameBox, locationBox);
-    pane.setTop(topBox);
-    // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // LEFT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Text soilProfile = new Text(mainBundle.getString("fieldview.soilprofile"));
     soilProfile.setFont(Font.font("Arial", 14));
 
@@ -133,12 +140,13 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
       }
     }
 
-    ChoiceBox<SoilProfile> soilChoiceBox = new ChoiceBox<SoilProfile>();
+    currentSoilBox = new ChoiceBox<SoilProfile>();
     if (!soilList.isEmpty()) {
       for (SoilProfile s : soilList) {
-        soilChoiceBox.getItems().add(s);
+        currentSoilBox.getItems().add(s);
+        System.out.println(currentSoilBox.getItems());
       }
-      soilChoiceBox.setConverter(new StringConverter<SoilProfile>() {
+      currentSoilBox.setConverter(new StringConverter<SoilProfile>() {
 
         @Override
         public String toString(SoilProfile object) {
@@ -147,14 +155,21 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
         @Override
         public SoilProfile fromString(String string) {
-          return soilChoiceBox.getItems().stream().filter(ap -> ap.getName().equals(string))
+          return currentSoilBox.getItems().stream().filter(ap -> ap.getName().equals(string))
               .findFirst().orElse(null);
         }
       });
     }
 
-    HBox soilProfileBox = new HBox();
-    soilProfileBox.getChildren().addAll(soilProfile, soilChoiceBox);
+    Button editProfile = new Button(mainBundle.getString("fieldview.editprofile"));
+    editProfile.setOnAction(new EventHandler<ActionEvent>() {
+
+      @Override
+      public void handle(ActionEvent e) {
+        // TODO
+        System.out.println("Hier passiert morgen was!");
+      }
+    });
 
     createSoil = new Button(mainBundle.getString("fieldview.createprofile"));
     createSoil.setOnAction(new EventHandler<ActionEvent>() {
@@ -390,40 +405,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
       }
     });
 
-    VBox leftBox = new VBox(50);
-    leftBox.setPadding(new Insets(20, 20, 20, 20));
-    leftBox.getChildren().addAll(soilProfileBox, createSoil);
-    pane.setLeft(leftBox);
-    // LEFT END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // CENTER ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    BorderPane center = new BorderPane();
-    center.setPadding(new Insets(20, 20, 20, 20));
-
-    // TODO - Bearbeiten des Profils ermöglichen!
-    Text createdSoil = new Text();
-    // soilChoiceBox.getSelectionModel().selectedIndexProperty()
-    // .addListener(new ChangeListener<Number>() {
-    // @Override
-    // public void changed(ObservableValue<? extends Number> observableValue, Number number,
-    // Number number2) {
-    // for (SoilProfile sp : soilList) {
-    // if (sp == soilChoiceBox.getValue()) {
-    // System.out.println(sp.getName());
-    // for (Soil soil : sp.getSoilType()) {
-    // for (SoilProfileDepth spd : sp.getProfileDepth()) {
-    // createdSoil.setText("Schicht #" + (layorList.size() + 1) + ": \n" + "Bodentyp: "
-    // + soil.getName() + ";\nWasserhaltekapazität: "
-    // + soil.getAvailableWaterCapacity() + ";\nTiefe (in cm): " + spd.getDepth()
-    // + "\n\n");
-    // createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
-    // }
-    // }
-    // }
-    // }
-    // }
-    // });
-    Button saveField = new Button(mainBundle.getString("menu.file.save"));
+    saveField = new Button(mainBundle.getString("menu.file.save"));
     saveField.setOnAction(new EventHandler<ActionEvent>() {
 
       @Override
@@ -431,20 +413,45 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         field.setName(name.getText());
         field.setArea(Double.valueOf(area.getText()));
         for (SoilProfile sp : soilList) {
-          if (sp == soilChoiceBox.getValue()) {
+          if (sp == currentSoilBox.getValue()) {
             field.setSoilProfile(sp);
           }
         }
         gsehenInstance.sendFarmDataChanged(field, null);
       }
     });
-    center.getChildren().addAll(createdSoil, saveField);
-    ScrollPane scrollPane = new ScrollPane();
-    scrollPane.setContent(center);
-    scrollPane.setPannable(true);
-    // TODO - ScrollPane einsetzen, sobald funktionsfähig!
-    pane.setBottom(scrollPane);
-    // CENTER END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    GridPane.setHalignment(nameLabel, HPos.LEFT);
+    GridPane.setHalignment(name, HPos.LEFT);
+    GridPane.setHalignment(areaLabel, HPos.LEFT);
+    GridPane.setHalignment(area, HPos.LEFT);
+    GridPane.setHalignment(soilProfile, HPos.LEFT);
+    GridPane.setHalignment(currentSoilBox, HPos.LEFT);
+    GridPane.setHalignment(editProfile, HPos.LEFT);
+    GridPane.setHalignment(createSoil, HPos.LEFT);
+    GridPane.setHalignment(saveField, HPos.LEFT);
+
+    GridPane.setConstraints(nameLabel, 0, 0);
+    GridPane.setConstraints(name, 1, 0);
+    GridPane.setConstraints(areaLabel, 0, 1);
+    GridPane.setConstraints(area, 1, 1);
+    GridPane.setConstraints(soilProfile, 0, 2);
+    GridPane.setConstraints(currentSoilBox, 1, 2);
+    GridPane.setConstraints(editProfile, 2, 2);
+    GridPane.setConstraints(createSoil, 0, 3);
+    GridPane.setConstraints(saveField, 0, 4);
+
+    grid.getChildren().addAll(nameLabel, name, areaLabel, area, soilProfile, currentSoilBox,
+        editProfile, createSoil, saveField);
+
+    pane.setTop(grid);
+    // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // BOTTOM ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    center = new VBox();
+    center.setPadding(new Insets(10));
+    center.setSpacing(8);
+    // BOTTOM END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     treeTableView =
         (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
@@ -468,26 +475,10 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
                   for (SoilProfile soPr : soilList) {
                     if (field.getSoilProfile() != null
                         && soPr.getName().equals(field.getSoilProfile().getName())) {
-                      soilChoiceBox.getSelectionModel().select(soPr);
+                      currentSoilBox.getSelectionModel().select(soPr);
                     }
                   }
-
-                  SoilProfile sp = field.getSoilProfile();
-                  if (sp != null) {
-                    for (Soil soil : sp.getSoilType()) {
-                      System.out.println(soil.getName());
-                      for (SoilProfileDepth spd : sp.getProfileDepth()) {
-                        createdSoil.setText(mainBundle.getString("fieldview.layor")
-                            + (layorList.size() + 1) + ": \n"
-                            + mainBundle.getString("fieldview.soiltype") + soil.getName() + ";\n"
-                            + mainBundle.getString("fieldview.awc")
-                            + soil.getAvailableWaterCapacity() + ";\n"
-                            + mainBundle.getString("fieldview.depth") + spd.getDepth() + "\n\n");
-                        createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
-                      }
-                    }
-                  }
-
+                  getCurrentProfile();
                 } else {
                   pane.setVisible(false);
                 }
@@ -495,5 +486,33 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
             }
           }
         });
+  }
+
+  /**
+   * Shows current SoilProfile.
+   */
+  public void getCurrentProfile() {
+    // TODO - Bearbeiten des Profils ermöglichen!
+    center.getChildren().clear();
+    pane.setBottom(null);
+    sp = field.getSoilProfile();
+    int index = 1;
+    Text setSoil = new Text(mainBundle.getString("fieldview.currentsoil") + "\n");
+    setSoil.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+    center.getChildren().add(setSoil);
+    for (Soil soil : sp.getSoilType()) {
+      Text createdSoil = new Text(mainBundle.getString("fieldview.layor") + (index) + ": \n"
+          + mainBundle.getString("fieldview.soiltype") + soil.getName() + ";\n"
+          + mainBundle.getString("fieldview.awc") + soil.getAvailableWaterCapacity() + ";\n"
+          + mainBundle.getString("fieldview.depth") + sp.getProfileDepth().get(index - 1).getDepth()
+          + "\n\n");
+      center.getChildren().add(createdSoil);
+      createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
+      index++;
+    }
+    ScrollPane scrollPane = new ScrollPane();
+    scrollPane.setContent(center);
+    scrollPane.setPannable(true);
+    pane.setBottom(scrollPane);
   }
 }
