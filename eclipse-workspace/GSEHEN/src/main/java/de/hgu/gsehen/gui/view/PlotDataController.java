@@ -200,14 +200,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     soilStart.setConverter(converter);
     soilStart.setPromptText("dd-MM-yyyy");
 
-    Button b1 = new Button(mainBundle.getString("plotview.pause"));
-    b1.setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent e) {
-        // TODO: pausieren der berechnung
-      }
-    });
-
     soilStartValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
     soilStartValueLabel.setFont(Font.font("Arial", 14));
     soilStartValue = new TextField("");
@@ -284,7 +276,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane.setHalignment(cropStart, HPos.LEFT);
     GridPane.setHalignment(soilStartLabel, HPos.LEFT);
     GridPane.setHalignment(soilStart, HPos.LEFT);
-    GridPane.setHalignment(b1, HPos.LEFT);
     GridPane.setHalignment(soilStartValueLabel, HPos.LEFT);
     GridPane.setHalignment(soilStartValue, HPos.LEFT);
     GridPane.setHalignment(b2, HPos.LEFT);
@@ -302,7 +293,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane.setConstraints(cropStart, 1, 3);
     GridPane.setConstraints(soilStartLabel, 0, 4);
     GridPane.setConstraints(soilStart, 1, 4);
-    GridPane.setConstraints(b1, 2, 4);
     GridPane.setConstraints(soilStartValueLabel, 0, 5);
     GridPane.setConstraints(soilStartValue, 1, 5);
     GridPane.setConstraints(b2, 2, 5);
@@ -310,7 +300,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane.setConstraints(cropChoiceBox, 1, 6);
 
     top.getChildren().addAll(nameLabel, name, areaLabel, area, rootingZoneLabel, rootingZone,
-        cropStartLabel, cropStart, soilStartLabel, soilStart, b1, soilStartValueLabel,
+        cropStartLabel, cropStart, soilStartLabel, soilStart, soilStartValueLabel,
         soilStartValue, b2, crop, cropChoiceBox);
 
     pane.setTop(top);
@@ -366,7 +356,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             plot.setCropStart(cropdate);
             plot.setRootingZone(Double.valueOf(rootingZone.getText()));
             plot.setSoilStartValue(Double.valueOf(soilStartValue.getText()));
-            // plot.setCalculationPaused(calculationPaused); TODO
             plot.setIsActive(isActive);
 
             em.getTransaction().commit();

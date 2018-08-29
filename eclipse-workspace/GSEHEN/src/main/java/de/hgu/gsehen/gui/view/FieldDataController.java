@@ -3,13 +3,11 @@ package de.hgu.gsehen.gui.view;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
-import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
-import de.hgu.gsehen.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -181,32 +179,8 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         Text soil = new Text(mainBundle.getString("fieldview.soiltype"));
         soil.setFont(Font.font("Arial", 14));
 
-        Soil sand = new Soil();
-        sand.setName(mainBundle.getString("fieldview.sand"));
-        sand.setAvailableWaterCapacity(8);
-        Soil sandyLoam = new Soil();
-        sandyLoam.setName(mainBundle.getString("fieldview.sandyloam"));
-        sandyLoam.setAvailableWaterCapacity(12);
-        Soil loam = new Soil();
-        loam.setName(mainBundle.getString("fieldview.loam"));
-        loam.setAvailableWaterCapacity(17);
-        Soil clayLoam = new Soil();
-        clayLoam.setName(mainBundle.getString("fieldview.clayloam"));
-        clayLoam.setAvailableWaterCapacity(18);
-        Soil siltyClay = new Soil();
-        siltyClay.setName(mainBundle.getString("fieldview.siltyclay"));
-        siltyClay.setAvailableWaterCapacity(20);
-        Soil clay = new Soil();
-        clay.setName(mainBundle.getString("fieldview.clay"));
-        clay.setAvailableWaterCapacity(23);
-
-        List<Soil> soils = new ArrayList<Soil>();
-        soils.add(sand);
-        soils.add(sandyLoam);
-        soils.add(loam);
-        soils.add(clayLoam);
-        soils.add(siltyClay);
-        soils.add(clay);
+        Soil s = new Soil();
+        List<Soil> soils = s.soils();
 
         ChoiceBox<Soil> soilChoiceBox = new ChoiceBox<Soil>();
         soilChoiceBox.getItems().addAll(soils);
@@ -469,7 +443,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     scrollPane.setContent(center);
     scrollPane.setPannable(true);
     // TODO - ScrollPane einsetzen, sobald funktionsfähig!
-    pane.setBottom(saveField);
+    pane.setBottom(scrollPane);
     // CENTER END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     treeTableView =
@@ -498,21 +472,21 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
                     }
                   }
 
-                  // SoilProfile sp = field.getSoilProfile();
-                  // if (sp != null) {
-                  // for (Soil soil : sp.getSoilType()) {
-                  // System.out.println(soil.getName());
-                  // for (SoilProfileDepth spd : sp.getProfileDepth()) {
-                  // createdSoil.setText(mainBundle.getString("fieldview.layor")
-                  // + (layorList.size() + 1) + ": \n"
-                  // + mainBundle.getString("fieldview.soiltype") + soil.getName() + ";\n"
-                  // + mainBundle.getString("fieldview.awc")
-                  // + soil.getAvailableWaterCapacity() + ";\n"
-                  // + mainBundle.getString("fieldview.depth") + spd.getDepth() + "\n\n");
-                  // createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
-                  // }
-                  // }
-                  // }
+                  SoilProfile sp = field.getSoilProfile();
+                  if (sp != null) {
+                    for (Soil soil : sp.getSoilType()) {
+                      System.out.println(soil.getName());
+                      for (SoilProfileDepth spd : sp.getProfileDepth()) {
+                        createdSoil.setText(mainBundle.getString("fieldview.layor")
+                            + (layorList.size() + 1) + ": \n"
+                            + mainBundle.getString("fieldview.soiltype") + soil.getName() + ";\n"
+                            + mainBundle.getString("fieldview.awc")
+                            + soil.getAvailableWaterCapacity() + ";\n"
+                            + mainBundle.getString("fieldview.depth") + spd.getDepth() + "\n\n");
+                        createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
+                      }
+                    }
+                  }
 
                 } else {
                   pane.setVisible(false);

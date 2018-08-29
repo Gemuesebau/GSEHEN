@@ -46,30 +46,3 @@ var eventsDebouncer = {
   }
 }
 
-function truncToDayUsingCalendar(calendar, date) {
-    calendar.setTime(date);
-    calendar.set(java.util.Calendar.HOUR_OF_DAY, 0);
-    calendar.set(java.util.Calendar.MINUTE, 0);
-    calendar.set(java.util.Calendar.SECOND, 0);
-    calendar.set(java.util.Calendar.MILLISECOND, 0);
-    return calendar.getTime();
-}
-
-function truncToDay(date) {
-    return truncToDayUsingCalendar(java.util.Calendar.getInstance(), date);
-}
-
-function transformArray(arr, startIndex, transformFunc) {
-	for (var i=startIndex; i<arr.length; i++) {
-		arr[i] = transformFunc(arr[i]);
-	}
-	return arr;
-}
-
-function arrayToObject(arr, propNamesArray) {
-	var obj = {};
-	for (var i=0; i<arr.length; i++) {
-		obj[propNamesArray[i]] = arr[i];
-	}
-	return obj;
-}

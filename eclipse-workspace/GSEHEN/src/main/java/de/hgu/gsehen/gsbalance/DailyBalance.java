@@ -77,11 +77,11 @@ public class DailyBalance {
     Double precipitation = dayData.getPrecipitation();
     if (precipitation == null) {
       throw new IllegalStateException("Precipitation has net been provided");
-    } ;
+    }
     Double etc = dayData.getEtc();
     if (etc == null) {
       throw new IllegalStateException("Etc has not been calculated");
-    } ;
+    }
     Double irrigation = dayData.getIrrigation();
     dayData.setDailyBalance(etc - precipitation - irrigation);
 

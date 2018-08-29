@@ -22,6 +22,9 @@ public class DeveloperController {
   private MenuItem jsPromptForMapViewMenuItem;
 
   @FXML
+  private MenuItem updateDayDataMenuItem;
+
+  @FXML
   @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
   public void reloadMapViewHTML(ActionEvent e) {
     Gsehen.getMaps().reload();
@@ -41,5 +44,10 @@ public class DeveloperController {
   @FXML
   public void jsPromptForMapView() {
     Gsehen.jsPrompt(Gsehen.getMaps());
+  }
+
+  @FXML
+  public void updateDayData(ActionEvent e) {
+    Gsehen.updateDayData();
   }
 }
