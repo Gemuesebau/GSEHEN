@@ -1,8 +1,12 @@
 package de.hgu.gsehen.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+import jdk.nashorn.internal.ir.annotations.Immutable;
 
 /**
  * Class representing a crop.
@@ -10,11 +14,13 @@ import javax.persistence.Id;
  * @author AT
  */
 @Entity
+@Immutable
 public class Crop {
 
   @Id
-  @GeneratedValue
-  private long id;
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(updatable = true, nullable = false)
+  private Long id;
   private String name;
   private boolean active;
   private double kc1;
@@ -38,9 +44,9 @@ public class Crop {
   public Crop() {
     super();
   }
-  
+
   public Crop(String string) {
-    
+
   }
 
   public Crop(String name, boolean active, double kc1, Double kc2, Double kc3, Double kc4,
@@ -61,7 +67,7 @@ public class Crop {
     this.bbch1 = bbch1;
     this.bbch2 = bbch2;
     this.bbch3 = bbch3;
-    this.bbch4 = bbch3;
+    this.bbch4 = bbch4;
     this.rootingZone1 = rootingZone1;
     this.rootingZone2 = rootingZone2;
     this.rootingZone3 = rootingZone3;
@@ -70,12 +76,11 @@ public class Crop {
 
   }
 
-
-  public long getId() {
+  public Long getId() {
     return id;
   }
 
-  public void setId(long id) {
+  public void setId(Long id) {
     this.id = id;
   }
 
@@ -229,6 +234,44 @@ public class Crop {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (!(obj instanceof Crop)) {
+      return false;
+    }
+    Crop other = (Crop) obj;
+    if (id == null) {
+      if (other.id != null) {
+        return false;
+      }
+    } else if (!id.equals(other.id)) {
+      return false;
+    }
+    if (name == null) {
+      if (other.name != null) {
+        return false;
+      }
+    } else if (!name.equals(other.name)) {
+      return false;
+    }
+    return true;
   }
 
 }
