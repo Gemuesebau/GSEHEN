@@ -139,10 +139,10 @@ public class TotalBalance {
 
       }
       // TotalWaterBalance not bigger than CurrentAvailableSoilWater
-      // plot.getWaterBalance().getDailyBalances().get(i)
-      // .setCurrentTotalWaterBalance(Math.min(
-      // plot.getWaterBalance().getDailyBalances().get(i).getCurrentTotalWaterBalance(),
-      // plot.getWaterBalance().getDailyBalances().get(i).getCurrentAvailableSoilWater()));
+      plot.getWaterBalance().getDailyBalances().get(i)
+          .setCurrentTotalWaterBalance(Math.min(
+              plot.getWaterBalance().getDailyBalances().get(i).getCurrentTotalWaterBalance(),
+              plot.getWaterBalance().getDailyBalances().get(i).getCurrentAvailableSoilWater()));
       System.out.println("Loop current total water balance is: "
           + plot.getWaterBalance().getDailyBalances().get(i).getCurrentTotalWaterBalance());
 
@@ -175,7 +175,7 @@ public class TotalBalance {
 
     recommendedAction.setAvailableWater(availableWater);
     recommendedAction
-        .setAvailableWaterPercent(availableWater / currentAvailableSoilWater * 0.3 * 100);
+        .setAvailableWaterPercent((availableWater / (currentAvailableSoilWater * 0.3)) * 100);
 
     Double projectedDaysToIrrigation = Math.floor(availableWater / currentDay.getEtc());
 
