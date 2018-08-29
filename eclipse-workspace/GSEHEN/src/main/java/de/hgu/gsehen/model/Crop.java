@@ -61,7 +61,7 @@ public class Crop {
     this.bbch1 = bbch1;
     this.bbch2 = bbch2;
     this.bbch3 = bbch3;
-    this.bbch4 = bbch3;
+    this.bbch4 = bbch4;
     this.rootingZone1 = rootingZone1;
     this.rootingZone2 = rootingZone2;
     this.rootingZone3 = rootingZone3;

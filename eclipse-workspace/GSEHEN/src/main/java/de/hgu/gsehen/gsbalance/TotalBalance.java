@@ -93,6 +93,11 @@ public class TotalBalance {
   }
 
   // TODO: Starkregenereignis und dauer der Pause konfigurierbar machen.
+  /**
+   * Method to calculate the total water balance of a plot.
+   * 
+   * @param plot the desired plot
+   */
   public static void calculateTotalWaterBalance(Plot plot) {
     Double rainMax = 30.0;
     Integer daysPause = 2;
@@ -104,17 +109,17 @@ public class TotalBalance {
       startValue = plot.getWaterBalance().getDailyBalances().get(0).getCurrentAvailableSoilWater();
     }
     int i;
-    for (i = 0; i == plot.getWaterBalance().getDailyBalances().size(); i++) {
-      Double currentTotalWaterBalance;
+    for (i = 0; i < plot.getWaterBalance().getDailyBalances().size(); i++) {
+      Double currentTotalWaterBalance = null;
       if (i == 0) {
         currentTotalWaterBalance =
-            startValue + plot.getWaterBalance().getDailyBalances().get(0).getDailyBalance();
+            startValue - plot.getWaterBalance().getDailyBalances().get(0).getDailyBalance();
         plot.getWaterBalance().getDailyBalances().get(0)
             .setCurrentTotalWaterBalance(currentTotalWaterBalance);
       } else {
         currentTotalWaterBalance =
-            plot.getWaterBalance().getDailyBalances().get(i - 1).getDailyBalance()
-                + plot.getWaterBalance().getDailyBalances().get(i).getDailyBalance();;
+            plot.getWaterBalance().getDailyBalances().get(i - 1).getCurrentTotalWaterBalance()
+                - plot.getWaterBalance().getDailyBalances().get(i).getDailyBalance();
         plot.getWaterBalance().getDailyBalances().get(i)
             .setCurrentTotalWaterBalance(currentTotalWaterBalance);
       }
@@ -133,8 +138,71 @@ public class TotalBalance {
         }
 
       }
+      // TotalWaterBalance not bigger than CurrentAvailableSoilWater
+      // plot.getWaterBalance().getDailyBalances().get(i)
+      // .setCurrentTotalWaterBalance(Math.min(
+      // plot.getWaterBalance().getDailyBalances().get(i).getCurrentTotalWaterBalance(),
+      // plot.getWaterBalance().getDailyBalances().get(i).getCurrentAvailableSoilWater()));
+      System.out.println("Loop current total water balance is: "
+          + plot.getWaterBalance().getDailyBalances().get(i).getCurrentTotalWaterBalance());
+
 
 
     }
   }
+
+  /**
+   * Method to recommend an irrigation descision for a plot
+   * 
+   * @param plot Plot in question
+   */
+  public static void recommendIrrigation(Plot plot) {
+    RecommendedAction recommendedAction = new RecommendedAction(null, null, null, null);
+    DayData currentDay = plot.getWaterBalance().getDailyBalances()
+        .get(plot.getWaterBalance().getDailyBalances().size() - 1);
+    Double currentAvailableSoilWater = currentDay.getCurrentAvailableSoilWater();
+    Double currentTotalWaterBalance = currentDay.getCurrentTotalWaterBalance();
+    Double waterContentAim = currentAvailableSoilWater * 0.9;// 7.2
+    Double waterContentTrigger = currentAvailableSoilWater * 0.6;// 4.8
+    Double waterContentToAim = waterContentAim - currentTotalWaterBalance;// 7.2 - 6.62
+    if (waterContentToAim < 0) {
+      System.out.println("Error");
+      throw new UnsupportedOperationException(
+          "The water balance exceedes the total available soil water \n "
+              + "- your plants are dead for sure \\u2620");// TODO:
+      // Language
+    }
+    Double availableWater = currentAvailableSoilWater * 0.3 - waterContentToAim;
+
+    recommendedAction.setAvailableWater(availableWater);
+    recommendedAction
+        .setAvailableWaterPercent(currentAvailableSoilWater * 0.3 / availableWater * 100);
+
+    Double projectedDaysToIrrigation = Math.floor(availableWater / currentDay.getEtc());
+
+    Boolean calculationPaused = plot.getCalculationPaused();
+    if (calculationPaused) {
+      recommendedAction.setRecommendation("Calculation is paused"); // TODO: Language
+    } else {
+      if (availableWater > 0) {
+
+        recommendedAction.setRecommendation(
+            "No action required. There are " + Math.round(availableWater * 100d) / 100d
+                + " mm left. The next irrgation might be nesccecary in " + projectedDaysToIrrigation
+                + "d"); // TODO: Language
+      } else {
+
+        recommendedAction.setRecommendation(
+            "Please irrigate " + Math.round(waterContentToAim * 100d) / 100d + "mm"); // TODO:
+        // Language
+      }
+
+    }
+
+    plot.setRecommendedAction(recommendedAction);
+
+
+  }
+
+
 }

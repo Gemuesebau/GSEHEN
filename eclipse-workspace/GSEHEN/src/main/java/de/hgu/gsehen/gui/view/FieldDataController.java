@@ -158,6 +158,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
     createSoil = new Button(mainBundle.getString("fieldview.createprofile"));
     createSoil.setOnAction(new EventHandler<ActionEvent>() {
+
       @Override
       public void handle(ActionEvent e) {
         // CREATE SOILPROFILE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -178,32 +179,8 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         Text soil = new Text(mainBundle.getString("fieldview.soiltype"));
         soil.setFont(Font.font("Arial", 14));
 
-        Soil sand = new Soil();
-        sand.setName(mainBundle.getString("fieldview.sand"));
-        sand.setAvailableWaterCapacity(8);
-        Soil sandyLoam = new Soil();
-        sandyLoam.setName(mainBundle.getString("fieldview.sandyloam"));
-        sandyLoam.setAvailableWaterCapacity(12);
-        Soil loam = new Soil();
-        loam.setName(mainBundle.getString("fieldview.loam"));
-        loam.setAvailableWaterCapacity(17);
-        Soil clayLoam = new Soil();
-        clayLoam.setName(mainBundle.getString("fieldview.clayloam"));
-        clayLoam.setAvailableWaterCapacity(18);
-        Soil siltyClay = new Soil();
-        siltyClay.setName(mainBundle.getString("fieldview.siltyclay"));
-        siltyClay.setAvailableWaterCapacity(20);
-        Soil clay = new Soil();
-        clay.setName(mainBundle.getString("fieldview.clay"));
-        clay.setAvailableWaterCapacity(23);
-
-        List<Soil> soils = new ArrayList<Soil>();
-        soils.add(sand);
-        soils.add(sandyLoam);
-        soils.add(loam);
-        soils.add(clayLoam);
-        soils.add(siltyClay);
-        soils.add(clay);
+        Soil s = new Soil();
+        List<Soil> soils = s.soils();
 
         ChoiceBox<Soil> soilChoiceBox = new ChoiceBox<Soil>();
         soilChoiceBox.getItems().addAll(soils);
@@ -315,7 +292,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
               layorText.setText(mainBundle.getString("fieldview.layor") + (layorList.size() + 1));
 
-              Button delSoil = new Button(mainBundle.getString("fieldview.delSoil"));
+              Button delSoil = new Button(mainBundle.getString("fieldview.delsoil"));
               delSoil.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent arg0) {
@@ -448,6 +425,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     // });
     Button saveField = new Button(mainBundle.getString("menu.file.save"));
     saveField.setOnAction(new EventHandler<ActionEvent>() {
+
       @Override
       public void handle(ActionEvent e) {
         field.setName(name.getText());
@@ -485,7 +463,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
                   name.setText(field.getName());
 
-                  area.setText(String.valueOf(field.getArea()));
+                  area.setText(String.valueOf(field.getPolygon().calculateArea()));
 
                   for (SoilProfile soPr : soilList) {
                     if (field.getSoilProfile() != null
