@@ -1,8 +1,9 @@
 package de.hgu.gsehen;
 
 import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
-import static de.hgu.gsehen.util.JDBCUtil.executeQuery;
+import static de.hgu.gsehen.util.DBUtil.executeQuery;
 
+import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
@@ -22,6 +23,8 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.util.DBUtil;
+import de.hgu.gsehen.util.DateUtil;
 import de.hgu.gsehen.util.Pair;
 
 import java.io.BufferedReader;
@@ -36,6 +39,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -62,12 +66,16 @@ import javafx.stage.WindowEvent;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
-
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-
-
 
 /**
  * The GSEHEN main application.
@@ -77,6 +85,7 @@ import org.hibernate.query.Query;
 @SuppressWarnings({ "checkstyle:commentsindentation" })
 public class Gsehen extends Application {
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+  private static final String WEATHER_DATA_JS = "/de/hgu/gsehen/js/weatherData.js";
 
   protected static final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
       Locale.GERMAN);
@@ -109,6 +118,8 @@ public class Gsehen extends Application {
   private java.util.Map<Class<? extends GsehenEvent>,
       List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
   private boolean dataChanged;
+
+  private static DayData dayData = null;
 
   private static Gsehen instance;
 
@@ -335,8 +346,8 @@ public class Gsehen extends Application {
     }
   }
 
-  public InputStreamReader getReaderForUtf8(String resourceName) throws IOException {
-    return new InputStreamReader(this.getClass().getResourceAsStream(resourceName), "utf-8");
+  public static InputStreamReader getReaderForUtf8(String resourceName) throws IOException {
+    return new InputStreamReader(Gsehen.class.getResourceAsStream(resourceName), "utf-8");
   }
 
   /**
@@ -580,5 +591,56 @@ public class Gsehen extends Application {
     dialog.setHeaderText(headerText);
     dialog.showAndWait();
     return dialog.getResult();
+  }
+
+  @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
+  public static void updateDayData() {
+    final Date today = DateUtil.truncToDay(new Date());
+    dayData = loadDayDataForDay(today, true);
+    boolean success = false;
+    ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+    try {
+      engine.put("LOGGER", LOGGER);
+      engine.put("dayData", dayData);
+      engine.eval(getReaderForUtf8(WEATHER_DATA_JS));
+      success = (boolean)((Invocable)engine).invokeFunction("updateDayData");
+    }
+    catch (Exception e) {
+      LOGGER.log(Level.SEVERE, "Can't evaluate " + WEATHER_DATA_JS, e);
+    }
+    LOGGER.log(Level.INFO, "Weather data import was " + (success ? "" : "NOT ") + "successful");
+    if (success) {
+      DBUtil.saveEntity(dayData);
+      LOGGER.log(Level.INFO, "Day data saved");
+    }
+    else {
+      dayData = loadDayDataForDay(today, false);
+    }
+    if (dayData != null) {
+      //     sendDayDataChanged(..); ---> water balance algorithm should listen to that event!
+    }
+  }
+
+  @SuppressWarnings({"checkstyle:rightcurly"})
+  private static DayData loadDayDataForDay(Date date, boolean create) {
+    EntityManager em = Persistence.createEntityManagerFactory("GSEHEN").createEntityManager();
+    CriteriaBuilder builder = em.getCriteriaBuilder();
+    CriteriaQuery<DayData> criteria = builder.createQuery(DayData.class);
+    Root<DayData> dayDataRoot = criteria.from(DayData.class);
+    criteria.select(dayDataRoot);
+    criteria.where(builder.equal(dayDataRoot.get("date"), date));
+    try {
+      return em.createQuery(criteria).getSingleResult();
+    }
+    catch (NoResultException nre) {
+      if (create) {
+        DayData result = new DayData();
+        result.setDate(date);
+        return result;
+      }
+      else {
+        return null;
+      }
+    }
   }
 }
