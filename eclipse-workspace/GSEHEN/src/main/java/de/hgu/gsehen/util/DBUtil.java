@@ -86,18 +86,20 @@ public class DBUtil {
    * @param entity the entity to save
    */
   @SuppressWarnings("checkstyle:rightcurly")
-  public static void saveEntity(Object entity) {
+  public static <T> T saveEntity(T entity) {
     EntityManager em = Persistence.createEntityManagerFactory("GSEHEN").createEntityManager();
+    T merged = null;
     try {
       em.getTransaction().begin();
-      em.merge(entity);
+      merged = em.merge(entity);
       em.getTransaction().commit();
     }
-    catch (Exception d) {
+    catch (Exception e) {
       em.getTransaction().rollback();
     }
     finally {
       em.close();
     }
+    return merged;
   }
 }

@@ -610,7 +610,7 @@ public class Gsehen extends Application {
     }
     LOGGER.log(Level.INFO, "Weather data import was " + (success ? "" : "NOT ") + "successful");
     if (success) {
-      DBUtil.saveEntity(dayData);
+      dayData = DBUtil.saveEntity(dayData);
       LOGGER.log(Level.INFO, "Day data saved");
     }
     else {
