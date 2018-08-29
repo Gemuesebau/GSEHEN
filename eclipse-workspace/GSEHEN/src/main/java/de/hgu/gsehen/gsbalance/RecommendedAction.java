@@ -1,6 +1,15 @@
 package de.hgu.gsehen.gsbalance;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
+@Entity
 public class RecommendedAction {
+
+  @Id
+  @GeneratedValue
+  private long id;
   String recommendation;
   Double availableWater;
   Double availableWaterPercent;
