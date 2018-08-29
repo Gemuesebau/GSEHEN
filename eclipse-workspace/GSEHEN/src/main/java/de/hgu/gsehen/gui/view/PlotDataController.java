@@ -356,7 +356,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             plot.setCropStart(cropdate);
             plot.setRootingZone(Double.valueOf(rootingZone.getText()));
             plot.setSoilStartValue(Double.valueOf(soilStartValue.getText()));
-            // plot.setCalculationPaused(calculationPaused); TODO
             plot.setIsActive(isActive);
 
             em.getTransaction().commit();

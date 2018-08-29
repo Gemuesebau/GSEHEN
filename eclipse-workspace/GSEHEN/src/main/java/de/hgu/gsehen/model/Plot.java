@@ -31,6 +31,7 @@ public class Plot extends Drawable {
   private Double rootingZone;
   @OneToOne(cascade = {CascadeType.ALL})
   private WaterBalance waterBalance;
+  @OneToOne(cascade = {CascadeType.ALL})
   private RecommendedAction recommendedAction;
   private Date soilStartDate;
   private Double soilStartValue;
