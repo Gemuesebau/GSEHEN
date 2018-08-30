@@ -14,6 +14,7 @@ import de.hgu.gsehen.util.DateUtil;
 
 public class DayDataChangedListener implements GsehenEventListener<DayDataChanged> {
   private Gsehen gsehenInstance;
+
   {
     gsehenInstance = Gsehen.getInstance();
     gsehenInstance.registerForEvent(DayDataChanged.class, this);

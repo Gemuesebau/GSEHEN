@@ -11,6 +11,7 @@ import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.GsehenViewEvent;
 import de.hgu.gsehen.event.RecommendedActionChanged;
+import de.hgu.gsehen.gsbalance.DayDataChangedListener;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
@@ -183,6 +184,7 @@ public class Gsehen extends Application {
     fields = new Fields(this, (BorderPane) scene.lookup(FIELDS_VIEW_ID));
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
     logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
+    new DayDataChangedListener();
 
     InputStream input = this.getClass()
         .getResourceAsStream("/de/hgu/gsehen/images/Logo_UniGeisenheim.png");
