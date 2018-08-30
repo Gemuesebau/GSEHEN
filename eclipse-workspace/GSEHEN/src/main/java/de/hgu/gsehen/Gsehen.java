@@ -12,6 +12,7 @@ import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.GsehenViewEvent;
 import de.hgu.gsehen.event.RecommendedActionChanged;
 import de.hgu.gsehen.gsbalance.DayDataChangedListener;
+import de.hgu.gsehen.gsbalance.DayDataPersistence;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
@@ -26,14 +27,10 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
-import de.hgu.gsehen.util.DBUtil;
-import de.hgu.gsehen.util.DateUtil;
 import de.hgu.gsehen.util.Pair;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
@@ -42,7 +39,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -50,7 +46,6 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -69,14 +64,7 @@ import javafx.stage.WindowEvent;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
@@ -88,7 +76,6 @@ import org.hibernate.query.Query;
 @SuppressWarnings({ "checkstyle:commentsindentation" })
 public class Gsehen extends Application {
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
-  private static final String WEATHER_DATA_JS = "/de/hgu/gsehen/js/weatherData.js";
 
   protected static final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
       Locale.GERMAN);
@@ -122,9 +109,9 @@ public class Gsehen extends Application {
       List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
   private boolean dataChanged;
 
-  private static DayData dayData = null;
-
   private static Gsehen instance;
+
+  private static DayDataPersistence dayDataPersistence;
 
   {
 
@@ -347,25 +334,6 @@ public class Gsehen extends Application {
       dataChanged = false;
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Can't evaluate ", e);
-    }
-  }
-
-  public static InputStreamReader getReaderForUtf8(String resourceName) throws IOException {
-    return new InputStreamReader(Gsehen.class.getResourceAsStream(resourceName), "utf-8");
-  }
-
-  /**
-   * Reads the contents of a given utf-8-encoded resource as one String.
-   *
-   * @param resourceName
-   *          the name of the resource to read
-   * @return a String containing the given resource's contents
-   * @throws IOException
-   *           if the resource can't be read (as utf-8)
-   */
-  public String getUtf8ResourceAsOneString(String resourceName) throws IOException {
-    try (BufferedReader buffer = new BufferedReader(getReaderForUtf8(resourceName))) {
-      return buffer.lines().collect(Collectors.joining("\n"));
     }
   }
 
@@ -629,55 +597,8 @@ public class Gsehen extends Application {
     return dialog.getResult();
   }
 
-  @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
+  @SuppressWarnings({"checkstyle:javadocmethod"})
   public static void updateDayData() {
-    final Date today = DateUtil.truncToDay(new Date());
-    // TODO for each weatherDataSource!
-    dayData = loadDayDataForDay(today, true);
-    boolean success = false;
-    ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
-    try {
-      engine.put("LOGGER", LOGGER);
-      engine.put("dayData", dayData);
-      engine.eval(getReaderForUtf8(WEATHER_DATA_JS));
-      success = (boolean)((Invocable)engine).invokeFunction("updateDayData");
-    }
-    catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Can't evaluate " + WEATHER_DATA_JS, e);
-    }
-    LOGGER.log(Level.INFO, "Weather data import was " + (success ? "" : "NOT ") + "successful");
-    if (success) {
-      dayData = DBUtil.saveEntity(dayData);
-      LOGGER.log(Level.INFO, "Day data saved");
-    }
-    else {
-      dayData = loadDayDataForDay(today, false);
-    }
-    if (dayData != null) {
-      instance.sendDayDataChanged(dayData, null);
-    }
-  }
-
-  @SuppressWarnings({"checkstyle:rightcurly"})
-  private static DayData loadDayDataForDay(Date date, boolean create) {
-    EntityManager em = Persistence.createEntityManagerFactory("GSEHEN").createEntityManager();
-    CriteriaBuilder builder = em.getCriteriaBuilder();
-    CriteriaQuery<DayData> criteria = builder.createQuery(DayData.class);
-    Root<DayData> dayDataRoot = criteria.from(DayData.class);
-    criteria.select(dayDataRoot);
-    criteria.where(builder.equal(dayDataRoot.get("date"), date));
-    try {
-      return em.createQuery(criteria).getSingleResult();
-    }
-    catch (NoResultException nre) {
-      if (create) {
-        DayData result = new DayData();
-        result.setDate(date);
-        return result;
-      }
-      else {
-        return null;
-      }
-    }
+    dayDataPersistence.recalculateDayData();
   }
 }
