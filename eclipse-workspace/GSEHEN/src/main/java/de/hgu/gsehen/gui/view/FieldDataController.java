@@ -165,7 +165,6 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
       @Override
       public void handle(ActionEvent e) {
-        // TODO
         pane.getChildren().clear();
 
         Text soilNameLabel = new Text(mainBundle.getString("fieldview.profilename"));

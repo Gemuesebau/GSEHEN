@@ -7,6 +7,7 @@ import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Plot;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -223,6 +224,15 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         Date date = Calendar.getInstance().getTime();
         DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         String enddate = formatter.format(date);
+        Date cropEnd;
+        try {
+          cropEnd = formatter.parse(enddate);
+          plot.setCropEnd(cropEnd);
+          plot.setIsActive(isActive);
+          gsehenInstance.saveUserData();
+        } catch (ParseException e1) {
+          e1.printStackTrace();
+        }
       }
     });
 
@@ -295,13 +305,13 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane.setConstraints(soilStart, 1, 4);
     GridPane.setConstraints(soilStartValueLabel, 0, 5);
     GridPane.setConstraints(soilStartValue, 1, 5);
-    GridPane.setConstraints(b2, 2, 5);
     GridPane.setConstraints(crop, 0, 6);
     GridPane.setConstraints(cropChoiceBox, 1, 6);
+    GridPane.setConstraints(b2, 0, 7);
 
     top.getChildren().addAll(nameLabel, name, areaLabel, area, rootingZoneLabel, rootingZone,
-        cropStartLabel, cropStart, soilStartLabel, soilStart, soilStartValueLabel,
-        soilStartValue, b2, crop, cropChoiceBox);
+        cropStartLabel, cropStart, soilStartLabel, soilStart, soilStartValueLabel, soilStartValue,
+        b2, crop, cropChoiceBox);
 
     pane.setTop(top);
     // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
