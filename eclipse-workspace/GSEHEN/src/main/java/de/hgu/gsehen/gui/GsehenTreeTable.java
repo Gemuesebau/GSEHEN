@@ -57,8 +57,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
   private Gsehen gsehenInstance;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>> eventListeners =
-      new HashMap<>();
+  private Map<Class<? extends GsehenEvent>, Class<? extends 
+      GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -330,7 +330,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 bottomBox.setPadding(new Insets(10, 10, 10, 10));
                 bottomBox.getChildren().addAll(actionBox);
 
-                System.out.println(plot.getIsActive());
                 if (plot.getIsActive()) {
                   attributeLabel1.setFont(Font.font("Arial", 12));
                   attribute1.setFont(Font.font("Arial", FontWeight.BOLD, 12));

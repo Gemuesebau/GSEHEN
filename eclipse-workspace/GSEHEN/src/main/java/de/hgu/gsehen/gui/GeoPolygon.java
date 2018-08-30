@@ -2,7 +2,6 @@ package de.hgu.gsehen.gui;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -16,7 +15,7 @@ public class GeoPolygon {
 
   private static final String POLYGON_MUST_HAVE_AT_LEAST_ONE_POINT =
       "the polygon must have at least one point";
-  
+
   @Id
   @GeneratedValue
   private int id;
@@ -147,8 +146,28 @@ public class GeoPolygon {
     return result;
   }
 
-  // TODO wird das (hier) benötigt? (aus UML "Shape")
+  /**
+   * Calcutes the area of an object via GeoPoints.
+   * 
+   * @return - The calculeted area.
+   */
   public double calculateArea() {
+    double distM = 0.0;
+    for (int i = 1; i <= geoPoints.size(); i++) {
+      double latMid = (getMinX() + getMaxX()) / 2.0;
+      double meterLat =
+          111132.954 - 559.822 * Math.cos(2.0 * latMid) + 1.175 * Math.cos(4.0 * latMid);
+      double meterLon = (3.14159265359 / 180) * 6367449 * Math.cos(latMid);
+
+      double deltaLat = Math.abs(getMinX() - getMaxX());
+      double deltaLon = Math.abs(getMinY() - getMaxY());
+
+      distM = Math.sqrt(Math.pow(deltaLat * meterLat, 2) + Math.pow(deltaLon * meterLon, 2));
+
+      System.out.println(distM);
+    }
+    // return distM; // meters
+    // TODO: Herausfinden, ob das Ergebnis stimmt.
     return 0.0;
   }
 }
