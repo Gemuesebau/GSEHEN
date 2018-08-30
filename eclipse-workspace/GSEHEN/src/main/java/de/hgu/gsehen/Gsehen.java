@@ -10,6 +10,7 @@ import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.GsehenViewEvent;
+import de.hgu.gsehen.event.RecommendedActionChanged;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
@@ -496,6 +497,22 @@ public class Gsehen extends Application {
       Class<? extends GsehenEventListener<DayDataChanged>> skipClass) {
     DayDataChanged event = new DayDataChanged();
     event.setDayData(dayData);
+    notifyEventListeners(event, skipClass);
+  }
+
+  /**
+   * Sends a "RecommendedActionChanged" event to all listeners registered for that kind of event,
+   * except the listeners that belong to the given "skipClass".
+   *
+   * @param plot
+   *          the plot for which the recommended action has changed
+   * @param skipClass
+   *          the event listener class to skip when iterating the listeners, or null
+   */
+  public void sendRecommendedActionChanged(Plot plot,
+      Class<? extends GsehenEventListener<DayDataChanged>> skipClass) {
+    RecommendedActionChanged event = new RecommendedActionChanged();
+    event.setPlot(plot);
     notifyEventListeners(event, skipClass);
   }
 

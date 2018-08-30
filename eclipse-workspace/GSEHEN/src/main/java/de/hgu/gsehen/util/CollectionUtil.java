@@ -24,7 +24,6 @@ public class CollectionUtil {
     list.add(listValue);
   }
 
-
   /**
    * Creates a map that contains the given classes as values,
    * mapped by their respective "simpleName".
@@ -38,5 +37,14 @@ public class CollectionUtil {
       result.put(clazz.getSimpleName(), clazz);
     }
     return result;
+  }
+
+  public static <T> T nvl(@SuppressWarnings("unchecked") T... objects) {
+    for (T obj : objects) {
+      if (obj != null) {
+        return obj;
+      }
+    }
+    return null;
   }
 }

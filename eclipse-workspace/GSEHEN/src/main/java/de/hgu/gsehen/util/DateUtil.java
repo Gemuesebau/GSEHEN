@@ -17,4 +17,16 @@ public class DateUtil {
   public static Date truncToDay(Date date) {
     return truncToDayUsingCalendar(Calendar.getInstance(), date);
   }
+
+  public static boolean between(Date date, Date start, Date end) {
+    if (date == null || (start == null && end == null)) {
+      return false;
+    }
+    return (
+      start == null || start.getTime() <= date.getTime()
+    )
+    && (
+      end == null || end.getTime() >= date.getTime()
+    );
+  }
 }
