@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import de.hgu.gsehen.evapotranspiration.DayData;
@@ -25,7 +24,7 @@ class TotalBalanceTest {
   GeoData location;
   SimpleDateFormat tag;
 
-  DayData today, today2, today3, today4;
+  DayData today, today2, today3, today4, today5;
   Plot plot;
   Crop crop;
   SoilProfile soilProfile;
@@ -41,8 +40,7 @@ class TotalBalanceTest {
 
 
 
-  @BeforeEach
-  void onCreate() throws ParseException {
+  void onCreate(int days) throws ParseException {
     location = new GeoData(false, 7.95, 49.99, 110);
     tag = new SimpleDateFormat("yyyy-MM-dd");
     soilStartDate = new SimpleDateFormat("yyyy-MM-dd");
@@ -62,6 +60,8 @@ class TotalBalanceTest {
     today4 = new DayData(tag.parse("2016-06-08"), 20.91875, 13.7, 28.4, 87.2708333333, null, null,
         28.32588, 0.0, 1.0381944444, 2.3, null, null, 1.0, null, null, null, null);
 
+    today5 = new DayData(tag.parse("2016-06-08"), 20.91875, 13.7, 28.4, 87.2708333333, null, null,
+        28.32588, 0.0, 1.0381944444, 2.3, null, null, 1.0, null, null, null, null);
     crop = new Crop("Salat", true, 0.6, 0.8, 1.3, null, 10, 20, 30, null, "Pflanzung",
         "30% Bedeckung", "80%Bedeckunng", null, 10, 20, 30, null, "Toller Salat");
 
@@ -79,11 +79,29 @@ class TotalBalanceTest {
     List<SoilProfileDepth> profileList = new ArrayList<SoilProfileDepth>();
     profileList.addAll(Arrays.asList(depth1, depth2, depth3));
     soilProfile = new SoilProfile("Feld2", soilList, profileList);
-
     List<DayData> dailyBalances = new ArrayList<DayData>();
-    dailyBalances.addAll(Arrays.asList(today));
-    // dailyBalances.addAll(Arrays.asList(today, today2, today3, today4));
-    // dailyBalances.addAll(Arrays.asList(today, today2));
+    switch (days) {
+      case 1:
+        dailyBalances.addAll(Arrays.asList(today));
+        break;
+      case 2:
+        dailyBalances.addAll(Arrays.asList(today, today2));
+        break;
+      case 3:
+        dailyBalances.addAll(Arrays.asList(today, today2, today3));
+        break;
+      case 4:
+        dailyBalances.addAll(Arrays.asList(today, today2, today3, today4));
+        break;
+
+      case 5:
+        dailyBalances.addAll(Arrays.asList(today, today2, today3, today4, today5));
+        break;
+
+      default:
+        dailyBalances.addAll(Arrays.asList(today, today2, today3, today4));
+        break;
+    }
     WaterBalance waterBalance = new WaterBalance(dailyBalances);
     plot.setWaterBalance(waterBalance);
     // plot.setLocation(location); //TODO: After Merge of GeoPoint Location etc.
@@ -92,6 +110,8 @@ class TotalBalanceTest {
 
   @Test
   void testDetermineCurrentRootingZone() throws ParseException {
+    onCreate(1);
+
     TotalBalance.determineCurrentRootingZone(today, plot);
 
     TotalBalance.determineCurrentRootingZone(today, plot);
@@ -133,6 +153,7 @@ class TotalBalanceTest {
 
   @Test
   void testCalculateCurrentAvailableSoilWater() throws ParseException {
+    onCreate(1);
 
     TotalBalance.determineCurrentRootingZone(today, plot);
     TotalBalance.calculateCurrentAvailableSoilWater(today, soilProfile);
@@ -169,8 +190,26 @@ class TotalBalanceTest {
   }
 
   @Test
-  void testCalculateTotalWaterBalanceAndrecommendIrrigation() {
+  void testCalculateTotalWaterBalanceAndrecommendIrrigation() throws ParseException {
+//    onCreate(1);
+//    calcualteGS();
+//
+//    onCreate(2);
+//    calcualteGS();
+//
+//    onCreate(3);
+//    calcualteGS();
+//
+//    onCreate(4);
+//    calcualteGS();
 
+
+    onCreate(5);
+    plot.getWaterBalance().getDailyBalances().get(0).setPrecipitation(32.0);
+    calcualteGS();
+  }
+
+  private void calcualteGS() {
     for (DayData elem : plot.getWaterBalance().getDailyBalances()) {
       System.out.println(elem);
       EnvCalculator.calculateEt0(elem, location);

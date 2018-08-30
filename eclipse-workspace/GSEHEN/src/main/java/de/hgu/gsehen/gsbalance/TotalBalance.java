@@ -100,54 +100,52 @@ public class TotalBalance {
    */
   public static void calculateTotalWaterBalance(Plot plot) {
     Double rainMax = 30.0;
-    Integer daysPause = 2;
-    plot.setCalculationPaused(false);
+    int daysPause = 2;
     Double startValue;
+    List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();
     if (plot.getSoilStartValue() != null) {
       startValue = plot.getSoilStartValue();
     } else {
-      startValue = plot.getWaterBalance().getDailyBalances().get(0).getCurrentAvailableSoilWater();
+      startValue = dailyBalances.get(0).getCurrentAvailableSoilWater();
     }
     int i;
-    for (i = 0; i < plot.getWaterBalance().getDailyBalances().size(); i++) {
+    int size = dailyBalances.size();
+    for (i = 0; i < size; i++) {
+      plot.setCalculationPaused(false);
       Double currentTotalWaterBalance = null;
       if (i == 0) {
-        currentTotalWaterBalance =
-            startValue - plot.getWaterBalance().getDailyBalances().get(0).getDailyBalance();
-        plot.getWaterBalance().getDailyBalances().get(0)
-            .setCurrentTotalWaterBalance(currentTotalWaterBalance);
+        currentTotalWaterBalance = startValue - dailyBalances.get(0).getDailyBalance();
+        dailyBalances.get(0).setCurrentTotalWaterBalance(currentTotalWaterBalance);
       } else {
-        currentTotalWaterBalance =
-            plot.getWaterBalance().getDailyBalances().get(i - 1).getCurrentTotalWaterBalance()
-                - plot.getWaterBalance().getDailyBalances().get(i).getDailyBalance();
-        plot.getWaterBalance().getDailyBalances().get(i)
-            .setCurrentTotalWaterBalance(currentTotalWaterBalance);
+        currentTotalWaterBalance = dailyBalances.get(i - 1).getCurrentTotalWaterBalance()
+            - dailyBalances.get(i).getDailyBalance();
+        dailyBalances.get(i).setCurrentTotalWaterBalance(currentTotalWaterBalance);
       }
       // Calculation Pause
-      if (currentTotalWaterBalance > plot.getWaterBalance().getDailyBalances().get(i)
-          .getCurrentAvailableSoilWater()
-          && plot.getWaterBalance().getDailyBalances().get(i).getPrecipitation() > rainMax) {
+      int k = 0;
+      if (currentTotalWaterBalance > dailyBalances.get(i).getCurrentAvailableSoilWater()
+          && dailyBalances.get(i).getPrecipitation() > rainMax) {
         plot.setCalculationPaused(true);
-        int k;
-        for (k = 1; k > daysPause
-            || i + k > plot.getWaterBalance().getDailyBalances().size(); k++) {
-          Double lastWaterBalance =
-              plot.getWaterBalance().getDailyBalances().get(i).getCurrentAvailableSoilWater();
-          plot.getWaterBalance().getDailyBalances().get(i + k)
-              .setCurrentTotalWaterBalance(lastWaterBalance);
-          i++;
+        for (k = 1; k <= daysPause; k++) {
+          if (i + k > size) {
+            k -= 1;
+            break;
+          }
+          System.out.println("k" + k + "i" + i);
+          Double maxWater = dailyBalances.get(i + k).getCurrentAvailableSoilWater();
+          dailyBalances.get(i + k).setCurrentTotalWaterBalance(maxWater);
+
         }
+        i += k;
+
 
       }
       // TotalWaterBalance not bigger than CurrentAvailableSoilWater
-      plot.getWaterBalance().getDailyBalances().get(i)
-          .setCurrentTotalWaterBalance(Math.min(
-              plot.getWaterBalance().getDailyBalances().get(i).getCurrentTotalWaterBalance(),
-              plot.getWaterBalance().getDailyBalances().get(i).getCurrentAvailableSoilWater()));
+      dailyBalances.get(i)
+          .setCurrentTotalWaterBalance(Math.min(dailyBalances.get(i).getCurrentTotalWaterBalance(),
+              dailyBalances.get(i).getCurrentAvailableSoilWater()));
       System.out.println("Loop current total water balance is: "
-          + plot.getWaterBalance().getDailyBalances().get(i).getCurrentTotalWaterBalance());
-
-
+          + dailyBalances.get(i).getCurrentTotalWaterBalance());
 
     }
   }
@@ -166,37 +164,39 @@ public class TotalBalance {
     Double waterContentAim = currentAvailableSoilWater * 0.9;
     Double waterContentToAim = waterContentAim - currentTotalWaterBalance;
     if (waterContentToAim > currentAvailableSoilWater) {
-      System.out.println("Error");
+      recommendedAction
+          .setRecommendation("The water balance exceedes the total available soil water \n "
+              + "- your plants are dead for sure \\u2620");// TODO:
       throw new UnsupportedOperationException(
           "The water balance exceedes the total available soil water \n "
               + "- your plants are dead for sure \\u2620");// TODO:
-      // Language
-    }
-    Double availableWater = currentAvailableSoilWater * 0.3 - waterContentToAim;
-
-    recommendedAction.setAvailableWater(availableWater);
-    recommendedAction
-        .setAvailableWaterPercent((availableWater / (currentAvailableSoilWater * 0.3)) * 100);
-
-    Double projectedDaysToIrrigation = Math.floor(availableWater / currentDay.getEtc());
-
-    Boolean calculationPaused = plot.getCalculationPaused();
-    if (calculationPaused) {
-      recommendedAction.setRecommendation("Calculation is paused"); // TODO: Language
     } else {
-      if (availableWater > 0) {
+      Double availableWater = currentAvailableSoilWater * 0.3 - waterContentToAim;
 
-        recommendedAction.setRecommendation(
-            "No action required. There are " + Math.round(availableWater * 100d) / 100d
-                + " mm left. The next irrgation might be nesccecary in " + projectedDaysToIrrigation
-                + "d"); // TODO: Language
+      recommendedAction.setAvailableWater(availableWater);
+      recommendedAction
+          .setAvailableWaterPercent((availableWater / (currentAvailableSoilWater * 0.3)) * 100);
+
+      Double projectedDaysToIrrigation = Math.floor(availableWater / currentDay.getEtc());
+
+      Boolean calculationPaused = plot.getCalculationPaused();
+      if (calculationPaused) {
+        recommendedAction.setRecommendation("Calculation is paused"); // TODO: Language
       } else {
+        if (availableWater > 0) {
 
-        recommendedAction.setRecommendation(
-            "Please irrigate " + Math.round(waterContentToAim * 100d) / 100d + "mm"); // TODO:
-        // Language
+          recommendedAction.setRecommendation(
+              "No action required. There are " + Math.round(availableWater * 100d) / 100d
+                  + " mm left. The next irrgation might be nesccecary in "
+                  + projectedDaysToIrrigation + "d"); // TODO: Language
+        } else {
+
+          recommendedAction.setRecommendation(
+              "Please irrigate " + Math.round(waterContentToAim * 100d) / 100d + "mm"); // TODO:
+          // Language
+        }
+
       }
-
     }
 
     plot.setRecommendedAction(recommendedAction);
