@@ -128,25 +128,22 @@ public class TotalBalance {
         plot.setCalculationPaused(true);
         for (k = 1; k <= daysPause; k++) {
           if (i + k > size) {
-            k -= 1;
             break;
           }
-          System.out.println("k" + k + "i" + i);
           Double maxWater = dailyBalances.get(i + k).getCurrentAvailableSoilWater();
           dailyBalances.get(i + k).setCurrentTotalWaterBalance(maxWater);
 
         }
-        i += k;
-
 
       }
       // TotalWaterBalance not bigger than CurrentAvailableSoilWater
       dailyBalances.get(i)
           .setCurrentTotalWaterBalance(Math.min(dailyBalances.get(i).getCurrentTotalWaterBalance(),
               dailyBalances.get(i).getCurrentAvailableSoilWater()));
-      System.out.println("Loop current total water balance is: "
-          + dailyBalances.get(i).getCurrentTotalWaterBalance());
 
+      if (k != 0 && k > 0) {
+        i += k - 1;
+      }
     }
   }
 

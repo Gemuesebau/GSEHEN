@@ -191,23 +191,44 @@ class TotalBalanceTest {
 
   @Test
   void testCalculateTotalWaterBalanceAndrecommendIrrigation() throws ParseException {
-//    onCreate(1);
-//    calcualteGS();
-//
-//    onCreate(2);
-//    calcualteGS();
-//
-//    onCreate(3);
-//    calcualteGS();
-//
-//    onCreate(4);
-//    calcualteGS();
+    onCreate(1);
+    calcualteGS();
+    for (DayData dates : plot.getWaterBalance().getDailyBalances()) {
+      System.out.println(dates.getCurrentTotalWaterBalance() + " " + dates.getDailyBalance());
+    }
 
+    onCreate(2);
+    calcualteGS();
+    for (DayData dates : plot.getWaterBalance().getDailyBalances()) {
+      System.out.println(dates.getCurrentTotalWaterBalance() + " " + dates.getDailyBalance());
+    }
 
+    onCreate(3);
+    calcualteGS();
+    for (DayData dates : plot.getWaterBalance().getDailyBalances()) {
+      System.out.println(dates.getCurrentTotalWaterBalance() + " " + dates.getDailyBalance());
+    }
+
+    onCreate(4);
+    calcualteGS();
+
+    for (DayData dates : plot.getWaterBalance().getDailyBalances()) {
+      System.out.println(dates.getCurrentTotalWaterBalance() + " " + dates.getDailyBalance());
+    }
+    onCreate(5);
+    calcualteGS();
+
+    for (DayData dates : plot.getWaterBalance().getDailyBalances()) {
+      System.out.println(dates.getCurrentTotalWaterBalance() + " " + dates.getDailyBalance());
+    }
     onCreate(5);
     plot.getWaterBalance().getDailyBalances().get(0).setPrecipitation(32.0);
     calcualteGS();
+    for (DayData dates : plot.getWaterBalance().getDailyBalances()) {
+      System.out.println(dates.getCurrentTotalWaterBalance() + " " + dates.getDailyBalance());
+    }
   }
+
 
   private void calcualteGS() {
     for (DayData elem : plot.getWaterBalance().getDailyBalances()) {
