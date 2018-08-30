@@ -40,7 +40,7 @@ class TotalBalanceTest {
   SimpleDateFormat cropEnd;
 
 
-  @Test
+
   @BeforeEach
   void onCreate() throws ParseException {
     location = new GeoData(false, 7.95, 49.99, 110);

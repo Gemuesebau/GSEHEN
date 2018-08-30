@@ -135,6 +135,7 @@ public class TotalBalance {
               plot.getWaterBalance().getDailyBalances().get(i).getCurrentAvailableSoilWater();
           plot.getWaterBalance().getDailyBalances().get(i + k)
               .setCurrentTotalWaterBalance(lastWaterBalance);
+          i++;
         }
 
       }
