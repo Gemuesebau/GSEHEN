@@ -1,13 +1,5 @@
 package de.hgu.gsehen.gui;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.logging.Logger;
-
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
@@ -18,6 +10,13 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -57,8 +56,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
   private Gsehen gsehenInstance;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>> eventListeners =
-      new HashMap<>();
+  private Map<Class<? extends GsehenEvent>, Class<? extends 
+      GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -325,7 +324,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 Text actionLabel = new Text(mainBundle.getString("treetableview.watering"));
                 actionLabel.setFont(Font.font("Arial", 14));
                 Text action;
-                if (plot.getSoilStartValue() != null) {
+                if (plot.getSoilStartValue() != null
+                    && plot.getRecommendedAction().getRecommendation() != null) {
                   action = new Text(plot.getRecommendedAction().getRecommendation());
                 } else {
                   action = new Text("/");
