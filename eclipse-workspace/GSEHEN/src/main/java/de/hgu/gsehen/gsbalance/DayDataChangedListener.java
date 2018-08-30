@@ -30,7 +30,7 @@ public class DayDataChangedListener implements GsehenEventListener<DayDataChange
               event.isFromWeatherDataSource(fieldWeatherDataSource)
               && DateUtil.between(
                   event.getDayData().getDate(),
-                  CollectionUtil.nvl(plot.getCropStart(), plot.getSoilStartDate()),
+                  CollectionUtil.nvl(plot.getSoilStartDate(), plot.getCropStart()),
                   plot.getCropEnd()
               )
           ) {
