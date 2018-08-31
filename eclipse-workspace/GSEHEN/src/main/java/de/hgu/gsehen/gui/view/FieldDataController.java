@@ -662,7 +662,8 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     pane.setBottom(null);
     sp = field.getSoilProfile();
     int index = 1;
-    Text setSoil = new Text(mainBundle.getString("fieldview.currentsoil") + "\n");
+    Text setSoil =
+        new Text(mainBundle.getString("fieldview.currentsoil") + " (" + sp.getName() + "):" + "\n");
     setSoil.setFont(Font.font("Arial", FontWeight.BOLD, 14));
     center.getChildren().add(setSoil);
     for (Soil soil : sp.getSoilType()) {
