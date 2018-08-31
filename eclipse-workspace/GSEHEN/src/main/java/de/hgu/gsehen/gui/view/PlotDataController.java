@@ -442,11 +442,18 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
               plot.setManualData(manualData);
             } else {
               ManualData manualData = plot.getManualData();
+              boolean newDate = true;
               for (ManualWaterSupply mws : manualData.getManualWaterSupply()) {
-                if (wateringDate == mws.getDate()) {
+                if (wateringDate.compareTo(mws.getDate()) == 0) {
+                  newDate = false;
                   mws.setIrrigation(Double.valueOf(irrigation.getText()));
                   mws.setPrecipitation(Double.valueOf(precipitation.getText()));
                 }
+              }
+              if (newDate) {
+                ManualWaterSupply manualWaterSupply = new ManualWaterSupply(wateringDate,
+                    Double.valueOf(irrigation.getText()), Double.valueOf(precipitation.getText()));
+                manualData.getManualWaterSupply().add(manualWaterSupply);
               }
             }
 
