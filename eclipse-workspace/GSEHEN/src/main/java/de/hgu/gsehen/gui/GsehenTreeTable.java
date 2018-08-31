@@ -1,13 +1,5 @@
 package de.hgu.gsehen.gui;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.logging.Logger;
-
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
@@ -18,6 +10,13 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -49,6 +48,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -57,8 +57,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
   private Gsehen gsehenInstance;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>> eventListeners =
-      new HashMap<>();
+  private Map<Class<? extends GsehenEvent>, Class<? extends 
+      GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -267,55 +267,48 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 Plot plot = (Plot) selectedItem.getValue();
 
                 attributeLabel1 = new Text(mainBundle.getString("fieldview.area"));
-                attributeLabel1.setFont(Font.font("Arial", 12));
                 attribute1 = new Text(Double.toString(plot.getPolygon().calculateArea()));
-                attribute1.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+
                 attribute1Box = new HBox();
                 attribute1Box.getChildren().addAll(attributeLabel1, attribute1);
 
                 attributeLabel2 = new Text(mainBundle.getString("plotview.rootingzone"));
-                attributeLabel2.setFont(Font.font("Arial", 12));
+
                 if (plot.getRootingZone() != null) {
                   attribute2 = new Text(Double.toString(plot.getRootingZone()));
                 } else {
                   attribute2 = new Text("0.0");
                 }
-                attribute2.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+
                 attribute2Box = new HBox();
                 attribute2Box.getChildren().addAll(attributeLabel2, attribute2);
 
                 attributeLabel3 = new Text(mainBundle.getString("plotview.crop"));
-                attributeLabel3.setFont(Font.font("Arial", 12));
                 if (plot.getCrop() != null) {
                   attribute3 = new Text(plot.getCrop().getName());
                 } else {
                   attribute3 = new Text(mainBundle.getString("treetableview.nocrop"));
                 }
-                attribute3.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 attribute3Box = new HBox();
                 attribute3Box.getChildren().addAll(attributeLabel3, attribute3);
 
                 Text soilStartLabel = new Text(mainBundle.getString("plotview.soilstart"));
-                soilStartLabel.setFont(Font.font("Arial", 12));
                 Text soilStart;
                 if (plot.getSoilStartDate() != null) {
                   soilStart = new Text(plot.getSoilStartDate().toString());
                 } else {
                   soilStart = new Text("/");
                 }
-                soilStart.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 HBox soilStartBox = new HBox();
                 soilStartBox.getChildren().addAll(soilStartLabel, soilStart);
 
                 Text soilValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
-                soilValueLabel.setFont(Font.font("Arial", 12));
                 Text soilValue;
                 if (plot.getSoilStartValue() != null) {
                   soilValue = new Text(plot.getSoilStartValue().toString());
                 } else {
                   soilValue = new Text("/");
                 }
-                soilValue.setFont(Font.font("Arial", FontWeight.BOLD, 14));
                 HBox soilValueBox = new HBox();
                 soilValueBox.getChildren().addAll(soilValueLabel, soilValue);
 
@@ -323,20 +316,55 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                     soilStartBox, soilValueBox);
 
                 Text actionLabel = new Text(mainBundle.getString("treetableview.watering"));
-                actionLabel.setFont(Font.font("Arial", 14));
                 Text action;
-                if (plot.getSoilStartValue() != null) {
+                if (plot.getSoilStartValue() != null && plot.getRecommendedAction() != null) {
                   action = new Text(plot.getRecommendedAction().getRecommendation());
                 } else {
                   action = new Text("/");
                 }
-                action.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+
                 HBox actionBox = new HBox();
                 actionBox.getChildren().addAll(actionLabel, action);
 
                 VBox bottomBox = new VBox(10);
                 bottomBox.setPadding(new Insets(10, 10, 10, 10));
                 bottomBox.getChildren().addAll(actionBox);
+
+                if (plot.getIsActive()) {
+                  attributeLabel1.setFont(Font.font("Arial", 12));
+                  attribute1.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                  attributeLabel2.setFont(Font.font("Arial", 12));
+                  attribute2.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                  attributeLabel3.setFont(Font.font("Arial", 12));
+                  attribute3.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                  soilStartLabel.setFont(Font.font("Arial", 12));
+                  soilStart.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                  soilValueLabel.setFont(Font.font("Arial", 12));
+                  soilValue.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                  actionLabel.setFont(Font.font("Arial", 14));
+                  action.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+                } else {
+                  nameLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+                  name.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
+                  typeLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+                  type.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
+                  attributeLabel1.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+                  attribute1.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
+                  attributeLabel2.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+                  attribute2.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
+                  attributeLabel3.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+                  attribute3.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
+                  soilStartLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+                  soilStart.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
+                  soilValueLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+                  soilValue.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
+                  actionLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+                  action.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
+                  Text plotIsInactive =
+                      new Text(mainBundle.getString("treetableview.plotinactive"));
+                  plotIsInactive.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+                  bottomBox.getChildren().add(plotIsInactive);
+                }
                 detailPane.setBottom(bottomBox);
               }
 
