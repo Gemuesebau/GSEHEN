@@ -65,7 +65,7 @@ class TotalBalanceTest {
     crop = new Crop("Salat", true, 0.6, 0.8, 1.3, null, 10, 20, 30, null, "Pflanzung",
         "30% Bedeckung", "80%Bedeckunng", null, 10, 20, 30, null, "Toller Salat");
 
-    plot = new Plot("Feld2", 200, null, null, 1.0, null, 120.0, null, null,
+    plot = new Plot("Feld2", 200, null, null, 1.0, null, 120.0, null, null, null,
         soilStartDate.parse("2016-06-04"), null, false, crop, cropStart.parse("2016-06-06"),
         cropEnd.parse("2016-09-06"), true);
     soil1 = new Soil("Sand", 8.0, null);

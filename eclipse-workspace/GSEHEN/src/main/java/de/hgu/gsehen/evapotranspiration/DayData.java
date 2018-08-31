@@ -26,7 +26,7 @@ public class DayData implements Comparable<DayData> {
   private Double airHumidityRelMin;
   private Double airHumidityRelMax;
   private double globalRad;
-  private Double precipitation; // ausgliedern in ein anders objekt?
+  private Double precipitation;
   private double windspeed2m;
   private Double et0;
   private Double currentKc;

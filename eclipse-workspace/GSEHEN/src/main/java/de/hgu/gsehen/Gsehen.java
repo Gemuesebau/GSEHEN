@@ -117,10 +117,12 @@ public class Gsehen extends Application {
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<Class<? extends GsehenEvent>,
-      List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
-  private boolean dataChanged;
+  private java.util.Map<
+      Class<? extends GsehenEvent>,
+      List<GsehenEventListener<?>>
+       > eventListeners = new HashMap<>();
 
+  private boolean dataChanged;
   private static Gsehen instance;
 
   {
@@ -149,7 +151,7 @@ public class Gsehen extends Application {
       importCropData();
     } catch (Exception e) {
       e.printStackTrace();
-    }   
+    }
     Application.launch(args);
   }
 
@@ -217,8 +219,10 @@ public class Gsehen extends Application {
 
   /**
    * PostgreSQL DB connection and storing in Persistence.
+   *
+   * @throws SQLException if SELECTing from PostgreSQL, our saving into local DB, fails
    */
-  public static void importCropData() {
+  public static void importCropData() throws SQLException {
     final String url = "jdbc:postgresql:"
         + "//hs-geisenheim.cwliowbz3tsc.eu-west-1.rds.amazonaws.com/standard";
     final String user = "GSEHEN_user";
@@ -264,16 +268,21 @@ public class Gsehen extends Application {
         }
       } catch (SQLException e) {
         System.out.println("no connection" + e.getLocalizedMessage());
+      } finally {
+        connection.close();
       }
     }
-
   }
 
   /**
    * Fill Crop with Data.
-   * @param rs ResultSet from PostgreSQL.
-   * @param crop New Crop
-   * @throws SQLException if setting a property fails
+   * 
+   * @param rs
+   *          ResultSet from PostgreSQL.
+   * @param crop
+   *          New Crop
+   * @throws SQLException
+   *          if SELECTing from PostgreSQL, our saving into local DB, fails
    */
   private static void transferPropertiesFromPgToCrop(ResultSet rs, Crop crop) throws SQLException {
     crop.setName(rs.getString("cName"));

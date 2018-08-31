@@ -153,7 +153,9 @@ public class GeoPolygon {
    */
   public double calculateArea() {
     double distM = 0.0;
-    for (int i = 1; i <= geoPoints.size(); i++) {
+    double[] x = new double[geoPoints.size()];
+    double[] y = new double[geoPoints.size()];
+    for (int i = 0; i < geoPoints.size(); i++) {
       double latMid = (getMinX() + getMaxX()) / 2.0;
       double meterLat =
           111132.954 - 559.822 * Math.cos(2.0 * latMid) + 1.175 * Math.cos(4.0 * latMid);
@@ -164,10 +166,28 @@ public class GeoPolygon {
 
       distM = Math.sqrt(Math.pow(deltaLat * meterLat, 2) + Math.pow(deltaLon * meterLon, 2));
 
-      System.out.println(distM);
+      x[i] = Math.sqrt(Math.pow(deltaLat * meterLat, 2));
+      y[i] = Math.sqrt(Math.pow(deltaLon * meterLon, 2));
+
+      // System.out.println(x[i]);
+      // System.out.println(y[i]);
     }
     // return distM; // meters
     // TODO: Herausfinden, ob das Ergebnis stimmt.
+    polygonArea(x, y, geoPoints.size());
     return 0.0;
   }
+
+  public double polygonArea(double[] X, double[] Y, int numPoints) {
+    double area = 0; // Accumulates area in the loop
+    int j = numPoints - 1; // The last vertex is the 'previous' one to the first
+
+    for (int i = 0; i < numPoints; i++) {
+      area = area + (X[j] + X[i]) * (Y[j] - Y[i]);
+      j = i; // j is previous vertex to i
+      // System.out.println(area / 2);
+    }
+    return area / 2;
+  }
+
 }
