@@ -169,12 +169,12 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
         Text soilNameLabel = new Text(mainBundle.getString("fieldview.profilename"));
         soilNameLabel.setFont(Font.font("Arial", 14));
-        TextField soilProfileName = new TextField(field.getSoilProfile().getName());
+        TextField soilProfileName = new TextField(currentSoilBox.getValue().getName());
         soilProfileName.textProperty().addListener(new ChangeListener<String>() {
           @Override
           public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
-            field.getSoilProfile().setName(soilProfileName.getText());
+            currentSoilBox.getValue().setName(soilProfileName.getText());
           }
         });
 
@@ -204,7 +204,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
 
         int row = 0;
 
-        for (int i = 0; i < field.getSoilProfile().getSoilType().size(); i++) {
+        for (int i = 0; i < currentSoilBox.getValue().getSoilType().size(); i++) {
           Text layor = new Text(mainBundle.getString("fieldview.layor") + (i + 1));
           layor.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
@@ -230,7 +230,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
             }
           });
 
-          Soil curSoil = field.getSoilProfile().getSoilType().get(i);
+          Soil curSoil = currentSoilBox.getValue().getSoilType().get(i);
           Text soilAwc = new Text();
           for (Soil setSoil : soilChoiceBox.getItems()) {
             if (setSoil.getName().equals(curSoil.getName())) {
@@ -250,9 +250,9 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
               if (newValue != null) {
                 soilAwc
                     .setText(String.valueOf(soilChoiceBox.getValue().getAvailableWaterCapacity()));
-                field.getSoilProfile().getSoilType().get(in)
+                currentSoilBox.getValue().getSoilType().get(in)
                     .setName(soilChoiceBox.getValue().getName());
-                field.getSoilProfile().getSoilType().get(in).setAvailableWaterCapacity(
+                currentSoilBox.getValue().getSoilType().get(in).setAvailableWaterCapacity(
                     soilChoiceBox.getValue().getAvailableWaterCapacity());
               }
             }
@@ -265,7 +265,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           pane.setTop(topBox);
 
           TextField depth = new TextField(
-              String.valueOf(field.getSoilProfile().getProfileDepth().get(i).getDepth()));
+              String.valueOf(currentSoilBox.getValue().getProfileDepth().get(i).getDepth()));
           Text depthLabel = new Text(mainBundle.getString("fieldview.depth"));
           depthLabel.setFont(Font.font("Arial", 14));
           depth.textProperty().addListener(new ChangeListener<String>() {
@@ -276,7 +276,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
                 if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
                   depth.setText(oldValue);
                 } else {
-                  field.getSoilProfile().getProfileDepth().get(in)
+                  currentSoilBox.getValue().getProfileDepth().get(in)
                       .setDepth(Double.valueOf(newValue));
                 }
               }
@@ -321,7 +321,6 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
             gsehenInstance.sendFarmDataChanged(field, null);
           }
         });
-
         pane.setBottom(back);
       }
     });
