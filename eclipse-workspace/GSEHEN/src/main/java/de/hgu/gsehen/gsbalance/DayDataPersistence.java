@@ -20,13 +20,12 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
-@SuppressWarnings({"checkstyle:commentsindentation"})
 public class DayDataPersistence /*implements GsehenEventListener<RecommendedActionChanged>*/ {
   private Gsehen gsehenInstance;
 
   {
     gsehenInstance = Gsehen.getInstance();
-//    gsehenInstance.registerForEvent(RecommendedActionChanged.class, this);
+    //gsehenInstance.registerForEvent(RecommendedActionChanged.class, this);
   }
 
   private static final Logger LOGGER = Logger.getLogger(DayDataPersistence.class.getName());
@@ -56,17 +55,9 @@ public class DayDataPersistence /*implements GsehenEventListener<RecommendedActi
    */
   @SuppressWarnings({"checkstyle:rightcurly"})
   public void recalculateDayData() {
+    final ScriptEngine engine = prepareScriptEngine();
     final Date today = DateUtil.truncToDay(new Date());
-    final List<WeatherDataSource> weatherDataSources = loadWeatherDataSources();
-    final ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
-    engine.put("LOGGER", LOGGER);
-    try {
-      engine.eval(getReaderForUtf8(WEATHER_DATA_JS));
-    }
-    catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Can't evaluate " + WEATHER_DATA_JS, e);
-    }
-    for (WeatherDataSource weatherDataSource : weatherDataSources) {
+    for (WeatherDataSource weatherDataSource : loadWeatherDataSources()) {
       DayData dayData = null;
       try {
         dayData = (DayData)((Invocable)engine)
@@ -78,18 +69,30 @@ public class DayDataPersistence /*implements GsehenEventListener<RecommendedActi
       LOGGER.log(Level.INFO, "Weather data import from '" + weatherDataSource.getName() + "' was "
           + (dayData == null ? "NOT " : "") + "successful");
       if (dayData != null) {
-        gsehenInstance.sendDayDataChanged(dayData, null);
+        gsehenInstance.sendDayDataChanged(dayData, weatherDataSource, null);
       }
     }
   }
 
+  private ScriptEngine prepareScriptEngine() {
+    final ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
+    engine.put("LOGGER", LOGGER);
+    try {
+      engine.eval(getReaderForUtf8(WEATHER_DATA_JS));
+    } catch (Exception e) {
+      LOGGER.log(Level.SEVERE, "Can't evaluate " + WEATHER_DATA_JS, e);
+    }
+    return engine;
+  }
+
   private List<WeatherDataSource> loadWeatherDataSources() {
-//    EntityManager em = Persistence.createEntityManagerFactory("GSEHEN").createEntityManager();
-//    CriteriaBuilder builder = em.getCriteriaBuilder();
-//    CriteriaQuery<WeatherDataSource> criteria = builder.createQuery(WeatherDataSource.class);
-//    Root<WeatherDataSource> dayDataRoot = criteria.from(WeatherDataSource.class);
-//    criteria.select(dayDataRoot);
-//    return em.createQuery(criteria).getResultList();
+    // FIXME actually load configured WDSs from DB
+    //EntityManager em = Persistence.createEntityManagerFactory("GSEHEN").createEntityManager();
+    //CriteriaBuilder builder = em.getCriteriaBuilder();
+    //CriteriaQuery<WeatherDataSource> criteria = builder.createQuery(WeatherDataSource.class);
+    //Root<WeatherDataSource> dayDataRoot = criteria.from(WeatherDataSource.class);
+    //criteria.select(dayDataRoot);
+    //return em.createQuery(criteria).getResultList();
     WeatherDataSource weatherDataSource = new WeatherDataSource();
     weatherDataSource.setName("CSV-Importer");
     weatherDataSource.setMeasIntervalSeconds(600);
@@ -106,8 +109,8 @@ public class DayDataPersistence /*implements GsehenEventListener<RecommendedActi
     return Arrays.asList(weatherDataSource);
   }
 
-//  @Override
-//  public void handle(RecommendedActionChanged event) {
-//    
-//  }
+  //@Override
+  //public void handle(RecommendedActionChanged event) {
+  //
+  //}
 }
