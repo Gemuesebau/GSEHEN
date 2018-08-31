@@ -235,6 +235,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           for (Soil setSoil : soilChoiceBox.getItems()) {
             if (setSoil.getName().equals(curSoil.getName())) {
               soilChoiceBox.getSelectionModel().select(setSoil);
+              soilAwc.setText(String.valueOf(setSoil.getAvailableWaterCapacity()));
             }
           }
 
