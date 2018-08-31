@@ -167,6 +167,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
       public void handle(ActionEvent e) {
         if (currentSoilBox.getValue() != null) {
           pane.getChildren().clear();
+          treeTableView.setVisible(false);
 
           Text soilNameLabel = new Text(mainBundle.getString("fieldview.profilename"));
           soilNameLabel.setFont(Font.font("Arial", 14));
@@ -319,6 +320,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
             @Override
             public void handle(ActionEvent arg0) {
               pane.getChildren().clear();
+              treeTableView.setVisible(true);
               gsehenInstance.sendFarmDataChanged(field, null);
             }
           });
@@ -334,6 +336,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
       public void handle(ActionEvent e) {
         // CREATE SOILPROFILE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         pane.getChildren().clear();
+        treeTableView.setVisible(false);
 
         Text soilNameLabel = new Text(mainBundle.getString("fieldview.profilename"));
         soilNameLabel.setFont(Font.font("Arial", 14));
@@ -529,6 +532,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           @Override
           public void handle(ActionEvent arg0) {
             pane.getChildren().clear();
+            treeTableView.setVisible(true);
             gsehenInstance.sendFarmDataChanged(field, null);
           }
         });
@@ -540,6 +544,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           @Override
           public void handle(ActionEvent arg0) {
             pane.getChildren().clear();
+            treeTableView.setVisible(true);
             soilProfileItem = new SoilProfile();
             soilProfileItem.setSoilType(soilSet);
             soilProfileItem.setProfileDepth(spdSet);
