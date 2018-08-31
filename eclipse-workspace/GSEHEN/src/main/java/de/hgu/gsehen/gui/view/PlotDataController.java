@@ -5,6 +5,8 @@ import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Drawable;
+import de.hgu.gsehen.model.ManualData;
+import de.hgu.gsehen.model.ManualWaterSupply;
 import de.hgu.gsehen.model.Plot;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -76,6 +78,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private Text soilStartLabel;
   private Text soilStartValueLabel;
   private Text cropStartLabel;
+  private StringConverter<LocalDate> convert;
 
   private TextField name;
   private TextField rootingZone;
@@ -146,7 +149,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     cropStartLabel.setFont(Font.font("Arial", 14));
     cropStart = new DatePicker();
     cropStart.setShowWeekNumbers(true);
-    StringConverter<LocalDate> convert = new StringConverter<LocalDate>() {
+    convert = new StringConverter<LocalDate>() {
       DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
       @Override
@@ -174,31 +177,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     soilStartLabel.setFont(Font.font("Arial", 14));
     soilStart = new DatePicker();
     soilStart.setShowWeekNumbers(true);
-
-    // Converter
-    StringConverter<LocalDate> converter = new StringConverter<LocalDate>() {
-      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
-      @Override
-      public String toString(LocalDate date) {
-        if (date != null) {
-          return dateFormatter.format(date);
-        } else {
-          return "";
-        }
-      }
-
-      @Override
-      public LocalDate fromString(String string) {
-        if (string != null && !string.isEmpty()) {
-          return LocalDate.parse(string, dateFormatter);
-        } else {
-          return null;
-        }
-      }
-    };
-
-    soilStart.setConverter(converter);
+    soilStart.setConverter(convert);
     soilStart.setPromptText("dd-MM-yyyy");
 
     soilStartValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
@@ -345,6 +324,143 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     play();
     // CENTER END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    Button watering = new Button(mainBundle.getString("plotview.watering"));
+    watering.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent e) {
+        pane.getChildren().clear();
+
+        Text nameLabel = new Text(plot.getName());
+        nameLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
+
+        pane.setTop(nameLabel);
+
+        // GridPane - Center Section
+        GridPane center = new GridPane();
+
+        // GridPane Configuration (Padding, Gaps, etc.)
+        center.setPadding(new Insets(20, 20, 20, 20));
+        center.setHgap(15);
+        center.setVgap(15);
+        center.setGridLinesVisible(false);
+
+        // Set Column and Row Constraints
+        ColumnConstraints column1 = new ColumnConstraints(200, 100, 300);
+        ColumnConstraints column2 = new ColumnConstraints(200, 100, 100);
+        column1.setHgrow(Priority.ALWAYS);
+        column2.setHgrow(Priority.ALWAYS);
+        RowConstraints rowEmpty = new RowConstraints();
+
+        // Add Constraints to Columns & Rows
+        center.getColumnConstraints().addAll(column1, column2);
+        center.getRowConstraints().add(0, rowEmpty);
+        center.getRowConstraints().add(1, rowEmpty);
+
+        Text dateLabel = new Text(mainBundle.getString("plotview.date"));
+        dateLabel.setFont(Font.font("Arial", 14));
+        DatePicker date = new DatePicker();
+        date.setShowWeekNumbers(true);
+        date.setConverter(convert);
+        date.setPromptText("dd-MM-yyyy");
+
+        Text irrigationLabel = new Text(mainBundle.getString("plotview.irrigation"));
+        irrigationLabel.setFont(Font.font("Arial", 14));
+        TextField irrigation = new TextField();
+        irrigation.textProperty().addListener(new ChangeListener<String>() {
+          @Override
+          public void changed(ObservableValue<? extends String> observable, String oldValue,
+              String newValue) {
+            if (newValue != null) {
+              if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+                irrigation.setText(oldValue);
+              }
+            }
+          }
+        });
+
+        Text precipitationLabel = new Text(mainBundle.getString("plotview.precipitation"));
+        precipitationLabel.setFont(Font.font("Arial", 14));
+        TextField precipitation = new TextField();
+        precipitation.textProperty().addListener(new ChangeListener<String>() {
+          @Override
+          public void changed(ObservableValue<? extends String> observable, String oldValue,
+              String newValue) {
+            if (newValue != null) {
+              if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+                precipitation.setText(oldValue);
+              }
+            }
+          }
+        });
+
+        // Set Nodes Vertical & Horizontal Alignment
+        GridPane.setHalignment(dateLabel, HPos.LEFT);
+        GridPane.setHalignment(date, HPos.LEFT);
+        GridPane.setHalignment(irrigationLabel, HPos.LEFT);
+        GridPane.setHalignment(irrigation, HPos.LEFT);
+        GridPane.setHalignment(precipitationLabel, HPos.LEFT);
+        GridPane.setHalignment(precipitation, HPos.LEFT);
+
+        // Set Row & Column Index for Nodes
+        GridPane.setConstraints(dateLabel, 0, 0);
+        GridPane.setConstraints(date, 1, 0);
+        GridPane.setConstraints(irrigationLabel, 0, 1);
+        GridPane.setConstraints(irrigation, 1, 1);
+        GridPane.setConstraints(precipitationLabel, 0, 2);
+        GridPane.setConstraints(precipitation, 1, 2);
+
+        center.getChildren().addAll(dateLabel, date, irrigationLabel, irrigation,
+            precipitationLabel, precipitation);
+
+        pane.setCenter(center);
+
+        Button back = new Button(mainBundle.getString("fieldview.back"));
+        back.setOnAction(new EventHandler<ActionEvent>() {
+          @Override
+          public void handle(ActionEvent arg0) {
+            pane.getChildren().clear();
+            gsehenInstance.sendFarmDataChanged(plot, null);
+          }
+        });
+
+        Button book = new Button(mainBundle.getString("plotview.book"));
+        book.setOnAction(new EventHandler<ActionEvent>() {
+          @Override
+          public void handle(ActionEvent arg0) {
+            LocalDate localDate = date.getValue();
+            Date wateringDate =
+                Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+            if (plot.getManualData() == null) {
+              ManualData manualData = new ManualData();
+              ManualWaterSupply manualWaterSupply = new ManualWaterSupply(wateringDate,
+                  Double.valueOf(irrigation.getText()), Double.valueOf(precipitation.getText()));
+              List<ManualWaterSupply> mwsList = new ArrayList<ManualWaterSupply>();
+              mwsList.add(manualWaterSupply);
+              manualData.setManualWaterSupply(mwsList);
+
+              plot.setManualData(manualData);
+            } else {
+              ManualData manualData = plot.getManualData();
+              for (ManualWaterSupply mws : manualData.getManualWaterSupply()) {
+                if (wateringDate == mws.getDate()) {
+                  mws.setIrrigation(Double.valueOf(irrigation.getText()));
+                  mws.setPrecipitation(Double.valueOf(precipitation.getText()));
+                }
+              }
+            }
+
+            pane.getChildren().clear();
+            gsehenInstance.sendFarmDataChanged(plot, null);
+          }
+        });
+
+        HBox buttonBox = new HBox();
+        buttonBox.getChildren().addAll(back, book);
+        pane.setBottom(buttonBox);
+      }
+    });
+
     Button save = new Button(mainBundle.getString("menu.file.save"));
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
@@ -379,7 +495,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         }
       }
     });
-    pane.setBottom(save);
+    VBox bottomBox = new VBox();
+    bottomBox.setPadding(new Insets(20, 20, 20, 20));
+    bottomBox.getChildren().addAll(watering, save);
+    pane.setBottom(bottomBox);
 
     treeTableView =
         (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
