@@ -11,6 +11,9 @@ import java.text.SimpleDateFormat;
 //import javax.persistence.EntityManager;
 //import javax.persistence.Persistence;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
+
 @SuppressWarnings({"checkstyle:abbreviationaswordinname","checkstyle:commentsindentation"})
 public class DBUtil {
 
@@ -80,26 +83,26 @@ public class DBUtil {
     return preparedStatement.executeQuery();
   }
 
-//  /**
-//   * Saves a JPA Entity.
-//   *
-//   * @param entity the entity to save
-//   */
-//  @SuppressWarnings("checkstyle:rightcurly")
-//  public static <T> T saveEntity(T entity) {
-//    EntityManager em = Persistence.createEntityManagerFactory("GSEHEN").createEntityManager();
-//    T merged = null;
-//    try {
-//      em.getTransaction().begin();
-//      merged = em.merge(entity);
-//      em.getTransaction().commit();
-//    }
-//    catch (Exception e) {
-//      em.getTransaction().rollback();
-//    }
-//    finally {
-//      em.close();
-//    }
-//    return merged;
-//  }
-}
+
+  /**
+    * Saves a JPA Entity.
+    * @param <T>
+    * @param entity the entity to save
+    */
+   @SuppressWarnings("checkstyle:rightcurly")
+   public static <T> void saveEntity(T entity) {
+     EntityManager em = Persistence.createEntityManagerFactory("GSEHEN").createEntityManager();
+     try {
+       em.getTransaction().begin();
+       em.persist(entity);
+       em.getTransaction().commit();
+     }
+     catch (Exception e) {
+       em.getTransaction().rollback();
+     }
+     finally {
+       em.close();
+     }
+   }
+ }
+

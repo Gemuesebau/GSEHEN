@@ -27,6 +27,7 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.util.DBUtil;
 import de.hgu.gsehen.util.Pair;
 
 import java.io.IOException;
@@ -64,7 +65,15 @@ import javafx.stage.WindowEvent;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ParameterExpression;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
@@ -79,7 +88,7 @@ public class Gsehen extends Application {
 
   protected static final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
       Locale.GERMAN);
-  
+
   private static final String MAIN_FXML = "main.fxml";
 
   public static final String MAIN_SPLIT_PANE_ID = "#mainSplitPane";
@@ -137,6 +146,11 @@ public class Gsehen extends Application {
     } catch (Exception e) {
       e.printStackTrace();
     }
+    try {
+      importCropData();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }   
     Application.launch(args);
   }
 
@@ -203,57 +217,85 @@ public class Gsehen extends Application {
   /**
    * PostgreSQL DB connection and storing in Persistence.
    */
-  public static void crop() {
-    Crop crops = new Crop();
+  public static void importCropData() {
     final String url = "jdbc:postgresql:"
         + "//hs-geisenheim.cwliowbz3tsc.eu-west-1.rds.amazonaws.com/standard";
     final String user = "GSEHEN_user";
     final String password = "Yp4NiYiHYfmcHs7Fe2CEmTpLv";
 
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
-    EntityManager em = emf.createEntityManager();
+    EntityManager em = Persistence.createEntityManagerFactory("GSEHEN").createEntityManager();
+    CriteriaBuilder builder = em.getCriteriaBuilder();
+    CriteriaQuery<Crop> criteria = builder.createQuery(Crop.class);
+    Root<Crop> cropRoot = criteria.from(Crop.class);
+    ParameterExpression<String> cropNameParameter = builder.parameter(String.class);
+    criteria.select(cropRoot).where(builder.equal(cropRoot.get("name"), cropNameParameter));
+
+    TypedQuery<Crop> query = em.createQuery(criteria);
 
     Connection connection = null;
     {
       try {
         connection = DriverManager.getConnection(url, user, password);
       } catch (SQLException e) {
-        System.out.println(e.getMessage());
+        LOGGER.log(Level.SEVERE, "Can't connect ", e);
       }
       try (PreparedStatement selectcrop = connection.prepareStatement("SELECT * FROM crop;")) {
         ResultSet rs = executeQuery(selectcrop);
-        
-//        em.getTransaction().begin();
-//        javax.persistence.Query query = em.createQuery("DELETE FROM Crop e ");
-//        int rowsDeleted = query.executeUpdate();
-//        em.getTransaction().commit();
+
         while (rs.next()) {
+          String cropName = rs.getString("cName");
 
-          em.getTransaction().begin();
+          query.setParameter(cropNameParameter, cropName);
 
-          crops = new Crop(rs.getString("cName"), rs.getBoolean("cActive"), rs.getDouble("cKC1"),
-              rs.getDouble("cKC2"), rs.getDouble("cKC3"), rs.getDouble("cKC4"),
-              rs.getInt("cPhase1"), rs.getInt("cPhase2"), rs.getInt("cPhase3"),
-              rs.getInt("cPhase4"), rs.getString("cBBCH1"), rs.getString("cBBCH2"),
-              rs.getString("cBBCH3"), rs.getString("cBBCH4"), rs.getInt("cRooting_Zone1"),
-              rs.getInt("cRooting_Zone2"), rs.getInt("cRooting_Zone3"), rs.getInt("cRooting_Zone4"),
-              rs.getString("cDescription"));
+          Crop crop;
+          try {
+            // Crop does already exist? => Update existing!
+            crop = query.getSingleResult();
+            LOGGER.log(Level.INFO, "Crop " + cropName + " existing!: " + crop, crop);
+          } catch (NoResultException | NonUniqueResultException e) {
+            // Crop does not exist yet? => Create new!
+            crop = new Crop();
+            LOGGER.log(Level.INFO, "Crop " + cropName + " new!: " + crop, crop);
+          }
 
-          em.merge(crops);
-          em.getTransaction().commit();
-
-        } 
-
-        
+          transferPropertiesFromPgToCrop(rs, crop);
+          DBUtil.saveEntity(crop);
+        }
       } catch (SQLException e) {
         System.out.println("no connection" + e.getLocalizedMessage());
       }
-
-      em.close();
     }
+
   }
 
-  
+  /**
+   * Fill Crop with Data.
+   * @param rs ResultSet from PostgreSQL.
+   * @param crop New Crop
+   * @throws SQLException
+   */
+  private static void transferPropertiesFromPgToCrop(ResultSet rs, Crop crop) throws SQLException {
+    crop.setName(rs.getString("cName"));
+    crop.setActive(rs.getBoolean("cActive"));
+    crop.setKc1(rs.getDouble("cKc1"));
+    crop.setKc2(rs.getDouble("cKc2"));
+    crop.setKc3(rs.getDouble("cKc3"));
+    crop.setKc4(rs.getDouble("cKc4"));
+    crop.setPhase1(rs.getInt("cPhase1"));
+    crop.setPhase2(rs.getInt("cPhase2"));
+    crop.setPhase3(rs.getInt("cPhase3"));
+    crop.setPhase4(rs.getInt("cPhase4"));
+    crop.setBbch1(rs.getString("cBbch1"));
+    crop.setBbch2(rs.getString("cBbch2"));
+    crop.setBbch3(rs.getString("cBbch3"));
+    crop.setBbch4(rs.getString("cBbch4"));
+    crop.setRootingZone1(rs.getInt("cRooting_Zone1"));
+    crop.setRootingZone2(rs.getInt("cRooting_Zone2"));
+    crop.setRootingZone3(rs.getInt("cRooting_Zone3"));
+    crop.setRootingZone4(rs.getInt("cRooting_Zone4"));
+    crop.setDescription(rs.getString("cDescription"));
+  }
+
   /**
    * Loads the user-created data (farms, fields, plots, ..)
    */
@@ -292,9 +334,6 @@ public class Gsehen extends Application {
     // }
   }
 
-  
-
-    
   /**
    * Saves the user-created data (farms, fields, plots, ..)
    */
@@ -597,7 +636,7 @@ public class Gsehen extends Application {
     return dialog.getResult();
   }
 
-  @SuppressWarnings({"checkstyle:javadocmethod"})
+  @SuppressWarnings({ "checkstyle:javadocmethod" })
   public static void updateDayData() {
     dayDataPersistence.recalculateDayData();
   }
