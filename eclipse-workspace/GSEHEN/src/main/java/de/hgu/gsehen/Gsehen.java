@@ -27,6 +27,7 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.model.WeatherDataSource;
 import de.hgu.gsehen.util.DBUtil;
 import de.hgu.gsehen.util.Pair;
 
@@ -106,6 +107,8 @@ public class Gsehen extends Application {
   private static Fields fields;
   private static Plots plots;
   private static Logs logs;
+  private static DayDataPersistence dayDataPersistence;
+
   private GsehenTreeTable treeTable;
 
   private List<Farm> farmsList = new ArrayList<>();
@@ -120,12 +123,8 @@ public class Gsehen extends Application {
 
   private static Gsehen instance;
 
-  private static DayDataPersistence dayDataPersistence;
-
   {
-
     instance = this;
-
   }
 
   public List<Farm> getDeletedFarms() {
@@ -185,6 +184,8 @@ public class Gsehen extends Application {
     fields = new Fields(this, (BorderPane) scene.lookup(FIELDS_VIEW_ID));
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
     logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
+
+    dayDataPersistence = new DayDataPersistence();
     new DayDataChangedListener();
 
     InputStream input = this.getClass()
@@ -272,7 +273,7 @@ public class Gsehen extends Application {
    * Fill Crop with Data.
    * @param rs ResultSet from PostgreSQL.
    * @param crop New Crop
-   * @throws SQLException
+   * @throws SQLException if setting a property fails
    */
   private static void transferPropertiesFromPgToCrop(ResultSet rs, Crop crop) throws SQLException {
     crop.setName(rs.getString("cName"));
@@ -502,10 +503,11 @@ public class Gsehen extends Application {
    * @param skipClass
    *          the event listener class to skip when iterating the listeners, or null
    */
-  public void sendDayDataChanged(DayData dayData,
+  public void sendDayDataChanged(DayData dayData, WeatherDataSource weatherDataSource,
       Class<? extends GsehenEventListener<DayDataChanged>> skipClass) {
     DayDataChanged event = new DayDataChanged();
     event.setDayData(dayData);
+    event.setWeatherDataSource(weatherDataSource);
     notifyEventListeners(event, skipClass);
   }
 
@@ -519,7 +521,7 @@ public class Gsehen extends Application {
    *          the event listener class to skip when iterating the listeners, or null
    */
   public void sendRecommendedActionChanged(Plot plot,
-      Class<? extends GsehenEventListener<DayDataChanged>> skipClass) {
+      Class<? extends GsehenEventListener<RecommendedActionChanged>> skipClass) {
     RecommendedActionChanged event = new RecommendedActionChanged();
     event.setPlot(plot);
     notifyEventListeners(event, skipClass);

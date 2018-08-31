@@ -5,6 +5,7 @@ import de.hgu.gsehen.model.WeatherDataSource;
 
 public class DayDataChanged extends GsehenEvent {
   private DayData dayData;
+  private WeatherDataSource weatherDataSource;
 
   public DayData getDayData() {
     return dayData;
@@ -14,6 +15,14 @@ public class DayDataChanged extends GsehenEvent {
     this.dayData = dayData;
   }
 
+  public WeatherDataSource getWeatherDataSource() {
+    return weatherDataSource;
+  }
+
+  public void setWeatherDataSource(WeatherDataSource weatherDataSource) {
+    this.weatherDataSource = weatherDataSource;
+  }
+
   /**
    * Determines whether this event originates from the given weather data source.
    *
@@ -21,8 +30,6 @@ public class DayDataChanged extends GsehenEvent {
    * @return true if this event originates from the given source, false otherwise
    */
   public boolean isFromWeatherDataSource(WeatherDataSource fieldWeatherDataSource) {
-    // FIXME add persistent property "weatherDataSource", and implement this correctly,
-    //  e.g. using a correct "equals" implementation!
-    return true;
+    return fieldWeatherDataSource != null && fieldWeatherDataSource.equals(weatherDataSource);
   }
 }

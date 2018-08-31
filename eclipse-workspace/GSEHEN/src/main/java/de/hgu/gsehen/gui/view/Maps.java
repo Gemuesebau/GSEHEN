@@ -49,7 +49,7 @@ public class Maps extends FarmDataController {
   public Drawable getDrawableWithEmptyPolygon(String typeKey)
       throws InstantiationException, IllegalAccessException {
     Drawable drawable = (Drawable) typesMap.get(typeKey).newInstance();
-    drawable.setNameAndPolygon("Unbenannt", new GeoPolygon()); // FIXME localize!
+    drawable.setNameAndPolygon("Unbenannt", new GeoPolygon()); // FIXME localize
     return drawable;
   }
 
