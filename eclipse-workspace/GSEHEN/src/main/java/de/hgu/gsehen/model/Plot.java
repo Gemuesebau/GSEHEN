@@ -32,6 +32,8 @@ public class Plot extends Drawable {
   @OneToOne(cascade = {CascadeType.ALL})
   private WaterBalance waterBalance;
   @OneToOne(cascade = {CascadeType.ALL})
+  private ManualData manualData;
+  @OneToOne(cascade = {CascadeType.ALL})
   private RecommendedAction recommendedAction;
   private Date soilStartDate;
   private Double soilStartValue;
@@ -215,7 +217,7 @@ public class Plot extends Drawable {
    * @param isActive Is the plot active and not archived
    */
   public Plot(String name, double area, GeoPolygon polygon, Location location, Double scalingFactor,
-      WeatherData weatherData, Double rootingZone, WaterBalance waterBalance,
+      WeatherData weatherData, Double rootingZone, WaterBalance waterBalance, ManualData manualData,
       RecommendedAction recommendedAction, Date soilStartDate, Double soilStartValue,
       Boolean calculationPaused, Crop crop, Date cropStart, Date cropEnd, Boolean isActive) {
     super();
@@ -227,6 +229,7 @@ public class Plot extends Drawable {
     this.weatherData = weatherData;
     this.rootingZone = rootingZone;
     this.waterBalance = waterBalance;
+    this.manualData = manualData;
     this.recommendedAction = recommendedAction;
     this.soilStartDate = soilStartDate;
     this.soilStartValue = soilStartValue;
@@ -240,5 +243,13 @@ public class Plot extends Drawable {
   @Override
   public String toString() {
     return " " + getClass().getSimpleName() + " '" + getName() + "'";
+  }
+
+  public ManualData getManualData() {
+    return manualData;
+  }
+
+  public void setManualData(ManualData manualData) {
+    this.manualData = manualData;
   }
 }

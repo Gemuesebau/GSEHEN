@@ -45,7 +45,7 @@ class DailyBalanceTest {
         "30% Bedeckung", "80%Bedeckunng", null, 10, 20, 30, null, "Toller Salat");
 
     try {
-      plot = new Plot("Feld2", 200, null, null, 1.0, null, 120.0, null, null,
+      plot = new Plot("Feld2", 200, null, null, 1.0, null, 120.0, null, null, null,
           soilStartDate.parse("2016-06-04"), 100.0, false, crop, cropStart.parse("2016-06-06"),
           cropEnd.parse("2016-09-06"), true);
     } catch (ParseException r) {
