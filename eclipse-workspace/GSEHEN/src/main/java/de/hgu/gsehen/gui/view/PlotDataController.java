@@ -215,8 +215,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
-    // Gsehen.crop(); TODO: Schauen, ob's läuft, sobald die Methode funktioniert.
-
     Text crop = new Text(mainBundle.getString("plotview.crop"));
     crop.setFont(Font.font("Arial", 14));
 
@@ -362,6 +360,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         date.setShowWeekNumbers(true);
         date.setConverter(convert);
         date.setPromptText("dd-MM-yyyy");
+        date.setValue(LocalDate.now());
 
         Text irrigationLabel = new Text(mainBundle.getString("plotview.irrigation"));
         irrigationLabel.setFont(Font.font("Arial", 14));
@@ -377,6 +376,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             }
           }
         });
+        irrigation.setText(String.valueOf(0.0));
 
         Text precipitationLabel = new Text(mainBundle.getString("plotview.precipitation"));
         precipitationLabel.setFont(Font.font("Arial", 14));
@@ -389,6 +389,29 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
               if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
                 precipitation.setText(oldValue);
               }
+            }
+          }
+        });
+        precipitation.setText(String.valueOf(0.0));
+
+        date.valueProperty().addListener((ov, oldValue, newValue) -> {
+          ManualData md = new ManualData();
+          boolean newData = true;
+
+          if (plot.getManualData() != null) {
+            md = plot.getManualData();
+          }
+
+          for (ManualWaterSupply mws : md.getManualWaterSupply()) {
+            Date wateringDate =
+                Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            if ((wateringDate.compareTo(mws.getDate()) == 0)) {
+              irrigation.setText(String.valueOf(mws.getIrrigation()));
+              precipitation.setText(String.valueOf(mws.getPrecipitation()));
+              newData = false;
+            } else if (newData) {
+              irrigation.setText(String.valueOf(0.0));
+              precipitation.setText(String.valueOf(0.0));
             }
           }
         });
@@ -484,7 +507,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             LocalDate cropDate = cropStart.getValue();
             Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             Date cropdate = Date.from(cropDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-
+            
             plot.setSoilStartDate(date);
             plot.setCropStart(cropdate);
             plot.setRootingZone(Double.valueOf(rootingZone.getText()));
@@ -528,8 +551,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
                   if (plot.getCrop() != null && cropList.size() != 0) {
                     cropChoiceBox.getSelectionModel().select(plot.getCrop());
-                  } else {
-                    cropChoiceBox.getSelectionModel().selectFirst();
                   }
 
                   Date date = plot.getSoilStartDate();
