@@ -112,6 +112,7 @@ public class Gsehen extends Application {
   private GsehenTreeTable treeTable;
 
   private List<Farm> farmsList = new ArrayList<>();
+
   private List<Farm> deletedFarms = new ArrayList<>();
 
   private Scene scene;
@@ -591,6 +592,10 @@ public class Gsehen extends Application {
 
   public List<Farm> getFarmsList() {
     return farmsList;
+  }
+  
+  public void setFarmsList(List<Farm> farmsList) {
+    this.farmsList = farmsList;
   }
 
   public Scene getScene() {
