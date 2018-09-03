@@ -10,6 +10,7 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.util.MessageUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +58,10 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
   private Gsehen gsehenInstance;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>> eventListeners =
+  private Map<
+      Class<? extends GsehenEvent>,
+      Class<? extends GsehenEventListener<? extends GsehenEvent>>
+       > eventListeners =
       new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
@@ -317,7 +321,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 Text actionLabel = new Text(mainBundle.getString("treetableview.watering"));
                 Text action;
                 if (plot.getSoilStartValue() != null && plot.getRecommendedAction() != null) {
-                  action = new Text(plot.getRecommendedAction().getRecommendation());
+                  action = new Text(getRecommendedActionText(plot));
                 } else {
                   action = new Text("/");
                 }
@@ -729,4 +733,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     gsehenInstance.sendFarmDataChanged(object, null);
   }
 
+  private String getRecommendedActionText(Plot plot) {
+    return MessageUtil.renderMessage(mainBundle,
+        plot.getRecommendedAction().getRecommendation().getMessagePropertyKey(),
+        3, index -> plot.getRecommendedAction().getParameterValue(index));
+  }
 }

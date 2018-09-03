@@ -1,10 +1,5 @@
 package de.hgu.gsehen.gsbalance;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Plot;
@@ -12,8 +7,14 @@ import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+
 public class TotalBalance {
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public static void determineCurrentRootingZone(DayData dayData, Plot plot) {
     Date today = dayData.getDate();
     Date cropStart = plot.getCropStart();
@@ -66,6 +67,7 @@ public class TotalBalance {
 
   }
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public static void calculateCurrentAvailableSoilWater(DayData dayData, SoilProfile soilProfile) {
     Integer currentRootingZone = dayData.getCurrentRootingZone();
     Double currentAvailableSoilWater = 0.0;
@@ -84,11 +86,7 @@ public class TotalBalance {
             * (soils.get(i).getAvailableWaterCapacity() / 100) / 1000;
         remaningRootingZone = Math.abs(rest.intValue());
       }
-
-
-
     }
-
     dayData.setCurrentAvailableSoilWater(currentAvailableSoilWater);
   }
 
@@ -148,8 +146,8 @@ public class TotalBalance {
   }
 
   /**
-   * Method to recommend an irrigation descision for a plot
-   * 
+   * Method to recommend an irrigation decision for a plot.
+   *
    * @param plot Plot in question
    */
   public static void recommendIrrigation(Plot plot) {
@@ -157,49 +155,34 @@ public class TotalBalance {
     DayData currentDay = plot.getWaterBalance().getDailyBalances()
         .get(plot.getWaterBalance().getDailyBalances().size() - 1);
     Double currentAvailableSoilWater = currentDay.getCurrentAvailableSoilWater();
-    Double currentTotalWaterBalance = currentDay.getCurrentTotalWaterBalance();
-    Double waterContentAim = currentAvailableSoilWater * 0.9;
-    Double waterContentToAim = waterContentAim - currentTotalWaterBalance;
+    Double waterContentToAim =
+        currentAvailableSoilWater * 0.9 - currentDay.getCurrentTotalWaterBalance();
     if (waterContentToAim > currentAvailableSoilWater) {
-      recommendedAction
-          .setRecommendation("The water balance exceedes the total available soil water \n "
-              + "- your plants are dead for sure \\u2620");// TODO:
+      recommendedAction.setRecommendation(RecommendedActionEnum.EXCESS);
       throw new UnsupportedOperationException(
-          "The water balance exceedes the total available soil water \n "
-              + "- your plants are dead for sure \\u2620");// TODO:
+          "The water balance exceeds the total available soil water\n"
+              + "- your plants are dead for sure \\u2620");
     } else {
       Double availableWater = currentAvailableSoilWater * 0.3 - waterContentToAim;
-
       recommendedAction.setAvailableWater(availableWater);
-      recommendedAction
-          .setAvailableWaterPercent((availableWater / (currentAvailableSoilWater * 0.3)) * 100);
-
-      Double projectedDaysToIrrigation = Math.floor(availableWater / currentDay.getEtc());
-
-      Boolean calculationPaused = plot.getCalculationPaused();
-      if (calculationPaused) {
-        recommendedAction.setRecommendation("Calculation is paused"); // TODO: Language
+      recommendedAction.setAvailableWaterPercent(
+          (availableWater / (currentAvailableSoilWater * 0.3)) * 100
+      );
+      if (plot.getCalculationPaused()) {
+        recommendedAction.setRecommendation(RecommendedActionEnum.PAUSE);
       } else {
         if (availableWater > 0) {
-
-          recommendedAction.setRecommendation(
-              "No action required. There are " + Math.round(availableWater * 100d) / 100d
-                  + " mm left. The next irrgation might be nesccecary in "
-                  + projectedDaysToIrrigation + "d"); // TODO: Language
+          recommendedAction.setRecommendation(RecommendedActionEnum.SOON);
+          recommendedAction.setAvailableWater(availableWater);
+          recommendedAction.setProjectedDaysToIrrigation(
+              (int)Math.floor(availableWater / currentDay.getEtc())
+          );
         } else {
-
-          recommendedAction.setRecommendation(
-              "Please irrigate " + Math.round(waterContentToAim * 100d) / 100d + "mm"); // TODO:
-          // Language
+          recommendedAction.setRecommendation(RecommendedActionEnum.IRRIGATION);
+          recommendedAction.setWaterContentToAim(waterContentToAim);
         }
-
       }
     }
-
     plot.setRecommendedAction(recommendedAction);
-
-
   }
-
-
 }
