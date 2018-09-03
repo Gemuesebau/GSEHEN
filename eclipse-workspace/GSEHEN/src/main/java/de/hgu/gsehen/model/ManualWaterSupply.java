@@ -19,10 +19,10 @@ public class ManualWaterSupply {
   public ManualWaterSupply() {}
 
   /**
-   * Constructor for ManualWaterSupply
+   * Constructor for ManualWaterSupply.
    * 
    * @param date Date of Manual action
-   * @param irrigation appplyed amount of water in mm
+   * @param irrigation applied amount of water in mm
    * @param precipitation amount of rainfall in mm
    */
   public ManualWaterSupply(Date date, Double irrigation, Double precipitation) {
@@ -55,6 +55,4 @@ public class ManualWaterSupply {
   public void setPrecipitation(Double precipitation) {
     this.precipitation = precipitation;
   }
-
-
 }

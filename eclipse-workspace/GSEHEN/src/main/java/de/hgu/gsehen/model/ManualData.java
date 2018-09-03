@@ -25,17 +25,11 @@ public class ManualData {
     this.manualWaterSupply = manualWaterSupply;
   }
 
-
-
   public List<ManualWaterSupply> getManualWaterSupply() {
     return manualWaterSupply;
   }
 
-
   public void setManualWaterSupply(List<ManualWaterSupply> manualWaterSupply) {
     this.manualWaterSupply = manualWaterSupply;
   }
-
 }
-
-
