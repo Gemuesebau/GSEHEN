@@ -31,7 +31,7 @@ public class Recommender {
             for (Field field : farm.getFields()) {
               for (Plot plot : field.getPlots()) {
                 final DayData eventDayData = event.getDayData();
-                final Date eventDayDataDate = eventDayData.getDate();
+                final Date eventDayDataDate = eventDayData == null ? null : eventDayData.getDate();
                 if (
                     event.isFromWeatherDataSource(field.getWeatherDataSource())
                     && DateUtil.between(
@@ -41,8 +41,8 @@ public class Recommender {
                     )
                 ) {
                   copyWeatherData(eventDayData, getCurrentDayData(plot, eventDayDataDate));
-                  performCalculations(field, plot);
                 }
+                performCalculations(field, plot);
               }
             }
           }

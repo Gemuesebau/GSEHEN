@@ -68,9 +68,7 @@ public class DayDataCalculation {
       }
       LOGGER.log(Level.INFO, "Weather data import from '" + weatherDataSource.getName() + "' was "
           + (dayData == null ? "NOT " : "") + "successful");
-      if (dayData != null) {
-        gsehenInstance.sendDayDataChanged(dayData, weatherDataSource, null);
-      }
+      gsehenInstance.sendDayDataChanged(dayData, weatherDataSource, null);
     }
   }
 
