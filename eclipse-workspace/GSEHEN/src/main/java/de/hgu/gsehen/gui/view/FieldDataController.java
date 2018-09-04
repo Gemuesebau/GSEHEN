@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.TreeMap;
 // import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -74,6 +75,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
   private ChoiceBox<WeatherDataSource> weatherData;
   private SoilProfile sp;
   private WeatherDataSource wds;
+  private WeatherDataSource wdsFile;
   private Button createSoil;
   private SoilProfile soilProfileItem;
   private Button save;
@@ -83,16 +85,17 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
   private int index;
   private VBox center;
   private Button saveField;
-  
+
   private TextField weatherDataName;
   private TextField interval;
   private TextField windspeed;
   private TextField dateFormat;
-  private TextField localeId;
+  private ChoiceBox<String> localeId;
   private TextField path;
   private TextField locationLat;
   private TextField locationLng;
   private TextField metersAbove;
+  private TreeMap<String, String> tm;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -588,12 +591,10 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     EntityManagerFactory weatherEmf = Persistence.createEntityManagerFactory("GSEHEN");
     EntityManager weatherEm = weatherEmf.createEntityManager();
     if (wdsList.isEmpty()) {
-      System.out.println("WDS-List empty");
       try {
         Session session = weatherEm.unwrap(Session.class);
         Query<WeatherDataSource> query = session.createQuery("from WeatherDataSource");
         wdsList = query.list();
-        System.out.println(wdsList.size());
       } finally {
         weatherEm.close();
       }
@@ -722,6 +723,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
                     if (field.getWeatherDataSource() != null
                         && wds.getName().equals(field.getWeatherDataSource().getName())) {
                       weatherData.getSelectionModel().select(wds);
+                      wdsFile = wds;
                     }
                   }
 
@@ -845,10 +847,18 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     Text dateFormatLabel = new Text(mainBundle.getString("fieldview.dateformat"));
     dateFormatLabel.setFont(Font.font("Arial", 14));
     dateFormat = new TextField();
+    Text dateFormatExample = new Text(mainBundle.getString("fieldview.dateformatexample"));
+    dateFormatExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
 
     Text localeIdLabel = new Text(mainBundle.getString("fieldview.localeid"));
     localeIdLabel.setFont(Font.font("Arial", 14));
-    localeId = new TextField();
+    localeId = new ChoiceBox<String>();
+
+    tm = new TreeMap<String, String>();
+    tm.put("GERMAN", "Deutsch (GERMAN)");
+    tm.put("ENGLISH", "Englisch (ENGLISH)");
+    tm.put("FRENCH", "Französisch (FRENCH)");
+    localeId.getItems().addAll(tm.values());
 
     Text filePathLabel = new Text(mainBundle.getString("fieldview.filepath"));
     filePathLabel.setFont(Font.font("Arial", 14));
@@ -868,7 +878,6 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     locationLatLabel.setFont(Font.font("Arial", 14));
     locationLat = new TextField();
     locationLat.textProperty().addListener(new ChangeListener<String>() {
-
       @Override
       public void changed(ObservableValue<? extends String> observable, String oldValue,
           String newValue) {
@@ -879,6 +888,8 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         }
       }
     });
+    Text locationLatExample = new Text(mainBundle.getString("fieldview.locationlatexample"));
+    locationLatExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
 
     Text locationLngLabel = new Text(mainBundle.getString("fieldview.locationlng"));
     locationLngLabel.setFont(Font.font("Arial", 14));
@@ -894,6 +905,8 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         }
       }
     });
+    Text locationLngExample = new Text(mainBundle.getString("fieldview.locationlngexample"));
+    locationLngExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
 
     Text metersAboveLabel = new Text(mainBundle.getString("fieldview.metersabove"));
     metersAboveLabel.setFont(Font.font("Arial", 14));
@@ -917,6 +930,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     GridPane.setHalignment(windspeed, HPos.LEFT);
     GridPane.setHalignment(dateFormatLabel, HPos.LEFT);
     GridPane.setHalignment(dateFormat, HPos.LEFT);
+    GridPane.setHalignment(dateFormatExample, HPos.LEFT);
     GridPane.setHalignment(localeIdLabel, HPos.LEFT);
     GridPane.setHalignment(localeId, HPos.LEFT);
     GridPane.setHalignment(filePathLabel, HPos.LEFT);
@@ -924,8 +938,10 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     GridPane.setHalignment(fileChooserButton, HPos.LEFT);
     GridPane.setHalignment(locationLatLabel, HPos.LEFT);
     GridPane.setHalignment(locationLat, HPos.LEFT);
+    GridPane.setHalignment(locationLatExample, HPos.LEFT);
     GridPane.setHalignment(locationLngLabel, HPos.LEFT);
     GridPane.setHalignment(locationLng, HPos.LEFT);
+    GridPane.setHalignment(locationLngExample, HPos.LEFT);
     GridPane.setHalignment(metersAboveLabel, HPos.LEFT);
     GridPane.setHalignment(metersAbove, HPos.LEFT);
 
@@ -936,6 +952,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     GridPane.setConstraints(windspeed, 1, 1);
     GridPane.setConstraints(dateFormatLabel, 0, 2);
     GridPane.setConstraints(dateFormat, 1, 2);
+    GridPane.setConstraints(dateFormatExample, 2, 2);
     GridPane.setConstraints(localeIdLabel, 0, 3);
     GridPane.setConstraints(localeId, 1, 3);
     GridPane.setConstraints(filePathLabel, 0, 4);
@@ -943,15 +960,17 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     GridPane.setConstraints(fileChooserButton, 2, 4);
     GridPane.setConstraints(locationLatLabel, 0, 5);
     GridPane.setConstraints(locationLat, 1, 5);
+    GridPane.setConstraints(locationLatExample, 2, 5);
     GridPane.setConstraints(locationLngLabel, 0, 6);
     GridPane.setConstraints(locationLng, 1, 6);
+    GridPane.setConstraints(locationLngExample, 2, 6);
     GridPane.setConstraints(metersAboveLabel, 0, 7);
     GridPane.setConstraints(metersAbove, 1, 7);
 
     center.getChildren().addAll(intervalLabel, interval, windspeedLabel, windspeed, dateFormatLabel,
-        dateFormat, localeIdLabel, localeId, filePathLabel, path, fileChooserButton,
-        locationLatLabel, locationLat, locationLngLabel, locationLng, metersAboveLabel,
-        metersAbove);
+        dateFormat, dateFormatExample, localeIdLabel, localeId, filePathLabel, path,
+        fileChooserButton, locationLatLabel, locationLat, locationLatExample, locationLngLabel,
+        locationLng, locationLngExample, metersAboveLabel, metersAbove);
 
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setContent(center);
@@ -972,22 +991,40 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
-        pane.getChildren().clear();
-        treeTableView.setVisible(true);
-        wds = new WeatherDataSource();
-        wds.setName(weatherDataName.getText());
-        wds.setMeasIntervalSeconds(Integer.valueOf(interval.getText()));
-        wds.setWindspeedMeasHeightMeters(Double.valueOf(windspeed.getText()));
-        wds.setDateFormatString(dateFormat.getText());
-        wds.setNumberLocaleId(localeId.getText());
-        wds.setDataFilePath(path.getText());
-        wds.setLocationLat(Double.valueOf(locationLat.getText()));
-        wds.setLocationLng(Double.valueOf(locationLng.getText()));
-        wds.setLocationMetersAboveSeaLevel(Double.valueOf(metersAbove.getText()));
+        if (!weatherDataName.getText().trim().isEmpty() && !interval.getText().trim().isEmpty()
+            && !windspeed.getText().trim().isEmpty() && !dateFormat.getText().trim().isEmpty()
+            && !localeId.getSelectionModel().isEmpty() && !path.getText().trim().isEmpty()
+            && !locationLat.getText().trim().isEmpty() && !locationLng.getText().trim().isEmpty()
+            && !metersAbove.getText().trim().isEmpty()) {
+          pane.getChildren().clear();
+          treeTableView.setVisible(true);
+          wds = new WeatherDataSource();
+          wds.setName(weatherDataName.getText());
+          wds.setMeasIntervalSeconds(Integer.valueOf(interval.getText()));
+          wds.setWindspeedMeasHeightMeters(Double.valueOf(windspeed.getText()));
+          wds.setDateFormatString(dateFormat.getText());
 
-        wdsList.add(wds);
-        pane.getChildren().clear();
-        gsehenInstance.sendFarmDataChanged(field, null);
+          for (String val : tm.values()) {
+            if (val.equals(localeId.getValue())) {
+              wds.setNumberLocaleId(getKeyFromValue(tm, val));
+            }
+          }
+
+          wds.setDataFilePath(path.getText());
+          wds.setLocationLat(Double.valueOf(locationLat.getText()));
+          wds.setLocationLng(Double.valueOf(locationLng.getText()));
+          wds.setLocationMetersAboveSeaLevel(Double.valueOf(metersAbove.getText()));
+
+          wdsList.add(wds);
+          pane.getChildren().clear();
+          gsehenInstance.sendFarmDataChanged(field, null);
+        } else {
+          Text error = new Text(mainBundle.getString("fieldview.error"));
+          error.setFont(Font.font("Verdana", 20));
+          error.setFill(Color.RED);
+          buttonBox.getChildren().clear();
+          buttonBox.getChildren().addAll(back, save, error);
+        }
       }
     });
 
@@ -1011,7 +1048,15 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
       windspeed.setText(String.valueOf(
           weatherData.getSelectionModel().getSelectedItem().getWindspeedMeasHeightMeters()));
       dateFormat.setText(weatherData.getSelectionModel().getSelectedItem().getDateFormatString());
-      localeId.setText(weatherData.getSelectionModel().getSelectedItem().getNumberLocaleId());
+
+      String val;
+      for (String key : tm.keySet()) {
+        if (key.equals(weatherData.getSelectionModel().getSelectedItem().getNumberLocaleId())) {
+          val = tm.get(key);
+          localeId.getSelectionModel().select(val);
+        }
+      }
+
       path.setText(weatherData.getSelectionModel().getSelectedItem().getDataFilePath());
       locationLat.setText(
           String.valueOf(weatherData.getSelectionModel().getSelectedItem().getLocationLat()));
@@ -1019,6 +1064,23 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           String.valueOf(weatherData.getSelectionModel().getSelectedItem().getLocationLng()));
       metersAbove.setText(String.valueOf(
           weatherData.getSelectionModel().getSelectedItem().getLocationMetersAboveSeaLevel()));
+      wdsList.remove(wdsFile);
     }
+  }
+
+  /**
+   * Returns the key based on a value.
+   * 
+   * @param tm - TreeMap.
+   * @param value - Given value.
+   * @return - The key to the value.
+   */
+  public String getKeyFromValue(TreeMap<String, String> tm, String value) {
+    for (String o : tm.keySet()) {
+      if (tm.get(o).equals(value)) {
+        return o;
+      }
+    }
+    return null;
   }
 }
