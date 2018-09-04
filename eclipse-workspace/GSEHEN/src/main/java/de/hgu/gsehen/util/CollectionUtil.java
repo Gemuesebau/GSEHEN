@@ -61,14 +61,14 @@ public class CollectionUtil {
    *
    * @param arraySize the desired array size
    * @param objectProducerFunction a function that produces the objects to
-   *   put at the respective array position each
+   *     put at the respective array position each
    * @return the array with objects at each position, according to the given
-   *   producer function
+   *     producer function
    */
-  public static Object fillObjectArray(int arraySize,
+  public static Object[] fillObjectArray(int arraySize,
       Function<Integer, Object> objectProducerFunction) {
     Object[] result = new Object[arraySize];
-    for (int i=0; i<result.length; i++) {
+    for (int i = 0; i < result.length; i++) {
       result[i] = objectProducerFunction.apply(i);
     }
     return result;

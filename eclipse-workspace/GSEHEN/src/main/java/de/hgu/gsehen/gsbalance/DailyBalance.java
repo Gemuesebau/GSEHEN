@@ -20,43 +20,57 @@ public class DailyBalance {
     Double kc2 = crop.getKc2();
     Double kc3 = crop.getKc3();
     Double kc4 = crop.getKc4();
+    Double soilKc = 0.3;
     Double currentKc = null;
     int phase1 = crop.getPhase1();
     Integer phase2 = crop.getPhase2();
     Integer phase3 = crop.getPhase3();
     Integer phase4 = crop.getPhase4();
-    if (today.compareTo(soilStart) >= 0 && today.compareTo(cropStart) < 0) {
-      currentKc = 0.3;
-    }
-    if (today.compareTo(cropStart) >= 0 && today.compareTo(cropEnd) <= 0) {
-      LocalDate localToday = today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      LocalDate localCropStart = cropStart.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      LocalDate localCropEnd = cropEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      if (localToday.compareTo(localCropStart.plusDays(phase1)) < 0
-          | (localToday.compareTo(localCropEnd) <= 0 && phase2 == null)) {
-        currentKc = kc1;
-      } else if (localToday.compareTo(localCropStart.plusDays(phase1 + phase2)) < 0
-          | (localToday.compareTo(localCropEnd) <= 0 && phase3 == null)) {
-        if (kc2 == null) {
-          throw new NullPointerException();
-        }
-        currentKc = kc2;
-      } else if (localToday.compareTo(localCropStart.plusDays(phase1 + phase2 + phase3)) < 0
-          | (localToday.compareTo(localCropEnd) <= 0 && phase4 == null)) {
-        if (kc3 == null) {
-          throw new NullPointerException();
-        }
-        currentKc = kc3;
-      } else if (localToday
-          .compareTo(localCropStart.plusDays(phase1 + phase2 + phase3 + phase4)) < 0
-          | localToday.compareTo(localCropEnd) <= 0) {
-        if (kc4 == null) {
-          throw new NullPointerException();
-        }
-        currentKc = kc4;
+
+    if (soilStart == null && cropStart == null) {
+      currentKc = 0.0;
+    } else if (cropStart == null && today.compareTo(soilStart) >= 0) {
+      currentKc = soilKc;
+    } else {
+      if (cropEnd == null) {
+        cropEnd = today;
       }
 
 
+      if (today.compareTo(soilStart) >= 0 && today.compareTo(cropStart) < 0) {
+        currentKc = soilKc;
+      }
+      if (today.compareTo(cropStart) >= 0 && today.compareTo(cropEnd) <= 0) {
+        LocalDate localToday = today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate localCropStart =
+            cropStart.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate localCropEnd = cropEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        if (localToday.compareTo(localCropStart.plusDays(phase1)) < 0
+            || (localToday.compareTo(localCropEnd) <= 0 && phase2 == null)) {
+          currentKc = kc1;
+        } else if (localToday.compareTo(localCropStart.plusDays(phase1 + phase2)) < 0
+            || (localToday.compareTo(localCropEnd) <= 0 && phase3 == null)) {
+          if (kc2 == null) {
+            throw new NullPointerException();
+          }
+          currentKc = kc2;
+        } else if (localToday.compareTo(localCropStart.plusDays(phase1 + phase2 + phase3)) < 0
+            || (localToday.compareTo(localCropEnd) <= 0 && phase4 == null)) {
+          if (kc3 == null) {
+            throw new NullPointerException();
+          }
+          currentKc = kc3;
+        } else if (localToday
+            .compareTo(localCropStart.plusDays(phase1 + phase2 + phase3 + phase4)) < 0
+            || localToday.compareTo(localCropEnd) <= 0) {
+          if (kc4 == null) {
+            throw new NullPointerException();
+          }
+          currentKc = kc4;
+        }
+
+
+      }
     }
     dayData.setCurrentKc(currentKc);
 

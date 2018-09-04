@@ -25,43 +25,55 @@ public class TotalBalance {
     Integer rootingZone2 = crop.getRootingZone2();
     Integer rootingZone3 = crop.getRootingZone3();
     Integer rootingZone4 = crop.getRootingZone4();
+    Integer soilZone = 10;
     Integer currentRootingZone = null;
     int phase1 = crop.getPhase1();
     Integer phase2 = crop.getPhase2();
     Integer phase3 = crop.getPhase3();
     Integer phase4 = crop.getPhase4();
-    if (today.compareTo(soilStart) >= 0 && today.compareTo(cropStart) < 0) {
-      currentRootingZone = 10;
-    }
-    if (today.compareTo(cropStart) >= 0 && today.compareTo(cropEnd) <= 0) {
-      LocalDate localToday = today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      LocalDate localCropStart = cropStart.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      LocalDate localCropEnd = cropEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      if (localToday.compareTo(localCropStart.plusDays(phase1)) < 0
-          | (localToday.compareTo(localCropEnd) <= 0 && phase2 == null)) {
-        currentRootingZone = rootingZone1;
-      } else if (localToday.compareTo(localCropStart.plusDays(phase1 + phase2)) < 0
-          | (localToday.compareTo(localCropEnd) <= 0 && phase3 == null)) {
-        if (rootingZone2 == null) {
-          throw new NullPointerException();
-        }
-        currentRootingZone = rootingZone2;
-      } else if (localToday.compareTo(localCropStart.plusDays(phase1 + phase2 + phase3)) < 0
-          | (localToday.compareTo(localCropEnd) <= 0 && phase4 == null)) {
-        if (rootingZone3 == null) {
-          throw new NullPointerException();
-        }
-        currentRootingZone = rootingZone3;
-      } else if (localToday
-          .compareTo(localCropStart.plusDays(phase1 + phase2 + phase3 + phase4)) < 0
-          | localToday.compareTo(localCropEnd) <= 0) {
-        if (rootingZone4 == null) {
-          throw new NullPointerException();
-        }
-        currentRootingZone = rootingZone4;
+
+    if (soilStart == null && cropStart == null) {
+      currentRootingZone = 0;
+    } else if (cropStart == null && today.compareTo(soilStart) >= 0) {
+      currentRootingZone = soilZone;
+    } else {
+      if (cropEnd == null) {
+        cropEnd = today;
       }
+      if (today.compareTo(soilStart) >= 0 && today.compareTo(cropStart) < 0) {
+        currentRootingZone = soilZone;
+      }
+      if (today.compareTo(cropStart) >= 0 && today.compareTo(cropEnd) <= 0) {
+        LocalDate localToday = today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate localCropStart =
+            cropStart.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate localCropEnd = cropEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        if (localToday.compareTo(localCropStart.plusDays(phase1)) < 0
+            || (localToday.compareTo(localCropEnd) <= 0 && phase2 == null)) {
+          currentRootingZone = rootingZone1;
+        } else if (localToday.compareTo(localCropStart.plusDays(phase1 + phase2)) < 0
+            || (localToday.compareTo(localCropEnd) <= 0 && phase3 == null)) {
+          if (rootingZone2 == null) {
+            throw new NullPointerException();
+          }
+          currentRootingZone = rootingZone2;
+        } else if (localToday.compareTo(localCropStart.plusDays(phase1 + phase2 + phase3)) < 0
+            || (localToday.compareTo(localCropEnd) <= 0 && phase4 == null)) {
+          if (rootingZone3 == null) {
+            throw new NullPointerException();
+          }
+          currentRootingZone = rootingZone3;
+        } else if (localToday
+            .compareTo(localCropStart.plusDays(phase1 + phase2 + phase3 + phase4)) < 0
+            || localToday.compareTo(localCropEnd) <= 0) {
+          if (rootingZone4 == null) {
+            throw new NullPointerException();
+          }
+          currentRootingZone = rootingZone4;
+        }
 
 
+      }
     }
     dayData.setCurrentRootingZone(currentRootingZone);
 
@@ -101,6 +113,9 @@ public class TotalBalance {
     int daysPause = 2;
     Double startValue;
     List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();
+    if (dailyBalances.isEmpty()) {
+      return;
+    }
     if (plot.getSoilStartValue() != null) {
       startValue = plot.getSoilStartValue();
     } else {
@@ -152,34 +167,38 @@ public class TotalBalance {
    */
   public static void recommendIrrigation(Plot plot) {
     RecommendedAction recommendedAction = new RecommendedAction(null, null, null, null);
-    DayData currentDay = plot.getWaterBalance().getDailyBalances()
-        .get(plot.getWaterBalance().getDailyBalances().size() - 1);
-    Double currentAvailableSoilWater = currentDay.getCurrentAvailableSoilWater();
-    Double waterContentToAim =
-        currentAvailableSoilWater * 0.9 - currentDay.getCurrentTotalWaterBalance();
-    if (waterContentToAim > currentAvailableSoilWater) {
-      recommendedAction.setRecommendation(RecommendedActionEnum.EXCESS);
-      throw new UnsupportedOperationException(
-          "The water balance exceeds the total available soil water\n"
-              + "- your plants are dead for sure \\u2620");
+    if (plot.getWaterBalance().getDailyBalances().isEmpty()) {
+      recommendedAction.setRecommendation(RecommendedActionEnum.NO_DATA);
     } else {
-      Double availableWater = currentAvailableSoilWater * 0.3 - waterContentToAim;
-      recommendedAction.setAvailableWater(availableWater);
-      recommendedAction.setAvailableWaterPercent(
-          (availableWater / (currentAvailableSoilWater * 0.3)) * 100
-      );
-      if (plot.getCalculationPaused()) {
-        recommendedAction.setRecommendation(RecommendedActionEnum.PAUSE);
+      DayData currentDay = plot.getWaterBalance().getDailyBalances()
+          .get(plot.getWaterBalance().getDailyBalances().size() - 1);
+      Double currentAvailableSoilWater = currentDay.getCurrentAvailableSoilWater();
+      Double waterContentToAim =
+          currentAvailableSoilWater * 0.9 - currentDay.getCurrentTotalWaterBalance();
+      if (waterContentToAim > currentAvailableSoilWater) {
+        recommendedAction.setRecommendation(RecommendedActionEnum.EXCESS);
+        throw new UnsupportedOperationException(
+            "The water balance exceeds the total available soil water\n"
+                + "- your plants are dead for sure \\u2620");
       } else {
-        if (availableWater > 0) {
-          recommendedAction.setRecommendation(RecommendedActionEnum.SOON);
-          recommendedAction.setAvailableWater(availableWater);
-          recommendedAction.setProjectedDaysToIrrigation(
-              (int)Math.floor(availableWater / currentDay.getEtc())
-          );
+        Double availableWater = currentAvailableSoilWater * 0.3 - waterContentToAim;
+        recommendedAction.setAvailableWater(availableWater);
+        recommendedAction.setAvailableWaterPercent(
+            (availableWater / (currentAvailableSoilWater * 0.3)) * 100
+        );
+        if (plot.getCalculationPaused()) {
+          recommendedAction.setRecommendation(RecommendedActionEnum.PAUSE);
         } else {
-          recommendedAction.setRecommendation(RecommendedActionEnum.IRRIGATION);
-          recommendedAction.setWaterContentToAim(waterContentToAim);
+          if (availableWater > 0) {
+            recommendedAction.setRecommendation(RecommendedActionEnum.SOON);
+            recommendedAction.setAvailableWater(availableWater);
+            recommendedAction.setProjectedDaysToIrrigation(
+                (int)Math.floor(availableWater / currentDay.getEtc())
+            );
+          } else {
+            recommendedAction.setRecommendation(RecommendedActionEnum.IRRIGATION);
+            recommendedAction.setWaterContentToAim(waterContentToAim);
+          }
         }
       }
     }

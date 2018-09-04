@@ -107,7 +107,7 @@ public class Gsehen extends Application {
   private static Fields fields;
   private static Plots plots;
   private static Logs logs;
-  private static DayDataCalculation dayDataPersistence;
+  private static DayDataCalculation dayDataCalculation;
 
   private GsehenTreeTable treeTable;
 
@@ -188,7 +188,7 @@ public class Gsehen extends Application {
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
     logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
 
-    dayDataPersistence = new DayDataCalculation();
+    dayDataCalculation = new DayDataCalculation();
     new Recommender();
 
     InputStream input = this.getClass()
@@ -676,6 +676,6 @@ public class Gsehen extends Application {
 
   @SuppressWarnings({ "checkstyle:javadocmethod" })
   public static void updateDayData() {
-    dayDataPersistence.recalculateDayData();
+    dayDataCalculation.recalculateDayData();
   }
 }
