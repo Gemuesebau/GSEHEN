@@ -10,8 +10,10 @@ import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.ManualWaterSupply;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.model.WaterBalance;
 import de.hgu.gsehen.util.CollectionUtil;
 import de.hgu.gsehen.util.DateUtil;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -50,6 +52,15 @@ public class Recommender {
   }
 
   private DayData getCurrentDayData(Plot plot, final Date eventDayDataDate) {
+    if (plot == null) {
+      throw new IllegalArgumentException("No plot given for day data calculation!"); 
+    }
+    if (plot.getWaterBalance() == null) {
+      plot.setWaterBalance(new WaterBalance());
+    }
+    if (plot.getWaterBalance().getDailyBalances() == null) {
+      plot.getWaterBalance().setDailyBalances(new ArrayList<DayData>());
+    }
     final List<DayData> plotDayDataList = plot.getWaterBalance().getDailyBalances();
     DayData plotCurrentDayData = null;
     for (DayData plotDayData : plotDayDataList) {
