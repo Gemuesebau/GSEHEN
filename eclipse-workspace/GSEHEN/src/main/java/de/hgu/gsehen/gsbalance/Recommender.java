@@ -55,12 +55,7 @@ public class Recommender {
     if (plot == null) {
       throw new IllegalArgumentException("No plot given for day data calculation!"); 
     }
-    if (plot.getWaterBalance() == null) {
-      plot.setWaterBalance(new WaterBalance());
-    }
-    if (plot.getWaterBalance().getDailyBalances() == null) {
-      plot.getWaterBalance().setDailyBalances(new ArrayList<DayData>());
-    }
+    guaranteeDailyBalances(plot);
     final List<DayData> plotDayDataList = plot.getWaterBalance().getDailyBalances();
     DayData plotCurrentDayData = null;
     for (DayData plotDayData : plotDayDataList) {
@@ -75,6 +70,15 @@ public class Recommender {
       plotDayDataList.add(plotCurrentDayData);
     }
     return plotCurrentDayData;
+  }
+
+  private void guaranteeDailyBalances(Plot plot) {
+    if (plot.getWaterBalance() == null) {
+      plot.setWaterBalance(new WaterBalance());
+    }
+    if (plot.getWaterBalance().getDailyBalances() == null) {
+      plot.getWaterBalance().setDailyBalances(new ArrayList<DayData>());
+    }
   }
 
   private void applyManualData(DayData dayData, Plot plot) {
@@ -100,6 +104,10 @@ public class Recommender {
   }
 
   private void performCalculations(Field field, Plot plot) {
+    if (field == null || plot == null) {
+      throw new IllegalArgumentException("No field or plot given for day data calculation!"); 
+    }
+    guaranteeDailyBalances(plot);
     for (DayData dayData : plot.getWaterBalance().getDailyBalances()) {
       applyManualData(dayData, plot);
       EnvCalculator.calculateEt0(dayData, field.getWeatherDataSource().getLocation());
