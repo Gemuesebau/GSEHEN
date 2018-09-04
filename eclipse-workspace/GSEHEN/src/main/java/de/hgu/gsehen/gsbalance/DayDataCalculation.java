@@ -20,7 +20,7 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
-public class DayDataPersistence /*implements GsehenEventListener<RecommendedActionChanged>*/ {
+public class DayDataCalculation {
   private Gsehen gsehenInstance;
 
   {
@@ -28,7 +28,7 @@ public class DayDataPersistence /*implements GsehenEventListener<RecommendedActi
     //gsehenInstance.registerForEvent(RecommendedActionChanged.class, this);
   }
 
-  private static final Logger LOGGER = Logger.getLogger(DayDataPersistence.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(DayDataCalculation.class.getName());
   private static final String WEATHER_DATA_JS = "/de/hgu/gsehen/js/weatherData.js";
 
   public static InputStreamReader getReaderForUtf8(String resourceName) throws IOException {

@@ -8,10 +8,13 @@ import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.ManualDataChanged;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
+import de.hgu.gsehen.model.ManualData;
 import de.hgu.gsehen.model.ManualWaterSupply;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.model.WaterBalance;
 import de.hgu.gsehen.util.CollectionUtil;
 import de.hgu.gsehen.util.DateUtil;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -50,6 +53,10 @@ public class Recommender {
   }
 
   private DayData getCurrentDayData(Plot plot, final Date eventDayDataDate) {
+    if (plot == null) {
+      throw new IllegalArgumentException("No plot given for day data calculation!"); 
+    }
+    guaranteeDailyBalances(plot);
     final List<DayData> plotDayDataList = plot.getWaterBalance().getDailyBalances();
     DayData plotCurrentDayData = null;
     for (DayData plotDayData : plotDayDataList) {
@@ -67,6 +74,10 @@ public class Recommender {
   }
 
   private void applyManualData(DayData dayData, Plot plot) {
+    if (plot == null) {
+      throw new IllegalArgumentException("No plot given for manual data processing!"); 
+    }
+    guaranteeManualData(plot);
     final Date date = dayData.getDate();
     final List<ManualWaterSupply> manualList = plot.getManualData().getManualWaterSupply();
     double irrigation = 0.0;
@@ -89,6 +100,10 @@ public class Recommender {
   }
 
   private void performCalculations(Field field, Plot plot) {
+    if (field == null || plot == null) {
+      throw new IllegalArgumentException("No field or plot given for day data calculation!"); 
+    }
+    guaranteeDailyBalances(plot);
     for (DayData dayData : plot.getWaterBalance().getDailyBalances()) {
       applyManualData(dayData, plot);
       EnvCalculator.calculateEt0(dayData, field.getWeatherDataSource().getLocation());
@@ -113,5 +128,23 @@ public class Recommender {
     plotCurrentDayData.setGlobalRad(eventDayData.getGlobalRad());
     plotCurrentDayData.setPrecipitation(eventDayData.getPrecipitation());
     plotCurrentDayData.setWindspeed2m(eventDayData.getWindspeed2m());
+  }
+
+  private void guaranteeDailyBalances(Plot plot) {
+    if (plot.getWaterBalance() == null) {
+      plot.setWaterBalance(new WaterBalance());
+    }
+    if (plot.getWaterBalance().getDailyBalances() == null) {
+      plot.getWaterBalance().setDailyBalances(new ArrayList<DayData>());
+    }
+  }
+
+  private void guaranteeManualData(Plot plot) {
+    if (plot.getManualData() == null) {
+      plot.setManualData(new ManualData());
+    }
+    if (plot.getManualData().getManualWaterSupply() == null) {
+      plot.getManualData().setManualWaterSupply(new ArrayList<ManualWaterSupply>());
+    }
   }
 }
