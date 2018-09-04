@@ -12,7 +12,7 @@ import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.GsehenViewEvent;
 import de.hgu.gsehen.event.ManualDataChanged;
 import de.hgu.gsehen.event.RecommendedActionChanged;
-import de.hgu.gsehen.gsbalance.DayDataPersistence;
+import de.hgu.gsehen.gsbalance.DayDataCalculation;
 import de.hgu.gsehen.gsbalance.Recommender;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenTreeTable;
@@ -107,7 +107,7 @@ public class Gsehen extends Application {
   private static Fields fields;
   private static Plots plots;
   private static Logs logs;
-  private static DayDataPersistence dayDataPersistence;
+  private static DayDataCalculation dayDataPersistence;
 
   private GsehenTreeTable treeTable;
 
@@ -188,7 +188,7 @@ public class Gsehen extends Application {
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
     logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
 
-    dayDataPersistence = new DayDataPersistence();
+    dayDataPersistence = new DayDataCalculation();
     new Recommender();
 
     InputStream input = this.getClass()
