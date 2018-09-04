@@ -10,6 +10,8 @@ import de.hgu.gsehen.model.Plot;
 
 
 public class DailyBalance {
+
+
   public static void determineCurrentKc(DayData dayData, Plot plot) {
     Date today = dayData.getDate();
     Date cropStart = plot.getCropStart();
@@ -79,9 +81,13 @@ public class DailyBalance {
 
 
   public static void calculateEtc(DayData dayData, Plot plot) {
+    // TODO: Add logging event
     Double et0 = dayData.getEt0();
     Double kc = dayData.getCurrentKc();
     Double faktor = plot.getScalingFactor();
+    if (faktor == null) {
+      faktor = 1.0;
+    }
     dayData.setEtc(et0 * kc * faktor);
   }
 
@@ -90,11 +96,11 @@ public class DailyBalance {
   public static void calculateDailyBalance(DayData dayData) throws IllegalStateException {
     Double precipitation = dayData.getPrecipitation();
     if (precipitation == null) {
-      throw new IllegalStateException("Precipitation has net been provided");
+      throw new IllegalStateException("Precipitation has net been provided"); // logging
     }
     Double etc = dayData.getEtc();
     if (etc == null) {
-      throw new IllegalStateException("Etc has not been calculated");
+      throw new IllegalStateException("Etc has not been calculated"); // logging
     }
     Double irrigation = dayData.getIrrigation();
     dayData.setDailyBalance(etc - precipitation - irrigation);
