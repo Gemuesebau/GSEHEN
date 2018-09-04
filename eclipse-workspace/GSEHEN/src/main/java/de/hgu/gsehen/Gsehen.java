@@ -10,9 +10,10 @@ import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.GsehenViewEvent;
+import de.hgu.gsehen.event.ManualDataChanged;
 import de.hgu.gsehen.event.RecommendedActionChanged;
-import de.hgu.gsehen.gsbalance.DayDataChangedListener;
-import de.hgu.gsehen.gsbalance.DayDataPersistence;
+import de.hgu.gsehen.gsbalance.DayDataCalculation;
+import de.hgu.gsehen.gsbalance.Recommender;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
@@ -41,6 +42,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -63,7 +65,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
@@ -74,7 +75,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
@@ -107,11 +107,12 @@ public class Gsehen extends Application {
   private static Fields fields;
   private static Plots plots;
   private static Logs logs;
-  private static DayDataPersistence dayDataPersistence;
+  private static DayDataCalculation dayDataCalculation;
 
   private GsehenTreeTable treeTable;
 
   private List<Farm> farmsList = new ArrayList<>();
+
   private List<Farm> deletedFarms = new ArrayList<>();
 
   private Scene scene;
@@ -187,8 +188,8 @@ public class Gsehen extends Application {
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
     logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
 
-    dayDataPersistence = new DayDataPersistence();
-    new DayDataChangedListener();
+    dayDataCalculation = new DayDataCalculation();
+    new Recommender();
 
     InputStream input = this.getClass()
         .getResourceAsStream("/de/hgu/gsehen/images/Logo_UniGeisenheim.png");
@@ -386,8 +387,8 @@ public class Gsehen extends Application {
     }
   }
 
-  public void registerForEvent(Class<? extends GsehenEvent> eventClass,
-      GsehenEventListener<?> eventListener) {
+  public <T extends GsehenEvent> void registerForEvent(Class<T> eventClass,
+      GsehenEventListener<T> eventListener) {
     addToMappedList(eventListeners, eventClass, eventListener);
   }
 
@@ -521,6 +522,28 @@ public class Gsehen extends Application {
   }
 
   /**
+   * Sends a "ManualDataChanged" event to all listeners registered for that kind of event,
+   * except the listeners that belong to the given "skipClass".
+   *
+   * @param field
+   *          the field that is the parent of the given plot
+   * @param plot
+   *          the plot where the manual data has changed
+   * @param skipClass
+   *          the event listener class to skip when iterating the listeners, or null
+   * @param date
+   *          the date (day only) to which the manual data change applies
+   */
+  public void sendManualDataChanged(Field field, Plot plot, Date date,
+      Class<? extends GsehenEventListener<DayDataChanged>> skipClass) {
+    ManualDataChanged event = new ManualDataChanged();
+    event.setField(field);
+    event.setPlot(plot);
+    event.setDate(date);
+    notifyEventListeners(event, skipClass);
+  }
+
+  /**
    * Sends a "RecommendedActionChanged" event to all listeners registered for that kind of event,
    * except the listeners that belong to the given "skipClass".
    *
@@ -592,6 +615,10 @@ public class Gsehen extends Application {
   public List<Farm> getFarmsList() {
     return farmsList;
   }
+  
+  public void setFarmsList(List<Farm> farmsList) {
+    this.farmsList = farmsList;
+  }
 
   public Scene getScene() {
     return scene;
@@ -649,6 +676,6 @@ public class Gsehen extends Application {
 
   @SuppressWarnings({ "checkstyle:javadocmethod" })
   public static void updateDayData() {
-    dayDataPersistence.recalculateDayData();
+    dayDataCalculation.recalculateDayData();
   }
 }

@@ -18,15 +18,24 @@ public class DateUtil {
     return truncToDayUsingCalendar(Calendar.getInstance(), date);
   }
 
+  /**
+   * Checks whether the given date is between the given borders.
+   * If "start" is null, then the lower bound isn't checked,
+   * and likewise, if "end" is null, then the upper bound isn't checked.
+   *
+   * @param date an arbitrary date
+   * @param start the lower date bound
+   * @param end the upper date bound
+   * @return true if the given date is between "start" and "end"
+   */
   public static boolean between(Date date, Date start, Date end) {
     if (date == null || (start == null && end == null)) {
       return false;
     }
     return (
       start == null || start.getTime() <= date.getTime()
-    )
-    && (
+      ) && (
       end == null || end.getTime() >= date.getTime()
-    );
+      );
   }
 }

@@ -10,6 +10,7 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.util.MessageUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,8 +58,11 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
   private Gsehen gsehenInstance;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends 
-      GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
+  private Map<
+      Class<? extends GsehenEvent>,
+      Class<? extends GsehenEventListener<? extends GsehenEvent>>
+       > eventListeners =
+      new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -105,7 +109,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private static final String DETAIL_BORDER_PANE_ID = "#detailBorderPane";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
-  private List<Farm> newFarmsList;
   private Farm farm;
   private Timeline scrolltimeline = new Timeline();
   private double scrollDirection = 0;
@@ -318,7 +321,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 Text actionLabel = new Text(mainBundle.getString("treetableview.watering"));
                 Text action;
                 if (plot.getSoilStartValue() != null && plot.getRecommendedAction() != null) {
-                  action = new Text(plot.getRecommendedAction().getRecommendation());
+                  action = new Text(getRecommendedActionText(plot));
                 } else {
                   action = new Text("/");
                 }
@@ -439,35 +442,17 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
           LOGGER.info(item + " stacked on " + getTarget(row));
 
-          newFarmsList = new ArrayList<>();
-
-          String farmName;
-          GeoPolygon farmGeo;
-
-          String fieldName;
-          GeoPolygon fieldGeo;
-          Field field;
-
-          String plotName;
-          GeoPolygon plotGeo;
-          Plot plot;
+          Field field = null;
+          Plot plot = null;
 
           // Updates the farmList
-
-
           for (int i = 0; i < farmTreeView.getRoot().getChildren().size(); i++) {
-            farmName = (String) farmTreeView.getRoot().getChildren().get(i).getValue().getName();
-            farmGeo = farmTreeView.getRoot().getChildren().get(i).getValue().getPolygon();
-            farm = new Farm(farmName, farmGeo);
+            farm = (Farm) farmTreeView.getRoot().getChildren().get(i).getValue();
             object = farm;
             for (int j = 0; j < farmTreeView.getRoot().getChildren().get(i).getChildren()
                 .size(); j++) {
-              fieldName = (String) farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
-                  .getValue().getName();
-              fieldGeo = farmTreeView.getRoot().getChildren().get(i).getChildren().get(j).getValue()
-                  .getPolygon();
-
-              field = new Field(fieldName, fieldGeo);
+              field = (Field) farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
+                  .getValue();
               object = field;
 
               if (j == 0) {
@@ -480,11 +465,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
               for (int k = 0; k < farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
                   .getChildren().size(); k++) {
-                plotName = (String) farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
-                    .getChildren().get(k).getValue().getName();
-                plotGeo = farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
-                    .getChildren().get(k).getValue().getPolygon();
-                plot = new Plot(plotName, plotGeo);
+                plot = (Plot) farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
+                    .getChildren().get(k).getValue();
                 object = plot;
                 if (k == 0) {
                   field.setPlots(plot);
@@ -494,12 +476,15 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 }
               }
             }
-            newFarmsList.add(farm);
           }
-          farmsList.clear();
-          farmsList.addAll(newFarmsList);
+          for (Farm farm : farmsList) {
+            if (farm.getName().equals("Neue Felder")) {
+              farmsList.remove(farm);
+              gsehenInstance.setFarmsList(farmsList);
+              fillTreeView();
+            }
+          }
           gsehenInstance.sendFarmDataChanged(object, null);
-
         } else {
           LOGGER.info(itemType + " can't be stack on " + destinationType);
         }
@@ -748,4 +733,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     gsehenInstance.sendFarmDataChanged(object, null);
   }
 
+  private String getRecommendedActionText(Plot plot) {
+    return MessageUtil.renderMessage(mainBundle,
+        plot.getRecommendedAction().getRecommendation().getMessagePropertyKey(),
+        3, index -> plot.getRecommendedAction().getParameterValue(index));
+  }
 }

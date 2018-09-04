@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
 
 public class CollectionUtil {
 
@@ -39,6 +40,12 @@ public class CollectionUtil {
     return result;
   }
 
+  /**
+   * Returns the first non-null object in the given array.
+   *
+   * @param objects an arbitrary number of objects
+   * @return the first of the given objects that is not null
+   */
   public static <T> T nvl(@SuppressWarnings("unchecked") T... objects) {
     for (T obj : objects) {
       if (obj != null) {
@@ -46,5 +53,24 @@ public class CollectionUtil {
       }
     }
     return null;
+  }
+
+  /**
+   * Builds an object array of the given size, using the given function as a
+   * producer for the objects put into the array at the respective positions.
+   *
+   * @param arraySize the desired array size
+   * @param objectProducerFunction a function that produces the objects to
+   *   put at the respective array position each
+   * @return the array with objects at each position, according to the given
+   *   producer function
+   */
+  public static Object fillObjectArray(int arraySize,
+      Function<Integer, Object> objectProducerFunction) {
+    Object[] result = new Object[arraySize];
+    for (int i=0; i<result.length; i++) {
+      result[i] = objectProducerFunction.apply(i);
+    }
+    return result;
   }
 }

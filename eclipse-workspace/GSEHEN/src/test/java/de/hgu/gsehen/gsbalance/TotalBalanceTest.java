@@ -192,45 +192,44 @@ class TotalBalanceTest {
   @Test
   void testCalculateTotalWaterBalanceAndrecommendIrrigation() throws ParseException {
     onCreate(1);
-    calcualteGS();
+    calculateGs();
     for (DayData dates : plot.getWaterBalance().getDailyBalances()) {
       System.out.println(dates.getCurrentTotalWaterBalance() + " " + dates.getDailyBalance());
     }
 
     onCreate(2);
-    calcualteGS();
+    calculateGs();
     for (DayData dates : plot.getWaterBalance().getDailyBalances()) {
       System.out.println(dates.getCurrentTotalWaterBalance() + " " + dates.getDailyBalance());
     }
 
     onCreate(3);
-    calcualteGS();
+    calculateGs();
     for (DayData dates : plot.getWaterBalance().getDailyBalances()) {
       System.out.println(dates.getCurrentTotalWaterBalance() + " " + dates.getDailyBalance());
     }
 
     onCreate(4);
-    calcualteGS();
+    calculateGs();
 
     for (DayData dates : plot.getWaterBalance().getDailyBalances()) {
       System.out.println(dates.getCurrentTotalWaterBalance() + " " + dates.getDailyBalance());
     }
     onCreate(5);
-    calcualteGS();
+    calculateGs();
 
     for (DayData dates : plot.getWaterBalance().getDailyBalances()) {
       System.out.println(dates.getCurrentTotalWaterBalance() + " " + dates.getDailyBalance());
     }
     onCreate(5);
     plot.getWaterBalance().getDailyBalances().get(0).setPrecipitation(32.0);
-    calcualteGS();
+    calculateGs();
     for (DayData dates : plot.getWaterBalance().getDailyBalances()) {
       System.out.println(dates.getCurrentTotalWaterBalance() + " " + dates.getDailyBalance());
     }
   }
 
-
-  private void calcualteGS() {
+  private void calculateGs() {
     for (DayData elem : plot.getWaterBalance().getDailyBalances()) {
       System.out.println(elem);
       EnvCalculator.calculateEt0(elem, location);
@@ -257,9 +256,6 @@ class TotalBalanceTest {
           .println("This is " + plot.getRecommendedAction().getAvailableWaterPercent() + " %");
     } catch (UnsupportedOperationException e) {
       System.out.println(e);
-    } ;
+    }
   }
-
-
-
 }

@@ -1,5 +1,8 @@
 package de.hgu.gsehen.model;
 
+import de.hgu.gsehen.gsbalance.RecommendedAction;
+import de.hgu.gsehen.gui.GeoPolygon;
+
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -7,10 +10,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
-
-import de.hgu.gsehen.gsbalance.RecommendedAction;
-import de.hgu.gsehen.gui.GeoPolygon;
-
 
 @Entity
 public class Plot extends Drawable {

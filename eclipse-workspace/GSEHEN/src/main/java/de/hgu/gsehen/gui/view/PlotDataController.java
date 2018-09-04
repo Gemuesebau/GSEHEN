@@ -5,9 +5,11 @@ import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Drawable;
+import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.ManualData;
 import de.hgu.gsehen.model.ManualWaterSupply;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.util.DateUtil;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -66,6 +68,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private List<Crop> cropList = new ArrayList<>();
 
   private TreeItem<Drawable> selectedItem;
+  private Field field;
   private Plot plot;
 
   private Gsehen gsehenInstance;
@@ -451,37 +454,47 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           @Override
           public void handle(ActionEvent arg0) {
             LocalDate localDate = date.getValue();
-            Date wateringDate =
-                Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date wateringDate = DateUtil.truncToDay(
+                Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
             if (plot.getManualData() == null) {
               ManualData manualData = new ManualData();
-              ManualWaterSupply manualWaterSupply = new ManualWaterSupply(wateringDate,
-                  Double.valueOf(irrigation.getText()), Double.valueOf(precipitation.getText()));
               List<ManualWaterSupply> mwsList = new ArrayList<ManualWaterSupply>();
-              mwsList.add(manualWaterSupply);
+              mwsList.add(parseSupply(wateringDate, irrigation, precipitation));
               manualData.setManualWaterSupply(mwsList);
-
               plot.setManualData(manualData);
             } else {
               ManualData manualData = plot.getManualData();
               boolean newDate = true;
               for (ManualWaterSupply mws : manualData.getManualWaterSupply()) {
-                if (wateringDate.compareTo(mws.getDate()) == 0) {
+                if (wateringDate.equals(mws.getDate())) {
                   newDate = false;
-                  mws.setIrrigation(Double.valueOf(irrigation.getText()));
-                  mws.setPrecipitation(Double.valueOf(precipitation.getText()));
+                  mws.setIrrigation(parseDouble(irrigation));
+                  mws.setPrecipitation(parseDouble(precipitation));
+                  break;
                 }
               }
               if (newDate) {
-                ManualWaterSupply manualWaterSupply = new ManualWaterSupply(wateringDate,
-                    Double.valueOf(irrigation.getText()), Double.valueOf(precipitation.getText()));
-                manualData.getManualWaterSupply().add(manualWaterSupply);
+                manualData.getManualWaterSupply().add(
+                    parseSupply(wateringDate, irrigation, precipitation));
               }
             }
 
             pane.getChildren().clear();
             gsehenInstance.sendFarmDataChanged(plot, null);
+            gsehenInstance.sendManualDataChanged(field, plot, wateringDate, null);
+          }
+
+          private ManualWaterSupply parseSupply(Date wateringDate,
+              TextField irrigation,
+              TextField precipitation) {
+            return new ManualWaterSupply(wateringDate,
+                parseDouble(irrigation),
+                parseDouble(precipitation));
+          }
+
+          private Double parseDouble(TextField textField) {
+            return Double.valueOf(textField.getText()); // FIXME localize! DateFormat!
           }
         });
 
@@ -544,6 +557,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                     && selectedItem.getValue().getClass().getSimpleName().equals("Plot")) {
                   pane.setVisible(true);
                   plot = (Plot) selectedItem.getValue();
+                  field = (Field) selectedItem.getParent().getValue();
 
                   name.setText(plot.getName());
 

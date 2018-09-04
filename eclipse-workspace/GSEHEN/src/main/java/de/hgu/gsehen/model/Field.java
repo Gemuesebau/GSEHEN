@@ -21,7 +21,7 @@ public class Field extends Drawable implements DrawableParent {
   @Id
   @GeneratedValue
   private long id;
-  @OneToOne
+  @OneToOne (cascade = {CascadeType.ALL})
   private WeatherDataSource weatherDataSource;
   @OneToOne (cascade = {CascadeType.ALL})
   private SoilProfile soilProfile;

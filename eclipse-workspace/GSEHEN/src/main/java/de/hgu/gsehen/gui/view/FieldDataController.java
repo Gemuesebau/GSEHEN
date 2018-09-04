@@ -8,6 +8,7 @@ import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
+import de.hgu.gsehen.model.WeatherDataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -37,6 +38,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -51,6 +54,8 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
   // private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
   private List<SoilProfile> soilList = new ArrayList<>();
+  private List<WeatherDataSource> wdsList = new ArrayList<>();
+  private FileChooser filePath;
 
   private TreeItem<Drawable> selectedItem;
   private Field field;
@@ -66,7 +71,9 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
   private Text area;
 
   private ChoiceBox<SoilProfile> currentSoilBox;
+  private ChoiceBox<WeatherDataSource> weatherData;
   private SoilProfile sp;
+  private WeatherDataSource wds;
   private Button createSoil;
   private SoilProfile soilProfileItem;
   private Button save;
@@ -76,6 +83,16 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
   private int index;
   private VBox center;
   private Button saveField;
+  
+  private TextField weatherDataName;
+  private TextField interval;
+  private TextField windspeed;
+  private TextField dateFormat;
+  private TextField localeId;
+  private TextField path;
+  private TextField locationLat;
+  private TextField locationLng;
+  private TextField metersAbove;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -537,8 +554,6 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           }
         });
 
-        buttonBox = new HBox();
-
         save = new Button(mainBundle.getString("menu.file.save"));
         save.setOnAction(new EventHandler<ActionEvent>() {
           @Override
@@ -556,6 +571,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           }
         });
 
+        buttonBox = new HBox();
         buttonBox.getChildren().addAll(back, save);
 
         VBox bottomBox = new VBox(25);
@@ -563,6 +579,62 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
         bottomBox.getChildren().addAll(buttonBox);
         pane.setBottom(bottomBox);
 
+      }
+    });
+
+    Text weatherDataSource = new Text(mainBundle.getString("fieldview.weatherdatasource"));
+    weatherDataSource.setFont(Font.font("Arial", 14));
+
+    EntityManagerFactory weatherEmf = Persistence.createEntityManagerFactory("GSEHEN");
+    EntityManager weatherEm = weatherEmf.createEntityManager();
+    if (wdsList.isEmpty()) {
+      System.out.println("WDS-List empty");
+      try {
+        Session session = weatherEm.unwrap(Session.class);
+        Query<WeatherDataSource> query = session.createQuery("from WeatherDataSource");
+        wdsList = query.list();
+        System.out.println(wdsList.size());
+      } finally {
+        weatherEm.close();
+      }
+    }
+
+    weatherData = new ChoiceBox<WeatherDataSource>();
+    if (!wdsList.isEmpty()) {
+      for (WeatherDataSource s : wdsList) {
+        weatherData.getItems().add(s);
+      }
+      weatherData.setConverter(new StringConverter<WeatherDataSource>() {
+
+        @Override
+        public String toString(WeatherDataSource object) {
+          return object.getName();
+        }
+
+        @Override
+        public WeatherDataSource fromString(String string) {
+          return weatherData.getItems().stream().filter(ap -> ap.getName().equals(string))
+              .findFirst().orElse(null);
+        }
+      });
+    }
+
+    Button editWds = new Button(mainBundle.getString("fieldview.editwds"));
+    editWds.setOnAction(new EventHandler<ActionEvent>() {
+
+      @Override
+      public void handle(ActionEvent e) {
+        setWeatherDataSource();
+        setWeatherDataTexts();
+      }
+    });
+
+    Button createWds = new Button(mainBundle.getString("fieldview.createwds"));
+    createWds.setOnAction(new EventHandler<ActionEvent>() {
+
+      @Override
+      public void handle(ActionEvent e) {
+        setWeatherDataSource();
       }
     });
 
@@ -578,6 +650,11 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
             field.setSoilProfile(sp);
           }
         }
+        for (WeatherDataSource wds : wdsList) {
+          if (wds == weatherData.getValue()) {
+            field.setWeatherDataSource(wds);
+          }
+        }
         gsehenInstance.sendFarmDataChanged(field, null);
       }
     });
@@ -590,6 +667,10 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     GridPane.setHalignment(currentSoilBox, HPos.LEFT);
     GridPane.setHalignment(editProfile, HPos.LEFT);
     GridPane.setHalignment(createSoil, HPos.LEFT);
+    GridPane.setHalignment(weatherDataSource, HPos.LEFT);
+    GridPane.setHalignment(weatherData, HPos.LEFT);
+    GridPane.setHalignment(editWds, HPos.LEFT);
+    GridPane.setHalignment(createWds, HPos.LEFT);
     GridPane.setHalignment(saveField, HPos.LEFT);
 
     GridPane.setConstraints(nameLabel, 0, 0);
@@ -599,11 +680,15 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     GridPane.setConstraints(soilProfile, 0, 2);
     GridPane.setConstraints(currentSoilBox, 1, 2);
     GridPane.setConstraints(editProfile, 2, 2);
-    GridPane.setConstraints(createSoil, 0, 3);
-    GridPane.setConstraints(saveField, 0, 4);
+    GridPane.setConstraints(weatherDataSource, 0, 3);
+    GridPane.setConstraints(weatherData, 1, 3);
+    GridPane.setConstraints(editWds, 2, 3);
+    GridPane.setConstraints(createSoil, 0, 4);
+    GridPane.setConstraints(createWds, 1, 4);
+    GridPane.setConstraints(saveField, 0, 5);
 
     grid.getChildren().addAll(nameLabel, name, areaLabel, area, soilProfile, currentSoilBox,
-        editProfile, createSoil, saveField);
+        editProfile, weatherDataSource, weatherData, editWds, createSoil, createWds, saveField);
 
     pane.setTop(grid);
     // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -632,6 +717,13 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
                   name.setText(field.getName());
 
                   area.setText(String.valueOf(field.getPolygon().calculateArea()));
+
+                  for (WeatherDataSource wds : wdsList) {
+                    if (field.getWeatherDataSource() != null
+                        && wds.getName().equals(field.getWeatherDataSource().getName())) {
+                      weatherData.getSelectionModel().select(wds);
+                    }
+                  }
 
                   for (SoilProfile soPr : soilList) {
                     if (field.getSoilProfile() != null
@@ -680,5 +772,253 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     scrollPane.setContent(center);
     scrollPane.setPannable(true);
     pane.setBottom(scrollPane);
+  }
+
+  /**
+   * Creates a WeatherDataSource.
+   */
+  public void setWeatherDataSource() {
+    pane.getChildren().clear();
+    treeTableView.setVisible(false);
+
+    Text weatherDataLabel = new Text(mainBundle.getString("fieldview.weatherdataname"));
+    weatherDataLabel.setFont(Font.font("Arial", 14));
+    weatherDataName = new TextField();
+
+    HBox nameBox = new HBox();
+    nameBox.getChildren().addAll(weatherDataLabel, weatherDataName);
+
+    VBox topBox = new VBox(25);
+    topBox.setPadding(new Insets(20, 20, 20, 20));
+    topBox.getChildren().addAll(nameBox);
+    pane.setTop(topBox);
+
+    // GridPane - Center Section
+    GridPane center = new GridPane();
+
+    // GridPane Configuration (Padding, Gaps, etc.)
+    center.setPadding(new Insets(20, 20, 20, 20));
+    center.setHgap(15);
+    center.setVgap(15);
+    center.setGridLinesVisible(false);
+
+    // Set Column and Row Constraints
+    ColumnConstraints column1 = new ColumnConstraints(200, 100, 300);
+    ColumnConstraints column2 = new ColumnConstraints(200, 100, 100);
+    column1.setHgrow(Priority.ALWAYS);
+    column2.setHgrow(Priority.ALWAYS);
+    RowConstraints rowEmpty = new RowConstraints();
+
+    // Add Constraints to Columns & Rows
+    center.getColumnConstraints().addAll(column1, column2);
+    center.getRowConstraints().add(0, rowEmpty);
+    center.getRowConstraints().add(1, rowEmpty);
+
+    Text intervalLabel = new Text(mainBundle.getString("fieldview.interval"));
+    intervalLabel.setFont(Font.font("Arial", 14));
+    interval = new TextField();
+    interval.textProperty().addListener(new ChangeListener<String>() {
+      @Override
+      public void changed(ObservableValue<? extends String> observable, String oldValue,
+          String newValue) {
+        if (!newValue.matches("\\d*")) {
+          interval.setText(newValue.replaceAll("[^\\d]", ""));
+        }
+      }
+    });
+
+    Text windspeedLabel = new Text(mainBundle.getString("fieldview.windspeed"));
+    windspeedLabel.setFont(Font.font("Arial", 14));
+    windspeed = new TextField();
+    windspeed.textProperty().addListener(new ChangeListener<String>() {
+      @Override
+      public void changed(ObservableValue<? extends String> observable, String oldValue,
+          String newValue) {
+        if (newValue != null) {
+          if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+            windspeed.setText(oldValue);
+          }
+        }
+      }
+    });
+
+    Text dateFormatLabel = new Text(mainBundle.getString("fieldview.dateformat"));
+    dateFormatLabel.setFont(Font.font("Arial", 14));
+    dateFormat = new TextField();
+
+    Text localeIdLabel = new Text(mainBundle.getString("fieldview.localeid"));
+    localeIdLabel.setFont(Font.font("Arial", 14));
+    localeId = new TextField();
+
+    Text filePathLabel = new Text(mainBundle.getString("fieldview.filepath"));
+    filePathLabel.setFont(Font.font("Arial", 14));
+    path = new TextField();
+    Button fileChooserButton = new Button(mainBundle.getString("fieldview.filechooserbutton"));
+    fileChooserButton.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        Stage stage = new Stage();
+        filePath = new FileChooser();
+        filePath.setTitle(mainBundle.getString("fieldview.filechooser"));
+        path.setText(filePath.showOpenDialog(stage).getAbsolutePath());
+      }
+    });
+
+    Text locationLatLabel = new Text(mainBundle.getString("fieldview.locationlat"));
+    locationLatLabel.setFont(Font.font("Arial", 14));
+    locationLat = new TextField();
+    locationLat.textProperty().addListener(new ChangeListener<String>() {
+
+      @Override
+      public void changed(ObservableValue<? extends String> observable, String oldValue,
+          String newValue) {
+        if (newValue != null) {
+          if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+            locationLat.setText(oldValue);
+          }
+        }
+      }
+    });
+
+    Text locationLngLabel = new Text(mainBundle.getString("fieldview.locationlng"));
+    locationLngLabel.setFont(Font.font("Arial", 14));
+    locationLng = new TextField();
+    locationLng.textProperty().addListener(new ChangeListener<String>() {
+      @Override
+      public void changed(ObservableValue<? extends String> observable, String oldValue,
+          String newValue) {
+        if (newValue != null) {
+          if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+            locationLng.setText(oldValue);
+          }
+        }
+      }
+    });
+
+    Text metersAboveLabel = new Text(mainBundle.getString("fieldview.metersabove"));
+    metersAboveLabel.setFont(Font.font("Arial", 14));
+    metersAbove = new TextField();
+    metersAbove.textProperty().addListener(new ChangeListener<String>() {
+      @Override
+      public void changed(ObservableValue<? extends String> observable, String oldValue,
+          String newValue) {
+        if (newValue != null) {
+          if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+            metersAbove.setText(oldValue);
+          }
+        }
+      }
+    });
+
+    // Set Nodes Vertical & Horizontal Alignment
+    GridPane.setHalignment(intervalLabel, HPos.LEFT);
+    GridPane.setHalignment(interval, HPos.LEFT);
+    GridPane.setHalignment(windspeedLabel, HPos.LEFT);
+    GridPane.setHalignment(windspeed, HPos.LEFT);
+    GridPane.setHalignment(dateFormatLabel, HPos.LEFT);
+    GridPane.setHalignment(dateFormat, HPos.LEFT);
+    GridPane.setHalignment(localeIdLabel, HPos.LEFT);
+    GridPane.setHalignment(localeId, HPos.LEFT);
+    GridPane.setHalignment(filePathLabel, HPos.LEFT);
+    GridPane.setHalignment(path, HPos.LEFT);
+    GridPane.setHalignment(fileChooserButton, HPos.LEFT);
+    GridPane.setHalignment(locationLatLabel, HPos.LEFT);
+    GridPane.setHalignment(locationLat, HPos.LEFT);
+    GridPane.setHalignment(locationLngLabel, HPos.LEFT);
+    GridPane.setHalignment(locationLng, HPos.LEFT);
+    GridPane.setHalignment(metersAboveLabel, HPos.LEFT);
+    GridPane.setHalignment(metersAbove, HPos.LEFT);
+
+    // Set Row & Column Index for Nodes
+    GridPane.setConstraints(intervalLabel, 0, 0);
+    GridPane.setConstraints(interval, 1, 0);
+    GridPane.setConstraints(windspeedLabel, 0, 1);
+    GridPane.setConstraints(windspeed, 1, 1);
+    GridPane.setConstraints(dateFormatLabel, 0, 2);
+    GridPane.setConstraints(dateFormat, 1, 2);
+    GridPane.setConstraints(localeIdLabel, 0, 3);
+    GridPane.setConstraints(localeId, 1, 3);
+    GridPane.setConstraints(filePathLabel, 0, 4);
+    GridPane.setConstraints(path, 1, 4);
+    GridPane.setConstraints(fileChooserButton, 2, 4);
+    GridPane.setConstraints(locationLatLabel, 0, 5);
+    GridPane.setConstraints(locationLat, 1, 5);
+    GridPane.setConstraints(locationLngLabel, 0, 6);
+    GridPane.setConstraints(locationLng, 1, 6);
+    GridPane.setConstraints(metersAboveLabel, 0, 7);
+    GridPane.setConstraints(metersAbove, 1, 7);
+
+    center.getChildren().addAll(intervalLabel, interval, windspeedLabel, windspeed, dateFormatLabel,
+        dateFormat, localeIdLabel, localeId, filePathLabel, path, fileChooserButton,
+        locationLatLabel, locationLat, locationLngLabel, locationLng, metersAboveLabel,
+        metersAbove);
+
+    ScrollPane scrollPane = new ScrollPane();
+    scrollPane.setContent(center);
+    scrollPane.setPannable(true);
+    pane.setCenter(scrollPane);
+
+    back = new Button(mainBundle.getString("fieldview.back"));
+    back.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent arg0) {
+        pane.getChildren().clear();
+        treeTableView.setVisible(true);
+        gsehenInstance.sendFarmDataChanged(field, null);
+      }
+    });
+
+    save = new Button(mainBundle.getString("menu.file.save"));
+    save.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent arg0) {
+        pane.getChildren().clear();
+        treeTableView.setVisible(true);
+        wds = new WeatherDataSource();
+        wds.setName(weatherDataName.getText());
+        wds.setMeasIntervalSeconds(Integer.valueOf(interval.getText()));
+        wds.setWindspeedMeasHeightMeters(Double.valueOf(windspeed.getText()));
+        wds.setDateFormatString(dateFormat.getText());
+        wds.setNumberLocaleId(localeId.getText());
+        wds.setDataFilePath(path.getText());
+        wds.setLocationLat(Double.valueOf(locationLat.getText()));
+        wds.setLocationLng(Double.valueOf(locationLng.getText()));
+        wds.setLocationMetersAboveSeaLevel(Double.valueOf(metersAbove.getText()));
+
+        wdsList.add(wds);
+        pane.getChildren().clear();
+        gsehenInstance.sendFarmDataChanged(field, null);
+      }
+    });
+
+    buttonBox = new HBox();
+    buttonBox.getChildren().addAll(back, save);
+
+    VBox bottomBox = new VBox(25);
+    bottomBox.setPadding(new Insets(20, 20, 20, 20));
+    bottomBox.getChildren().addAll(buttonBox);
+    pane.setBottom(bottomBox);
+  }
+
+  /**
+   * Fills TextFields with correct values.
+   */
+  public void setWeatherDataTexts() {
+    if (weatherData.getSelectionModel().getSelectedItem() != null) {
+      weatherDataName.setText(weatherData.getSelectionModel().getSelectedItem().getName());
+      interval.setText(String
+          .valueOf(weatherData.getSelectionModel().getSelectedItem().getMeasIntervalSeconds()));
+      windspeed.setText(String.valueOf(
+          weatherData.getSelectionModel().getSelectedItem().getWindspeedMeasHeightMeters()));
+      dateFormat.setText(weatherData.getSelectionModel().getSelectedItem().getDateFormatString());
+      localeId.setText(weatherData.getSelectionModel().getSelectedItem().getNumberLocaleId());
+      path.setText(weatherData.getSelectionModel().getSelectedItem().getDataFilePath());
+      locationLat.setText(
+          String.valueOf(weatherData.getSelectionModel().getSelectedItem().getLocationLat()));
+      locationLng.setText(
+          String.valueOf(weatherData.getSelectionModel().getSelectedItem().getLocationLng()));
+      metersAbove.setText(String.valueOf(
+          weatherData.getSelectionModel().getSelectedItem().getLocationMetersAboveSeaLevel()));
+    }
   }
 }
