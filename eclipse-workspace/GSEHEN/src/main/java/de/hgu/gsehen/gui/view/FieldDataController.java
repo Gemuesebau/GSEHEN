@@ -12,11 +12,13 @@ import de.hgu.gsehen.model.WeatherDataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.TreeMap;
 // import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -874,7 +876,10 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     localeIdLabel.setFont(Font.font("Arial", 14));
     localeId = new ChoiceBox<String>();
 
-    localeId.getItems().addAll(javaLocaleMap.values());
+    final ObservableList<String> localeIdChoiceBoxItems = localeId.getItems();
+    for (Entry<String, String> entry : javaLocaleMap.entrySet()) {
+      localeIdChoiceBoxItems.add(entry.getValue());
+    }
 
     Text filePathLabel = new Text(mainBundle.getString("fieldview.filepath"));
     filePathLabel.setFont(Font.font("Arial", 14));
