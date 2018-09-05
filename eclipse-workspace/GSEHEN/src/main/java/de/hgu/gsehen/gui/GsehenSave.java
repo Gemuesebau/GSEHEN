@@ -1,7 +1,6 @@
 package de.hgu.gsehen.gui;
 
 import de.hgu.gsehen.Gsehen;
-import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -18,11 +17,13 @@ import javafx.stage.Stage;
 
 public final class GsehenSave extends Application {
   private Gsehen gsehenInstance;
-  protected static final ResourceBundle mainBundle =
-      ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
+  protected final ResourceBundle mainBundle;
 
   {
     gsehenInstance = Gsehen.getInstance();
+
+    mainBundle =
+        ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
   }
 
   @Override

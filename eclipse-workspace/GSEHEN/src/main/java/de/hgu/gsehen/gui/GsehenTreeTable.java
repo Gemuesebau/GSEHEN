@@ -14,7 +14,6 @@ import de.hgu.gsehen.util.MessageUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
@@ -55,8 +54,8 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
-
   private Gsehen gsehenInstance;
+  protected final ResourceBundle mainBundle;
 
   private Map<
       Class<? extends GsehenEvent>,
@@ -77,6 +76,10 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
   {
     gsehenInstance = Gsehen.getInstance();
+
+    mainBundle =
+        ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
+
     gsehenInstance.registerForEvent(FarmDataChanged.class,
         new GsehenEventListener<FarmDataChanged>() {
           {
@@ -101,8 +104,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         });
   }
 
-  protected static final ResourceBundle mainBundle =
-      ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
   private static final DataFormat SERIALIZED_MIME_TYPE =
       new DataFormat("application/x-java-serialized-object");
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";

@@ -1,8 +1,9 @@
 package de.hgu.gsehen.model;
 
+import de.hgu.gsehen.Gsehen;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.ResourceBundle;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,8 +16,6 @@ import javax.persistence.Id;
  */
 @Entity
 public class Soil {
-  protected static final ResourceBundle mainBundle =
-      ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
 
   public Soil() {}
 
@@ -73,6 +72,9 @@ public class Soil {
    * Creates the given soils.
    */
   public List<Soil> soils() {
+    final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
+        Gsehen.getInstance().getSelectedLocale());
+
     List<Soil> soils = new ArrayList<Soil>();
 
     Soil sand = new Soil(mainBundle.getString("fieldview.sand"), 8, "");

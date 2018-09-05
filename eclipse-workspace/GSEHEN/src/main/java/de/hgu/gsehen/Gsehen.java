@@ -86,9 +86,7 @@ import org.hibernate.query.Query;
 @SuppressWarnings({ "checkstyle:commentsindentation" })
 public class Gsehen extends Application {
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
-
-  protected static final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
-      Locale.GERMAN);
+  protected final ResourceBundle mainBundle;
 
   private static final String MAIN_FXML = "main.fxml";
 
@@ -128,6 +126,8 @@ public class Gsehen extends Application {
 
   {
     instance = this;
+
+    mainBundle = ResourceBundle.getBundle("i18n.main", getSelectedLocale());
   }
 
   public List<Farm> getDeletedFarms() {

@@ -20,9 +20,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.ResourceBundle;
-// import java.util.logging.Logger;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -61,9 +59,7 @@ import org.hibernate.query.Query;
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
   private final Timeline timeline = new Timeline();
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
-  protected static final ResourceBundle mainBundle =
-      ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
-  // private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+  protected final ResourceBundle mainBundle;
 
   private List<Crop> cropList = new ArrayList<>();
 
@@ -96,6 +92,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   {
     gsehenInstance = Gsehen.getInstance();
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
+
+    mainBundle =
+        ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
   }
 
   /**
