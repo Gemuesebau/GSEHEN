@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.function.Function;
 
 public class CollectionUtil {
@@ -72,5 +73,14 @@ public class CollectionUtil {
       result[i] = objectProducerFunction.apply(i);
     }
     return result;
+  }
+
+  public static <K, V> K getKeyForValue(final V value, Map<K, V> map) {
+    for (Entry<K, V> entry : map.entrySet()) {
+      if (entry.getValue().equals(value)) {
+        return entry.getKey();
+      }
+    }
+    return null;
   }
 }

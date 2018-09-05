@@ -1,5 +1,7 @@
 package de.hgu.gsehen.gui.view;
 
+import static de.hgu.gsehen.util.CollectionUtil.getKeyForValue;
+
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
@@ -12,13 +14,10 @@ import de.hgu.gsehen.model.WeatherDataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.TreeMap;
-// import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -97,6 +96,26 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
   private TextField metersAbove;
   private TreeMap<String, String> javaLocaleMap;
 
+  private void fillJavaLocaleMap(final Locale selectedLocale) {
+    javaLocaleMap = new TreeMap<String, String>();
+    java.lang.reflect.Field[] fieldArray = Locale.class.getFields();
+    for (int i = 0; i < fieldArray.length; i++) {
+      if (fieldArray[i].getType().equals(Locale.class)) {
+        String language;
+        try {
+          language =
+              ((Locale)fieldArray[i].get(null)).getDisplayLanguage(selectedLocale);
+        } catch (Exception e) {
+          language = null;
+        }
+        if (language != null && language.length() > 0) {
+          final String fieldName = fieldArray[i].getName();
+          javaLocaleMap.put(language + " (" + fieldName + ")", fieldName);
+        }
+      }
+    }
+  }
+
   {
     gsehenInstance = Gsehen.getInstance();
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
@@ -105,23 +124,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     mainBundle =
         ResourceBundle.getBundle("i18n.main", selLocale);
 
-    javaLocaleMap = new TreeMap<String, String>();
-    java.lang.reflect.Field[] fieldArray = Locale.class.getFields();
-    for (int i = 0; i < fieldArray.length; i++) {
-      if (fieldArray[i].getType().equals(Locale.class)) {
-        String language;
-        try {
-          language =
-              ((Locale)fieldArray[i].get(null)).getDisplayLanguage(selLocale);
-        } catch (Exception e) {
-          language = null;
-        }
-        if (language != null && language.length() > 0) {
-          final String fieldName = fieldArray[i].getName();
-          javaLocaleMap.put(fieldName, language + " (" + fieldName + ")");
-        }
-      }
-    }
+    fillJavaLocaleMap(selLocale);
   }
 
   /**
@@ -875,11 +878,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     Text localeIdLabel = new Text(mainBundle.getString("fieldview.localeid"));
     localeIdLabel.setFont(Font.font("Arial", 14));
     localeId = new ChoiceBox<String>();
-
-    final ObservableList<String> localeIdChoiceBoxItems = localeId.getItems();
-    for (Entry<String, String> entry : javaLocaleMap.entrySet()) {
-      localeIdChoiceBoxItems.add(entry.getValue());
-    }
+    localeId.getItems().addAll(javaLocaleMap.keySet());
 
     Text filePathLabel = new Text(mainBundle.getString("fieldview.filepath"));
     filePathLabel.setFont(Font.font("Arial", 14));
@@ -1024,13 +1023,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           wds.setMeasIntervalSeconds(Integer.valueOf(interval.getText()));
           wds.setWindspeedMeasHeightMeters(Double.valueOf(windspeed.getText()));
           wds.setDateFormatString(dateFormat.getText());
-
-          for (String val : javaLocaleMap.values()) {
-            if (val.equals(localeId.getValue())) {
-              wds.setNumberLocaleId(getKeyFromValue(javaLocaleMap, val));
-            }
-          }
-
+          wds.setNumberLocaleId(javaLocaleMap.get(localeId.getValue()));
           wds.setDataFilePath(path.getText());
           wds.setLocationLat(Double.valueOf(locationLat.getText()));
           wds.setLocationLng(Double.valueOf(locationLng.getText()));
@@ -1062,46 +1055,25 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
    * Fills TextFields with correct values.
    */
   public void setWeatherDataTexts() {
-    if (weatherData.getSelectionModel().getSelectedItem() != null) {
-      weatherDataName.setText(weatherData.getSelectionModel().getSelectedItem().getName());
+    final WeatherDataSource selectedWeatherDataSource =
+        weatherData.getSelectionModel().getSelectedItem();
+    if (selectedWeatherDataSource != null) {
+      weatherDataName.setText(selectedWeatherDataSource.getName());
       interval.setText(String
-          .valueOf(weatherData.getSelectionModel().getSelectedItem().getMeasIntervalSeconds()));
+          .valueOf(selectedWeatherDataSource.getMeasIntervalSeconds()));
       windspeed.setText(String.valueOf(
-          weatherData.getSelectionModel().getSelectedItem().getWindspeedMeasHeightMeters()));
-      dateFormat.setText(weatherData.getSelectionModel().getSelectedItem().getDateFormatString());
-
-      String val;
-      for (String key : javaLocaleMap.keySet()) {
-        if (key.equals(weatherData.getSelectionModel().getSelectedItem().getNumberLocaleId())) {
-          val = javaLocaleMap.get(key);
-          localeId.getSelectionModel().select(val);
-        }
-      }
-
-      path.setText(weatherData.getSelectionModel().getSelectedItem().getDataFilePath());
+          selectedWeatherDataSource.getWindspeedMeasHeightMeters()));
+      dateFormat.setText(selectedWeatherDataSource.getDateFormatString());
+      localeId.getSelectionModel().select(
+          getKeyForValue(selectedWeatherDataSource.getNumberLocaleId(), javaLocaleMap));
+      path.setText(selectedWeatherDataSource.getDataFilePath());
       locationLat.setText(
-          String.valueOf(weatherData.getSelectionModel().getSelectedItem().getLocationLat()));
+          String.valueOf(selectedWeatherDataSource.getLocationLat()));
       locationLng.setText(
-          String.valueOf(weatherData.getSelectionModel().getSelectedItem().getLocationLng()));
+          String.valueOf(selectedWeatherDataSource.getLocationLng()));
       metersAbove.setText(String.valueOf(
-          weatherData.getSelectionModel().getSelectedItem().getLocationMetersAboveSeaLevel()));
+          selectedWeatherDataSource.getLocationMetersAboveSeaLevel()));
       wdsList.remove(wdsFile);
     }
-  }
-
-  /**
-   * Returns the key based on a value.
-   * 
-   * @param tm - TreeMap.
-   * @param value - Given value.
-   * @return - The key to the value.
-   */
-  public String getKeyFromValue(TreeMap<String, String> tm, String value) {
-    for (String o : tm.keySet()) {
-      if (tm.get(o).equals(value)) {
-        return o;
-      }
-    }
-    return null;
   }
 }
