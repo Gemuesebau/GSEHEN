@@ -8,11 +8,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-//import javax.persistence.EntityManager;
-//import javax.persistence.Persistence;
-
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 
 @SuppressWarnings({"checkstyle:abbreviationaswordinname","checkstyle:commentsindentation"})
 public class DBUtil {
@@ -83,26 +83,29 @@ public class DBUtil {
     return preparedStatement.executeQuery();
   }
 
+  @SuppressWarnings({ "checkstyle:rightcurly", "checkstyle:javadocmethod" })
+  public static <T> void saveEntity(T entity) {
+    EntityManager em = Persistence.createEntityManagerFactory("GSEHEN").createEntityManager();
+    try {
+      em.getTransaction().begin();
+      em.persist(entity);
+      em.getTransaction().commit();
+    }
+    catch (Exception e) {
+      em.getTransaction().rollback();
+    }
+    finally {
+      em.close();
+    }
+  }
 
-  /**
-    * Saves a JPA Entity.
-    * @param <T>
-    * @param entity the entity to save
-    */
-   @SuppressWarnings("checkstyle:rightcurly")
-   public static <T> void saveEntity(T entity) {
-     EntityManager em = Persistence.createEntityManagerFactory("GSEHEN").createEntityManager();
-     try {
-       em.getTransaction().begin();
-       em.persist(entity);
-       em.getTransaction().commit();
-     }
-     catch (Exception e) {
-       em.getTransaction().rollback();
-     }
-     finally {
-       em.close();
-     }
-   }
- }
+  @SuppressWarnings({ "checkstyle:javadocmethod", "unchecked" })
+  public static <T> Query<T> createQuery(EntityManager em, Class<T> queryRoot) {
+    return (Query<T>) em.unwrap(Session.class).createQuery("from " + queryRoot.getSimpleName());
+  }
 
+  @SuppressWarnings({ "checkstyle:javadocmethod" })
+  public static <T> List<T> createQueryAndList(EntityManager em, Class<T> queryRoot) {
+    return createQuery(em, queryRoot).list();
+  }
+}

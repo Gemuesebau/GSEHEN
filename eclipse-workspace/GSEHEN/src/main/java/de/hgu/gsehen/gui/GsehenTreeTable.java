@@ -10,6 +10,7 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.util.MessageUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -262,8 +263,10 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 attributeLabel3 = new Text(mainBundle.getString("fieldview.soilprofile"));
                 attributeLabel3.setFont(Font.font("Arial", 12));
-                if (field.getSoilProfile() != null) {
-                  attribute3 = new Text(field.getSoilProfile().getName());
+                SoilProfile fieldSoilProfile =
+                    gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
+                if (fieldSoilProfile != null) {
+                  attribute3 = new Text(fieldSoilProfile.getName());
                 } else {
                   attribute3 = new Text("");
                 }
@@ -570,8 +573,10 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           result = new ReadOnlyStringWrapper("/");
         } else if (param.getValue().getValue().getClass().getSimpleName().equals("Field")) {
           Field field = (Field) param.getValue().getValue();
-          if (field.getSoilProfile() != null) {
-            result = new ReadOnlyStringWrapper(field.getSoilProfile().getName());
+          SoilProfile fieldSoilProfile =
+              gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
+          if (fieldSoilProfile != null) {
+            result = new ReadOnlyStringWrapper(fieldSoilProfile.getName());
           } else {
             result = new ReadOnlyStringWrapper("/");
           }

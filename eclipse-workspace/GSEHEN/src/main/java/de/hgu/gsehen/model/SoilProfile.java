@@ -14,6 +14,7 @@ public class SoilProfile {
   @Id
   @GeneratedValue
   private long id;
+  private String uuid;
   private String name;
 
   @OneToMany(cascade = {CascadeType.ALL})
@@ -21,14 +22,39 @@ public class SoilProfile {
   @OneToMany(cascade = {CascadeType.ALL})
   private List<SoilProfileDepth> profileDepth;
 
+  public SoilProfile(String uuid) {
+    this();
+    this.uuid = uuid;
+  }
+
+  /**
+   * Creates a new SoilProfile with the given "payload" data.
+   * This constructor doesn't result in the UUID being (newly) created,
+   * and is thus only suited for tests!
+   * The given lists must have the same size, since soils and depths belong
+   * to one another each.
+   *
+   * @param name a name for the new SoilProfile
+   * @param soilType the list of soils in this profile
+   * @param profileDepth the list of soil depths in this profile
+   */
   public SoilProfile(String name, List<Soil> soilType, List<SoilProfileDepth> profileDepth) {
-    super();
+    this();
     this.name = name;
     this.soilType = soilType;
     this.profileDepth = profileDepth;
   }
 
-  public SoilProfile() {}
+  public SoilProfile() {
+  }
+
+  public String getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
 
   public String getName() {
     return name;

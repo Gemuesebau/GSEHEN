@@ -48,19 +48,14 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
 
 public class FieldDataController extends Application
     implements GsehenEventListener<FarmDataChanged> {
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   protected final ResourceBundle mainBundle;
 
-  private List<SoilProfile> soilList = new ArrayList<>();
-  private List<WeatherDataSource> wdsList = new ArrayList<>();
+  private List<SoilProfile> soilProfileList;
+  private List<WeatherDataSource> weatherDataSourceList;
   private FileChooser filePath;
 
   private TreeItem<Drawable> selectedItem;
@@ -82,7 +77,6 @@ public class FieldDataController extends Application
   private WeatherDataSource wds;
   private WeatherDataSource wdsFile;
   private Button createSoil;
-  private SoilProfile soilProfileItem;
   private Button save;
   private Button back;
   private HBox buttonBox;
@@ -124,12 +118,14 @@ public class FieldDataController extends Application
 
   {
     gsehenInstance = Gsehen.getInstance();
-    gsehenInstance.registerForEvent(FarmDataChanged.class, this);
+    soilProfileList = gsehenInstance.getSoilProfiles();
+    weatherDataSourceList = gsehenInstance.getWeatherDataSources();
 
     final Locale selLocale = gsehenInstance.getSelectedLocale();
     mainBundle = ResourceBundle.getBundle("i18n.main", selLocale);
-
     fillJavaLocaleMap(selLocale);
+
+    gsehenInstance.registerForEvent(FarmDataChanged.class, this);
   }
 
   /**
@@ -179,21 +175,9 @@ public class FieldDataController extends Application
     Text soilProfile = new Text(mainBundle.getString("fieldview.soilprofile"));
     soilProfile.setFont(Font.font("Arial", 14));
 
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
-    EntityManager em = emf.createEntityManager();
-    if (soilList.isEmpty()) {
-      try {
-        Session session = em.unwrap(Session.class);
-        Query<SoilProfile> query = session.createQuery("from SoilProfile");
-        soilList = query.list();
-      } finally {
-        em.close();
-      }
-    }
-
     currentSoilBox = new ChoiceBox<SoilProfile>();
-    if (!soilList.isEmpty()) {
-      for (SoilProfile s : soilList) {
+    if (!soilProfileList.isEmpty()) {
+      for (SoilProfile s : soilProfileList) {
         currentSoilBox.getItems().add(s);
       }
       currentSoilBox.setConverter(new StringConverter<SoilProfile>() {
@@ -480,10 +464,8 @@ public class FieldDataController extends Application
         center.getRowConstraints().add(0, rowEmpty);
         center.getRowConstraints().add(1, rowEmpty);
 
-        List<Soil> soilSet = new ArrayList<Soil>();
-        List<SoilProfileDepth> spdSet = new ArrayList<SoilProfileDepth>();
-
-        soilProfileItem = new SoilProfile();
+        List<Soil> soilList = new ArrayList<Soil>();
+        List<SoilProfileDepth> soilDepthList = new ArrayList<SoilProfileDepth>();
 
         Button setSoil = new Button(mainBundle.getString("fieldview.setsoil"));
         setSoil.setOnAction(new EventHandler<ActionEvent>() {
@@ -499,8 +481,8 @@ public class FieldDataController extends Application
               SoilProfileDepth spd = new SoilProfileDepth();
               spd.setDepth(Double.parseDouble(depth.getText()));
 
-              soilSet.add(soil);
-              spdSet.add(spd);
+              soilList.add(soil);
+              soilDepthList.add(spd);
 
               soilChoiceBox.setValue(null);
               soilAwc.setText(null);
@@ -522,8 +504,8 @@ public class FieldDataController extends Application
               delSoil.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent arg0) {
-                  soilSet.remove(soil);
-                  spdSet.remove(spd);
+                  soilList.remove(soil);
+                  soilDepthList.remove(spd);
                   layorList.remove(createdSoil);
                   center.getChildren().removeAll(createdSoil, delSoil);
                   depth.setText(mainBundle.getString("fieldview.layor") + (layorList.size() - 1));
@@ -596,12 +578,11 @@ public class FieldDataController extends Application
           public void handle(ActionEvent arg0) {
             pane.getChildren().clear();
             treeTableView.setVisible(true);
-            soilProfileItem = new SoilProfile();
-            soilProfileItem.setSoilType(soilSet);
-            soilProfileItem.setProfileDepth(spdSet);
+            SoilProfile soilProfileItem = new SoilProfile(Gsehen.getUuid());
+            soilProfileItem.setSoilType(soilList);
+            soilProfileItem.setProfileDepth(soilDepthList);
             soilProfileItem.setName(soilProfileName.getText());
-
-            soilList.add(soilProfileItem);
+            soilProfileList.add(soilProfileItem);
             pane.getChildren().clear();
             gsehenInstance.sendFarmDataChanged(field, null);
           }
@@ -621,21 +602,9 @@ public class FieldDataController extends Application
     Text weatherDataSource = new Text(mainBundle.getString("fieldview.weatherdatasource"));
     weatherDataSource.setFont(Font.font("Arial", 14));
 
-    EntityManagerFactory weatherEmf = Persistence.createEntityManagerFactory("GSEHEN");
-    EntityManager weatherEm = weatherEmf.createEntityManager();
-    if (wdsList.isEmpty()) {
-      try {
-        Session session = weatherEm.unwrap(Session.class);
-        Query<WeatherDataSource> query = session.createQuery("from WeatherDataSource");
-        wdsList = query.list();
-      } finally {
-        weatherEm.close();
-      }
-    }
-
     weatherData = new ChoiceBox<WeatherDataSource>();
-    if (!wdsList.isEmpty()) {
-      for (WeatherDataSource s : wdsList) {
+    if (!weatherDataSourceList.isEmpty()) {
+      for (WeatherDataSource s : weatherDataSourceList) {
         weatherData.getItems().add(s);
       }
       weatherData.setConverter(new StringConverter<WeatherDataSource>() {
@@ -679,12 +648,12 @@ public class FieldDataController extends Application
       public void handle(ActionEvent e) {
         field.setName(name.getText());
         field.setArea(Double.valueOf(area.getText()));
-        for (SoilProfile sp : soilList) {
+        for (SoilProfile sp : soilProfileList) {
           if (sp == currentSoilBox.getValue()) {
-            field.setSoilProfile(sp);
+            field.setSoilProfileUuid(sp.getUuid());
           }
         }
-        for (WeatherDataSource wds : wdsList) {
+        for (WeatherDataSource wds : weatherDataSourceList) {
           if (wds == weatherData.getValue()) {
             field.setWeatherDataSource(wds);
           }
@@ -752,7 +721,7 @@ public class FieldDataController extends Application
 
                   area.setText(String.valueOf(field.getPolygon().calculateArea()));
 
-                  for (WeatherDataSource wds : wdsList) {
+                  for (WeatherDataSource wds : weatherDataSourceList) {
                     if (field.getWeatherDataSource() != null
                         && wds.getName().equals(field.getWeatherDataSource().getName())) {
                       weatherData.getSelectionModel().select(wds);
@@ -760,13 +729,15 @@ public class FieldDataController extends Application
                     }
                   }
 
-                  for (SoilProfile soPr : soilList) {
-                    if (field.getSoilProfile() != null
-                        && soPr.getName().equals(field.getSoilProfile().getName())) {
+                  SoilProfile fieldSoilProfile =
+                      gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
+                  for (SoilProfile soPr : soilProfileList) {
+                    if (fieldSoilProfile != null
+                        && soPr.getName().equals(fieldSoilProfile.getName())) {
                       currentSoilBox.getSelectionModel().select(soPr);
                     }
                   }
-                  if (field.getSoilProfile() != null) {
+                  if (fieldSoilProfile != null) {
                     getCurrentProfile();
                   } else {
                     currentSoilBox.getSelectionModel().clearSelection();
@@ -787,7 +758,7 @@ public class FieldDataController extends Application
   public void getCurrentProfile() {
     center.getChildren().clear();
     pane.setBottom(null);
-    sp = field.getSoilProfile();
+    sp = gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
     int index = 1;
     Text setSoil = new Text(
         mainBundle.getString("fieldview.currentsoil") + " (" + sp.getName() + "):" + "\n");
@@ -1049,7 +1020,7 @@ public class FieldDataController extends Application
             wds.setLocationLng(Double.valueOf(locationLng.getText()));
             wds.setLocationMetersAboveSeaLevel(Double.valueOf(metersAbove.getText()));
 
-            wdsList.add(wds);
+            weatherDataSourceList.add(wds);
             pane.getChildren().clear();
             gsehenInstance.sendFarmDataChanged(field, null);
           } catch (IllegalArgumentException iae) {
@@ -1101,7 +1072,7 @@ public class FieldDataController extends Application
       locationLng.setText(String.valueOf(selectedWeatherDataSource.getLocationLng()));
       metersAbove
           .setText(String.valueOf(selectedWeatherDataSource.getLocationMetersAboveSeaLevel()));
-      wdsList.remove(wdsFile);
+      weatherDataSourceList.remove(wdsFile);
     }
   }
 

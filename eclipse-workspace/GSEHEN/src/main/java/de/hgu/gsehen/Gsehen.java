@@ -28,6 +28,7 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.WeatherDataSource;
 import de.hgu.gsehen.util.DBUtil;
 import de.hgu.gsehen.util.Pair;
@@ -47,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -122,10 +124,15 @@ public class Gsehen extends Application {
        > eventListeners = new HashMap<>();
 
   private boolean dataChanged;
+  private List<SoilProfile> soilProfilesList;
+  private List<WeatherDataSource> weatherDataSourcesList;
   private static Gsehen instance;
 
   {
     instance = this;
+
+    soilProfilesList = loadAll(SoilProfile.class);
+    weatherDataSourcesList = loadAll(WeatherDataSource.class);
 
     mainBundle = ResourceBundle.getBundle("i18n.main", getSelectedLocale());
   }
@@ -325,66 +332,43 @@ public class Gsehen extends Application {
 
       // möglichkeit 2, alle möglichen objekte
       Session session = em.unwrap(Session.class);
-      Query<Farm> query = session.createQuery("from Farm"); // You will get Weayher object
-      farmsList = query.list(); // You are accessing as list<WeatherModel>
+      Query<Farm> query = session.createQuery("from Farm");
+      farmsList = query.list();
     } finally {
       em.close();
     }
 
-    // ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
-    // try {
-    // engine.put("instance", this);
-    // engine.put("LOGGER", LOGGER);
-    // engine.put("farms", farmsList);
-    // engine.eval(getReaderForUtf8(LOAD_USER_DATA_JS));
-
     dataChanged = false;
-    // } catch (Exception e) {
-    // LOGGER.log(Level.SEVERE, "Can't evaluate " + LOAD_USER_DATA_JS, e);
     sendFarmDataChanged(null, null);
-    // }
   }
 
   /**
    * Saves the user-created data (farms, fields, plots, ..)
    */
   public void saveUserData() {
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
+    EntityManager em = emf.createEntityManager();
 
     try {
-
-      EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
-      EntityManager em = emf.createEntityManager();
-
-      try {
-        em.getTransaction().begin();
-        for (Farm farm : farmsList) {
-          em.merge(farm);
-        }
-
-        for (Farm deletedFarm : this.getDeletedFarms()) {
-          em.remove(em.contains(deletedFarm) ? deletedFarm : em.merge(deletedFarm));
-        }
-        this.getDeletedFarms().clear();
-
-        em.getTransaction().commit();
-      } catch (Exception e) {
-        System.out.println("Problem: " + e.getMessage());
-        em.getTransaction().rollback();
-      } finally {
-        em.close();
+      em.getTransaction().begin();
+      for (Farm farm : farmsList) {
+        em.merge(farm);
       }
 
-      // speichern in datei wird ersetzt durch speichern in DB
-      // engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
-      // engine.put("instance", this);
-      // engine.put("LOGGER", LOGGER);
-      // engine.put("farms", farmsList);
+      for (Farm deletedFarm : this.getDeletedFarms()) {
+        em.remove(em.contains(deletedFarm) ? deletedFarm : em.merge(deletedFarm));
+      }
+      this.getDeletedFarms().clear();
 
-      // engine.eval(getReaderForUtf8(SAVE_USER_DATA_JS));
-      dataChanged = false;
+      em.getTransaction().commit();
     } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Can't evaluate ", e);
+      System.out.println("Problem: " + e.getMessage());
+      em.getTransaction().rollback();
+    } finally {
+      em.close();
     }
+
+    dataChanged = false;
   }
 
   public <T extends GsehenEvent> void registerForEvent(Class<T> eventClass,
@@ -683,7 +667,46 @@ public class Gsehen extends Application {
     dayDataCalculation.recalculateDayData();
   }
 
+  @SuppressWarnings({ "checkstyle:javadocmethod" })
+  public static <T> List<T> loadAll(final Class<T> queryRootClass) {
+    EntityManager em = Persistence.createEntityManagerFactory("GSEHEN").createEntityManager();
+    try {
+      return DBUtil.createQueryAndList(em, queryRootClass);
+    } finally {
+      em.close();
+    }
+  }
+
   public Locale getSelectedLocale() {
     return Locale.GERMAN; // FIXME make user-selectable
+  }
+
+  public List<SoilProfile> getSoilProfiles() {
+    return soilProfilesList;
+  }
+
+  public List<WeatherDataSource> getWeatherDataSources() {
+    return weatherDataSourcesList;
+  }
+
+  public static String getUuid() {
+    return UUID.randomUUID().toString();
+  }
+
+  /**
+   * Lookup method for a SoilProfile, using its uuid.
+   * TODO alternatively, or additionally, use a Map for SoilProfiles,
+   * and not (just) the list as obtained from the DB.
+   *
+   * @param soilProfileUuid the uuid of the SoilProfile to lookup
+   * @return the SoilProfile with the given uuid, or null if no such SoilProfile exists
+   */
+  public SoilProfile getSoilProfileForUuid(String soilProfileUuid) {
+    for (SoilProfile soilProfile : soilProfilesList) {
+      if (soilProfile.getUuid().equals(soilProfileUuid)) {
+        return soilProfile;
+      }
+    }
+    return null;
   }
 }

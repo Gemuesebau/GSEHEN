@@ -111,7 +111,8 @@ public class Recommender {
       DailyBalance.calculateEtc(dayData, plot);
       DailyBalance.calculateDailyBalance(dayData);
       TotalBalance.determineCurrentRootingZone(dayData, plot);
-      TotalBalance.calculateCurrentAvailableSoilWater(dayData, field.getSoilProfile());
+      TotalBalance.calculateCurrentAvailableSoilWater(dayData,
+          gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid()));
     }
     TotalBalance.calculateTotalWaterBalance(plot);
     TotalBalance.recommendIrrigation(plot);
