@@ -50,9 +50,7 @@ import org.hibernate.query.Query;
 
 public class FieldDataController implements GsehenEventListener<FarmDataChanged> {
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
-  protected static final ResourceBundle mainBundle =
-      ResourceBundle.getBundle("i18n.main", Locale.GERMAN);
-  // private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+  protected final ResourceBundle mainBundle;
 
   private List<SoilProfile> soilList = new ArrayList<>();
   private List<WeatherDataSource> wdsList = new ArrayList<>();
@@ -95,11 +93,33 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
   private TextField locationLat;
   private TextField locationLng;
   private TextField metersAbove;
-  private TreeMap<String, String> tm;
+  private TreeMap<String, String> javaLocaleMap;
 
   {
     gsehenInstance = Gsehen.getInstance();
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
+
+    final Locale selLocale = gsehenInstance.getSelectedLocale();
+    mainBundle =
+        ResourceBundle.getBundle("i18n.main", selLocale);
+
+    javaLocaleMap = new TreeMap<String, String>();
+    java.lang.reflect.Field[] fieldArray = Locale.class.getFields();
+    for (int i = 0; i < fieldArray.length; i++) {
+      if (fieldArray[i].getType().equals(Locale.class)) {
+        String language;
+        try {
+          language =
+              ((Locale)fieldArray[i].get(null)).getDisplayLanguage(selLocale);
+        } catch (Exception e) {
+          language = null;
+        }
+        if (language != null && language.length() > 0) {
+          final String fieldName = fieldArray[i].getName();
+          javaLocaleMap.put(fieldName, language + " (" + fieldName + ")");
+        }
+      }
+    }
   }
 
   /**
@@ -854,11 +874,7 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
     localeIdLabel.setFont(Font.font("Arial", 14));
     localeId = new ChoiceBox<String>();
 
-    tm = new TreeMap<String, String>();
-    tm.put("GERMAN", "Deutsch (GERMAN)");
-    tm.put("ENGLISH", "Englisch (ENGLISH)");
-    tm.put("FRENCH", "Französisch (FRENCH)");
-    localeId.getItems().addAll(tm.values());
+    localeId.getItems().addAll(javaLocaleMap.values());
 
     Text filePathLabel = new Text(mainBundle.getString("fieldview.filepath"));
     filePathLabel.setFont(Font.font("Arial", 14));
@@ -1004,9 +1020,9 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
           wds.setWindspeedMeasHeightMeters(Double.valueOf(windspeed.getText()));
           wds.setDateFormatString(dateFormat.getText());
 
-          for (String val : tm.values()) {
+          for (String val : javaLocaleMap.values()) {
             if (val.equals(localeId.getValue())) {
-              wds.setNumberLocaleId(getKeyFromValue(tm, val));
+              wds.setNumberLocaleId(getKeyFromValue(javaLocaleMap, val));
             }
           }
 
@@ -1050,9 +1066,9 @@ public class FieldDataController implements GsehenEventListener<FarmDataChanged>
       dateFormat.setText(weatherData.getSelectionModel().getSelectedItem().getDateFormatString());
 
       String val;
-      for (String key : tm.keySet()) {
+      for (String key : javaLocaleMap.keySet()) {
         if (key.equals(weatherData.getSelectionModel().getSelectedItem().getNumberLocaleId())) {
-          val = tm.get(key);
+          val = javaLocaleMap.get(key);
           localeId.getSelectionModel().select(val);
         }
       }

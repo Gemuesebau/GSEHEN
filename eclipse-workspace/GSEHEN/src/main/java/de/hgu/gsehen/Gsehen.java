@@ -678,4 +678,8 @@ public class Gsehen extends Application {
   public static void updateDayData() {
     dayDataCalculation.recalculateDayData();
   }
+
+  public Locale getSelectedLocale() {
+    return Locale.GERMAN; // FIXME make user-selectable
+  }
 }
