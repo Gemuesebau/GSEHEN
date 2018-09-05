@@ -283,4 +283,8 @@ public class MainController {
   public void setMapViewportFromFarm() {
     gsehenInstance.setMapViewportFromFarm();
   }
+  
+  public TabPane getTabPane() {
+    return tabPane;
+  }
 }

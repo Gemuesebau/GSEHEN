@@ -32,6 +32,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableColumn.CellEditEvent;
@@ -59,7 +60,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private Field autoField;
   protected final ResourceBundle mainBundle;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends 
+  private Map<Class<? extends GsehenEvent>, Class<? extends
       GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
@@ -143,6 +144,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private HBox attribute2Box;
   private HBox attribute3Box;
 
+  private TabPane tabPane;
+
   /**
    * Adds the FarmTreeView.
    */
@@ -154,6 +157,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     farmTreeView.setRoot(rootItem);
     farmTreeView.setShowRoot(false);
     farmTreeView.setEditable(true);
+
+    tabPane = gsehenInstance.getMainController().getTabPane();
 
     farmTreeView.setRowFactory(this::rowFactory);
     addColumn(mainBundle.getString("treetableview.name"), "name");
@@ -223,6 +228,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
               if (selectedItem.getValue().getClass().getSimpleName()
                   .equals(mainBundle.getString("gui.view.Map.drawableType.Farm"))) {
+                tabPane.getSelectionModel().select(1);
                 Farm farm = (Farm) selectedItem.getValue();
 
                 attributeLabel1 = new Text(mainBundle.getString("treetableview.fieldnumber"));
@@ -235,6 +241,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 centerBox.getChildren().addAll(attribute1Box);
                 detailPane.setBottom(null);
               } else if (selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
+                if (!tabPane.getSelectionModel().isSelected(0)) {
+                  tabPane.getSelectionModel().select(2);
+                }
                 Field field = (Field) selectedItem.getValue();
 
                 attributeLabel1 = new Text(mainBundle.getString("treetableview.plotnumber"));
@@ -266,6 +275,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 detailPane.setBottom(null);
               } else if (selectedItem.getValue().getClass().getSimpleName()
                   .equals(mainBundle.getString("gui.view.Map.drawableType.Plot"))) {
+                if (!tabPane.getSelectionModel().isSelected(0)) {
+                  tabPane.getSelectionModel().select(3);
+                }
                 Plot plot = (Plot) selectedItem.getValue();
 
                 attributeLabel1 = new Text(mainBundle.getString("fieldview.area"));

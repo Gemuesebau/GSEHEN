@@ -647,6 +647,10 @@ public class Gsehen extends Application {
   public static Logs getLogs() {
     return logs;
   }
+  
+  public MainController getMainController() {
+    return mainController;
+  }
 
   /**
    * Prompts for JavaScript to be run in a WebView.
