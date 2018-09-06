@@ -80,7 +80,7 @@ import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.hibernate.query.Query; 
 
 /**
  * The GSEHEN main application.
@@ -136,6 +136,7 @@ public class Gsehen extends Application {
 
     soilProfilesList = loadAll(SoilProfile.class);
     weatherDataSourcesList = loadAll(WeatherDataSource.class);
+    LOGGER.log(Level.INFO, "Loaded Croplist");
     crops = loadAll(Crop.class);
 
     mainBundle = ResourceBundle.getBundle("i18n.main", getSelectedLocale());
@@ -263,6 +264,7 @@ public class Gsehen extends Application {
     } catch (Exception e) {
       em.getTransaction().rollback();
     } finally {
+      LOGGER.log(Level.INFO, "Loading from PostgreSQL was successful!");
       em.close();
     }
   }
