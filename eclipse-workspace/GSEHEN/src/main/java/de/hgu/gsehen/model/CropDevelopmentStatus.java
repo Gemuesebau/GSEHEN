@@ -1,9 +1,10 @@
 package de.hgu.gsehen.model;
 
-import javax.persistence.Entity;
+import javax.persistence.Embeddable;
 
-@Entity
+@Embeddable
 public class CropDevelopmentStatus {
+
   private int phase1;
   private Integer phase2;
   private Integer phase3;
