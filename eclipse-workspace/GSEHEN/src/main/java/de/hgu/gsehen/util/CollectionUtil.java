@@ -3,9 +3,10 @@ package de.hgu.gsehen.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class CollectionUtil {
 
@@ -75,6 +76,7 @@ public class CollectionUtil {
     return result;
   }
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public static <K, V> K getKeyForValue(final V value, Map<K, V> map) {
     for (Entry<K, V> entry : map.entrySet()) {
       if (entry.getValue().equals(value)) {
@@ -82,5 +84,14 @@ public class CollectionUtil {
       }
     }
     return null;
+  }
+
+  @SuppressWarnings("checkstyle:javadocmethod")
+  public static <T> List<T> fillList(int size, Supplier<T> supplier) {
+    List<T> result = new ArrayList<>();
+    for (int i = 0; i < size; i++) {
+      result.add(supplier.get());
+    }
+    return result;
   }
 }

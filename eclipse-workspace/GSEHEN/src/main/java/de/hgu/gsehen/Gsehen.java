@@ -27,9 +27,11 @@ import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
+import de.hgu.gsehen.model.Messages;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.WeatherDataSource;
+import de.hgu.gsehen.util.CollectionUtil;
 import de.hgu.gsehen.util.DBUtil;
 import de.hgu.gsehen.util.Pair;
 
@@ -49,6 +51,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -75,7 +78,9 @@ import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.ParameterExpression;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -238,48 +243,113 @@ public class Gsehen extends Application {
 
     EntityManager em = Persistence.createEntityManagerFactory("GSEHEN").createEntityManager();
     CriteriaBuilder builder = em.getCriteriaBuilder();
-    CriteriaQuery<Crop> criteria = builder.createQuery(Crop.class);
-    Root<Crop> cropRoot = criteria.from(Crop.class);
-    ParameterExpression<String> cropNameParameter = builder.parameter(String.class);
-    criteria.select(cropRoot).where(builder.equal(cropRoot.get("name"), cropNameParameter));
-
-    TypedQuery<Crop> query = em.createQuery(criteria);
 
     Connection connection = null;
-    {
-      try {
-        connection = DriverManager.getConnection(url, user, password);
-      } catch (SQLException e) {
-        LOGGER.log(Level.SEVERE, "Can't connect ", e);
-      }
-      try (PreparedStatement selectcrop = connection.prepareStatement("SELECT * FROM crop;")) {
-        ResultSet rs = executeQuery(selectcrop);
-
-        while (rs.next()) {
-          String cropName = rs.getString("cName");
-
-          query.setParameter(cropNameParameter, cropName);
-
-          Crop crop;
-          try {
-            // Crop does already exist? => Update existing!
-            crop = query.getSingleResult();
-            LOGGER.log(Level.INFO, "Crop " + cropName + " existing!: " + crop, crop);
-          } catch (NoResultException | NonUniqueResultException e) {
-            // Crop does not exist yet? => Create new!
-            crop = new Crop();
-            LOGGER.log(Level.INFO, "Crop " + cropName + " new!: " + crop, crop);
-          }
-
-          transferPropertiesFromPgToCrop(rs, crop);
-          DBUtil.saveEntity(crop);
-        }
-      } catch (SQLException e) {
-        System.out.println("no connection" + e.getLocalizedMessage());
-      } finally {
-        connection.close();
-      }
+    try {
+      connection = DriverManager.getConnection(url, user, password);
+    } catch (SQLException e) {
+      LOGGER.log(Level.SEVERE, "Can't connect ", e);
     }
+    try {
+      em.getTransaction().begin();
+      transfer(em, builder, connection,
+          "SELECT * FROM crop;", new String[] { "cName" },
+          Crop.class, new String[] { "name" },
+          Gsehen::transferPropertiesFromPgToCrop);
+      transfer(em, builder, connection,
+          "SELECT * FROM messages;", new String[] { "key", "locale_id" },
+          Messages.class, new String[] { "key", "localeId" },
+          Gsehen::transferPropertiesFromPgToMessages);
+      em.getTransaction().commit();
+    } catch (Exception e) {
+      em.getTransaction().rollback();
+    } finally {
+      em.close();
+    }
+  }
+
+  private static <T> void transfer(EntityManager em, CriteriaBuilder cb, Connection conn,
+      final String sourceSql, final String[] sourceKey, final Class<T> targetClass,
+      final String[] targetKey, BiConsumer<ResultSet, T> propertyTransfer) {
+    if (sourceKey.length != targetKey.length) {
+      throw new IllegalArgumentException("Transfer: source and target keys must have "
+          + "the same number of elements! "
+          + sourceKey.length
+          + " != "
+          + targetKey.length
+          + "!");
+    }
+    CriteriaQuery<T> cq = cb.createQuery(targetClass);
+    Root<T> cropRoot = cq.from(targetClass);
+    List<ParameterExpression<String>> cropNameParameters =
+        CollectionUtil.fillList(sourceKey.length, () -> cb.parameter(String.class));
+    buildSelect(cb, cq, targetKey, cropRoot, cropNameParameters);
+
+    TypedQuery<T> targetQuery = em.createQuery(cq);
+    try (PreparedStatement statement = conn.prepareStatement(sourceSql)) {
+      ResultSet sourceResultSet = executeQuery(statement);
+      while (sourceResultSet.next()) {
+        String[] keyParts = extractKeyParts(sourceResultSet, sourceKey);
+        populateParameters(targetQuery, cropNameParameters, keyParts);
+        T targetObject = getOrCreateTargetObject(keyParts, targetQuery, targetClass);
+        propertyTransfer.accept(sourceResultSet, targetObject);
+        em.persist(targetObject);
+      }
+    } catch (SQLException e) {
+      System.out.println("no connection" + e.getLocalizedMessage());
+    }
+  }
+
+  private static <T> T getOrCreateTargetObject(String[] keyParts, TypedQuery<T> targetQuery,
+      final Class<T> targetClass) {
+    T targetObject;
+    try {
+      // target object does already exist? => Update existing!
+      targetObject = targetQuery.getSingleResult();
+      LOGGER.log(Level.INFO, "Target "
+          + targetClass.getSimpleName()
+          + " " + keyParts + " existing: " + targetObject, targetObject);
+    } catch (NoResultException e) {
+      // target object does not exist yet? => Create new!
+      try {
+        targetObject = targetClass.newInstance();
+      } catch (Exception e1) {
+        throw new RuntimeException("Can't create target "
+          + targetClass.getSimpleName()
+          + " instance", e);
+      }
+      LOGGER.log(Level.INFO, "Target "
+          + targetClass.getSimpleName()
+          + " " + keyParts + " new: " + targetObject, targetObject);
+    }
+    return targetObject;
+  }
+
+  private static String[] extractKeyParts(ResultSet sourceResultSet, String[] sourceKey) throws SQLException {
+    String[] result = new String[sourceKey.length];
+    int index = 0;
+    for (String sourceKeyPart : sourceKey) {
+      result[index++] = sourceResultSet.getString(sourceKeyPart);
+    }
+    return result;
+  }
+
+  private static <T> void populateParameters(TypedQuery<T> query,
+      List<ParameterExpression<String>> parameters, String[] keyParts) {
+    int index = 0;
+    for (ParameterExpression<String> parameter : parameters) {
+      query.setParameter(parameter, keyParts[index++]);
+    }
+  }
+
+  private static <T> void buildSelect(CriteriaBuilder cb, CriteriaQuery<T> cq,
+      final String[] targetKey, Root<T> root, List<ParameterExpression<String>> parameters) {
+    List<Predicate> equalityParts = new ArrayList<>();
+    int index = 0;
+    for (String targetKeyPart : targetKey) {
+      equalityParts.add(cb.equal(root.get(targetKeyPart), parameters.get(index++)));
+    }
+    cq.select(root).where(cb.and(equalityParts.toArray(new Predicate[equalityParts.size()])));
   }
 
   /**
@@ -290,28 +360,50 @@ public class Gsehen extends Application {
    * @param crop
    *          New Crop
    * @throws SQLException
-   *          if SELECTing from PostgreSQL, our saving into local DB, fails
+   *          if SELECTing from PostgreSQL, or saving into local DB, fails
    */
-  private static void transferPropertiesFromPgToCrop(ResultSet rs, Crop crop) throws SQLException {
-    crop.setName(rs.getString("cName"));
-    crop.setActive(rs.getBoolean("cActive"));
-    crop.setKc1(rs.getDouble("cKc1"));
-    crop.setKc2(rs.getDouble("cKc2"));
-    crop.setKc3(rs.getDouble("cKc3"));
-    crop.setKc4(rs.getDouble("cKc4"));
-    crop.setPhase1(rs.getInt("cPhase1"));
-    crop.setPhase2(rs.getInt("cPhase2"));
-    crop.setPhase3(rs.getInt("cPhase3"));
-    crop.setPhase4(rs.getInt("cPhase4"));
-    crop.setBbch1(rs.getString("cBbch1"));
-    crop.setBbch2(rs.getString("cBbch2"));
-    crop.setBbch3(rs.getString("cBbch3"));
-    crop.setBbch4(rs.getString("cBbch4"));
-    crop.setRootingZone1(rs.getInt("cRooting_Zone1"));
-    crop.setRootingZone2(rs.getInt("cRooting_Zone2"));
-    crop.setRootingZone3(rs.getInt("cRooting_Zone3"));
-    crop.setRootingZone4(rs.getInt("cRooting_Zone4"));
-    crop.setDescription(rs.getString("cDescription"));
+  private static void transferPropertiesFromPgToCrop(ResultSet rs, Crop crop) {
+    try {
+      crop.setName(rs.getString("cName"));
+      crop.setActive(rs.getBoolean("cActive"));
+      crop.setKc1(rs.getDouble("cKc1"));
+      crop.setKc2(rs.getDouble("cKc2"));
+      crop.setKc3(rs.getDouble("cKc3"));
+      crop.setKc4(rs.getDouble("cKc4"));
+      crop.setPhase1(rs.getInt("cPhase1"));
+      crop.setPhase2(rs.getInt("cPhase2"));
+      crop.setPhase3(rs.getInt("cPhase3"));
+      crop.setPhase4(rs.getInt("cPhase4"));
+      crop.setBbch1(rs.getString("cBbch1"));
+      crop.setBbch2(rs.getString("cBbch2"));
+      crop.setBbch3(rs.getString("cBbch3"));
+      crop.setBbch4(rs.getString("cBbch4"));
+      crop.setRootingZone1(rs.getInt("cRooting_Zone1"));
+      crop.setRootingZone2(rs.getInt("cRooting_Zone2"));
+      crop.setRootingZone3(rs.getInt("cRooting_Zone3"));
+      crop.setRootingZone4(rs.getInt("cRooting_Zone4"));
+      crop.setDescription(rs.getString("cDescription"));
+    } catch (SQLException e) {
+      throw new RuntimeException("Property transfer: can't get or set property", e);
+    }
+  }
+
+  /**
+   * Fill Messages with Data. FIXME implement!!
+   * 
+   * @param rs
+   *          ResultSet from PostgreSQL.
+   * @param messages
+   *          New Messages
+   * @throws SQLException
+   *          if SELECTing from PostgreSQL, or saving into local DB, fails
+   */
+  private static void transferPropertiesFromPgToMessages(ResultSet rs, Messages messages) {
+//    try {
+//      //messages.set...(...);
+//    } catch (SQLException e) {
+//      throw new RuntimeException("Property transfer: can't get or set property", e);
+//    }
   }
 
   /**
