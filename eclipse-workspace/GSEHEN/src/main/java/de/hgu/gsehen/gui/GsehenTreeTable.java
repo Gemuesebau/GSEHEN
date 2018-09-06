@@ -103,7 +103,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
             fillTreeView();
           }
         });
-    
+
     gsehenInstance.registerForEvent(RecommendedActionChanged.class,
         event -> updatePlotInfo(event.getPlot()));
   }
@@ -114,7 +114,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private static final String DETAIL_BORDER_PANE_ID = "#detailBorderPane";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private static final String PLOT_RECOMMENDED_ACTION_TEXT = "#plotRecommendedActionText";
-
 
   private Farm farm;
   private Timeline scrolltimeline = new Timeline();
@@ -345,7 +344,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 Text actionLabel = new Text(mainBundle.getString("treetableview.watering"));
                 Text action;
                 if (plot.getSoilStartValue() != null && plot.getRecommendedAction() != null) {
-                  action = new Text(getRecommendedActionText(plot) + " : " + new java.text.SimpleDateFormat("EE., dd.MM.yyyy, HH:mm:ss.SSS", getSelectedLocale()).format(new java.util.Date()));
+                  action = new Text(getRecommendedActionText(plot) + " : "
+                      + new java.text.SimpleDateFormat("EE., dd.MM.yyyy, HH:mm:ss.SSS",
+                          getSelectedLocale()).format(new java.util.Date()));
                 } else {
                   action = new Text("/");
                 }
@@ -462,9 +463,11 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           if (item.getParent().getValue().getName().equals("Neue Plots")) {
             autoFarm = (Farm) item.getParent().getParent().getValue();
             autoField = (Field) item.getParent().getValue();
+            System.out.println(1);
           } else if (item.getParent().getValue().getName().equals("Neue Felder")) {
             autoFarm = (Farm) item.getParent().getValue();
             autoField = (Field) item.getValue();
+            System.out.println(2);
           }
 
           item.getParent().getChildren().remove(item);
@@ -509,15 +512,18 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
               }
             }
           }
-          if (autoFarm != null && autoField.getName().equals("Unbenannt")
-              || autoField.getName().equals("Neue Plots")) {
+          if (autoFarm != null || autoField.getName().equals("Neue Plots")) {
+            System.out.println(3);
             autoFarm.getFields().remove(autoField);
             if (autoFarm.getFields().isEmpty()) {
+              System.out.println(4);
               farmsList.remove(autoFarm);
               gsehenInstance.setFarmsList(farmsList);
             }
             fillTreeView();
           }
+          autoFarm = null;
+          autoField = null;
           gsehenInstance.sendFarmDataChanged(object, null);
         } else {
           LOGGER.info(itemType + " can't be stack on " + destinationType);
@@ -768,24 +774,22 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     gsehenInstance.sendFarmDataChanged(object, null);
   }
 
-
-
   private String getRecommendedActionText(Plot plot) {
     return MessageUtil.renderMessage(mainBundle,
         plot.getRecommendedAction().getRecommendation().getMessagePropertyKey(), 3,
         index -> plot.getRecommendedAction().getParameterValue(index));
   }
-  
+
   private void updatePlotInfo(Plot plot) {
-   try { ((Text) gsehenInstance.getScene().lookup(PLOT_RECOMMENDED_ACTION_TEXT))
-        .setText(getRecommendedActionText(plot));
-  }catch (Exception e) {
-   
+    try {
+      ((Text) gsehenInstance.getScene().lookup(PLOT_RECOMMENDED_ACTION_TEXT))
+          .setText(getRecommendedActionText(plot));
+    } catch (Exception e) {
+
+    }
   }
-  }
+
   public Locale getSelectedLocale() {
     return Locale.GERMAN; // FIXME make user-selectable
   }
 }
-
-
