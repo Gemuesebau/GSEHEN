@@ -6,6 +6,7 @@ import de.hgu.gsehen.gui.GeoPolygon;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -39,6 +40,8 @@ public class Plot extends Drawable {
   private Boolean calculationPaused;
   @OneToOne(cascade = {CascadeType.ALL})
   private Crop crop;
+  @Embedded
+  private CropDevelopmentStatus cropDevelopmentStatus;
   private Date cropStart;
   private Date cropEnd;
   private Boolean isActive;
@@ -185,6 +188,14 @@ public class Plot extends Drawable {
 
   public void setIsActive(Boolean isActive) {
     this.isActive = isActive;
+  }
+
+  public CropDevelopmentStatus getCropDevelopmentStatus() {
+    return cropDevelopmentStatus;
+  }
+
+  public void setCropDevelopmentStatus(CropDevelopmentStatus cropDevelopmentStatus) {
+    this.cropDevelopmentStatus = cropDevelopmentStatus;
   }
 
   public void visualize() {}

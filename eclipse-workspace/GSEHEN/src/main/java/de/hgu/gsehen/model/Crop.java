@@ -40,6 +40,7 @@ public class Crop {
     super();
   }
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public Crop(String name, boolean active, double kc1, Double kc2, Double kc3, Double kc4,
       int phase1, Integer phase2, Integer phase3, Integer phase4, String bbch1, String bbch2,
       String bbch3, String bbch4, int rootingZone1, Integer rootingZone2, Integer rootingZone3,
