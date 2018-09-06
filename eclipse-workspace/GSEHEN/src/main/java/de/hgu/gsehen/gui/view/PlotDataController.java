@@ -252,6 +252,16 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
+    // TODO
+    cropChoiceBox.getSelectionModel().selectedIndexProperty()
+        .addListener(new ChangeListener<Number>() {
+          @Override
+          public void changed(ObservableValue<? extends Number> observableValue, Number number,
+              Number number2) {
+            plot.setCropDevelopmentStatus(null);
+          }
+        });
+
     phaseTable = new TableView();
     phaseTable.setEditable(true);
 
