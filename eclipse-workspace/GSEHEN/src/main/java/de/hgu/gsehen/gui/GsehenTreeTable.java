@@ -61,8 +61,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private Field autoField;
   protected final ResourceBundle mainBundle;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends
-      GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
+  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -229,7 +228,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
               if (selectedItem.getValue().getClass().getSimpleName()
                   .equals(mainBundle.getString("gui.view.Map.drawableType.Farm"))) {
-                tabPane.getSelectionModel().select(1);
+                if (!tabPane.getSelectionModel().isSelected(0)) {
+                  tabPane.getSelectionModel().select(1);
+                }
                 Farm farm = (Farm) selectedItem.getValue();
 
                 attributeLabel1 = new Text(mainBundle.getString("treetableview.fieldnumber"));
@@ -242,7 +243,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 centerBox.getChildren().addAll(attribute1Box);
                 detailPane.setBottom(null);
               } else if (selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
-                if (!tabPane.getSelectionModel().isSelected(0)) {
+                if (!tabPane.getSelectionModel().isSelected(0)
+                    && !tabPane.getSelectionModel().isSelected(1)) {
                   tabPane.getSelectionModel().select(2);
                 }
                 Field field = (Field) selectedItem.getValue();
@@ -263,8 +265,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 attributeLabel3 = new Text(mainBundle.getString("fieldview.soilprofile"));
                 attributeLabel3.setFont(Font.font("Arial", 12));
-                SoilProfile fieldSoilProfile =
-                    gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
+                SoilProfile fieldSoilProfile = gsehenInstance
+                    .getSoilProfileForUuid(field.getSoilProfileUuid());
                 if (fieldSoilProfile != null) {
                   attribute3 = new Text(fieldSoilProfile.getName());
                 } else {
@@ -278,7 +280,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 detailPane.setBottom(null);
               } else if (selectedItem.getValue().getClass().getSimpleName()
                   .equals(mainBundle.getString("gui.view.Map.drawableType.Plot"))) {
-                if (!tabPane.getSelectionModel().isSelected(0)) {
+                if (!tabPane.getSelectionModel().isSelected(0)
+                    && !tabPane.getSelectionModel().isSelected(1)) {
                   tabPane.getSelectionModel().select(3);
                 }
                 Plot plot = (Plot) selectedItem.getValue();
@@ -573,8 +576,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           result = new ReadOnlyStringWrapper("/");
         } else if (param.getValue().getValue().getClass().getSimpleName().equals("Field")) {
           Field field = (Field) param.getValue().getValue();
-          SoilProfile fieldSoilProfile =
-              gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
+          SoilProfile fieldSoilProfile = gsehenInstance
+              .getSoilProfileForUuid(field.getSoilProfileUuid());
           if (fieldSoilProfile != null) {
             result = new ReadOnlyStringWrapper(fieldSoilProfile.getName());
           } else {
