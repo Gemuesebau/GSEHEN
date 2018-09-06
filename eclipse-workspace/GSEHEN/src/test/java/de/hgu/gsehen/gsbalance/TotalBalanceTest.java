@@ -14,6 +14,7 @@ import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.evapotranspiration.EnvCalculator;
 import de.hgu.gsehen.evapotranspiration.GeoData;
 import de.hgu.gsehen.model.Crop;
+import de.hgu.gsehen.model.CropDevelopmentStatus;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilProfile;
@@ -65,9 +66,11 @@ class TotalBalanceTest {
     crop = new Crop("Salat", true, 0.6, 0.8, 1.3, null, 10, 20, 30, null, "Pflanzung",
         "30% Bedeckung", "80%Bedeckunng", null, 10, 20, 30, null, "Toller Salat");
 
+    CropDevelopmentStatus cropDevelopmentStatus = new CropDevelopmentStatus(null, null, null, null);
+
     plot = new Plot("Feld2", 200, null, null, 1.0, null, 120.0, null, null, null,
-        soilStartDate.parse("2016-06-04"), null, false, crop, cropStart.parse("2016-06-06"),
-        cropEnd.parse("2016-09-06"), true);
+        soilStartDate.parse("2016-06-04"), null, false, crop, cropDevelopmentStatus,
+        cropStart.parse("2016-06-06"), cropEnd.parse("2016-09-06"), true);
     soil1 = new Soil("Sand", 8.0, null);
     soil2 = new Soil("SandyLoam", 12.0, null);
     soil3 = new Soil("Loam", 17.0, null);

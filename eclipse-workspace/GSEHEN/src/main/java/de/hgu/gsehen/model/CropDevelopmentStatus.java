@@ -5,6 +5,16 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class CropDevelopmentStatus {
 
+  public CropDevelopmentStatus() {};
+
+  public CropDevelopmentStatus(Integer phase1, Integer phase2, Integer phase3, Integer phase4) {
+    super();
+    this.phase1 = phase1;
+    this.phase2 = phase2;
+    this.phase3 = phase3;
+    this.phase4 = phase4;
+  }
+
   private Integer phase1;
   private Integer phase2;
   private Integer phase3;
