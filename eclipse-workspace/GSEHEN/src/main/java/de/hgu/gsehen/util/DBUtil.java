@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import org.hibernate.Session;
@@ -107,5 +108,10 @@ public class DBUtil {
   @SuppressWarnings({ "checkstyle:javadocmethod" })
   public static <T> List<T> createQueryAndList(EntityManager em, Class<T> queryRoot) {
     return createQuery(em, queryRoot).list();
+  }
+
+  @SuppressWarnings({ "checkstyle:javadocmethod" })
+  public static String generateUuid() {
+    return UUID.randomUUID().toString();
   }
 }

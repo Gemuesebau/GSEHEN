@@ -1,15 +1,16 @@
 package de.hgu.gsehen.model;
 
-import de.hgu.gsehen.gsbalance.RecommendedAction;
-import de.hgu.gsehen.gui.GeoPolygon;
-
 import java.util.Date;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+
+import de.hgu.gsehen.gsbalance.RecommendedAction;
+import de.hgu.gsehen.gui.GeoPolygon;
 
 @Entity
 public class Plot extends Drawable {
@@ -39,6 +40,8 @@ public class Plot extends Drawable {
   private Boolean calculationPaused;
   @OneToOne(cascade = {CascadeType.ALL})
   private Crop crop;
+  @Embedded
+  private CropDevelopmentStatus cropDevelopmentStatus;
   private Date cropStart;
   private Date cropEnd;
   private Boolean isActive;
@@ -187,6 +190,14 @@ public class Plot extends Drawable {
     this.isActive = isActive;
   }
 
+  public CropDevelopmentStatus getCropDevelopmentStatus() {
+    return cropDevelopmentStatus;
+  }
+
+  public void setCropDevelopmentStatus(CropDevelopmentStatus cropDevelopmentStatus) {
+    this.cropDevelopmentStatus = cropDevelopmentStatus;
+  }
+
   public void visualize() {}
 
   public void configure() {}
@@ -218,7 +229,8 @@ public class Plot extends Drawable {
   public Plot(String name, double area, GeoPolygon polygon, Location location, Double scalingFactor,
       WeatherData weatherData, Double rootingZone, WaterBalance waterBalance, ManualData manualData,
       RecommendedAction recommendedAction, Date soilStartDate, Double soilStartValue,
-      Boolean calculationPaused, Crop crop, Date cropStart, Date cropEnd, Boolean isActive) {
+      Boolean calculationPaused, Crop crop, CropDevelopmentStatus cropDevelopmentStatus,
+      Date cropStart, Date cropEnd, Boolean isActive) {
     super();
     this.name = name;
     this.area = area;
@@ -234,6 +246,7 @@ public class Plot extends Drawable {
     this.soilStartValue = soilStartValue;
     this.calculationPaused = calculationPaused;
     this.crop = crop;
+    this.cropDevelopmentStatus = cropDevelopmentStatus;
     this.cropStart = cropStart;
     this.cropEnd = cropEnd;
     this.isActive = isActive;

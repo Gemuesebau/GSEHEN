@@ -33,7 +33,7 @@ public class Recommender {
                 final DayData eventDayData = event.getDayData();
                 final Date eventDayDataDate = eventDayData == null ? null : eventDayData.getDate();
                 if (
-                    event.isFromWeatherDataSource(field.getWeatherDataSource())
+                    event.isFromWeatherDataSource(field.getWeatherDataSourceUuid())
                     && DateUtil.between(
                         eventDayDataDate,
                         CollectionUtil.nvl(plot.getSoilStartDate(), plot.getCropStart()),
@@ -106,7 +106,8 @@ public class Recommender {
     guaranteeDailyBalances(plot);
     for (DayData dayData : plot.getWaterBalance().getDailyBalances()) {
       applyManualData(dayData, plot);
-      EnvCalculator.calculateEt0(dayData, field.getWeatherDataSource().getLocation());
+      EnvCalculator.calculateEt0(dayData,
+          gsehenInstance.getWeatherDataSourceForUuid(field.getWeatherDataSourceUuid()).getLocation());
       DailyBalance.determineCurrentKc(dayData, plot);
       DailyBalance.calculateEtc(dayData, plot);
       DailyBalance.calculateDailyBalance(dayData);

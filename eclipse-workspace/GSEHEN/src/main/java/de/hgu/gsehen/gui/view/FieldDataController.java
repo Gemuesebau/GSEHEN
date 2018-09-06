@@ -11,7 +11,7 @@ import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
 import de.hgu.gsehen.model.WeatherDataSource;
-
+import de.hgu.gsehen.util.DBUtil;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -578,7 +578,7 @@ public class FieldDataController extends Application
           public void handle(ActionEvent arg0) {
             pane.getChildren().clear();
             treeTableView.setVisible(true);
-            SoilProfile soilProfileItem = new SoilProfile(Gsehen.getUuid());
+            SoilProfile soilProfileItem = new SoilProfile(DBUtil.generateUuid());
             soilProfileItem.setSoilType(soilList);
             soilProfileItem.setProfileDepth(soilDepthList);
             soilProfileItem.setName(soilProfileName.getText());
@@ -655,7 +655,7 @@ public class FieldDataController extends Application
         }
         for (WeatherDataSource wds : weatherDataSourceList) {
           if (wds == weatherData.getValue()) {
-            field.setWeatherDataSource(wds);
+            field.setWeatherDataSourceUuid(wds.getUuid());
           }
         }
         gsehenInstance.sendFarmDataChanged(field, null);
@@ -722,8 +722,11 @@ public class FieldDataController extends Application
                   area.setText(String.valueOf(field.getPolygon().calculateArea()));
 
                   for (WeatherDataSource wds : weatherDataSourceList) {
-                    if (field.getWeatherDataSource() != null
-                        && wds.getName().equals(field.getWeatherDataSource().getName())) {
+                    final WeatherDataSource weatherDataSource =
+                        gsehenInstance.getWeatherDataSourceForUuid(
+                            field.getWeatherDataSourceUuid());
+                    if (weatherDataSource != null
+                        && wds.getName().equals(weatherDataSource.getName())) {
                       weatherData.getSelectionModel().select(wds);
                       wdsFile = wds;
                     }
@@ -1009,7 +1012,7 @@ public class FieldDataController extends Application
 
             pane.getChildren().clear();
             treeTableView.setVisible(true);
-            wds = new WeatherDataSource();
+            wds = new WeatherDataSource(DBUtil.generateUuid());
             wds.setName(weatherDataName.getText());
             wds.setMeasIntervalSeconds(Integer.valueOf(interval.getText()));
             wds.setWindspeedMeasHeightMeters(Double.valueOf(windspeed.getText()));

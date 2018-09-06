@@ -14,6 +14,7 @@ public class WeatherDataSource {
   @Id
   @GeneratedValue
   private long id;
+  private String uuid;
 
   private String name;
   private int measIntervalSeconds;
@@ -24,6 +25,14 @@ public class WeatherDataSource {
   private double locationLng;
   private double locationLat;
   private double locationMetersAboveSeaLevel;
+
+  public WeatherDataSource(String uuid) {
+    this();
+    this.uuid = uuid;
+  }
+
+  public WeatherDataSource() {
+  }
 
   public long getId() {
     return id;
@@ -123,5 +132,13 @@ public class WeatherDataSource {
 
   public SimpleDateFormat getDateFormat() {
     return new SimpleDateFormat(dateFormatString);
+  }
+
+  public String getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
   }
 }

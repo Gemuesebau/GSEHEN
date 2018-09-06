@@ -26,10 +26,11 @@ public class DayDataChanged extends GsehenEvent {
   /**
    * Determines whether this event originates from the given weather data source.
    *
-   * @param fieldWeatherDataSource the weather data source to check
+   * @param weatherDataSourceUuid the weather data source to check
    * @return true if this event originates from the given source, false otherwise
    */
-  public boolean isFromWeatherDataSource(WeatherDataSource fieldWeatherDataSource) {
-    return fieldWeatherDataSource != null && fieldWeatherDataSource.equals(weatherDataSource);
+  public boolean isFromWeatherDataSource(String weatherDataSourceUuid) {
+    return weatherDataSourceUuid != null &&
+        weatherDataSourceUuid.equals(weatherDataSource.getUuid());
   }
 }

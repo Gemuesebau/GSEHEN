@@ -50,7 +50,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -73,17 +72,15 @@ import javafx.stage.WindowEvent;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.hibernate.query.Query; 
 
 /**
  * The GSEHEN main application.
@@ -131,6 +128,7 @@ public class Gsehen extends Application {
   private boolean dataChanged;
   private List<SoilProfile> soilProfilesList;
   private List<WeatherDataSource> weatherDataSourcesList;
+  private List<Crop> crops;
   private static Gsehen instance;
 
   {
@@ -138,6 +136,8 @@ public class Gsehen extends Application {
 
     soilProfilesList = loadAll(SoilProfile.class);
     weatherDataSourcesList = loadAll(WeatherDataSource.class);
+    LOGGER.log(Level.INFO, "Loaded Croplist");
+    crops = loadAll(Crop.class);
 
     mainBundle = ResourceBundle.getBundle("i18n.main", getSelectedLocale());
   }
@@ -264,6 +264,7 @@ public class Gsehen extends Application {
     } catch (Exception e) {
       em.getTransaction().rollback();
     } finally {
+      LOGGER.log(Level.INFO, "Loading from PostgreSQL was successful!");
       em.close();
     }
   }
@@ -325,7 +326,8 @@ public class Gsehen extends Application {
     return targetObject;
   }
 
-  private static String[] extractKeyParts(ResultSet sourceResultSet, String[] sourceKey) throws SQLException {
+  private static String[] extractKeyParts(ResultSet sourceResultSet, String[] sourceKey)
+      throws SQLException {
     String[] result = new String[sourceKey.length];
     int index = 0;
     for (String sourceKeyPart : sourceKey) {
@@ -447,6 +449,13 @@ public class Gsehen extends Application {
       em.getTransaction().begin();
       for (Farm farm : farmsList) {
         em.merge(farm);
+      }
+      for (SoilProfile soilProfile : soilProfilesList) {
+        em.merge(soilProfile);        
+      }
+      
+      for (WeatherDataSource dataSource : weatherDataSourcesList) {
+        em.merge(dataSource);        
       }
 
       for (Farm deletedFarm : this.getDeletedFarms()) {
@@ -771,10 +780,6 @@ public class Gsehen extends Application {
     }
   }
 
-  public Locale getSelectedLocale() {
-    return Locale.GERMAN; // FIXME make user-selectable
-  }
-
   public List<SoilProfile> getSoilProfiles() {
     return soilProfilesList;
   }
@@ -783,17 +788,15 @@ public class Gsehen extends Application {
     return weatherDataSourcesList;
   }
 
-  public static String getUuid() {
-    return UUID.randomUUID().toString();
+  public List<Crop> getCrops() {
+    return crops;
   }
 
   /**
-   * Lookup method for a SoilProfile, using its uuid.
-   * TODO alternatively, or additionally, use a Map for SoilProfiles,
-   * and not (just) the list as obtained from the DB.
+   * Lookup method for a SoilProfile, using its UUID.
    *
-   * @param soilProfileUuid the uuid of the SoilProfile to lookup
-   * @return the SoilProfile with the given uuid, or null if no such SoilProfile exists
+   * @param soilProfileUuid the UUID of the SoilProfile to lookup
+   * @return the SoilProfile with the given UUID, or null if no such SoilProfile exists
    */
   public SoilProfile getSoilProfileForUuid(String soilProfileUuid) {
     for (SoilProfile soilProfile : soilProfilesList) {
@@ -802,5 +805,24 @@ public class Gsehen extends Application {
       }
     }
     return null;
+  }
+
+  /**
+   * Lookup method for a WeatherDataSource, using its UUID.
+   *
+   * @param weatherDataSourceUuid the UUID of the WeatherDataSource to lookup
+   * @return the WeatherDataSource with the given UUID, or null if no such WeatherDataSource exists
+   */
+  public WeatherDataSource getWeatherDataSourceForUuid(String weatherDataSourceUuid) {
+    for (WeatherDataSource weatherDataSource : weatherDataSourcesList) {
+      if (weatherDataSource.getUuid().equals(weatherDataSourceUuid)) {
+        return weatherDataSource;
+      }
+    }
+    return null;
+  }
+
+  public Locale getSelectedLocale() {
+    return Locale.GERMAN; // FIXME make a user choice/option in UI
   }
 }
