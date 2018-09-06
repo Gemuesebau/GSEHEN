@@ -519,11 +519,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
-        try {
-          EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
-          EntityManager em = emf.createEntityManager();
           try {
-            em.getTransaction().begin();
             plot.setName(name.getText());
             plot.setCrop(cropChoiceBox.getValue());
 
@@ -538,18 +534,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             plot.setSoilStartValue(Double.valueOf(soilStartValue.getText()));
             plot.setIsActive(isActive);
             plot.setScalingFactor(scalingFactor.getValue());
-
-            em.getTransaction().commit();
-          } catch (Exception d) {
-            em.getTransaction().rollback();
-          } finally {
-            em.close();
-          }
         } finally {
           gsehenInstance.sendFarmDataChanged(plot, null);
         }
       }
     });
+    
     VBox bottomBox = new VBox();
     bottomBox.setPadding(new Insets(20, 20, 20, 20));
     bottomBox.getChildren().addAll(watering, save);
