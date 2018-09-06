@@ -6,6 +6,7 @@ import java.util.Date;
 
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Crop;
+import de.hgu.gsehen.model.CropDevelopmentStatus;
 import de.hgu.gsehen.model.Plot;
 
 
@@ -18,16 +19,39 @@ public class DailyBalance {
     Date cropEnd = plot.getCropEnd();
     Date soilStart = plot.getSoilStartDate();
     Crop crop = plot.getCrop();
+    CropDevelopmentStatus cropDevelopmentStatus = plot.getCropDevelopmentStatus();
     Double kc1 = crop.getKc1();
     Double kc2 = crop.getKc2();
     Double kc3 = crop.getKc3();
     Double kc4 = crop.getKc4();
     Double soilKc = 0.3;
     Double currentKc = null;
-    int phase1 = crop.getPhase1();
-    Integer phase2 = crop.getPhase2();
-    Integer phase3 = crop.getPhase3();
-    Integer phase4 = crop.getPhase4();
+    int phase1;
+    Integer phase2;
+    Integer phase3;
+    Integer phase4;
+    if (cropDevelopmentStatus.getPhase1() != null) {
+      phase1 = cropDevelopmentStatus.getPhase1();
+    } else {
+      phase1 = crop.getPhase1();
+    }
+
+    if (cropDevelopmentStatus.getPhase2() != null) {
+      phase2 = cropDevelopmentStatus.getPhase2();
+    } else {
+      phase2 = crop.getPhase2();
+    }
+
+    if (cropDevelopmentStatus.getPhase3() != null) {
+      phase3 = cropDevelopmentStatus.getPhase3();
+    } else {
+      phase3 = crop.getPhase3();
+    }
+    if (cropDevelopmentStatus.getPhase4() != null) {
+      phase4 = cropDevelopmentStatus.getPhase4();
+    } else {
+      phase4 = crop.getPhase4();
+    }
 
     if (soilStart == null && cropStart == null) {
       currentKc = 0.0;

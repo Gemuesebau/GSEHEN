@@ -1,16 +1,17 @@
 package de.hgu.gsehen.gsbalance;
 
-import de.hgu.gsehen.evapotranspiration.DayData;
-import de.hgu.gsehen.model.Crop;
-import de.hgu.gsehen.model.Plot;
-import de.hgu.gsehen.model.Soil;
-import de.hgu.gsehen.model.SoilProfile;
-import de.hgu.gsehen.model.SoilProfileDepth;
-
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+
+import de.hgu.gsehen.evapotranspiration.DayData;
+import de.hgu.gsehen.model.Crop;
+import de.hgu.gsehen.model.CropDevelopmentStatus;
+import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.model.Soil;
+import de.hgu.gsehen.model.SoilProfile;
+import de.hgu.gsehen.model.SoilProfileDepth;
 
 public class TotalBalance {
 
@@ -21,16 +22,39 @@ public class TotalBalance {
     Date cropEnd = plot.getCropEnd();
     Date soilStart = plot.getSoilStartDate();
     Crop crop = plot.getCrop();
+    CropDevelopmentStatus cropDevelopmentStatus = plot.getCropDevelopmentStatus();
     Integer rootingZone1 = crop.getRootingZone1();
     Integer rootingZone2 = crop.getRootingZone2();
     Integer rootingZone3 = crop.getRootingZone3();
     Integer rootingZone4 = crop.getRootingZone4();
     Integer soilZone = 10;
     Integer currentRootingZone = null;
-    int phase1 = crop.getPhase1();
-    Integer phase2 = crop.getPhase2();
-    Integer phase3 = crop.getPhase3();
-    Integer phase4 = crop.getPhase4();
+    int phase1;
+    Integer phase2;
+    Integer phase3;
+    Integer phase4;
+    if (cropDevelopmentStatus.getPhase1() != null) {
+      phase1 = cropDevelopmentStatus.getPhase1();
+    } else {
+      phase1 = crop.getPhase1();
+    }
+
+    if (cropDevelopmentStatus.getPhase2() != null) {
+      phase2 = cropDevelopmentStatus.getPhase2();
+    } else {
+      phase2 = crop.getPhase2();
+    }
+
+    if (cropDevelopmentStatus.getPhase3() != null) {
+      phase3 = cropDevelopmentStatus.getPhase3();
+    } else {
+      phase3 = crop.getPhase3();
+    }
+    if (cropDevelopmentStatus.getPhase4() != null) {
+      phase4 = cropDevelopmentStatus.getPhase4();
+    } else {
+      phase4 = crop.getPhase4();
+    }
 
     if (soilStart == null && cropStart == null) {
       currentRootingZone = 0;
@@ -183,9 +207,8 @@ public class TotalBalance {
       } else {
         Double availableWater = currentAvailableSoilWater * 0.3 - waterContentToAim;
         recommendedAction.setAvailableWater(availableWater);
-        recommendedAction.setAvailableWaterPercent(
-            (availableWater / (currentAvailableSoilWater * 0.3)) * 100
-        );
+        recommendedAction
+            .setAvailableWaterPercent((availableWater / (currentAvailableSoilWater * 0.3)) * 100);
         if (plot.getCalculationPaused()) {
           recommendedAction.setRecommendation(RecommendedActionEnum.PAUSE);
         } else {
@@ -193,8 +216,7 @@ public class TotalBalance {
             recommendedAction.setRecommendation(RecommendedActionEnum.SOON);
             recommendedAction.setAvailableWater(availableWater);
             recommendedAction.setProjectedDaysToIrrigation(
-                (int)Math.floor(availableWater / currentDay.getEtc())
-            );
+                (int) Math.floor(availableWater / currentDay.getEtc()));
           } else {
             recommendedAction.setRecommendation(RecommendedActionEnum.IRRIGATION);
             recommendedAction.setWaterContentToAim(waterContentToAim);
