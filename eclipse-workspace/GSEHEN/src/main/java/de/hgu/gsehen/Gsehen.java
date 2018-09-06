@@ -80,7 +80,7 @@ import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.hibernate.query.Query; 
 
 /**
  * The GSEHEN main application.
