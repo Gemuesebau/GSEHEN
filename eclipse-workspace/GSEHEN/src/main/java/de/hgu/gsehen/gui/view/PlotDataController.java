@@ -5,6 +5,7 @@ import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.CropPhase;
 import de.hgu.gsehen.model.Crop;
+import de.hgu.gsehen.model.CropDevelopmentStatus;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.ManualData;
@@ -59,9 +60,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
   private final Timeline timeline = new Timeline();
@@ -70,6 +68,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   private List<Crop> cropList = new ArrayList<>();
   private ObservableList<CropPhase> cropPhaseList;
+  private CropDevelopmentStatus devCrop;
 
   private TreeItem<Drawable> selectedItem;
   private Field field;
@@ -253,7 +252,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
-    // TODO - Tabelle einbauen!
     phaseTable = new TableView();
     phaseTable.setEditable(true);
 
@@ -287,7 +285,16 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       public void handle(CellEditEvent<CropPhase, String> t) {
         ((CropPhase) t.getTableView().getItems().get(t.getTablePosition().getRow()))
             .setDuration(t.getNewValue());
-
+        CropDevelopmentStatus devCrop = plot.getCropDevelopmentStatus();
+        if (phaseTable.getFocusModel().getFocusedIndex() == 0) {
+          devCrop.setPhase1(Integer.valueOf(t.getNewValue()));
+        } else if (phaseTable.getFocusModel().getFocusedIndex() == 1) {
+          devCrop.setPhase2(Integer.valueOf(t.getNewValue()));
+        } else if (phaseTable.getFocusModel().getFocusedIndex() == 2) {
+          devCrop.setPhase3(Integer.valueOf(t.getNewValue()));
+        } else if (phaseTable.getFocusModel().getFocusedIndex() == 3) {
+          devCrop.setPhase4(Integer.valueOf(t.getNewValue()));
+        }
       }
     });
 
@@ -568,21 +575,29 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
-          try {
-            plot.setName(name.getText());
-            plot.setCrop(cropChoiceBox.getValue());
+        try {
+          plot.setName(name.getText());
+          plot.setCrop(cropChoiceBox.getValue());
+          if (plot.getCropDevelopmentStatus() == null) {
+            devCrop = new CropDevelopmentStatus();
+            devCrop.setPhase1(plot.getCrop().getPhase1());
+            devCrop.setPhase2(plot.getCrop().getPhase2());
+            devCrop.setPhase3(plot.getCrop().getPhase3());
+            devCrop.setPhase4(plot.getCrop().getPhase4());
+          }
+          plot.setCropDevelopmentStatus(devCrop);
 
-            LocalDate localDate = soilStart.getValue();
-            LocalDate cropDate = cropStart.getValue();
-            Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            Date cropdate = Date.from(cropDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+          LocalDate localDate = soilStart.getValue();
+          LocalDate cropDate = cropStart.getValue();
+          Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+          Date cropdate = Date.from(cropDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-            plot.setSoilStartDate(date);
-            plot.setCropStart(cropdate);
-            plot.setRootingZone(Double.valueOf(rootingZone.getText()));
-            plot.setSoilStartValue(Double.valueOf(soilStartValue.getText()));
-            plot.setIsActive(isActive);
-            plot.setScalingFactor(scalingFactor.getValue());
+          plot.setSoilStartDate(date);
+          plot.setCropStart(cropdate);
+          plot.setRootingZone(Double.valueOf(rootingZone.getText()));
+          plot.setSoilStartValue(Double.valueOf(soilStartValue.getText()));
+          plot.setIsActive(isActive);
+          plot.setScalingFactor(scalingFactor.getValue());
         } finally {
           gsehenInstance.sendFarmDataChanged(plot, null);
         }
@@ -665,39 +680,38 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                         java.time.LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
                     Date cropStartDate = plot.getCropStart();
-                    System.out.println(cropStartDate);
 
-                    if (plot.getCrop().getPhase2() == 0) {
-                      cropPhaseList = FXCollections
-                          .observableArrayList(new CropPhase(1, plot.getCrop().getDescription(),
-                              today, cropStartDate, String.valueOf(plot.getCrop().getPhase1())));
-                      phaseTable.getItems().addAll(cropPhaseList);
-                    } else if (plot.getCrop().getPhase3() == 0) {
+                    if (plot.getCropDevelopmentStatus().getPhase2() == 0) {
                       cropPhaseList = FXCollections.observableArrayList(
                           new CropPhase(1, plot.getCrop().getDescription(), today, cropStartDate,
-                              String.valueOf(plot.getCrop().getPhase1())),
-                          new CropPhase(2, plot.getCrop().getDescription(), today, cropStartDate,
-                              String.valueOf(plot.getCrop().getPhase2())));
+                              String.valueOf(plot.getCropDevelopmentStatus().getPhase1())));
                       phaseTable.getItems().addAll(cropPhaseList);
-                    } else if (plot.getCrop().getPhase4() == 0) {
+                    } else if (plot.getCropDevelopmentStatus().getPhase3() == 0) {
                       cropPhaseList = FXCollections.observableArrayList(
                           new CropPhase(1, plot.getCrop().getDescription(), today, cropStartDate,
-                              String.valueOf(plot.getCrop().getPhase1())),
+                              String.valueOf(plot.getCropDevelopmentStatus().getPhase1())),
                           new CropPhase(2, plot.getCrop().getDescription(), today, cropStartDate,
-                              String.valueOf(plot.getCrop().getPhase2())),
+                              String.valueOf(plot.getCropDevelopmentStatus().getPhase2())));
+                      phaseTable.getItems().addAll(cropPhaseList);
+                    } else if (plot.getCropDevelopmentStatus().getPhase4() == 0) {
+                      cropPhaseList = FXCollections.observableArrayList(
+                          new CropPhase(1, plot.getCrop().getDescription(), today, cropStartDate,
+                              String.valueOf(plot.getCropDevelopmentStatus().getPhase1())),
+                          new CropPhase(2, plot.getCrop().getDescription(), today, cropStartDate,
+                              String.valueOf(plot.getCropDevelopmentStatus().getPhase2())),
                           new CropPhase(3, plot.getCrop().getDescription(), today, cropStartDate,
-                              String.valueOf(plot.getCrop().getPhase3())));
+                              String.valueOf(plot.getCropDevelopmentStatus().getPhase3())));
                       phaseTable.getItems().addAll(cropPhaseList);
                     } else {
                       cropPhaseList = FXCollections.observableArrayList(
                           new CropPhase(1, plot.getCrop().getDescription(), today, cropStartDate,
-                              String.valueOf(plot.getCrop().getPhase1())),
+                              String.valueOf(plot.getCropDevelopmentStatus().getPhase1())),
                           new CropPhase(2, plot.getCrop().getDescription(), today, cropStartDate,
-                              String.valueOf(plot.getCrop().getPhase2())),
+                              String.valueOf(plot.getCropDevelopmentStatus().getPhase2())),
                           new CropPhase(3, plot.getCrop().getDescription(), today, cropStartDate,
-                              String.valueOf(plot.getCrop().getPhase3())),
+                              String.valueOf(plot.getCropDevelopmentStatus().getPhase3())),
                           new CropPhase(4, plot.getCrop().getDescription(), today, cropStartDate,
-                              String.valueOf(plot.getCrop().getPhase4())));
+                              String.valueOf(plot.getCropDevelopmentStatus().getPhase4())));
                       phaseTable.getItems().addAll(cropPhaseList);
                     }
                   }
