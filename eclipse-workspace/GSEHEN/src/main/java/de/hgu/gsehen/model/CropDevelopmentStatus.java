@@ -5,16 +5,16 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class CropDevelopmentStatus {
 
-  private int phase1;
+  private Integer phase1;
   private Integer phase2;
   private Integer phase3;
   private Integer phase4;
 
-  public int getPhase1() {
+  public Integer getPhase1() {
     return phase1;
   }
 
-  public void setPhase1(int phase1) {
+  public void setPhase1(Integer phase1) {
     this.phase1 = phase1;
   }
 
