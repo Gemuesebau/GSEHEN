@@ -399,11 +399,13 @@ public class Gsehen extends Application {
    *          if SELECTing from PostgreSQL, or saving into local DB, fails
    */
   private static void transferPropertiesFromPgToMessages(ResultSet rs, Messages messages) {
-//    try {
-//      //messages.set...(...);
-//    } catch (SQLException e) {
-//      throw new RuntimeException("Property transfer: can't get or set property", e);
-//    }
+    try {
+      messages.setKey(rs.getString("key"));
+      messages.setLocaleId(rs.getString("locale_id"));
+      messages.setText(rs.getString("text"));
+    } catch (SQLException e) {
+      throw new RuntimeException("Property transfer: can't get or set property", e);
+    }
   }
 
   /**
