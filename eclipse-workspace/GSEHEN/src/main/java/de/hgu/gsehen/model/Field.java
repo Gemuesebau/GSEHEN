@@ -21,8 +21,7 @@ public class Field extends Drawable implements DrawableParent {
   @Id
   @GeneratedValue
   private long id;
-  @OneToOne (cascade = {CascadeType.ALL})
-  private WeatherDataSource weatherDataSource;
+  private String weatherDataSourceUuid;
   private String soilProfileUuid;
   private Double rootingZone;
   @OneToOne
@@ -75,12 +74,12 @@ public class Field extends Drawable implements DrawableParent {
     this.polygon = polygon != null ? polygon : new GeoPolygon();
   }
 
-  public WeatherDataSource getWeatherDataSource() {
-    return weatherDataSource;
+  public String getWeatherDataSourceUuid() {
+    return weatherDataSourceUuid;
   }
 
-  public void setWeatherDataSource(WeatherDataSource weatherDataSource) {
-    this.weatherDataSource = weatherDataSource;
+  public void setWeatherDataSourceUuid(String weatherDataSourceUuid) {
+    this.weatherDataSourceUuid = weatherDataSourceUuid;
   }
 
   public String getSoilProfileUuid() {
@@ -103,6 +102,7 @@ public class Field extends Drawable implements DrawableParent {
     return location;
   }
 
+  // ??? FIXME setLocation ???
   public void setGeoPoint(GeoPoint location) {
     this.location = location;
   }

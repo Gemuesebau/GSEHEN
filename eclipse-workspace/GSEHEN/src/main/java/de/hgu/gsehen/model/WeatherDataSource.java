@@ -26,6 +26,14 @@ public class WeatherDataSource {
   private double locationLat;
   private double locationMetersAboveSeaLevel;
 
+  public WeatherDataSource(String uuid) {
+    this();
+    this.uuid = uuid;
+  }
+
+  public WeatherDataSource() {
+  }
+
   public long getId() {
     return id;
   }

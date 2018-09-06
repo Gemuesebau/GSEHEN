@@ -655,7 +655,7 @@ public class FieldDataController extends Application
         }
         for (WeatherDataSource wds : weatherDataSourceList) {
           if (wds == weatherData.getValue()) {
-            field.setWeatherDataSource(wds);
+            field.setWeatherDataSourceUuid(wds.getUuid());
           }
         }
         gsehenInstance.sendFarmDataChanged(field, null);
@@ -722,8 +722,11 @@ public class FieldDataController extends Application
                   area.setText(String.valueOf(field.getPolygon().calculateArea()));
 
                   for (WeatherDataSource wds : weatherDataSourceList) {
-                    if (field.getWeatherDataSource() != null
-                        && wds.getName().equals(field.getWeatherDataSource().getName())) {
+                    final WeatherDataSource weatherDataSource =
+                        gsehenInstance.getWeatherDataSourceForUuid(
+                            field.getWeatherDataSourceUuid());
+                    if (weatherDataSource != null
+                        && wds.getName().equals(weatherDataSource.getName())) {
                       weatherData.getSelectionModel().select(wds);
                       wdsFile = wds;
                     }
@@ -1009,7 +1012,7 @@ public class FieldDataController extends Application
 
             pane.getChildren().clear();
             treeTableView.setVisible(true);
-            wds = new WeatherDataSource();
+            wds = new WeatherDataSource(DBUtil.generateUuid());
             wds.setName(weatherDataName.getText());
             wds.setMeasIntervalSeconds(Integer.valueOf(interval.getText()));
             wds.setWindspeedMeasHeightMeters(Double.valueOf(windspeed.getText()));

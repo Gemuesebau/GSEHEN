@@ -2,17 +2,13 @@ package de.hgu.gsehen.gsbalance;
 
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
-//import de.hgu.gsehen.event.GsehenEventListener;
-//import de.hgu.gsehen.event.RecommendedActionChanged;
 import de.hgu.gsehen.model.WeatherDataSource;
 import de.hgu.gsehen.util.DateUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -25,7 +21,6 @@ public class DayDataCalculation {
 
   {
     gsehenInstance = Gsehen.getInstance();
-    //gsehenInstance.registerForEvent(RecommendedActionChanged.class, this);
   }
 
   private static final Logger LOGGER = Logger.getLogger(DayDataCalculation.class.getName());
@@ -57,7 +52,7 @@ public class DayDataCalculation {
   public void recalculateDayData() {
     final ScriptEngine engine = prepareScriptEngine();
     final Date today = DateUtil.truncToDay(new Date());
-    for (WeatherDataSource weatherDataSource : loadWeatherDataSources()) {
+    for (WeatherDataSource weatherDataSource : gsehenInstance.getWeatherDataSources()) {
       DayData dayData = null;
       try {
         dayData = (DayData)((Invocable)engine)
@@ -82,33 +77,4 @@ public class DayDataCalculation {
     }
     return engine;
   }
-
-  private List<WeatherDataSource> loadWeatherDataSources() {
-    // FIXME actually load configured WDSs from DB
-    //EntityManager em = Persistence.createEntityManagerFactory("GSEHEN").createEntityManager();
-    //CriteriaBuilder builder = em.getCriteriaBuilder();
-    //CriteriaQuery<WeatherDataSource> criteria = builder.createQuery(WeatherDataSource.class);
-    //Root<WeatherDataSource> dayDataRoot = criteria.from(WeatherDataSource.class);
-    //criteria.select(dayDataRoot);
-    //return em.createQuery(criteria).getResultList();
-    WeatherDataSource weatherDataSource = new WeatherDataSource();
-    weatherDataSource.setName("CSV-Importer");
-    weatherDataSource.setMeasIntervalSeconds(600);
-    weatherDataSource.setWindspeedMeasHeightMeters(2);
-    weatherDataSource.setDateFormatString("d.M.y");
-    weatherDataSource.setNumberLocaleId("GERMAN");
-    weatherDataSource.setDataFilePath(
-        System.getProperty("user.dir")
-        + "\\src\\main\\resources\\de\\hgu\\gsehen\\csv\\GeisenheimKlima.csv"
-    );
-    weatherDataSource.setLocationLng(7.95);
-    weatherDataSource.setLocationLat(49.99);
-    weatherDataSource.setLocationMetersAboveSeaLevel(110);
-    return Arrays.asList(weatherDataSource);
-  }
-
-  //@Override
-  //public void handle(RecommendedActionChanged event) {
-  //
-  //}
 }
