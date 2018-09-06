@@ -446,6 +446,13 @@ public class Gsehen extends Application {
       for (Farm farm : farmsList) {
         em.merge(farm);
       }
+      for (SoilProfile soilProfile : soilProfilesList) {
+        em.merge(soilProfile);        
+      }
+      
+      for (WeatherDataSource dataSource : weatherDataSourcesList) {
+        em.merge(dataSource);        
+      }
 
       for (Farm deletedFarm : this.getDeletedFarms()) {
         em.remove(em.contains(deletedFarm) ? deletedFarm : em.merge(deletedFarm));
