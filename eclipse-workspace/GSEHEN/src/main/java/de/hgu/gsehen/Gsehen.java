@@ -128,6 +128,7 @@ public class Gsehen extends Application {
   private boolean dataChanged;
   private List<SoilProfile> soilProfilesList;
   private List<WeatherDataSource> weatherDataSourcesList;
+  private List<Crop> crops;
   private static Gsehen instance;
 
   {
@@ -135,6 +136,7 @@ public class Gsehen extends Application {
 
     soilProfilesList = loadAll(SoilProfile.class);
     weatherDataSourcesList = loadAll(WeatherDataSource.class);
+    crops = loadAll(Crop.class);
 
     mainBundle = ResourceBundle.getBundle("i18n.main", getSelectedLocale());
   }
@@ -782,6 +784,10 @@ public class Gsehen extends Application {
 
   public List<WeatherDataSource> getWeatherDataSources() {
     return weatherDataSourcesList;
+  }
+
+  public List<Crop> getCrops() {
+    return crops;
   }
 
   /**

@@ -54,8 +54,6 @@ import javafx.util.StringConverter;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
 
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
   private final Timeline timeline = new Timeline();
@@ -92,6 +90,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   {
     gsehenInstance = Gsehen.getInstance();
+    cropList = gsehenInstance.getCrops();
+
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
 
     mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
@@ -220,18 +220,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     Text crop = new Text(mainBundle.getString("plotview.crop"));
     crop.setFont(Font.font("Arial", 14));
-
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
-    EntityManager em = emf.createEntityManager();
-    if (cropList.isEmpty()) {
-      try {
-        Session session = em.unwrap(Session.class);
-        Query<Crop> query = session.createQuery("from Crop");
-        cropList = query.list();
-      } finally {
-        em.close();
-      }
-    }
 
     ChoiceBox<Crop> cropChoiceBox = new ChoiceBox<Crop>();
     if (!cropList.isEmpty()) {
