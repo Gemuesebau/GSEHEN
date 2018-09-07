@@ -14,6 +14,7 @@ public class CropPhase {
   private Date today;
   private Date cropStart;
   private String duration;
+  private String rootingZone;
 
   public CropPhase() {
     super();
@@ -32,15 +33,18 @@ public class CropPhase {
    *          - The date, the crop was set.
    * @param duration
    *          - Phase duration in days.
+   * @param rootingZone
+   *          - RootingZone of each phase.
    */
-  public CropPhase(Integer phase, String description, Date today, Date cropStart,
-      String duration) {
+  public CropPhase(Integer phase, String description, Date today, Date cropStart, String duration,
+      String rootingZone) {
 
     this.setPhase(phase);
     this.description = description;
     this.setToday(today);
     this.setCropStart(cropStart);
     this.setDuration(duration);
+    this.rootingZone = rootingZone;
 
   }
 
@@ -82,5 +86,13 @@ public class CropPhase {
 
   public void setDuration(String duration) {
     this.duration = duration;
+  }
+
+  public String getRootingZone() {
+    return rootingZone;
+  }
+
+  public void setRootingZone(String rootingZone) {
+    this.rootingZone = rootingZone;
   }
 }
