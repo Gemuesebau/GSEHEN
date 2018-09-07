@@ -731,6 +731,14 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                     soilStartValue.setText(String.valueOf(plot.getSoilStartValue()));
                   }
 
+                  if (plot.getCropDevelopmentStatus() != null) {
+                    devCrop = plot.getCropDevelopmentStatus();
+                  }
+
+                  if (plot.getCropRootingZone() != null) {
+                    devRoot = plot.getCropRootingZone();
+                  }
+
                   setTableData();
 
                 } else {
