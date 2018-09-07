@@ -8,12 +8,12 @@ public class CropDevelopmentStatus {
   public CropDevelopmentStatus() {};
 
   /**
-   * Class inheritng manually provied bbch phase lengths for the actual crop.
+   * Class inheritng manually provied bbch phase lengths in days for the actual crop.
    * 
-   * @param phase1
-   * @param phase2
-   * @param phase3
-   * @param phase4
+   * @param phase1 BBCH phase 1
+   * @param phase2 BBCH phase 2
+   * @param phase3 BBCH phase 3
+   * @param phase4 BBCH phase 4
    */
   public CropDevelopmentStatus(Integer phase1, Integer phase2, Integer phase3, Integer phase4) {
     super();
