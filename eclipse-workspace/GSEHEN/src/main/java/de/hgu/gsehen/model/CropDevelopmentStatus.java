@@ -7,6 +7,14 @@ public class CropDevelopmentStatus {
 
   public CropDevelopmentStatus() {};
 
+  /**
+   * Class inheritng manually provied bbch phase lengths for the actual crop.
+   * 
+   * @param phase1
+   * @param phase2
+   * @param phase3
+   * @param phase4
+   */
   public CropDevelopmentStatus(Integer phase1, Integer phase2, Integer phase3, Integer phase4) {
     super();
     this.phase1 = phase1;

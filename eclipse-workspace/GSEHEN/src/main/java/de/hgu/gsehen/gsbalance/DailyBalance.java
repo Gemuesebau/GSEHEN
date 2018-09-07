@@ -13,6 +13,12 @@ import de.hgu.gsehen.model.Plot;
 public class DailyBalance {
 
 
+  /**
+   * Method to determine the current kc-value for the day and actual crop on the plot.
+   * 
+   * @param dayData the day
+   * @param plot the Plot
+   */
   public static void determineCurrentKc(DayData dayData, Plot plot) {
     Date today = dayData.getDate();
     Date cropStart = plot.getCropStart();
@@ -104,6 +110,12 @@ public class DailyBalance {
 
 
 
+  /**
+   * Calculates the actual/current crop evapotranspiration.
+   * 
+   * @param dayData the day
+   * @param plot the plot
+   */
   public static void calculateEtc(DayData dayData, Plot plot) {
     // TODO: Add logging event
     Double et0 = dayData.getEt0();
@@ -117,6 +129,12 @@ public class DailyBalance {
 
 
 
+  /**
+   * Method to calculate the daily water balance.
+   * 
+   * @param dayData the day
+   * @throws IllegalStateException if prerequisites are not fullfilled
+   */
   public static void calculateDailyBalance(DayData dayData) throws IllegalStateException {
     Double precipitation = dayData.getPrecipitation();
     if (precipitation == null) {
