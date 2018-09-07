@@ -91,7 +91,7 @@ import org.hibernate.query.Query;
 public class Gsehen extends Application {
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   protected final ResourceBundle mainBundle;
-
+  
   private static final String MAIN_FXML = "main.fxml";
 
   public static final String MAIN_SPLIT_PANE_ID = "#mainSplitPane";

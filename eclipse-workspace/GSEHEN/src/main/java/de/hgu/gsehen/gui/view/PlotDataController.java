@@ -98,6 +98,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private boolean isActive = true;
   private HBox bottomBox;
   private Text error;
+  private Date formattedCropStartDate;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -258,15 +259,17 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       @Override
       public void changed(ObservableValue<? extends Crop> observable, //
           Crop oldValue, Crop newValue) {
-        // TODO - Listener wird auch beim Klick im TTV aktiviert und "löscht" damit Änderungen!
-        plot.setCrop(newValue);
-        devCrop = new CropDevelopmentStatus();
-        devCrop.setPhase1(plot.getCrop().getPhase1());
-        devCrop.setPhase2(plot.getCrop().getPhase2());
-        devCrop.setPhase3(plot.getCrop().getPhase3());
-        devCrop.setPhase4(plot.getCrop().getPhase4());
-        plot.setCropDevelopmentStatus(devCrop);
-        setTableData();
+        if (oldValue != newValue && oldValue != null) {
+          System.out.println(oldValue + " & " + newValue);
+          plot.setCrop(newValue);
+          devCrop = new CropDevelopmentStatus();
+          devCrop.setPhase1(plot.getCrop().getPhase1());
+          devCrop.setPhase2(plot.getCrop().getPhase2());
+          devCrop.setPhase3(plot.getCrop().getPhase3());
+          devCrop.setPhase4(plot.getCrop().getPhase4());
+          plot.setCropDevelopmentStatus(devCrop);
+          setTableData();
+        }
       }
     };
     cropChoiceBox.getSelectionModel().selectedItemProperty().addListener(changeListener);
@@ -721,37 +724,65 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           .from(java.time.LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
       Date cropStartDate = plot.getCropStart();
+      DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+      String enddate = formatter.format(cropStartDate);
+      try {
+        formattedCropStartDate = formatter.parse(enddate);
+      } catch (ParseException e) {
+        e.printStackTrace();
+      }
+
+      Calendar calendar = Calendar.getInstance();
+      calendar.setTime(cropStartDate);
 
       if (plot.getCrop().getPhase2() == 0) {
         cropPhaseList = FXCollections
-            .observableArrayList(new CropPhase(1, plot.getCrop().getDescription(), today,
-                cropStartDate, String.valueOf(devCrop.getPhase1())));
+            .observableArrayList(new CropPhase(1, plot.getCrop().getBbch1(), today,
+                formattedCropStartDate, String.valueOf(devCrop.getPhase1())));
         phaseTable.getItems().addAll(cropPhaseList);
       } else if (plot.getCrop().getPhase3() == 0) {
+        calendar.add(Calendar.DAY_OF_YEAR, devCrop.getPhase1());
+        Date datePhase2 = calendar.getTime();
+
         cropPhaseList = FXCollections.observableArrayList(
-            new CropPhase(1, plot.getCrop().getDescription(), today, cropStartDate,
+            new CropPhase(1, plot.getCrop().getBbch1(), today, formattedCropStartDate,
                 String.valueOf(devCrop.getPhase1())),
-            new CropPhase(2, plot.getCrop().getDescription(), today, cropStartDate,
+            new CropPhase(2, plot.getCrop().getBbch2(), today, datePhase2,
                 String.valueOf(devCrop.getPhase2())));
         phaseTable.getItems().addAll(cropPhaseList);
       } else if (plot.getCrop().getPhase4() == 0) {
+        calendar.add(Calendar.DAY_OF_YEAR, devCrop.getPhase1());
+        Date datePhase2 = calendar.getTime();
+        calendar.setTime(datePhase2);
+        calendar.add(Calendar.DAY_OF_YEAR, devCrop.getPhase2());
+        Date datePhase3 = calendar.getTime();
+
         cropPhaseList = FXCollections.observableArrayList(
-            new CropPhase(1, plot.getCrop().getDescription(), today, cropStartDate,
+            new CropPhase(1, plot.getCrop().getBbch1(), today, formattedCropStartDate,
                 String.valueOf(devCrop.getPhase1())),
-            new CropPhase(2, plot.getCrop().getDescription(), today, cropStartDate,
+            new CropPhase(2, plot.getCrop().getBbch2(), today, datePhase2,
                 String.valueOf(devCrop.getPhase2())),
-            new CropPhase(3, plot.getCrop().getDescription(), today, cropStartDate,
+            new CropPhase(3, plot.getCrop().getBbch3(), today, datePhase3,
                 String.valueOf(devCrop.getPhase3())));
         phaseTable.getItems().addAll(cropPhaseList);
       } else {
+        calendar.add(Calendar.DAY_OF_YEAR, devCrop.getPhase1());
+        Date datePhase2 = calendar.getTime();
+        calendar.setTime(datePhase2);
+        calendar.add(Calendar.DAY_OF_YEAR, devCrop.getPhase2());
+        Date datePhase3 = calendar.getTime();
+        calendar.setTime(datePhase3);
+        calendar.add(Calendar.DAY_OF_YEAR, devCrop.getPhase3());
+        Date datePhase4 = calendar.getTime();
+
         cropPhaseList = FXCollections.observableArrayList(
-            new CropPhase(1, plot.getCrop().getDescription(), today, cropStartDate,
+            new CropPhase(1, plot.getCrop().getBbch1(), today, formattedCropStartDate,
                 String.valueOf(devCrop.getPhase1())),
-            new CropPhase(2, plot.getCrop().getDescription(), today, cropStartDate,
+            new CropPhase(2, plot.getCrop().getBbch2(), today, datePhase2,
                 String.valueOf(devCrop.getPhase2())),
-            new CropPhase(3, plot.getCrop().getDescription(), today, cropStartDate,
+            new CropPhase(3, plot.getCrop().getBbch3(), today, datePhase3,
                 String.valueOf(devCrop.getPhase3())),
-            new CropPhase(4, plot.getCrop().getDescription(), today, cropStartDate,
+            new CropPhase(4, plot.getCrop().getBbch4(), today, datePhase4,
                 String.valueOf(devCrop.getPhase4())));
         phaseTable.getItems().addAll(cropPhaseList);
       }
