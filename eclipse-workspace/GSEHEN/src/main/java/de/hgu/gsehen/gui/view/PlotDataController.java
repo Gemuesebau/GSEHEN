@@ -3,7 +3,9 @@ package de.hgu.gsehen.gui.view;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
+import de.hgu.gsehen.gui.CropPhase;
 import de.hgu.gsehen.model.Crop;
+import de.hgu.gsehen.model.CropDevelopmentStatus;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.ManualData;
@@ -30,30 +32,33 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.VPos;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellEditEvent;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
   private final Timeline timeline = new Timeline();
@@ -61,6 +66,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   protected final ResourceBundle mainBundle;
 
   private List<Crop> cropList = new ArrayList<>();
+  private ObservableList<CropPhase> cropPhaseList;
+  private CropDevelopmentStatus devCrop;
 
   private TreeItem<Drawable> selectedItem;
   private Field field;
@@ -69,6 +76,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private Gsehen gsehenInstance;
   private BorderPane pane;
   private TreeTableView<Drawable> treeTableView;
+  private TableView<CropPhase> phaseTable;
 
   private Text nameLabel;
   private Text areaLabel;
@@ -100,15 +108,14 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   /**
    * Constructs a new plot data controller associated with the given BorderPane.
    *
-   * @param pane
-   *          - the associated BorderPane.
+   * @param pane - the associated BorderPane.
    */
   public PlotDataController(Gsehen application, BorderPane pane) {
     this.gsehenInstance = application;
     this.pane = pane;
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void handle(FarmDataChanged event) {
     pane.setVisible(false);
@@ -243,48 +250,69 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
-    // Set Nodes Vertical & Horizontal Alignment
-    GridPane.setHalignment(nameLabel, HPos.LEFT);
-    GridPane.setHalignment(name, HPos.LEFT);
-    GridPane.setHalignment(areaLabel, HPos.LEFT);
-    GridPane.setHalignment(area, HPos.LEFT);
-    GridPane.setHalignment(rootingZoneLabel, HPos.LEFT);
-    GridPane.setHalignment(rootingZone, HPos.LEFT);
-    GridPane.setHalignment(cropStartLabel, HPos.LEFT);
-    GridPane.setHalignment(cropStart, HPos.LEFT);
-    GridPane.setHalignment(soilStartLabel, HPos.LEFT);
-    GridPane.setHalignment(soilStart, HPos.LEFT);
-    GridPane.setHalignment(soilStartValueLabel, HPos.LEFT);
-    GridPane.setHalignment(soilStartValue, HPos.LEFT);
-    GridPane.setHalignment(b2, HPos.LEFT);
-    GridPane.setHalignment(crop, HPos.LEFT);
-    GridPane.setHalignment(cropChoiceBox, HPos.LEFT);
+    ChangeListener<Crop> changeListener = new ChangeListener<Crop>() {
+      @Override
+      public void changed(ObservableValue<? extends Crop> observable, //
+          Crop oldValue, Crop newValue) {
+        // TODO - Listener wird auch beim Klick im TTV aktiviert und "löscht" damit Änderungen!
+        plot.setCrop(newValue);
+        devCrop = new CropDevelopmentStatus();
+        devCrop.setPhase1(plot.getCrop().getPhase1());
+        devCrop.setPhase2(plot.getCrop().getPhase2());
+        devCrop.setPhase3(plot.getCrop().getPhase3());
+        devCrop.setPhase4(plot.getCrop().getPhase4());
+        plot.setCropDevelopmentStatus(devCrop);
+        setTableData();
+      }
+    };
+    cropChoiceBox.getSelectionModel().selectedItemProperty().addListener(changeListener);
 
-    // Set Row & Column Index for Nodes
-    GridPane.setConstraints(nameLabel, 0, 0);
-    GridPane.setConstraints(name, 1, 0);
-    GridPane.setConstraints(areaLabel, 0, 1);
-    GridPane.setConstraints(area, 1, 1);
-    GridPane.setConstraints(rootingZoneLabel, 0, 2);
-    GridPane.setConstraints(rootingZone, 1, 2);
-    GridPane.setConstraints(cropStartLabel, 0, 3);
-    GridPane.setConstraints(cropStart, 1, 3);
-    GridPane.setConstraints(soilStartLabel, 0, 4);
-    GridPane.setConstraints(soilStart, 1, 4);
-    GridPane.setConstraints(soilStartValueLabel, 0, 5);
-    GridPane.setConstraints(soilStartValue, 1, 5);
-    GridPane.setConstraints(crop, 0, 6);
-    GridPane.setConstraints(cropChoiceBox, 1, 6);
-    GridPane.setConstraints(b2, 0, 7);
+    phaseTable = new TableView();
+    phaseTable.setEditable(true);
 
-    top.getChildren().addAll(nameLabel, name, areaLabel, area, rootingZoneLabel, rootingZone,
-        cropStartLabel, cropStart, soilStartLabel, soilStart, soilStartValueLabel, soilStartValue,
-        b2, crop, cropChoiceBox);
+    TableColumn phase = new TableColumn("Phase");
+    TableColumn description = new TableColumn("Beschreibung");
+    TableColumn today = new TableColumn("*");
+    TableColumn startDate = new TableColumn("Startdatum");
+    TableColumn duration = new TableColumn("Dauer");
 
-    pane.setTop(top);
-    // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    phaseTable.getColumns().addAll(phase, description, today, startDate, duration);
 
-    // CENTER ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    phase.setMinWidth(150);
+    phase.setCellValueFactory(new PropertyValueFactory<CropPhase, Integer>("phase"));
+    description.setMinWidth(150);
+    description.setCellValueFactory(new PropertyValueFactory<CropPhase, String>("description"));
+    today.setMinWidth(75);
+    today.setCellValueFactory(new PropertyValueFactory<CropPhase, Date>("today"));
+    startDate.setMinWidth(150);
+    startDate.setCellValueFactory(new PropertyValueFactory<CropPhase, Date>("cropStart"));
+    duration.setMinWidth(150);
+    duration.setCellValueFactory(new PropertyValueFactory<CropPhase, Integer>("duration"));
+
+    phaseTable.setEditable(true);
+    phase.setEditable(false);
+    description.setEditable(false);
+    today.setEditable(false);
+    startDate.setEditable(false);
+    duration.setCellFactory(TextFieldTableCell.forTableColumn());
+    duration.setOnEditCommit(new EventHandler<CellEditEvent<CropPhase, String>>() {
+      @Override
+      public void handle(CellEditEvent<CropPhase, String> t) {
+        ((CropPhase) t.getTableView().getItems().get(t.getTablePosition().getRow()))
+            .setDuration(t.getNewValue());
+        if (phaseTable.getFocusModel().getFocusedIndex() == 0) {
+          devCrop.setPhase1(Integer.valueOf(t.getNewValue()));
+        } else if (phaseTable.getFocusModel().getFocusedIndex() == 1) {
+          devCrop.setPhase2(Integer.valueOf(t.getNewValue()));
+        } else if (phaseTable.getFocusModel().getFocusedIndex() == 2) {
+          devCrop.setPhase3(Integer.valueOf(t.getNewValue()));
+        } else if (phaseTable.getFocusModel().getFocusedIndex() == 3) {
+          devCrop.setPhase4(Integer.valueOf(t.getNewValue()));
+        }
+      }
+    });
+
+    cropPhaseList = FXCollections.observableArrayList();
 
     waterBalanceLabel = new Text(mainBundle.getString("plotview.waterbalance"));
     waterBalanceLabel.setFont(Font.font("Arial", 14));
@@ -292,7 +320,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // Balkendiagramm Wasserbillanz TODO: Farben einbauen/Wassertiefe in scala
     CategoryAxis xaxis;
     NumberAxis yaxis;
-    String[] plote = { "Plot" };
+    String[] plote = {"Plot"};
     xaxis = new CategoryAxis();
     xaxis.setCategories(FXCollections.<String>observableArrayList(plote));
     yaxis = new NumberAxis("cm", 0.0d, 25.0d, 1);
@@ -301,9 +329,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             FXCollections.observableArrayList(new BarChart.Data(plote[0], 7.0d))));
     BarChart chart;
     chart = new BarChart(xaxis, yaxis, barChartData, 25.0d);
-
-    HBox waterBalanceBox = new HBox();
-    waterBalanceBox.getChildren().addAll(waterBalanceLabel, chart);
+    play();
 
     Text scalingFactorLabel = new Text(mainBundle.getString("plotview.scalingfactor"));
     scalingFactorLabel.setFont(Font.font("Arial", 14));
@@ -325,18 +351,62 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
-    HBox scalingBox = new HBox();
-    scalingBox.setPadding(new Insets(10, 0, 10, 0));
-    scalingBox.setSpacing(10);
-    scalingBox.getChildren().addAll(scalingFactorLabel, scalingFactor, scalingValue);
+    // Set Nodes Vertical & Horizontal Alignment
+    GridPane.setHalignment(nameLabel, HPos.LEFT);
+    GridPane.setHalignment(name, HPos.LEFT);
+    GridPane.setHalignment(areaLabel, HPos.LEFT);
+    GridPane.setHalignment(area, HPos.LEFT);
+    GridPane.setHalignment(rootingZoneLabel, HPos.LEFT);
+    GridPane.setHalignment(rootingZone, HPos.LEFT);
+    GridPane.setHalignment(cropStartLabel, HPos.LEFT);
+    GridPane.setHalignment(cropStart, HPos.LEFT);
+    GridPane.setHalignment(soilStartLabel, HPos.LEFT);
+    GridPane.setHalignment(soilStart, HPos.LEFT);
+    GridPane.setHalignment(soilStartValueLabel, HPos.LEFT);
+    GridPane.setHalignment(soilStartValue, HPos.LEFT);
+    GridPane.setHalignment(crop, HPos.LEFT);
+    GridPane.setHalignment(cropChoiceBox, HPos.LEFT);
+    GridPane.setHalignment(phaseTable, HPos.LEFT);
+    GridPane.setHalignment(waterBalanceLabel, HPos.LEFT);
+    GridPane.setHalignment(chart, HPos.LEFT);
+    GridPane.setHalignment(scalingFactorLabel, HPos.LEFT);
+    GridPane.setHalignment(scalingFactor, HPos.LEFT);
+    GridPane.setHalignment(scalingValue, HPos.LEFT);
 
-    VBox centerBox = new VBox();
-    centerBox.setPadding(new Insets(20, 20, 20, 20));
-    centerBox.getChildren().addAll(waterBalanceBox, scalingBox);
-    pane.setCenter(centerBox);
+    // Set Row & Column Index for Nodes
+    GridPane.setConstraints(nameLabel, 0, 0);
+    GridPane.setConstraints(name, 1, 0, 2, 1);
+    GridPane.setConstraints(areaLabel, 0, 1);
+    GridPane.setConstraints(area, 1, 1, 2, 1);
+    GridPane.setConstraints(rootingZoneLabel, 0, 2);
+    GridPane.setConstraints(rootingZone, 1, 2, 2, 1);
+    GridPane.setConstraints(cropStartLabel, 0, 3);
+    GridPane.setConstraints(cropStart, 1, 3, 2, 1);
+    GridPane.setConstraints(soilStartLabel, 0, 4);
+    GridPane.setConstraints(soilStart, 1, 4, 2, 1);
+    GridPane.setConstraints(soilStartValueLabel, 0, 5);
+    GridPane.setConstraints(soilStartValue, 1, 5, 2, 1);
+    GridPane.setConstraints(crop, 0, 6);
+    GridPane.setConstraints(cropChoiceBox, 1, 6, 2, 1);
+    GridPane.setConstraints(phaseTable, 0, 7, 3, 1, HPos.CENTER, VPos.CENTER, Priority.SOMETIMES,
+        Priority.SOMETIMES);
+    GridPane.setConstraints(waterBalanceLabel, 0, 8);
+    GridPane.setConstraints(chart, 1, 8, 2, 1);
+    GridPane.setConstraints(scalingFactorLabel, 0, 9);
+    GridPane.setConstraints(scalingFactor, 1, 9);
+    GridPane.setConstraints(scalingValue, 2, 9);
 
-    play();
-    // CENTER END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    top.getChildren().addAll(nameLabel, name, areaLabel, area, rootingZoneLabel, rootingZone,
+        cropStartLabel, cropStart, soilStartLabel, soilStart, soilStartValueLabel, soilStartValue,
+        b2, crop, cropChoiceBox, phaseTable, waterBalanceLabel, chart, scalingFactorLabel,
+        scalingFactor, scalingValue);
+
+    ScrollPane scrollPane = new ScrollPane();
+    scrollPane.setContent(top);
+    scrollPane.setPannable(true);
+
+    pane.setCenter(scrollPane);
+    // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Button watering = new Button(mainBundle.getString("plotview.watering"));
     watering.setOnAction(new EventHandler<ActionEvent>() {
@@ -419,8 +489,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           }
 
           for (ManualWaterSupply mws : md.getManualWaterSupply()) {
-            Date wateringDate = Date
-                .from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date wateringDate =
+                Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             if ((wateringDate.compareTo(mws.getDate()) == 0)) {
               irrigation.setText(String.valueOf(mws.getIrrigation()));
               precipitation.setText(String.valueOf(mws.getPrecipitation()));
@@ -519,42 +589,43 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
-          try {
-            plot.setName(name.getText());
-            plot.setCrop(cropChoiceBox.getValue());
+        try {
+          plot.setName(name.getText());
+          plot.setCrop(cropChoiceBox.getValue());
 
-            LocalDate localDate = soilStart.getValue();
-            LocalDate cropDate = cropStart.getValue();
-            Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            Date cropdate = Date.from(cropDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+          LocalDate localDate = soilStart.getValue();
+          LocalDate cropDate = cropStart.getValue();
+          Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+          Date cropdate = Date.from(cropDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-            plot.setSoilStartDate(date);
-            plot.setCropStart(cropdate);
-            plot.setRootingZone(Double.valueOf(rootingZone.getText()));
-            plot.setSoilStartValue(Double.valueOf(soilStartValue.getText()));
-            plot.setIsActive(isActive);
-            plot.setScalingFactor(scalingFactor.getValue());
+          plot.setSoilStartDate(date);
+          plot.setCropStart(cropdate);
+          plot.setRootingZone(Double.valueOf(rootingZone.getText()));
+          plot.setSoilStartValue(Double.valueOf(soilStartValue.getText()));
+          plot.setIsActive(isActive);
+          plot.setScalingFactor(scalingFactor.getValue());
         } finally {
           gsehenInstance.sendFarmDataChanged(plot, null);
         }
       }
     });
-    
-    VBox bottomBox = new VBox();
+    HBox bottomBox = new HBox();
     bottomBox.setPadding(new Insets(20, 20, 20, 20));
-    bottomBox.getChildren().addAll(watering, save);
+    bottomBox.setSpacing(10);
+    bottomBox.getChildren().addAll(b2, watering, save);
+
     pane.setBottom(bottomBox);
 
-    treeTableView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
-        .lookup(FARM_TREE_VIEW_ID);
+    treeTableView =
+        (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
     treeTableView.getSelectionModel().selectedItemProperty()
         .addListener(new ChangeListener<Object>() {
           @Override
           public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
             for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
               if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
-                selectedItem = treeTableView.getSelectionModel().getSelectedCells().get(i)
-                    .getTreeItem();
+                selectedItem =
+                    treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
                 if (selectedItem != null
                     && selectedItem.getValue().getClass().getSimpleName().equals("Plot")) {
                   pane.setVisible(true);
@@ -575,34 +646,41 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
                   Date date = plot.getSoilStartDate();
                   Date cropdate = plot.getCropStart();
+
                   if (date != null) {
-                    LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault())
-                        .toLocalDate();
-                    LocalDate cropDate = date.toInstant().atZone(ZoneId.systemDefault())
-                        .toLocalDate();
+                    LocalDate localDate =
+                        date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    LocalDate cropDate =
+                        date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                     soilStart.setValue(localDate);
                     cropStart.setValue(cropDate);
                   } else {
                     soilStart.setValue(null);
                     cropStart.setValue(null);
                   }
+
                   if (cropdate != null) {
-                    LocalDate cropDate = cropdate.toInstant().atZone(ZoneId.systemDefault())
-                        .toLocalDate();
+                    LocalDate cropDate =
+                        cropdate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                     cropStart.setValue(cropDate);
                   } else {
                     cropStart.setValue(null);
                   }
+
                   if (plot.getRootingZone() == null) {
                     rootingZone.setText(String.valueOf(0.0));
                   } else {
                     rootingZone.setText(String.valueOf(plot.getRootingZone()));
                   }
+
                   if (plot.getSoilStartValue() == null) {
                     soilStartValue.setText(String.valueOf(0.0));
                   } else {
                     soilStartValue.setText(String.valueOf(plot.getSoilStartValue()));
                   }
+
+                  setTableData();
+
                 } else {
                   pane.setVisible(false);
                 }
@@ -610,6 +688,54 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             }
           }
         });
+  }
+
+  private void setTableData() {
+    phaseTable.getItems().clear();
+
+    Date cropdate = plot.getCropStart();
+
+    if (cropdate != null && devCrop != null) {
+      Date today =
+          Date.from(java.time.LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+      Date cropStartDate = plot.getCropStart();
+
+      if (plot.getCrop().getPhase2() == 0) {
+        cropPhaseList =
+            FXCollections.observableArrayList(new CropPhase(1, plot.getCrop().getDescription(),
+                today, cropStartDate, String.valueOf(devCrop.getPhase1())));
+        phaseTable.getItems().addAll(cropPhaseList);
+      } else if (plot.getCrop().getPhase3() == 0) {
+        cropPhaseList = FXCollections.observableArrayList(
+            new CropPhase(1, plot.getCrop().getDescription(), today, cropStartDate,
+                String.valueOf(devCrop.getPhase1())),
+            new CropPhase(2, plot.getCrop().getDescription(), today, cropStartDate,
+                String.valueOf(devCrop.getPhase2())));
+        phaseTable.getItems().addAll(cropPhaseList);
+      } else if (plot.getCrop().getPhase4() == 0) {
+        cropPhaseList = FXCollections.observableArrayList(
+            new CropPhase(1, plot.getCrop().getDescription(), today, cropStartDate,
+                String.valueOf(devCrop.getPhase1())),
+            new CropPhase(2, plot.getCrop().getDescription(), today, cropStartDate,
+                String.valueOf(devCrop.getPhase2())),
+            new CropPhase(3, plot.getCrop().getDescription(), today, cropStartDate,
+                String.valueOf(devCrop.getPhase3())));
+        phaseTable.getItems().addAll(cropPhaseList);
+      } else {
+        cropPhaseList = FXCollections.observableArrayList(
+            new CropPhase(1, plot.getCrop().getDescription(), today, cropStartDate,
+                String.valueOf(devCrop.getPhase1())),
+            new CropPhase(2, plot.getCrop().getDescription(), today, cropStartDate,
+                String.valueOf(devCrop.getPhase2())),
+            new CropPhase(3, plot.getCrop().getDescription(), today, cropStartDate,
+                String.valueOf(devCrop.getPhase3())),
+            new CropPhase(4, plot.getCrop().getDescription(), today, cropStartDate,
+                String.valueOf(devCrop.getPhase4())));
+        phaseTable.getItems().addAll(cropPhaseList);
+      }
+    }
+
   }
 
   public void play() {
