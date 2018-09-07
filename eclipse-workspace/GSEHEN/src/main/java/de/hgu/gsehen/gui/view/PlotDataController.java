@@ -593,13 +593,13 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           plot.setName(name.getText());
           plot.setCrop(cropChoiceBox.getValue());
 
-          LocalDate localDate = soilStart.getValue();
-          LocalDate cropDate = cropStart.getValue();
-          Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-          Date cropdate = Date.from(cropDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+          LocalDate localDateCrop = cropStart.getValue();
+          LocalDate localDateSoil = soilStart.getValue();
+          Date soilDate = Date.from(localDateSoil.atStartOfDay(ZoneId.systemDefault()).toInstant());
+          Date cropDate = Date.from(localDateCrop.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-          plot.setSoilStartDate(date);
-          plot.setCropStart(cropdate);
+          plot.setSoilStartDate(soilDate);
+          plot.setCropStart(cropDate);
           plot.setRootingZone(Double.valueOf(rootingZone.getText()));
           plot.setSoilStartValue(Double.valueOf(soilStartValue.getText()));
           plot.setIsActive(isActive);
