@@ -1,6 +1,7 @@
 package de.hgu.gsehen.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -91,6 +92,15 @@ public class CollectionUtil {
     List<T> result = new ArrayList<>();
     for (int i = 0; i < size; i++) {
       result.add(supplier.get());
+    }
+    return result;
+  }
+
+  @SuppressWarnings("checkstyle:javadocmethod")
+  public static <K, V> Map<K, V> listToMap(List<V> list, Function<V, K> keyGenerator) {
+    Map<K, V> result = new HashMap<>();
+    for (V v : list) {
+      result.put(keyGenerator.apply(v), v);
     }
     return result;
   }

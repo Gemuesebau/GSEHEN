@@ -1,7 +1,5 @@
 package de.hgu.gsehen.gui;
 
-import java.util.Date;
-
 /**
  * Class representing a crop phase.
  *
@@ -11,8 +9,8 @@ public class CropPhase {
 
   private Integer phase;
   private String description;
-  private Date today;
-  private Date cropStart;
+  private String todayMarker;
+  private String cropStart;
   private String duration;
   private String rootingZone;
 
@@ -36,12 +34,12 @@ public class CropPhase {
    * @param rootingZone
    *          - RootingZone of each phase.
    */
-  public CropPhase(Integer phase, String description, Date today, Date cropStart, String duration,
+  public CropPhase(Integer phase, String description, String todayMarker, String cropStart, String duration,
       String rootingZone) {
 
     this.setPhase(phase);
     this.description = description;
-    this.setToday(today);
+    this.setTodayMarker(todayMarker);
     this.setCropStart(cropStart);
     this.setDuration(duration);
     this.rootingZone = rootingZone;
@@ -64,20 +62,20 @@ public class CropPhase {
     this.description = description;
   }
 
-  public Date getToday() {
-    return today;
+  public String getTodayMarker() {
+    return todayMarker;
   }
 
-  public void setToday(Date today) {
-    this.today = today;
+  public void setTodayMarker(String todayMarker) {
+    this.todayMarker = todayMarker;
   }
 
-  public Date getCropStart() {
+  public String getCropStart() {
     return cropStart;
   }
 
-  public void setCropStart(Date cropStart) {
-    this.cropStart = cropStart;
+  public void setCropStart(String cropStart2) {
+    this.cropStart = cropStart2;
   }
 
   public String getDuration() {

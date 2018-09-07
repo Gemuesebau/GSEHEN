@@ -47,11 +47,13 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
@@ -132,10 +134,13 @@ public class Gsehen extends Application {
   private List<SoilProfile> soilProfilesList;
   private List<WeatherDataSource> weatherDataSourcesList;
   private List<Crop> crops;
+  private Map<String, Messages> messages;
+
   private static Gsehen instance;
 
   private Locale selectedLocale;
   private DecimalFormat numberFormat;
+  private SimpleDateFormat dateFormat;
 
   {
     instance = this;
@@ -145,6 +150,7 @@ public class Gsehen extends Application {
     weatherDataSourcesList = loadAll(WeatherDataSource.class);
     LOGGER.log(Level.INFO, "Loaded Croplist");
     crops = loadAll(Crop.class);
+    messages = CollectionUtil.listToMap(loadAll(Messages.class), message -> message.getKey() + "." + message.getLocaleId());
 
     mainBundle = ResourceBundle.getBundle("i18n.main", getSelectedLocale());
   }
@@ -832,6 +838,7 @@ public class Gsehen extends Application {
   public void setSelectedLocale(Locale selectedLocale) {
     this.selectedLocale = selectedLocale;
     this.numberFormat = (DecimalFormat)NumberFormat.getNumberInstance(selectedLocale);
+    this.dateFormat = new SimpleDateFormat("dd.MM.yyyy", selectedLocale);
   }
 
   public Locale getSelectedLocale() {
@@ -850,5 +857,13 @@ public class Gsehen extends Application {
   @SuppressWarnings("checkstyle:javadocmethod")
   public String formatDouble(double value) {
     return numberFormat.format(value);
+  }
+
+  public String localizeCropText(String messageKey) {
+    return messages.get(messageKey + "." + getSelectedLocale().getLanguage()).getText();
+  }
+
+  public String formatDate(Date date) {
+    return dateFormat.format(date);
   }
 }

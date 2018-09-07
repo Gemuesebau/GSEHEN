@@ -311,7 +311,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 attributeLabel3 = new Text(mainBundle.getString("plotview.crop"));
                 if (plot.getCrop() != null) {
-                  attribute3 = new Text(plot.getCrop().getName());
+                  attribute3 = new Text(gsehenInstance.localizeCropText(plot.getCrop().getName()));
                 } else {
                   attribute3 = new Text(mainBundle.getString("treetableview.nocrop"));
                 }
@@ -599,7 +599,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         } else if (param.getValue().getValue().getClass().getSimpleName().equals("Plot")) {
           Plot plot = (Plot) param.getValue().getValue();
           if (plot.getCrop() != null) {
-            result = new ReadOnlyStringWrapper(plot.getCrop().getName());
+            result = new ReadOnlyStringWrapper(gsehenInstance.localizeCropText(plot.getCrop().getName()));
           } else {
             result = new ReadOnlyStringWrapper("/");
           }
