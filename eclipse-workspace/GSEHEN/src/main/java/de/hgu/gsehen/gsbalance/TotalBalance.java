@@ -1,10 +1,5 @@
 package de.hgu.gsehen.gsbalance;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
@@ -15,17 +10,21 @@ import de.hgu.gsehen.model.SoilManualData;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+
 public class TotalBalance {
 
   @SuppressWarnings("checkstyle:javadocmethod")
   public static void determineCurrentRootingZone(DayData dayData, Plot plot,
       SoilProfile soilProfile) {
-    Date today = dayData.getDate();
-    Date cropStart = plot.getCropStart();
+    final Date today = dayData.getDate();
+    final Date cropStart = plot.getCropStart();
     Date cropEnd = plot.getCropEnd();
-    Date soilStart = plot.getSoilStartDate();
+    final Date soilStart = plot.getSoilStartDate();
     Crop crop = plot.getCrop();
-    CropDevelopmentStatus cropDevelopmentStatus = plot.getCropDevelopmentStatus();
     CropRootingZone cropRootingZone = plot.getCropRootingZone();
     Integer rootingZone1;
     Integer rootingZone2;
@@ -61,6 +60,7 @@ public class TotalBalance {
     } else {
       soilZone = 10;
     }
+    CropDevelopmentStatus cropDevelopmentStatus = plot.getCropDevelopmentStatus();
     Integer currentRootingZone = null;
     int phase1;
     Integer phase2;
@@ -169,12 +169,12 @@ public class TotalBalance {
     SoilManualData soilManualData = soilProfile.getSoilManualData();
     Double rainMax;
     Integer daysPause;
-    if (soilManualData.getRainMax() != null) {
+    if (soilManualData != null && soilManualData.getRainMax() != null) {
       rainMax = soilManualData.getRainMax();
     } else {
       rainMax = 30.0;
     }
-    if (soilManualData.getDaysPause() != null) {
+    if (soilManualData != null && soilManualData.getDaysPause() != null) {
       daysPause = soilManualData.getDaysPause();
     } else {
       daysPause = 2;

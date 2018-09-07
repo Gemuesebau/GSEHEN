@@ -5,7 +5,8 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class CropDevelopmentStatus {
 
-  public CropDevelopmentStatus() {};
+  public CropDevelopmentStatus() {
+  }
 
   /**
    * Class inheritng manually provied bbch phase lengths in days for the actual crop.
