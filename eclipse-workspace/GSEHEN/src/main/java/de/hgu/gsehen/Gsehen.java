@@ -44,6 +44,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -131,8 +134,12 @@ public class Gsehen extends Application {
   private List<Crop> crops;
   private static Gsehen instance;
 
+  private Locale selectedLocale;
+  private DecimalFormat numberFormat;
+
   {
     instance = this;
+    setSelectedLocale(Locale.GERMAN);
 
     soilProfilesList = loadAll(SoilProfile.class);
     weatherDataSourcesList = loadAll(WeatherDataSource.class);
@@ -822,7 +829,24 @@ public class Gsehen extends Application {
     return null;
   }
 
+  public void setSelectedLocale(Locale selectedLocale) {
+    this.selectedLocale = selectedLocale;
+    this.numberFormat = (DecimalFormat)NumberFormat.getNumberInstance(selectedLocale);
+  }
+
   public Locale getSelectedLocale() {
-    return Locale.GERMAN; // FIXME make a user choice/option in UI
+    return selectedLocale; // FIXME make a user choice/option in UI
+  }
+
+  @SuppressWarnings("checkstyle:javadocmethod")
+  public double parseDouble(String value) {
+    try {
+      return (double) numberFormat.parse(value);
+    } catch (ParseException e) {
+      throw new RuntimeException("Parsing double failed", e);
+    }
+  }
+  public String formatDouble(double value) {
+    return numberFormat.format(value);
   }
 }

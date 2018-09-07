@@ -314,7 +314,7 @@ public class FieldDataController extends Application
                     depth.setText(oldValue);
                   } else {
                     currentSoilBox.getValue().getProfileDepth().get(in)
-                        .setDepth(Double.valueOf(newValue));
+                        .setDepth(gsehenInstance.parseDouble(newValue));
                   }
                 }
               }
@@ -647,7 +647,7 @@ public class FieldDataController extends Application
       @Override
       public void handle(ActionEvent e) {
         field.setName(name.getText());
-        field.setArea(Double.valueOf(area.getText()));
+        field.setArea(gsehenInstance.parseDouble(area.getText()));
         for (SoilProfile sp : soilProfileList) {
           if (sp == currentSoilBox.getValue()) {
             field.setSoilProfileUuid(sp.getUuid());
@@ -1015,13 +1015,13 @@ public class FieldDataController extends Application
             wds = new WeatherDataSource(DBUtil.generateUuid());
             wds.setName(weatherDataName.getText());
             wds.setMeasIntervalSeconds(Integer.valueOf(interval.getText()));
-            wds.setWindspeedMeasHeightMeters(Double.valueOf(windspeed.getText()));
+            wds.setWindspeedMeasHeightMeters(gsehenInstance.parseDouble(windspeed.getText()));
             wds.setDateFormatString(dateFormat.getText());
             wds.setNumberLocaleId(javaLocaleMap.get(localeId.getValue()));
             wds.setDataFilePath(path.getText());
-            wds.setLocationLat(Double.valueOf(locationLat.getText()));
-            wds.setLocationLng(Double.valueOf(locationLng.getText()));
-            wds.setLocationMetersAboveSeaLevel(Double.valueOf(metersAbove.getText()));
+            wds.setLocationLat(gsehenInstance.parseDouble(locationLat.getText()));
+            wds.setLocationLng(gsehenInstance.parseDouble(locationLng.getText()));
+            wds.setLocationMetersAboveSeaLevel(gsehenInstance.parseDouble(metersAbove.getText()));
 
             weatherDataSourceList.add(wds);
             pane.getChildren().clear();

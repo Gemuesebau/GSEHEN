@@ -582,7 +582,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           }
 
           private Double parseDouble(TextField textField) {
-            return Double.valueOf(textField.getText()); // FIXME localize! DateFormat!
+            return gsehenInstance.parseDouble(textField.getText()); // FIXME localize! DateFormat!
           }
         });
 
@@ -614,8 +614,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
               plot.setSoilStartDate(soilDate);
             }
 
-            plot.setRootingZone(Double.valueOf(rootingZone.getText()));
-            plot.setSoilStartValue(Double.valueOf(soilStartValue.getText()));
+            plot.setRootingZone(gsehenInstance.parseDouble(rootingZone.getText()));
+            plot.setSoilStartValue(gsehenInstance.parseDouble(soilStartValue.getText()));
             plot.setIsActive(isActive);
             plot.setScalingFactor(scalingFactor.getValue());
           } finally {
