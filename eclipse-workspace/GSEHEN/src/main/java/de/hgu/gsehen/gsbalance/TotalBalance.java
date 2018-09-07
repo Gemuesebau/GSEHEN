@@ -55,7 +55,7 @@ public class TotalBalance {
     }
     SoilManualData soilManualData = soilProfile.getSoilManualData();
     Integer soilZone;
-    if (soilManualData.getSoilZone() != null) {
+    if (soilManualData != null && soilManualData.getSoilZone() != null) {
       soilZone = soilManualData.getSoilZone();
     } else {
       soilZone = 10;
@@ -245,9 +245,9 @@ public class TotalBalance {
           currentAvailableSoilWater * 0.9 - currentDay.getCurrentTotalWaterBalance();
       if (waterContentToAim > currentAvailableSoilWater) {
         recommendedAction.setRecommendation(RecommendedActionEnum.EXCESS);
-        throw new UnsupportedOperationException(
-            "The water balance exceeds the total available soil water\n"
-                + "- your plants are dead for sure \\u2620");
+//        throw new UnsupportedOperationException(
+//            "The water balance exceeds the total available soil water\n"
+//                + "- your plants are dead for sure \\u2620");
       } else {
         Double availableWater = currentAvailableSoilWater * 0.3 - waterContentToAim;
         recommendedAction.setAvailableWater(availableWater);

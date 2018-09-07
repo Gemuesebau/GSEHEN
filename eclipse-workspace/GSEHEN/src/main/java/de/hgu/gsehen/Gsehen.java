@@ -841,11 +841,13 @@ public class Gsehen extends Application {
   @SuppressWarnings("checkstyle:javadocmethod")
   public double parseDouble(String value) {
     try {
-      return (double) numberFormat.parse(value);
+      return numberFormat.parse(value).doubleValue();
     } catch (ParseException e) {
       throw new RuntimeException("Parsing double failed", e);
     }
   }
+
+  @SuppressWarnings("checkstyle:javadocmethod")
   public String formatDouble(double value) {
     return numberFormat.format(value);
   }
