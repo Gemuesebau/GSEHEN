@@ -42,6 +42,8 @@ public class Plot extends Drawable {
   private Crop crop;
   @Embedded
   private CropDevelopmentStatus cropDevelopmentStatus;
+  @Embedded
+  private CropRootingZone cropRootingZone;
   private Date cropStart;
   private Date cropEnd;
   private Boolean isActive;
@@ -198,6 +200,22 @@ public class Plot extends Drawable {
     this.cropDevelopmentStatus = cropDevelopmentStatus;
   }
 
+  public ManualData getManualData() {
+    return manualData;
+  }
+
+  public void setManualData(ManualData manualData) {
+    this.manualData = manualData;
+  }
+
+  public CropRootingZone getCropRootingZone() {
+    return cropRootingZone;
+  }
+
+  public void setCropRootingZone(CropRootingZone cropRootingZone) {
+    this.cropRootingZone = cropRootingZone;
+  }
+
   public void visualize() {}
 
   public void configure() {}
@@ -222,6 +240,7 @@ public class Plot extends Drawable {
    * @param soilStartValue Water content in mm for first soillayer 10cm
    * @param calculationPaused Is the calculation paused due to heavy rainfall
    * @param crop Subordinated crop
+   * @param cropDevelopmentStatus user input data concerning crop development phases
    * @param cropStart Start date of the crop
    * @param cropEnd End date of the crop
    * @param isActive Is the plot active and not archived
@@ -230,7 +249,7 @@ public class Plot extends Drawable {
       WeatherData weatherData, Double rootingZone, WaterBalance waterBalance, ManualData manualData,
       RecommendedAction recommendedAction, Date soilStartDate, Double soilStartValue,
       Boolean calculationPaused, Crop crop, CropDevelopmentStatus cropDevelopmentStatus,
-      Date cropStart, Date cropEnd, Boolean isActive) {
+      CropRootingZone cropRootingZone, Date cropStart, Date cropEnd, Boolean isActive) {
     super();
     this.name = name;
     this.area = area;
@@ -247,6 +266,7 @@ public class Plot extends Drawable {
     this.calculationPaused = calculationPaused;
     this.crop = crop;
     this.cropDevelopmentStatus = cropDevelopmentStatus;
+    this.cropRootingZone = cropRootingZone;
     this.cropStart = cropStart;
     this.cropEnd = cropEnd;
     this.isActive = isActive;
@@ -257,11 +277,5 @@ public class Plot extends Drawable {
     return " " + getClass().getSimpleName() + " '" + getName() + "'";
   }
 
-  public ManualData getManualData() {
-    return manualData;
-  }
 
-  public void setManualData(ManualData manualData) {
-    this.manualData = manualData;
-  }
 }

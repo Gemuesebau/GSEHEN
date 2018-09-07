@@ -8,26 +8,59 @@ import java.util.List;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
+import de.hgu.gsehen.model.CropRootingZone;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.model.Soil;
+import de.hgu.gsehen.model.SoilManualData;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
 
 public class TotalBalance {
 
   @SuppressWarnings("checkstyle:javadocmethod")
-  public static void determineCurrentRootingZone(DayData dayData, Plot plot) {
+  public static void determineCurrentRootingZone(DayData dayData, Plot plot,
+      SoilProfile soilProfile) {
     Date today = dayData.getDate();
     Date cropStart = plot.getCropStart();
     Date cropEnd = plot.getCropEnd();
     Date soilStart = plot.getSoilStartDate();
     Crop crop = plot.getCrop();
     CropDevelopmentStatus cropDevelopmentStatus = plot.getCropDevelopmentStatus();
-    Integer rootingZone1 = crop.getRootingZone1();
-    Integer rootingZone2 = crop.getRootingZone2();
-    Integer rootingZone3 = crop.getRootingZone3();
-    Integer rootingZone4 = crop.getRootingZone4();
-    Integer soilZone = 10;
+    CropRootingZone cropRootingZone = plot.getCropRootingZone();
+    Integer rootingZone1;
+    Integer rootingZone2;
+    Integer rootingZone3;
+    Integer rootingZone4;
+    if (cropRootingZone.getRootingZone1() != null) {
+      rootingZone1 = cropRootingZone.getRootingZone1();
+    } else {
+      rootingZone1 = crop.getRootingZone1();
+    }
+
+    if (cropRootingZone.getRootingZone2() != null) {
+      rootingZone2 = cropRootingZone.getRootingZone2();
+    } else {
+      rootingZone2 = crop.getRootingZone2();
+    }
+
+    if (cropRootingZone.getRootingZone3() != null) {
+      rootingZone3 = cropRootingZone.getRootingZone3();
+    } else {
+      rootingZone3 = crop.getRootingZone3();
+    }
+
+    if (cropRootingZone.getRootingZone4() != null) {
+      rootingZone4 = cropRootingZone.getRootingZone4();
+    } else {
+      rootingZone4 = crop.getRootingZone4();
+    }
+    SoilManualData soilManualData = soilProfile.getSoilManualData();
+    Integer soilZone;
+    if (soilManualData.getSoilZone() != null) {
+      soilZone = soilManualData.getSoilZone();
+    } else {
+      soilZone = 10;
+    }
     Integer currentRootingZone = null;
     int phase1;
     Integer phase2;
@@ -132,9 +165,20 @@ public class TotalBalance {
    * 
    * @param plot the desired plot
    */
-  public static void calculateTotalWaterBalance(Plot plot) {
-    Double rainMax = 30.0;
-    int daysPause = 2;
+  public static void calculateTotalWaterBalance(Plot plot, SoilProfile soilProfile) {
+    SoilManualData soilManualData = soilProfile.getSoilManualData();
+    Double rainMax;
+    Integer daysPause;
+    if (soilManualData.getRainMax() != null) {
+      rainMax = soilManualData.getRainMax();
+    } else {
+      rainMax = 30.0;
+    }
+    if (soilManualData.getDaysPause() != null) {
+      daysPause = soilManualData.getDaysPause();
+    } else {
+      daysPause = 2;
+    }
     Double startValue;
     List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();
     if (dailyBalances.isEmpty()) {

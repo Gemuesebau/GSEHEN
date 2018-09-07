@@ -3,6 +3,7 @@ package de.hgu.gsehen.model;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -16,7 +17,8 @@ public class SoilProfile {
   private long id;
   private String uuid;
   private String name;
-
+  @Embedded
+  private SoilManualData soilManualData;
   @OneToMany(cascade = {CascadeType.ALL})
   private List<Soil> soilType;
   @OneToMany(cascade = {CascadeType.ALL})
@@ -28,25 +30,24 @@ public class SoilProfile {
   }
 
   /**
-   * Creates a new SoilProfile with the given "payload" data.
-   * This constructor doesn't result in the UUID being (newly) created,
-   * and is thus only suited for tests!
-   * The given lists must have the same size, since soils and depths belong
-   * to one another each.
+   * Creates a new SoilProfile with the given "payload" data. This constructor doesn't result in the
+   * UUID being (newly) created, and is thus only suited for tests! The given lists must have the
+   * same size, since soils and depths belong to one another each.
    *
    * @param name a name for the new SoilProfile
    * @param soilType the list of soils in this profile
    * @param profileDepth the list of soil depths in this profile
    */
-  public SoilProfile(String name, List<Soil> soilType, List<SoilProfileDepth> profileDepth) {
+  public SoilProfile(String name, SoilManualData soilManualData, List<Soil> soilType,
+      List<SoilProfileDepth> profileDepth) {
     this();
     this.name = name;
+    this.soilManualData = soilManualData;
     this.soilType = soilType;
     this.profileDepth = profileDepth;
   }
 
-  public SoilProfile() {
-  }
+  public SoilProfile() {}
 
   public String getUuid() {
     return uuid;
@@ -85,4 +86,12 @@ public class SoilProfile {
   public void visualize() {}
 
   public void modify() {}
+
+  public SoilManualData getSoilManualData() {
+    return soilManualData;
+  }
+
+  public void setSoilManualData(SoilManualData soilManualData) {
+    this.soilManualData = soilManualData;
+  }
 }

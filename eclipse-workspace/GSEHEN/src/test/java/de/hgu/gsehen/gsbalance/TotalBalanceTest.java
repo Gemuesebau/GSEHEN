@@ -15,8 +15,10 @@ import de.hgu.gsehen.evapotranspiration.EnvCalculator;
 import de.hgu.gsehen.evapotranspiration.GeoData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
+import de.hgu.gsehen.model.CropRootingZone;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.model.Soil;
+import de.hgu.gsehen.model.SoilManualData;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
 import de.hgu.gsehen.model.WaterBalance;
@@ -67,10 +69,12 @@ class TotalBalanceTest {
         "30% Bedeckung", "80%Bedeckunng", null, 10, 20, 30, null, "Toller Salat");
 
     CropDevelopmentStatus cropDevelopmentStatus = new CropDevelopmentStatus(null, null, null, null);
+    CropRootingZone cropRootingZone = new CropRootingZone(null, null, null, null);
 
     plot = new Plot("Feld2", 200, null, null, 1.0, null, 120.0, null, null, null,
         soilStartDate.parse("2016-06-04"), null, false, crop, cropDevelopmentStatus,
-        cropStart.parse("2016-06-06"), cropEnd.parse("2016-09-06"), true);
+        cropRootingZone, cropStart.parse("2016-06-06"), cropEnd.parse("2016-09-06"), true);
+    SoilManualData soilManualData = new SoilManualData(null, null, null);
     soil1 = new Soil("Sand", 8.0, null);
     soil2 = new Soil("SandyLoam", 12.0, null);
     soil3 = new Soil("Loam", 17.0, null);
@@ -81,7 +85,7 @@ class TotalBalanceTest {
     soilList.addAll(Arrays.asList(soil1, soil2, soil3));
     List<SoilProfileDepth> profileList = new ArrayList<SoilProfileDepth>();
     profileList.addAll(Arrays.asList(depth1, depth2, depth3));
-    soilProfile = new SoilProfile("Feld2", soilList, profileList);
+    soilProfile = new SoilProfile("Feld2", soilManualData, soilList, profileList);
     List<DayData> dailyBalances = new ArrayList<DayData>();
     switch (days) {
       case 1:
@@ -115,24 +119,24 @@ class TotalBalanceTest {
   void testDetermineCurrentRootingZone() throws ParseException {
     onCreate(1);
 
-    TotalBalance.determineCurrentRootingZone(today, plot);
+    TotalBalance.determineCurrentRootingZone(today, plot, soilProfile);
 
-    TotalBalance.determineCurrentRootingZone(today, plot);
+    TotalBalance.determineCurrentRootingZone(today, plot, soilProfile);
     // System.out.println(today.getCurrentRootingZone());
     assert (10 == today.getCurrentRootingZone());
 
     today.setDate(tag.parse("2016-06-16"));
-    TotalBalance.determineCurrentRootingZone(today, plot);
+    TotalBalance.determineCurrentRootingZone(today, plot, soilProfile);
     // System.out.println(today.getCurrentRootingZone());
     assert (20 == today.getCurrentRootingZone());
 
     today.setDate(tag.parse("2016-07-16"));
-    TotalBalance.determineCurrentRootingZone(today, plot);
+    TotalBalance.determineCurrentRootingZone(today, plot, soilProfile);
     // System.out.println(today.getCurrentRootingZone());
     assert (30 == today.getCurrentRootingZone());
 
     today.setDate(tag.parse("2016-09-06"));
-    TotalBalance.determineCurrentRootingZone(today, plot);
+    TotalBalance.determineCurrentRootingZone(today, plot, soilProfile);
     // System.out.println(today.getCurrentRootingZone());
     assert (30 == today.getCurrentRootingZone());
 
@@ -140,7 +144,7 @@ class TotalBalanceTest {
     today.setDate(tag.parse("2016-09-06"));
     crop.setKc3(null);
     crop.setPhase3(null);
-    TotalBalance.determineCurrentRootingZone(today, plot);
+    TotalBalance.determineCurrentRootingZone(today, plot, soilProfile);
     // System.out.println(today.getCurrentRootingZone());
     assert (20 == today.getCurrentRootingZone());
 
@@ -149,7 +153,7 @@ class TotalBalanceTest {
     crop.setPhase2(null);
     crop.setKc3(null);
     crop.setPhase3(null);
-    TotalBalance.determineCurrentRootingZone(today, plot);
+    TotalBalance.determineCurrentRootingZone(today, plot, soilProfile);
     // System.out.println(today.getCurrentRootingZone());
     assert (10 == today.getCurrentRootingZone());
   }
@@ -158,19 +162,19 @@ class TotalBalanceTest {
   void testCalculateCurrentAvailableSoilWater() throws ParseException {
     onCreate(1);
 
-    TotalBalance.determineCurrentRootingZone(today, plot);
+    TotalBalance.determineCurrentRootingZone(today, plot, soilProfile);
     TotalBalance.calculateCurrentAvailableSoilWater(today, soilProfile);
     assert (soilProfile.getSoilType().size() == 3);
     assertEquals(today.getCurrentAvailableSoilWater(), 8.0, 0.01);
 
     today.setDate(tag.parse("2016-06-16"));
-    TotalBalance.determineCurrentRootingZone(today, plot);
+    TotalBalance.determineCurrentRootingZone(today, plot, soilProfile);
     TotalBalance.calculateCurrentAvailableSoilWater(today, soilProfile);
     // System.out.println(today.getCurrentAvailableSoilWater());
     assertEquals(today.getCurrentAvailableSoilWater(), 20.1, 0.01);
 
     today.setDate(tag.parse("2016-09-06"));
-    TotalBalance.determineCurrentRootingZone(today, plot);
+    TotalBalance.determineCurrentRootingZone(today, plot, soilProfile);
     TotalBalance.calculateCurrentAvailableSoilWater(today, soilProfile);
     assertEquals(today.getCurrentAvailableSoilWater(), 37.1, 0.01);
 
@@ -181,13 +185,13 @@ class TotalBalanceTest {
     List<SoilProfileDepth> depth = new ArrayList<SoilProfileDepth>(Arrays.asList(depth1));
     soilProfile.setProfileDepth(depth);
     assert (soilProfile.getSoilType().size() == 1);
-    TotalBalance.determineCurrentRootingZone(today, plot);
+    TotalBalance.determineCurrentRootingZone(today, plot, soilProfile);
     TotalBalance.calculateCurrentAvailableSoilWater(today, soilProfile);
     assertEquals(today.getCurrentAvailableSoilWater(), 8.0, 0.01);
 
 
     today.setDate(tag.parse("2016-09-06"));
-    TotalBalance.determineCurrentRootingZone(today, plot);
+    TotalBalance.determineCurrentRootingZone(today, plot, soilProfile);
     TotalBalance.calculateCurrentAvailableSoilWater(today, soilProfile);
     assertEquals(today.getCurrentAvailableSoilWater(), 8.0 * 3, 0.01);
   }
@@ -243,12 +247,12 @@ class TotalBalanceTest {
       System.out.println("Current Etc " + elem.getEtc());
       DailyBalance.calculateDailyBalance(elem);
       System.out.println("Daily Balance " + elem.getDailyBalance());
-      TotalBalance.determineCurrentRootingZone(elem, plot);
+      TotalBalance.determineCurrentRootingZone(elem, plot, soilProfile);
       System.out.println("Current rooting zone" + elem.getCurrentRootingZone());
       TotalBalance.calculateCurrentAvailableSoilWater(elem, soilProfile);
       System.out.println("Availabe Soil water " + elem.getCurrentAvailableSoilWater());
     }
-    TotalBalance.calculateTotalWaterBalance(plot);
+    TotalBalance.calculateTotalWaterBalance(plot, soilProfile);
 
     try {
       TotalBalance.recommendIrrigation(plot);

@@ -13,6 +13,7 @@ import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.evapotranspiration.GeoData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
+import de.hgu.gsehen.model.CropRootingZone;
 import de.hgu.gsehen.model.Plot;
 
 class DailyBalanceTest {
@@ -46,10 +47,11 @@ class DailyBalanceTest {
         "30% Bedeckung", "80%Bedeckunng", null, 10, 20, 30, null, "Toller Salat");
 
     CropDevelopmentStatus cropDevelopmentStatus = new CropDevelopmentStatus(null, null, null, null);
+    CropRootingZone cropRootingZone = new CropRootingZone(null, null, null, null);
     try {
       plot = new Plot("Feld2", 200, null, null, 1.0, null, 120.0, null, null, null,
           soilStartDate.parse("2016-06-04"), 100.0, false, crop, cropDevelopmentStatus,
-          cropStart.parse("2016-06-06"), cropEnd.parse("2016-09-06"), true);
+          cropRootingZone, cropStart.parse("2016-06-06"), cropEnd.parse("2016-09-06"), true);
     } catch (ParseException r) {
       r.printStackTrace();
     }

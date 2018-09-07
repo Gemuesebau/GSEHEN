@@ -1,5 +1,9 @@
 package de.hgu.gsehen.gsbalance;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.evapotranspiration.EnvCalculator;
@@ -14,9 +18,6 @@ import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.model.WaterBalance;
 import de.hgu.gsehen.util.CollectionUtil;
 import de.hgu.gsehen.util.DateUtil;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 public class Recommender {
   private Gsehen gsehenInstance;
@@ -25,36 +26,33 @@ public class Recommender {
     gsehenInstance = Gsehen.getInstance();
     gsehenInstance.registerForEvent(DayDataChanged.class,
         new GsehenEventListener<DayDataChanged>() {
-        @Override
-        public void handle(DayDataChanged event) {
-          for (Farm farm : gsehenInstance.getFarmsList()) {
-            for (Field field : farm.getFields()) {
-              for (Plot plot : field.getPlots()) {
-                final DayData eventDayData = event.getDayData();
-                final Date eventDayDataDate = eventDayData == null ? null : eventDayData.getDate();
-                if (
-                    event.isFromWeatherDataSource(field.getWeatherDataSourceUuid())
-                    && DateUtil.between(
-                        eventDayDataDate,
-                        CollectionUtil.nvl(plot.getSoilStartDate(), plot.getCropStart()),
-                        plot.getCropEnd()
-                    )
-                ) {
-                  copyWeatherData(eventDayData, getCurrentDayData(plot, eventDayDataDate));
+          @Override
+          public void handle(DayDataChanged event) {
+            for (Farm farm : gsehenInstance.getFarmsList()) {
+              for (Field field : farm.getFields()) {
+                for (Plot plot : field.getPlots()) {
+                  final DayData eventDayData = event.getDayData();
+                  final Date eventDayDataDate =
+                      eventDayData == null ? null : eventDayData.getDate();
+                  if (event.isFromWeatherDataSource(field.getWeatherDataSourceUuid())
+                      && DateUtil.between(eventDayDataDate,
+                          CollectionUtil.nvl(plot.getSoilStartDate(), plot.getCropStart()),
+                          plot.getCropEnd())) {
+                    copyWeatherData(eventDayData, getCurrentDayData(plot, eventDayDataDate));
+                  }
+                  performCalculations(field, plot);
                 }
-                performCalculations(field, plot);
               }
             }
           }
-        }
-      });
+        });
     gsehenInstance.registerForEvent(ManualDataChanged.class,
         event -> performCalculations(event.getField(), event.getPlot()));
   }
 
   private DayData getCurrentDayData(Plot plot, final Date eventDayDataDate) {
     if (plot == null) {
-      throw new IllegalArgumentException("No plot given for day data calculation!"); 
+      throw new IllegalArgumentException("No plot given for day data calculation!");
     }
     guaranteeDailyBalances(plot);
     final List<DayData> plotDayDataList = plot.getWaterBalance().getDailyBalances();
@@ -75,7 +73,7 @@ public class Recommender {
 
   private void applyManualData(DayData dayData, Plot plot) {
     if (plot == null) {
-      throw new IllegalArgumentException("No plot given for manual data processing!"); 
+      throw new IllegalArgumentException("No plot given for manual data processing!");
     }
     guaranteeManualData(plot);
     final Date date = dayData.getDate();
@@ -101,21 +99,23 @@ public class Recommender {
 
   private void performCalculations(Field field, Plot plot) {
     if (field == null || plot == null) {
-      throw new IllegalArgumentException("No field or plot given for day data calculation!"); 
+      throw new IllegalArgumentException("No field or plot given for day data calculation!");
     }
     guaranteeDailyBalances(plot);
     for (DayData dayData : plot.getWaterBalance().getDailyBalances()) {
       applyManualData(dayData, plot);
-      EnvCalculator.calculateEt0(dayData,
-          gsehenInstance.getWeatherDataSourceForUuid(field.getWeatherDataSourceUuid()).getLocation());
+      EnvCalculator.calculateEt0(dayData, gsehenInstance
+          .getWeatherDataSourceForUuid(field.getWeatherDataSourceUuid()).getLocation());
       DailyBalance.determineCurrentKc(dayData, plot);
       DailyBalance.calculateEtc(dayData, plot);
       DailyBalance.calculateDailyBalance(dayData);
-      TotalBalance.determineCurrentRootingZone(dayData, plot);
+      TotalBalance.determineCurrentRootingZone(dayData, plot,
+          gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid()));
       TotalBalance.calculateCurrentAvailableSoilWater(dayData,
           gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid()));
     }
-    TotalBalance.calculateTotalWaterBalance(plot);
+    TotalBalance.calculateTotalWaterBalance(plot,
+        gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid()));
     TotalBalance.recommendIrrigation(plot);
     gsehenInstance.sendRecommendedActionChanged(plot, null);
   }
