@@ -138,7 +138,7 @@ public class Gsehen extends Application {
 
   private static Gsehen instance;
 
-  private Locale selectedLocale;
+  private static Locale selectedLocale;
   private DecimalFormat numberFormat;
   private SimpleDateFormat dateFormat;
 
@@ -841,7 +841,7 @@ public class Gsehen extends Application {
     this.dateFormat = new SimpleDateFormat("dd.MM.yyyy", selectedLocale);
   }
 
-  public Locale getSelectedLocale() {
+  public static Locale getSelectedLocale() {
     return selectedLocale; // FIXME make a user choice/option in UI
   }
 

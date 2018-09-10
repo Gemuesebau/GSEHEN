@@ -114,7 +114,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private static final String PLOT_RECOMMENDED_ACTION_TEXT_ID = "#plotRecommendedActionText";
 
-
   private Farm farm;
   private Timeline scrolltimeline = new Timeline();
   private double scrollDirection = 0;
@@ -146,7 +145,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private Text attributeLabel3;
   private Text attribute3;
 
-  public  Text action;
+  public Text action;
 
   private HBox attribute1Box;
   private HBox attribute2Box;
@@ -345,19 +344,17 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 Text actionLabel = new Text(mainBundle.getString("treetableview.watering"));
 
-                
-
                 if (plot.getSoilStartValue() != null && plot.getRecommendedAction() != null) {
                   action = new Text(getRecommendedActionText(plot) + " : "
                       + new java.text.SimpleDateFormat("EE., dd.MM.yyyy, HH:mm:ss.SSS",
                           Gsehen.getSelectedLocale()).format(new java.util.Date()));
-                  
+
                 } else {
                   action = new Text("/");
                 }
 
                 action.setId(PLOT_RECOMMENDED_ACTION_TEXT_ID);
-                
+
                 HBox actionBox = new HBox();
                 actionBox.getChildren().addAll(actionLabel, action);
 
@@ -793,7 +790,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     Platform.runLater(new Runnable() {
       @Override
       public void run() {
-       action.setText(getRecommendedActionText(plot));
+        action.setText(getRecommendedActionText(plot));
       }
     });
   }
