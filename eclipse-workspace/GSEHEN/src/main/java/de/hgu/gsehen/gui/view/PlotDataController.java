@@ -813,11 +813,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
                   setTableData();
 
-                  // TODO: Ist das so richtig?
-                  waterLevel = plot.getWaterBalance().getDailyBalances()
-                      .get(plot.getWaterBalance().getDailyBalances().size() - 1)
-                      .getCurrentAvailableSoilWater();
-                  System.out.println(waterLevel);
+                  if (plot.getRecommendedAction() != null) {
+                    waterLevel = plot.getRecommendedAction().getAvailableWater();
+                  }
 
                 } else {
                   pane.setVisible(false);
