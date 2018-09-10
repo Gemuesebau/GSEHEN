@@ -35,7 +35,7 @@ import javafx.stage.Stage;
  *
  * @author CWI
  */
-@SuppressWarnings({"checkstyle:commentsindentation"})
+@SuppressWarnings({ "checkstyle:commentsindentation" })
 public class MainController {
   private Gsehen gsehenInstance;
   private String column2;
@@ -103,7 +103,7 @@ public class MainController {
     });
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes", "static-access"})
+  @SuppressWarnings({ "unchecked", "rawtypes", "static-access" })
   @FXML
   private void csv(ActionEvent c) {
     Stage primaryStage = new Stage();
@@ -140,9 +140,9 @@ public class MainController {
           column13 = fields[12];
           firstLine = false;
         } else {
-          CsvItem csvItem =
-              new CsvItem(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5],
-                  fields[6], fields[7], fields[8], fields[9], fields[10], fields[11], fields[12]);
+          CsvItem csvItem = new CsvItem(fields[0], fields[1], fields[2], fields[3], fields[4],
+              fields[5], fields[6], fields[7], fields[8], fields[9], fields[10], fields[11],
+              fields[12]);
           dataList.add(csvItem);
         }
 
@@ -283,8 +283,48 @@ public class MainController {
   public void setMapViewportFromFarm() {
     gsehenInstance.setMapViewportFromFarm();
   }
-  
+
   public TabPane getTabPane() {
     return tabPane;
+  }
+
+  public Tab getFieldViewTab() {
+    return fieldViewTab;
+  }
+
+  public void setFieldViewTab(Tab fieldViewTab) {
+    this.fieldViewTab = fieldViewTab;
+  }
+
+  public Tab getMapViewTab() {
+    return mapViewTab;
+  }
+
+  public void setMapViewTab(Tab mapViewTab) {
+    this.mapViewTab = mapViewTab;
+  }
+
+  public Tab getFarmViewTab() {
+    return farmViewTab;
+  }
+
+  public void setFarmViewTab(Tab farmViewTab) {
+    this.farmViewTab = farmViewTab;
+  }
+
+  public Tab getPlotViewTab() {
+    return plotViewTab;
+  }
+
+  public void setPlotViewTab(Tab plotViewTab) {
+    this.plotViewTab = plotViewTab;
+  }
+
+  public Tab getLogViewTab() {
+    return logViewTab;
+  }
+
+  public void setLogViewTab(Tab logViewTab) {
+    this.logViewTab = logViewTab;
   }
 }

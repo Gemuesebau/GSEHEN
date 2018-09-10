@@ -43,6 +43,8 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
@@ -79,6 +81,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private Gsehen gsehenInstance;
   private BorderPane pane;
   private TreeTableView<Drawable> treeTableView;
+  private TabPane tabPane;
+  private Tab mapViewTab;
+  private Tab farmViewTab;
+  private Tab fieldViewTab;
+  private Tab plotViewTab;
+  private Tab logViewTab;
   private TableView<CropPhase> cropTable;
 
   private Text nameLabel;
@@ -478,6 +486,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       @Override
       public void handle(ActionEvent e) {
         pane.getChildren().clear();
+        treeTableView.setVisible(false);
+        tabPane.getTabs().removeAll(mapViewTab, farmViewTab, fieldViewTab, logViewTab);
 
         // Name of the plot
         Text nameLabel = new Text(plot.getName());
@@ -598,6 +608,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           @Override
           public void handle(ActionEvent arg0) {
             pane.getChildren().clear();
+            treeTableView.setVisible(true);
+            tabPane.getTabs().clear();
+            tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab,
+                logViewTab);
             gsehenInstance.sendFarmDataChanged(plot, null);
           }
         });
@@ -703,6 +717,13 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     bottomBox.getChildren().addAll(harvest, watering, save);
 
     pane.setBottom(bottomBox);
+
+    tabPane = gsehenInstance.getMainController().getTabPane();
+    mapViewTab = gsehenInstance.getMainController().getMapViewTab();
+    farmViewTab = gsehenInstance.getMainController().getFarmViewTab();
+    fieldViewTab = gsehenInstance.getMainController().getFieldViewTab();
+    plotViewTab = gsehenInstance.getMainController().getPlotViewTab();
+    logViewTab = gsehenInstance.getMainController().getLogViewTab();
 
     // Actions that will happen, if you click a 'plot' in the TreeTableView
     treeTableView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()

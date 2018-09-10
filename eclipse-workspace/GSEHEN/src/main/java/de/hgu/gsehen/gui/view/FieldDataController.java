@@ -30,6 +30,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
@@ -64,6 +66,12 @@ public class FieldDataController extends Application
   private Gsehen gsehenInstance;
   private BorderPane pane;
   private TreeTableView<Drawable> treeTableView;
+  private TabPane tabPane;
+  private Tab mapViewTab;
+  private Tab farmViewTab;
+  private Tab fieldViewTab;
+  private Tab plotViewTab;
+  private Tab logViewTab;
 
   private Text nameLabel;
   private Text areaLabel;
@@ -199,12 +207,14 @@ public class FieldDataController extends Application
 
     Button editProfile = new Button(mainBundle.getString("fieldview.editprofile"));
     editProfile.setOnAction(new EventHandler<ActionEvent>() {
-
       @Override
       public void handle(ActionEvent e) {
         editSoilProfile();
       }
     });
+
+    VBox soilBox = new VBox();
+    soilBox.getChildren().addAll(currentSoilBox, editProfile);
 
     createSoil = new Button(mainBundle.getString("fieldview.createprofile"));
     createSoil.setOnAction(new EventHandler<ActionEvent>() {
@@ -248,6 +258,9 @@ public class FieldDataController extends Application
       }
     });
 
+    VBox weatherBox = new VBox();
+    weatherBox.getChildren().addAll(weatherData, editWds);
+
     Button createWds = new Button(mainBundle.getString("fieldview.createwds"));
     createWds.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -284,12 +297,10 @@ public class FieldDataController extends Application
     GridPane.setHalignment(areaLabel, HPos.LEFT);
     GridPane.setHalignment(area, HPos.LEFT);
     GridPane.setHalignment(soilProfile, HPos.LEFT);
-    GridPane.setHalignment(currentSoilBox, HPos.LEFT);
-    GridPane.setHalignment(editProfile, HPos.LEFT);
+    GridPane.setHalignment(soilBox, HPos.LEFT);
     GridPane.setHalignment(createSoil, HPos.LEFT);
     GridPane.setHalignment(weatherDataSource, HPos.LEFT);
-    GridPane.setHalignment(weatherData, HPos.LEFT);
-    GridPane.setHalignment(editWds, HPos.LEFT);
+    GridPane.setHalignment(weatherBox, HPos.LEFT);
     GridPane.setHalignment(createWds, HPos.LEFT);
     GridPane.setHalignment(saveField, HPos.LEFT);
 
@@ -298,17 +309,15 @@ public class FieldDataController extends Application
     GridPane.setConstraints(areaLabel, 0, 1);
     GridPane.setConstraints(area, 1, 1);
     GridPane.setConstraints(soilProfile, 0, 2);
-    GridPane.setConstraints(currentSoilBox, 1, 2);
-    GridPane.setConstraints(editProfile, 2, 2);
+    GridPane.setConstraints(soilBox, 1, 2);
+    GridPane.setConstraints(createSoil, 2, 2);
     GridPane.setConstraints(weatherDataSource, 0, 3);
-    GridPane.setConstraints(weatherData, 1, 3);
-    GridPane.setConstraints(editWds, 2, 3);
-    GridPane.setConstraints(createSoil, 0, 4);
-    GridPane.setConstraints(createWds, 1, 4);
+    GridPane.setConstraints(weatherBox, 1, 3);
+    GridPane.setConstraints(createWds, 2, 3);
     GridPane.setConstraints(saveField, 0, 5);
 
-    grid.getChildren().addAll(nameLabel, name, areaLabel, area, soilProfile, currentSoilBox,
-        editProfile, weatherDataSource, weatherData, editWds, createSoil, createWds, saveField);
+    grid.getChildren().addAll(nameLabel, name, areaLabel, area, soilProfile, soilBox,
+        weatherDataSource, weatherBox, createSoil, createWds, saveField);
 
     pane.setTop(grid);
     // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -318,6 +327,13 @@ public class FieldDataController extends Application
     center.setPadding(new Insets(10));
     center.setSpacing(8);
     // BOTTOM END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    tabPane = gsehenInstance.getMainController().getTabPane();
+    mapViewTab = gsehenInstance.getMainController().getMapViewTab();
+    farmViewTab = gsehenInstance.getMainController().getFarmViewTab();
+    fieldViewTab = gsehenInstance.getMainController().getFieldViewTab();
+    plotViewTab = gsehenInstance.getMainController().getPlotViewTab();
+    logViewTab = gsehenInstance.getMainController().getLogViewTab();
 
     // Actions that will happen, if you click a 'field' in the TreeTableView
     treeTableView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
@@ -406,6 +422,7 @@ public class FieldDataController extends Application
   private void createWeatherDataSource() {
     pane.getChildren().clear();
     treeTableView.setVisible(false);
+    tabPane.getTabs().removeAll(mapViewTab, farmViewTab, plotViewTab, logViewTab);
 
     // Name
     Text weatherDataLabel = new Text(mainBundle.getString("fieldview.weatherdataname"));
@@ -616,6 +633,8 @@ public class FieldDataController extends Application
       public void handle(ActionEvent arg0) {
         pane.getChildren().clear();
         treeTableView.setVisible(true);
+        tabPane.getTabs().clear();
+        tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab, logViewTab);
         gsehenInstance.sendFarmDataChanged(field, null);
       }
     });
@@ -648,6 +667,10 @@ public class FieldDataController extends Application
 
             weatherDataSourceList.add(wds);
             pane.getChildren().clear();
+            treeTableView.setVisible(true);
+            tabPane.getTabs().clear();
+            tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab,
+                logViewTab);
             gsehenInstance.sendFarmDataChanged(field, null);
           } catch (IllegalArgumentException iae) {
             if (center.getChildren().contains(dateError)) {
@@ -708,6 +731,7 @@ public class FieldDataController extends Application
   private void createSoilProfile() {
     pane.getChildren().clear();
     treeTableView.setVisible(false);
+    tabPane.getTabs().removeAll(mapViewTab, farmViewTab, plotViewTab, logViewTab);
 
     // Name
     Text soilNameLabel = new Text(mainBundle.getString("fieldview.profilename"));
@@ -908,6 +932,8 @@ public class FieldDataController extends Application
       public void handle(ActionEvent arg0) {
         pane.getChildren().clear();
         treeTableView.setVisible(true);
+        tabPane.getTabs().clear();
+        tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab, logViewTab);
         gsehenInstance.sendFarmDataChanged(field, null);
       }
     });
@@ -918,6 +944,8 @@ public class FieldDataController extends Application
       public void handle(ActionEvent arg0) {
         pane.getChildren().clear();
         treeTableView.setVisible(true);
+        tabPane.getTabs().clear();
+        tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab, logViewTab);
         SoilProfile soilProfileItem = new SoilProfile(DBUtil.generateUuid());
         soilProfileItem.setSoilType(soilList);
         soilProfileItem.setProfileDepth(soilDepthList);
@@ -944,6 +972,7 @@ public class FieldDataController extends Application
     if (currentSoilBox.getValue() != null) {
       pane.getChildren().clear();
       treeTableView.setVisible(false);
+      tabPane.getTabs().removeAll(mapViewTab, farmViewTab, plotViewTab, logViewTab);
 
       // Name
       Text soilNameLabel = new Text(mainBundle.getString("fieldview.profilename"));
@@ -1103,6 +1132,8 @@ public class FieldDataController extends Application
         public void handle(ActionEvent arg0) {
           pane.getChildren().clear();
           treeTableView.setVisible(true);
+          tabPane.getTabs().clear();
+          tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab, logViewTab);
           gsehenInstance.sendFarmDataChanged(field, null);
         }
       });
