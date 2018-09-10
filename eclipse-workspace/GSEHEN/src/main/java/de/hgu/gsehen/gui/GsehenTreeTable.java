@@ -16,7 +16,6 @@ import de.hgu.gsehen.util.MessageUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
@@ -113,7 +112,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   private static final String DETAIL_BORDER_PANE_ID = "#detailBorderPane";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
-  private static final String PLOT_RECOMMENDED_ACTION_TEXT = "#plotRecommendedActionText";
+  private static final String PLOT_RECOMMENDED_ACTION_TEXT_ID = "#plotRecommendedActionText";
+
 
   private Farm farm;
   private Timeline scrolltimeline = new Timeline();
@@ -134,7 +134,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private ContextMenu menu = new ContextMenu();
   private MenuItem deleteItem;
 
-  private BorderPane detailPane;
+  private static BorderPane detailPane;
   private Text nameLabel;
   private Text name;
   private Text typeLabel;
@@ -145,6 +145,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private Text attribute2;
   private Text attributeLabel3;
   private Text attribute3;
+
+  public  Text action;
 
   private HBox attribute1Box;
   private HBox attribute2Box;
@@ -342,15 +344,20 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                     soilStartBox, soilValueBox);
 
                 Text actionLabel = new Text(mainBundle.getString("treetableview.watering"));
-                Text action;
+
+                
+
                 if (plot.getSoilStartValue() != null && plot.getRecommendedAction() != null) {
                   action = new Text(getRecommendedActionText(plot) + " : "
                       + new java.text.SimpleDateFormat("EE., dd.MM.yyyy, HH:mm:ss.SSS",
-                          getSelectedLocale()).format(new java.util.Date()));
+                          Gsehen.getSelectedLocale()).format(new java.util.Date()));
+                  
                 } else {
                   action = new Text("/");
                 }
-                action.setId(PLOT_RECOMMENDED_ACTION_TEXT);
+
+                action.setId(PLOT_RECOMMENDED_ACTION_TEXT_ID);
+                
                 HBox actionBox = new HBox();
                 actionBox.getChildren().addAll(actionLabel, action);
 
@@ -599,7 +606,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         } else if (param.getValue().getValue().getClass().getSimpleName().equals("Plot")) {
           Plot plot = (Plot) param.getValue().getValue();
           if (plot.getCrop() != null) {
-            result = new ReadOnlyStringWrapper(gsehenInstance.localizeCropText(plot.getCrop().getName()));
+            result = new ReadOnlyStringWrapper(
+                gsehenInstance.localizeCropText(plot.getCrop().getName()));
           } else {
             result = new ReadOnlyStringWrapper("/");
           }
@@ -781,15 +789,12 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   }
 
   private void updatePlotInfo(Plot plot) {
-    try {
-      ((Text) gsehenInstance.getScene().lookup(PLOT_RECOMMENDED_ACTION_TEXT))
-          .setText(getRecommendedActionText(plot));
-    } catch (Exception e) {
 
-    }
-  }
-
-  public Locale getSelectedLocale() {
-    return Locale.GERMAN; // FIXME make user-selectable
+    Platform.runLater(new Runnable() {
+      @Override
+      public void run() {
+       action.setText(getRecommendedActionText(plot));
+      }
+    });
   }
 }
