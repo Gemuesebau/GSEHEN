@@ -75,6 +75,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private CropRootingZone devRoot;
 
   private TreeItem<Drawable> selectedItem;
+  private int currentItem;
   private Field field;
   private Plot plot;
 
@@ -613,6 +614,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab,
                 logViewTab);
             gsehenInstance.sendFarmDataChanged(plot, null);
+            tabPane.getSelectionModel().select(3);
+            treeTableView.getSelectionModel().clearSelection();
+            treeTableView.getSelectionModel().select(currentItem);
           }
         });
 
@@ -649,8 +653,15 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             }
 
             pane.getChildren().clear();
+            treeTableView.setVisible(true);
+            tabPane.getTabs().clear();
+            tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab,
+                logViewTab);
             gsehenInstance.sendFarmDataChanged(plot, null);
             gsehenInstance.sendManualDataChanged(field, plot, wateringDate, null);
+            tabPane.getSelectionModel().select(3);
+            treeTableView.getSelectionModel().clearSelection();
+            treeTableView.getSelectionModel().select(currentItem);
           }
 
           private ManualWaterSupply parseSupply(Date wateringDate, TextField irrigation,
@@ -701,6 +712,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
               bottomBox.getChildren().remove(error);
             }
             gsehenInstance.sendFarmDataChanged(plot, null);
+            tabPane.getSelectionModel().select(3);
+            treeTableView.getSelectionModel().clearSelection();
+            treeTableView.getSelectionModel().select(currentItem);
           }
         } else {
           error = new Text(mainBundle.getString("plotview.error"));
@@ -812,6 +826,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             }
           }
         });
+    currentItem = treeTableView.getSelectionModel().getSelectedIndex();
   }
 
   @SuppressWarnings("checkstyle:all")

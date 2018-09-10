@@ -61,6 +61,7 @@ public class FieldDataController extends Application
   private FileChooser filePath;
 
   private TreeItem<Drawable> selectedItem;
+  private int currentItem;
   private Field field;
 
   private Gsehen gsehenInstance;
@@ -147,9 +148,13 @@ public class FieldDataController extends Application
     this.pane = pane;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public void handle(FarmDataChanged event) {
+    createFieldView();
+  }
+
+  @SuppressWarnings("unchecked")
+  private void createFieldView() {
     pane.setVisible(false);
     index = 1;
 
@@ -289,6 +294,9 @@ public class FieldDataController extends Application
           }
         }
         gsehenInstance.sendFarmDataChanged(field, null);
+        tabPane.getSelectionModel().select(2);
+        treeTableView.getSelectionModel().clearSelection();
+        treeTableView.getSelectionModel().select(currentItem);
       }
     });
 
@@ -386,6 +394,7 @@ public class FieldDataController extends Application
             }
           }
         });
+    currentItem = treeTableView.getSelectionModel().getSelectedIndex();
   }
 
   /**
@@ -636,6 +645,9 @@ public class FieldDataController extends Application
         tabPane.getTabs().clear();
         tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab, logViewTab);
         gsehenInstance.sendFarmDataChanged(field, null);
+        tabPane.getSelectionModel().select(2);
+        treeTableView.getSelectionModel().clearSelection();
+        treeTableView.getSelectionModel().select(currentItem);
       }
     });
 
@@ -672,6 +684,9 @@ public class FieldDataController extends Application
             tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab,
                 logViewTab);
             gsehenInstance.sendFarmDataChanged(field, null);
+            tabPane.getSelectionModel().select(2);
+            treeTableView.getSelectionModel().clearSelection();
+            treeTableView.getSelectionModel().select(currentItem);
           } catch (IllegalArgumentException iae) {
             if (center.getChildren().contains(dateError)) {
               center.getChildren().remove(dateError);
@@ -935,6 +950,9 @@ public class FieldDataController extends Application
         tabPane.getTabs().clear();
         tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab, logViewTab);
         gsehenInstance.sendFarmDataChanged(field, null);
+        tabPane.getSelectionModel().select(2);
+        treeTableView.getSelectionModel().clearSelection();
+        treeTableView.getSelectionModel().select(currentItem);
       }
     });
 
@@ -953,6 +971,9 @@ public class FieldDataController extends Application
         soilProfileList.add(soilProfileItem);
         pane.getChildren().clear();
         gsehenInstance.sendFarmDataChanged(field, null);
+        tabPane.getSelectionModel().select(2);
+        treeTableView.getSelectionModel().clearSelection();
+        treeTableView.getSelectionModel().select(currentItem);
       }
     });
 
@@ -1135,6 +1156,9 @@ public class FieldDataController extends Application
           tabPane.getTabs().clear();
           tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab, logViewTab);
           gsehenInstance.sendFarmDataChanged(field, null);
+          tabPane.getSelectionModel().select(2);
+          treeTableView.getSelectionModel().clearSelection();
+          treeTableView.getSelectionModel().select(currentItem);
         }
       });
       pane.setBottom(back);
