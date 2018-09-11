@@ -178,7 +178,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       public void changed(ObservableValue<? extends String> observable, String oldValue,
           String newValue) {
         if (newValue != null) {
-          if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+          if (!gsehenInstance.isParseable(newValue)) {
             soilStartValue.setText(oldValue);
           }
         }
@@ -230,7 +230,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       public void changed(ObservableValue<? extends String> observable, String oldValue,
           String newValue) {
         if (newValue != null) {
-          if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+          if (!gsehenInstance.isParseable(newValue)) {
             soilStartValue.setText(oldValue);
           }
         }
@@ -535,13 +535,13 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
             if (newValue != null) {
-              if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+              if (!gsehenInstance.isParseable(newValue)) {
                 irrigation.setText(oldValue);
               }
             }
           }
         });
-        irrigation.setText(String.valueOf(0.0));
+        irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(0.0));
 
         // Niederschlag (in mm)
         Text precipitationLabel = new Text(mainBundle.getString("plotview.precipitation"));
@@ -552,13 +552,13 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
             if (newValue != null) {
-              if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+              if (!gsehenInstance.isParseable(newValue)) {
                 precipitation.setText(oldValue);
               }
             }
           }
         });
-        precipitation.setText(String.valueOf(0.0));
+        precipitation.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
 
         date.valueProperty().addListener((ov, oldValue, newValue) -> {
           ManualData md = new ManualData();
@@ -573,12 +573,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             Date wateringDate = Date
                 .from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             if ((wateringDate.compareTo(mws.getDate()) == 0)) {
-              irrigation.setText(String.valueOf(mws.getIrrigation()));
-              precipitation.setText(String.valueOf(mws.getPrecipitation()));
+              irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(mws.getIrrigation()));
+              precipitation.setText(gsehenInstance.formatDoubleOneDecimal(mws.getPrecipitation()));
               newData = false;
             } else if (newData) {
-              irrigation.setText(String.valueOf(0.0));
-              precipitation.setText(String.valueOf(0.0));
+              irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(0.0));
+              precipitation.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
             }
           }
         });
@@ -758,7 +758,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
                   name.setText(plot.getName());
 
-                  area.setText(String.valueOf(plot.getPolygon().calculateArea()));
+                  area.setText(
+                      gsehenInstance.formatDoubleOneDecimal(plot.getPolygon().calculateArea()));
 
                   if (plot.getScalingFactor() != null) {
                     scalingFactor.setValue(plot.getScalingFactor());
@@ -792,15 +793,17 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                   }
 
                   if (plot.getRootingZone() == null) {
-                    rootingZone.setText(String.valueOf(0.0));
+                    rootingZone.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
                   } else {
-                    rootingZone.setText(String.valueOf(plot.getRootingZone()));
+                    rootingZone.setText(
+                        gsehenInstance.formatDoubleOneDecimal(plot.getRootingZone()));
                   }
 
                   if (plot.getSoilStartValue() == null) {
-                    soilStartValue.setText(String.valueOf(0.0));
+                    soilStartValue.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
                   } else {
-                    soilStartValue.setText(String.valueOf(plot.getSoilStartValue()));
+                    soilStartValue.setText(
+                        gsehenInstance.formatDoubleOneDecimal(plot.getSoilStartValue()));
                   }
 
                   if (plot.getCropDevelopmentStatus() != null) {
@@ -864,8 +867,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         calendar.add(Calendar.DAY_OF_YEAR, currentPhaseDuration);
         cropPhases.add(new CropPhase(index + 1, gsehenInstance.localizeCropText(bbchs.get(index)),
             DateUtil.between(today, currentCalendarTime, calendar.getTime()) ? "\u25B6" : "",
-            gsehenInstance.formatDate(currentCalendarTime), String.valueOf(currentPhaseDuration),
-            String.valueOf(rootingZones.get(index++))));
+            gsehenInstance.formatDate(currentCalendarTime), gsehenInstance.formatDoubleOneDecimal(currentPhaseDuration),
+            gsehenInstance.formatDoubleOneDecimal(rootingZones.get(index++))));
       }
       cropTable.getItems().addAll(FXCollections.observableArrayList(cropPhases));
     }

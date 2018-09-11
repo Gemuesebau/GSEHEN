@@ -62,7 +62,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private Field autoField;
   protected final ResourceBundle mainBundle;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
+  private Map<
+      Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>
+        > eventListeners = new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -144,8 +146,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private Text attribute2;
   private Text attributeLabel3;
   private Text attribute3;
-
-  public Text action;
+  private Text action;
 
   private HBox attribute1Box;
   private HBox attribute2Box;
@@ -265,7 +266,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 attributeLabel2 = new Text(mainBundle.getString("fieldview.area"));
                 attributeLabel2.setFont(Font.font("Arial", 12));
-                attribute2 = new Text(Double.toString(field.getPolygon().calculateArea()));
+                attribute2 = new Text(
+                    gsehenInstance.formatDoubleOneDecimal(field.getPolygon().calculateArea()));
                 attribute2.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 attribute2Box = new HBox();
                 attribute2Box.getChildren().addAll(attributeLabel2, attribute2);
@@ -294,7 +296,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 Plot plot = (Plot) selectedItem.getValue();
 
                 attributeLabel1 = new Text(mainBundle.getString("fieldview.area"));
-                attribute1 = new Text(Double.toString(plot.getPolygon().calculateArea()));
+                attribute1 = new Text(
+                    gsehenInstance.formatDoubleOneDecimal(plot.getPolygon().calculateArea()));
 
                 attribute1Box = new HBox();
                 attribute1Box.getChildren().addAll(attributeLabel1, attribute1);
@@ -302,7 +305,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 attributeLabel2 = new Text(mainBundle.getString("plotview.rootingzone"));
 
                 if (plot.getRootingZone() != null) {
-                  attribute2 = new Text(Double.toString(plot.getRootingZone()));
+                  attribute2 = new Text(
+                      gsehenInstance.formatDoubleOneDecimal(plot.getRootingZone()));
                 } else {
                   attribute2 = new Text("0.0");
                 }
@@ -322,7 +326,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 Text soilStartLabel = new Text(mainBundle.getString("plotview.soilstart"));
                 Text soilStart;
                 if (plot.getSoilStartDate() != null) {
-                  soilStart = new Text(plot.getSoilStartDate().toString());
+                  soilStart = new Text(gsehenInstance.formatDate(plot.getSoilStartDate()));
                 } else {
                   soilStart = new Text("/");
                 }
@@ -332,7 +336,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 Text soilValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
                 Text soilValue;
                 if (plot.getSoilStartValue() != null) {
-                  soilValue = new Text(plot.getSoilStartValue().toString());
+                  soilValue = new Text(
+                      gsehenInstance.formatDoubleOneDecimal(plot.getSoilStartValue()));
                 } else {
                   soilValue = new Text("/");
                 }
@@ -345,9 +350,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 Text actionLabel = new Text(mainBundle.getString("treetableview.watering"));
 
                 if (plot.getSoilStartValue() != null && plot.getRecommendedAction() != null) {
-                  action = new Text(getRecommendedActionText(plot) + " : "
+                  action = new Text(getRecommendedActionText(plot)/* + " : "
                       + new java.text.SimpleDateFormat("EE., dd.MM.yyyy, HH:mm:ss.SSS",
-                          Gsehen.getSelectedLocale()).format(new java.util.Date()));
+                          gsehenInstance.getSelectedLocale()).format(new java.util.Date())*/);
 
                 } else {
                   action = new Text("/");
@@ -781,12 +786,21 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
   private String getRecommendedActionText(Plot plot) {
     return MessageUtil.renderMessage(mainBundle,
-        plot.getRecommendedAction().getRecommendation().getMessagePropertyKey(), 3,
-        index -> plot.getRecommendedAction().getParameterValue(index));
+        plot.getRecommendedAction().getRecommendation().getMessagePropertyKey(),
+        3, index -> formatDouble(plot.getRecommendedAction().getParameterValue(index)));
+  }
+
+  @SuppressWarnings("checkstyle:javadocmethod")
+  private Object formatDouble(Object parameterValue) {
+    if (parameterValue instanceof Double) {
+      // this MAY be irrigation ...
+      return gsehenInstance.formatDoubleTwoDecimal((Double)parameterValue);
+    } else {
+      return parameterValue;
+    }
   }
 
   private void updatePlotInfo(Plot plot) {
-
     Platform.runLater(new Runnable() {
       @Override
       public void run() {

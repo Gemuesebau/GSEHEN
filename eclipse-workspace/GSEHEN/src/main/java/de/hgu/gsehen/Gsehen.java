@@ -138,8 +138,9 @@ public class Gsehen extends Application {
 
   private static Gsehen instance;
 
-  private static Locale selectedLocale;
-  private DecimalFormat numberFormat;
+  private Locale selectedLocale;
+  private DecimalFormat oneDecimalNumberFormat;
+  private DecimalFormat twoDecimalNumberFormat;
   private SimpleDateFormat dateFormat;
 
   {
@@ -150,7 +151,8 @@ public class Gsehen extends Application {
     weatherDataSourcesList = loadAll(WeatherDataSource.class);
     LOGGER.log(Level.INFO, "Loaded Croplist");
     crops = loadAll(Crop.class);
-    messages = CollectionUtil.listToMap(loadAll(Messages.class), message -> message.getKey() + "." + message.getLocaleId());
+    messages = CollectionUtil.listToMap(loadAll(Messages.class),
+        message -> message.getKey() + "." + message.getLocaleId());
 
     mainBundle = ResourceBundle.getBundle("i18n.main", getSelectedLocale());
   }
@@ -835,28 +837,37 @@ public class Gsehen extends Application {
     return null;
   }
 
-  public void setSelectedLocale(Locale selectedLocale) {
-    this.selectedLocale = selectedLocale;
-    this.numberFormat = (DecimalFormat)NumberFormat.getNumberInstance(selectedLocale);
-    this.dateFormat = new SimpleDateFormat("dd.MM.yyyy", selectedLocale);
+  @SuppressWarnings("checkstyle:javadocmethod")
+  public void setSelectedLocale(Locale selectedLocaleParameter) {
+    selectedLocale = selectedLocaleParameter;
+    oneDecimalNumberFormat = (DecimalFormat)NumberFormat.getNumberInstance(selectedLocaleParameter);
+    oneDecimalNumberFormat.applyPattern("#,##0.0");
+    twoDecimalNumberFormat = (DecimalFormat)NumberFormat.getNumberInstance(selectedLocaleParameter);
+    twoDecimalNumberFormat.applyPattern("#,##0.00");
+    dateFormat = new SimpleDateFormat("dd.MM.yyyy", selectedLocaleParameter);
   }
 
-  public static Locale getSelectedLocale() {
+  public Locale getSelectedLocale() {
     return selectedLocale; // FIXME make a user choice/option in UI
   }
 
   @SuppressWarnings("checkstyle:javadocmethod")
   public double parseDouble(String value) {
     try {
-      return numberFormat.parse(value).doubleValue();
+      // superfluous decimals are ignored
+      return oneDecimalNumberFormat.parse(value).doubleValue();
     } catch (ParseException e) {
       throw new RuntimeException("Parsing double failed", e);
     }
   }
 
   @SuppressWarnings("checkstyle:javadocmethod")
-  public String formatDouble(double value) {
-    return numberFormat.format(value);
+  public String formatDoubleOneDecimal(double value) {
+    return oneDecimalNumberFormat.format(value);
+  }
+
+  public String formatDoubleTwoDecimal(double value) {
+    return twoDecimalNumberFormat.format(value);
   }
 
   public String localizeCropText(String messageKey) {
@@ -865,5 +876,19 @@ public class Gsehen extends Application {
 
   public String formatDate(Date date) {
     return dateFormat.format(date);
+  }
+
+  @SuppressWarnings("checkstyle:javadocmethod")
+  public boolean isParseable(String value) {
+    try {
+      parseDouble(value);
+    } catch (RuntimeException e) {
+      if (e.getCause() != null && e.getCause() instanceof ParseException) {
+        return false;
+      } else {
+        throw e;
+      }
+    }
+    return true;
   }
 }
