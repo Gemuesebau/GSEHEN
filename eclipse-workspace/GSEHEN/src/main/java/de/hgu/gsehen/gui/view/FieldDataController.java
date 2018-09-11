@@ -51,6 +51,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
+@SuppressWarnings("static-access")
 public class FieldDataController extends Application
     implements GsehenEventListener<FarmDataChanged> {
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
@@ -301,18 +302,6 @@ public class FieldDataController extends Application
         treeTableView.getSelectionModel().select(currentItem);
       }
     });
-
-    GridPane.setHalignment(nameLabel, HPos.LEFT);
-    GridPane.setHalignment(name, HPos.LEFT);
-    GridPane.setHalignment(areaLabel, HPos.LEFT);
-    GridPane.setHalignment(area, HPos.LEFT);
-    GridPane.setHalignment(soilProfile, HPos.LEFT);
-    GridPane.setHalignment(soilBox, HPos.LEFT);
-    GridPane.setHalignment(createSoil, HPos.LEFT);
-    GridPane.setHalignment(weatherDataSource, HPos.LEFT);
-    GridPane.setHalignment(weatherBox, HPos.LEFT);
-    GridPane.setHalignment(createWds, HPos.LEFT);
-    GridPane.setHalignment(saveField, HPos.LEFT);
 
     GridPane.setConstraints(nameLabel, 0, 0);
     GridPane.setConstraints(name, 1, 0);
@@ -583,28 +572,6 @@ public class FieldDataController extends Application
         }
       }
     });
-
-    // Set Nodes Vertical & Horizontal Alignment
-    GridPane.setHalignment(intervalLabel, HPos.LEFT);
-    GridPane.setHalignment(interval, HPos.LEFT);
-    GridPane.setHalignment(windspeedLabel, HPos.LEFT);
-    GridPane.setHalignment(windspeed, HPos.LEFT);
-    GridPane.setHalignment(dateFormatLabel, HPos.LEFT);
-    GridPane.setHalignment(dateFormat, HPos.LEFT);
-    GridPane.setHalignment(dateFormatExample, HPos.LEFT);
-    GridPane.setHalignment(localeIdLabel, HPos.LEFT);
-    GridPane.setHalignment(localeId, HPos.LEFT);
-    GridPane.setHalignment(filePathLabel, HPos.LEFT);
-    GridPane.setHalignment(path, HPos.LEFT);
-    GridPane.setHalignment(fileChooserButton, HPos.LEFT);
-    GridPane.setHalignment(locationLatLabel, HPos.LEFT);
-    GridPane.setHalignment(locationLat, HPos.LEFT);
-    GridPane.setHalignment(locationLatExample, HPos.LEFT);
-    GridPane.setHalignment(locationLngLabel, HPos.LEFT);
-    GridPane.setHalignment(locationLng, HPos.LEFT);
-    GridPane.setHalignment(locationLngExample, HPos.LEFT);
-    GridPane.setHalignment(metersAboveLabel, HPos.LEFT);
-    GridPane.setHalignment(metersAbove, HPos.LEFT);
 
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(intervalLabel, 0, 0);
@@ -915,16 +882,6 @@ public class FieldDataController extends Application
       }
     });
 
-    // Set Nodes Vertical & Horizontal Alignment
-    GridPane.setHalignment(layerText, HPos.LEFT);
-    GridPane.setHalignment(soil, HPos.LEFT);
-    GridPane.setHalignment(soilChoiceBox, HPos.LEFT);
-    GridPane.setHalignment(soilAwcLabel, HPos.LEFT);
-    GridPane.setHalignment(soilAwc, HPos.LEFT);
-    GridPane.setHalignment(depthLabel, HPos.LEFT);
-    GridPane.setHalignment(depth, HPos.LEFT);
-    GridPane.setHalignment(setSoil, HPos.LEFT);
-
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(layerText, 0, 0, 2, 1);
     GridPane.setConstraints(soil, 0, 1);
@@ -1117,14 +1074,6 @@ public class FieldDataController extends Application
             }
           }
         });
-        // Set Nodes Vertical & Horizontal Alignment
-        GridPane.setHalignment(layer, HPos.LEFT);
-        GridPane.setHalignment(soil, HPos.LEFT);
-        GridPane.setHalignment(soilChoiceBox, HPos.LEFT);
-        GridPane.setHalignment(soilAwcLabel, HPos.LEFT);
-        GridPane.setHalignment(soilAwc, HPos.LEFT);
-        GridPane.setHalignment(depthLabel, HPos.LEFT);
-        GridPane.setHalignment(depth, HPos.LEFT);
 
         // Set Row & Column Index for Nodes
         GridPane.setConstraints(layer, 0, row);
