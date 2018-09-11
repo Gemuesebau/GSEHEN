@@ -838,13 +838,13 @@ public class Gsehen extends Application {
   }
 
   @SuppressWarnings("checkstyle:javadocmethod")
-  public void setSelectedLocale(Locale selectedLocaleParameter) {
-    selectedLocale = selectedLocaleParameter;
-    oneDecimalNumberFormat = (DecimalFormat)NumberFormat.getNumberInstance(selectedLocaleParameter);
+  public void setSelectedLocale(Locale selectedLocale) {
+    this.selectedLocale = selectedLocale;
+    oneDecimalNumberFormat = (DecimalFormat)NumberFormat.getNumberInstance(selectedLocale);
     oneDecimalNumberFormat.applyPattern("#,##0.0");
-    twoDecimalNumberFormat = (DecimalFormat)NumberFormat.getNumberInstance(selectedLocaleParameter);
+    twoDecimalNumberFormat = (DecimalFormat)NumberFormat.getNumberInstance(selectedLocale);
     twoDecimalNumberFormat.applyPattern("#,##0.00");
-    dateFormat = new SimpleDateFormat("dd.MM.yyyy", selectedLocaleParameter);
+    dateFormat = new SimpleDateFormat("dd.MM.yyyy", selectedLocale);
   }
 
   public Locale getSelectedLocale() {

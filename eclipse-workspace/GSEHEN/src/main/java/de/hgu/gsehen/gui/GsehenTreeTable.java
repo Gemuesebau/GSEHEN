@@ -785,19 +785,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   }
 
   private String getRecommendedActionText(Plot plot) {
-    return MessageUtil.renderMessage(mainBundle,
-        plot.getRecommendedAction().getRecommendation().getMessagePropertyKey(),
-        3, index -> formatDouble(plot.getRecommendedAction().getParameterValue(index)));
-  }
-
-  @SuppressWarnings("checkstyle:javadocmethod")
-  private Object formatDouble(Object parameterValue) {
-    if (parameterValue instanceof Double) {
-      // this MAY be irrigation ...
-      return gsehenInstance.formatDoubleTwoDecimal((Double)parameterValue);
-    } else {
-      return parameterValue;
-    }
+    return MessageUtil.renderMessage(gsehenInstance.getSelectedLocale(), mainBundle,
+        plot.getRecommendedAction());
   }
 
   private void updatePlotInfo(Plot plot) {
