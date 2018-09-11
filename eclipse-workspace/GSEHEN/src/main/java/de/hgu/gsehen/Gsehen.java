@@ -854,7 +854,6 @@ public class Gsehen extends Application {
   @SuppressWarnings("checkstyle:javadocmethod")
   public double parseDouble(String value) {
     try {
-      // superfluous decimals are ignored
       return oneDecimalNumberFormat.parse(value).doubleValue();
     } catch (ParseException e) {
       throw new RuntimeException("Parsing double failed", e);
