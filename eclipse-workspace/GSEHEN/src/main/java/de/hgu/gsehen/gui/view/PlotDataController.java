@@ -67,7 +67,6 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
-@SuppressWarnings("static-access")
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
   private final Timeline timeline = new Timeline();
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
@@ -273,8 +272,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           // A tooltip, that shows the current crop description
           Tooltip tooltip = new Tooltip(
               gsehenInstance.localizeCropText(cropChoiceBox.getValue().getDescription()));
-          tooltip.setStyle(
-              "-fx-font-style: italic; -fx-background-color: #ffffff; "
+          tooltip.setStyle("-fx-font-style: italic; -fx-background-color: #ffffff; "
               + "-fx-text-fill: #000000; -fx-font-size: 9pt;");
           cropChoiceBox.setTooltip(tooltip);
 
@@ -347,14 +345,17 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       public void handle(CellEditEvent<CropPhase, String> t) {
         ((CropPhase) t.getTableView().getItems().get(t.getTablePosition().getRow()))
             .setDuration(t.getNewValue());
-        if (cropTable.getFocusModel().getFocusedIndex() == 0) {
+        if (cropTable.getFocusModel().getFocusedIndex() == 0 && !t.getNewValue().isEmpty()) {
           devPhase.setPhase1(Integer.valueOf(t.getNewValue()));
-        } else if (cropTable.getFocusModel().getFocusedIndex() == 1) {
+        } else if (cropTable.getFocusModel().getFocusedIndex() == 1 && !t.getNewValue().isEmpty()) {
           devPhase.setPhase2(Integer.valueOf(t.getNewValue()));
-        } else if (cropTable.getFocusModel().getFocusedIndex() == 2) {
+        } else if (cropTable.getFocusModel().getFocusedIndex() == 2 && !t.getNewValue().isEmpty()) {
           devPhase.setPhase3(Integer.valueOf(t.getNewValue()));
-        } else if (cropTable.getFocusModel().getFocusedIndex() == 3) {
+        } else if (cropTable.getFocusModel().getFocusedIndex() == 3 && !t.getNewValue().isEmpty()) {
           devPhase.setPhase4(Integer.valueOf(t.getNewValue()));
+        } else {
+          ((CropPhase) t.getTableView().getItems().get(t.getTablePosition().getRow()))
+          .setDuration(t.getOldValue());
         }
         setTableData();
       }
@@ -612,48 +613,58 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           }
         });
 
+        HBox buttonBox = new HBox();
+
         // Bewässerung buchen
         Button book = new Button(mainBundle.getString("plotview.book"));
         book.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent arg0) {
-            LocalDate localDate = date.getValue();
-            Date wateringDate = DateUtil
-                .truncToDay(Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            if (date.getValue() != null && !irrigation.getText().isEmpty()
+                && !precipitation.getText().isEmpty()) {
+              LocalDate localDate = date.getValue();
+              Date wateringDate = DateUtil.truncToDay(
+                  Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
-            if (plot.getManualData() == null) {
-              ManualData manualData = new ManualData();
-              List<ManualWaterSupply> mwsList = new ArrayList<ManualWaterSupply>();
-              mwsList.add(parseSupply(wateringDate, irrigation, precipitation));
-              manualData.setManualWaterSupply(mwsList);
-              plot.setManualData(manualData);
-            } else {
-              ManualData manualData = plot.getManualData();
-              boolean newDate = true;
-              for (ManualWaterSupply mws : manualData.getManualWaterSupply()) {
-                if (wateringDate.equals(mws.getDate())) {
-                  newDate = false;
-                  mws.setIrrigation(parseDouble(irrigation));
-                  mws.setPrecipitation(parseDouble(precipitation));
-                  break;
+              if (plot.getManualData() == null) {
+                ManualData manualData = new ManualData();
+                List<ManualWaterSupply> mwsList = new ArrayList<ManualWaterSupply>();
+                mwsList.add(parseSupply(wateringDate, irrigation, precipitation));
+                manualData.setManualWaterSupply(mwsList);
+                plot.setManualData(manualData);
+              } else {
+                ManualData manualData = plot.getManualData();
+                boolean newDate = true;
+                for (ManualWaterSupply mws : manualData.getManualWaterSupply()) {
+                  if (wateringDate.equals(mws.getDate())) {
+                    newDate = false;
+                    mws.setIrrigation(parseDouble(irrigation));
+                    mws.setPrecipitation(parseDouble(precipitation));
+                    break;
+                  }
+                }
+                if (newDate) {
+                  manualData.getManualWaterSupply()
+                      .add(parseSupply(wateringDate, irrigation, precipitation));
                 }
               }
-              if (newDate) {
-                manualData.getManualWaterSupply()
-                    .add(parseSupply(wateringDate, irrigation, precipitation));
-              }
-            }
 
-            pane.getChildren().clear();
-            treeTableView.setVisible(true);
-            tabPane.getTabs().clear();
-            tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab,
-                logViewTab);
-            gsehenInstance.sendFarmDataChanged(plot, null);
-            gsehenInstance.sendManualDataChanged(field, plot, wateringDate, null);
-            tabPane.getSelectionModel().select(3);
-            treeTableView.getSelectionModel().clearSelection();
-            treeTableView.getSelectionModel().select(currentItem);
+              pane.getChildren().clear();
+              treeTableView.setVisible(true);
+              tabPane.getTabs().clear();
+              tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab,
+                  logViewTab);
+              gsehenInstance.sendFarmDataChanged(plot, null);
+              gsehenInstance.sendManualDataChanged(field, plot, wateringDate, null);
+              tabPane.getSelectionModel().select(3);
+              treeTableView.getSelectionModel().clearSelection();
+              treeTableView.getSelectionModel().select(currentItem);
+            } else {
+              Text wateringError = new Text(mainBundle.getString("fieldview.error"));
+              wateringError.setFont(Font.font("Verdana", 14));
+              wateringError.setFill(Color.RED);
+              buttonBox.getChildren().add(wateringError);
+            }
           }
 
           private ManualWaterSupply parseSupply(Date wateringDate, TextField irrigation,
@@ -667,7 +678,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           }
         });
 
-        HBox buttonBox = new HBox();
         buttonBox.getChildren().addAll(back, book);
         pane.setBottom(buttonBox);
       }
@@ -679,34 +689,43 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       @Override
       public void handle(ActionEvent e) {
         if (cropStart.getValue() != null || soilStart.getValue() != null) {
-          try {
-            plot.setName(name.getText());
-            plot.setCrop(cropChoiceBox.getValue());
+          if (!name.getText().isEmpty() && !rootingZone.getText().isEmpty()
+              && !soilStartValue.getText().isEmpty() && cropChoiceBox.getValue() != null) {
+            try {
+              plot.setName(name.getText());
+              plot.setCrop(cropChoiceBox.getValue());
 
-            if (cropStart.getValue() != null) {
-              LocalDate localDateCrop = cropStart.getValue();
-              Date cropDate = Date
-                  .from(localDateCrop.atStartOfDay(ZoneId.systemDefault()).toInstant());
-              plot.setCropStart(cropDate);
+              if (cropStart.getValue() != null) {
+                LocalDate localDateCrop = cropStart.getValue();
+                Date cropDate = Date
+                    .from(localDateCrop.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                plot.setCropStart(cropDate);
+              }
+              if (soilStart.getValue() != null) {
+                LocalDate localDateSoil = soilStart.getValue();
+                Date soilDate = Date
+                    .from(localDateSoil.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                plot.setSoilStartDate(soilDate);
+              }
+              plot.setRootingZone(gsehenInstance.parseDouble(rootingZone.getText()));
+              plot.setSoilStartValue(gsehenInstance.parseDouble(soilStartValue.getText()));
+              plot.setIsActive(isActive);
+              plot.setScalingFactor(scalingFactor.getValue());
+            } finally {
+              if (bottomBox.getChildren().contains(error)) {
+                bottomBox.getChildren().remove(error);
+              }
+              gsehenInstance.sendFarmDataChanged(plot, null);
+              tabPane.getSelectionModel().select(3);
+              treeTableView.getSelectionModel().clearSelection();
+              treeTableView.getSelectionModel().select(currentItem);
             }
-            if (soilStart.getValue() != null) {
-              LocalDate localDateSoil = soilStart.getValue();
-              Date soilDate = Date
-                  .from(localDateSoil.atStartOfDay(ZoneId.systemDefault()).toInstant());
-              plot.setSoilStartDate(soilDate);
-            }
-            plot.setRootingZone(gsehenInstance.parseDouble(rootingZone.getText()));
-            plot.setSoilStartValue(gsehenInstance.parseDouble(soilStartValue.getText()));
-            plot.setIsActive(isActive);
-            plot.setScalingFactor(scalingFactor.getValue());
-          } finally {
-            if (bottomBox.getChildren().contains(error)) {
-              bottomBox.getChildren().remove(error);
-            }
-            gsehenInstance.sendFarmDataChanged(plot, null);
-            tabPane.getSelectionModel().select(3);
-            treeTableView.getSelectionModel().clearSelection();
-            treeTableView.getSelectionModel().select(currentItem);
+          } else {
+            Text plotError = new Text(mainBundle.getString("fieldview.error"));
+            plotError.setFont(Font.font("Verdana", 14));
+            plotError.setFill(Color.RED);
+            bottomBox.getChildren().clear();
+            bottomBox.getChildren().addAll(harvest, watering, save, plotError);
           }
         } else {
           error = new Text(mainBundle.getString("plotview.error"));
@@ -738,6 +757,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         .addListener(new ChangeListener<Object>() {
           @Override
           public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
+            bottomBox.getChildren().clear();
+            bottomBox.getChildren().addAll(harvest, watering, save);
             for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
               if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
                 selectedItem = treeTableView.getSelectionModel().getSelectedCells().get(i)
@@ -787,15 +808,15 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                   if (plot.getRootingZone() == null) {
                     rootingZone.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
                   } else {
-                    rootingZone.setText(
-                        gsehenInstance.formatDoubleOneDecimal(plot.getRootingZone()));
+                    rootingZone
+                        .setText(gsehenInstance.formatDoubleOneDecimal(plot.getRootingZone()));
                   }
 
                   if (plot.getSoilStartValue() == null) {
                     soilStartValue.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
                   } else {
-                    soilStartValue.setText(
-                        gsehenInstance.formatDoubleOneDecimal(plot.getSoilStartValue()));
+                    soilStartValue
+                        .setText(gsehenInstance.formatDoubleOneDecimal(plot.getSoilStartValue()));
                   }
 
                   if (plot.getCropDevelopmentStatus() != null) {
@@ -860,7 +881,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         calendar.add(Calendar.DAY_OF_YEAR, currentPhaseDuration);
         cropPhases.add(new CropPhase(index + 1, gsehenInstance.localizeCropText(bbchs.get(index)),
             DateUtil.between(today, currentCalendarTime, calendar.getTime()) ? "\u25B6" : "",
-            gsehenInstance.formatDate(currentCalendarTime), gsehenInstance.formatDoubleOneDecimal(currentPhaseDuration),
+            gsehenInstance.formatDate(currentCalendarTime),
+            gsehenInstance.formatDoubleOneDecimal(currentPhaseDuration),
             gsehenInstance.formatDoubleOneDecimal(rootingZones.get(index++))));
       }
       cropTable.getItems().addAll(FXCollections.observableArrayList(cropPhases));

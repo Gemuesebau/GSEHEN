@@ -51,7 +51,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-@SuppressWarnings("static-access")
 public class FieldDataController extends Application
     implements GsehenEventListener<FarmDataChanged> {
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
@@ -104,6 +103,7 @@ public class FieldDataController extends Application
   private TextField locationLat;
   private TextField locationLng;
   private TextField metersAbove;
+  private TextField depth;
   private TreeMap<String, String> javaLocaleMap;
   private Text dateError = new Text();
 
@@ -280,26 +280,34 @@ public class FieldDataController extends Application
 
     // Speichern
     saveField = new Button(mainBundle.getString("button.accept"));
+    Text nameError = new Text(mainBundle.getString("fieldview.nameerror"));
+    nameError.setFont(Font.font("Verdana", 14));
+    nameError.setFill(Color.RED);
     saveField.setOnAction(new EventHandler<ActionEvent>() {
 
       @Override
       public void handle(ActionEvent e) {
-        field.setName(name.getText());
-        field.setArea(gsehenInstance.parseDouble(area.getText()));
-        for (SoilProfile sp : soilProfileList) {
-          if (sp == currentSoilBox.getValue()) {
-            field.setSoilProfileUuid(sp.getUuid());
+        if (name.getText().isEmpty()) {
+          GridPane.setConstraints(nameError, 2, 0);
+          grid.getChildren().add(nameError);
+        } else {
+          field.setName(name.getText());
+          field.setArea(gsehenInstance.parseDouble(area.getText()));
+          for (SoilProfile sp : soilProfileList) {
+            if (sp == currentSoilBox.getValue()) {
+              field.setSoilProfileUuid(sp.getUuid());
+            }
           }
-        }
-        for (WeatherDataSource wds : weatherDataSourceList) {
-          if (wds == weatherData.getValue()) {
-            field.setWeatherDataSourceUuid(wds.getUuid());
+          for (WeatherDataSource wds : weatherDataSourceList) {
+            if (wds == weatherData.getValue()) {
+              field.setWeatherDataSourceUuid(wds.getUuid());
+            }
           }
+          gsehenInstance.sendFarmDataChanged(field, null);
+          tabPane.getSelectionModel().select(2);
+          treeTableView.getSelectionModel().clearSelection();
+          treeTableView.getSelectionModel().select(currentItem);
         }
-        gsehenInstance.sendFarmDataChanged(field, null);
-        tabPane.getSelectionModel().select(2);
-        treeTableView.getSelectionModel().clearSelection();
-        treeTableView.getSelectionModel().select(currentItem);
       }
     });
 
@@ -377,6 +385,9 @@ public class FieldDataController extends Application
                   } else {
                     currentSoilBox.getSelectionModel().clearSelection();
                     pane.setBottom(null);
+                  }
+                  if (grid.getChildren().contains(nameError)) {
+                    grid.getChildren().remove(nameError);
                   }
                 } else {
                   pane.setVisible(false);
@@ -663,7 +674,7 @@ public class FieldDataController extends Application
             }
             dateError.setText(
                 mainBundle.getString("fieldview.dateerror") + "\"" + iae.getMessage() + "\"");
-            dateError.setFont(Font.font("Verdana", 12));
+            dateError.setFont(Font.font("Verdana", 14));
             dateError.setFill(Color.RED);
             GridPane.setHalignment(dateError, HPos.LEFT);
             GridPane.setConstraints(dateError, 3, 2);
@@ -671,7 +682,7 @@ public class FieldDataController extends Application
           }
         } else {
           Text error = new Text(mainBundle.getString("fieldview.error"));
-          error.setFont(Font.font("Verdana", 20));
+          error.setFont(Font.font("Verdana", 14));
           error.setFill(Color.RED);
           buttonBox.getChildren().clear();
           buttonBox.getChildren().addAll(back, save, error);
@@ -821,8 +832,8 @@ public class FieldDataController extends Application
     setSoil.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
-        if (soilChoiceBox.getValue() != null && depth.getText() != null
-            && soilProfileName.getText() != null) {
+        if (soilChoiceBox.getValue() != null && !depth.getText().isEmpty()
+            && !soilAwc.getText().isEmpty() && !soilChoiceBox.getValue().getName().isEmpty()) {
           Soil soil = new Soil();
           soil.setName(soilChoiceBox.getValue().getName());
           soil.setAvailableWaterCapacity(Double.parseDouble(soilAwc.getText()));
@@ -874,7 +885,7 @@ public class FieldDataController extends Application
           depth.setText(mainBundle.getString("fieldview.layer") + (layerList.size() + 1));
         } else {
           Text error = new Text(mainBundle.getString("fieldview.error"));
-          error.setFont(Font.font("Verdana", 20));
+          error.setFont(Font.font("Verdana", 14));
           error.setFill(Color.RED);
           buttonBox.getChildren().clear();
           buttonBox.getChildren().addAll(back, save, error);
@@ -919,20 +930,28 @@ public class FieldDataController extends Application
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
-        pane.getChildren().clear();
-        treeTableView.setVisible(true);
-        tabPane.getTabs().clear();
-        tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab, logViewTab);
-        SoilProfile soilProfileItem = new SoilProfile(DBUtil.generateUuid());
-        soilProfileItem.setSoilType(soilList);
-        soilProfileItem.setProfileDepth(soilDepthList);
-        soilProfileItem.setName(soilProfileName.getText());
-        soilProfileList.add(soilProfileItem);
-        pane.getChildren().clear();
-        gsehenInstance.sendFarmDataChanged(field, null);
-        tabPane.getSelectionModel().select(2);
-        treeTableView.getSelectionModel().clearSelection();
-        treeTableView.getSelectionModel().select(currentItem);
+        if (!soilProfileName.getText().isEmpty() && !soilList.isEmpty()) {
+          pane.getChildren().clear();
+          treeTableView.setVisible(true);
+          tabPane.getTabs().clear();
+          tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab, logViewTab);
+          SoilProfile soilProfileItem = new SoilProfile(DBUtil.generateUuid());
+          soilProfileItem.setSoilType(soilList);
+          soilProfileItem.setProfileDepth(soilDepthList);
+          soilProfileItem.setName(soilProfileName.getText());
+          soilProfileList.add(soilProfileItem);
+          pane.getChildren().clear();
+          gsehenInstance.sendFarmDataChanged(field, null);
+          tabPane.getSelectionModel().select(2);
+          treeTableView.getSelectionModel().clearSelection();
+          treeTableView.getSelectionModel().select(currentItem);
+        } else {
+          Text profileError = new Text(mainBundle.getString("fieldview.profileerror"));
+          profileError.setFont(Font.font("Verdana", 14));
+          profileError.setFill(Color.RED);
+          buttonBox.getChildren().clear();
+          buttonBox.getChildren().addAll(back, save, profileError);
+        }
       }
     });
 
@@ -962,7 +981,9 @@ public class FieldDataController extends Application
         @Override
         public void changed(ObservableValue<? extends String> observable, String oldValue,
             String newValue) {
-          currentSoilBox.getValue().setName(soilProfileName.getText());
+          if (!newValue.isEmpty()) {
+            currentSoilBox.getValue().setName(soilProfileName.getText());
+          }
         }
       });
 
@@ -1056,7 +1077,7 @@ public class FieldDataController extends Application
         pane.setTop(topBox);
 
         // Tiefe
-        TextField depth = new TextField(
+        depth = new TextField(
             String.valueOf(currentSoilBox.getValue().getProfileDepth().get(i).getDepth()));
         Text depthLabel = new Text(mainBundle.getString("fieldview.depth"));
         depthLabel.setFont(Font.font("Arial", 14));
@@ -1064,7 +1085,7 @@ public class FieldDataController extends Application
           @Override
           public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
-            if (newValue != null) {
+            if (!newValue.isEmpty()) {
               if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
                 depth.setText(oldValue);
               } else {
@@ -1102,14 +1123,24 @@ public class FieldDataController extends Application
       back.setOnAction(new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent arg0) {
-          pane.getChildren().clear();
-          treeTableView.setVisible(true);
-          tabPane.getTabs().clear();
-          tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab, logViewTab);
-          gsehenInstance.sendFarmDataChanged(field, null);
-          tabPane.getSelectionModel().select(2);
-          treeTableView.getSelectionModel().clearSelection();
-          treeTableView.getSelectionModel().select(currentItem);
+          if (!soilProfileName.getText().isEmpty() && !depth.getText().isEmpty()) {
+            pane.getChildren().clear();
+            treeTableView.setVisible(true);
+            tabPane.getTabs().clear();
+            tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab,
+                logViewTab);
+            gsehenInstance.sendFarmDataChanged(field, null);
+            tabPane.getSelectionModel().select(2);
+            treeTableView.getSelectionModel().clearSelection();
+            treeTableView.getSelectionModel().select(currentItem);
+          } else {
+            Text profileChangeError = new Text(mainBundle.getString("fieldview.error"));
+            profileChangeError.setFont(Font.font("Verdana", 14));
+            profileChangeError.setFill(Color.RED);
+            HBox bottom = new HBox();
+            bottom.getChildren().addAll(back, profileChangeError);
+            pane.setBottom(bottom);
+          }
         }
       });
       pane.setBottom(back);
