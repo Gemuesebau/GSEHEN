@@ -270,6 +270,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       public void changed(ObservableValue<? extends Crop> observable, //
           Crop oldValue, Crop newValue) {
         if (oldValue != newValue) {
+          Tooltip t = new Tooltip(
+              gsehenInstance.localizeCropText(cropChoiceBox.getValue().getDescription()));
+          cropChoiceBox.setTooltip(t);
+
           plot.setCrop(newValue);
           // devPhase is a helper-object where you can set the duration of each crop phase
           devPhase = new CropDevelopmentStatus();
@@ -749,8 +753,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
                   if (plot.getCrop() != null && cropList.size() != 0) {
                     cropChoiceBox.getSelectionModel().select(plot.getCrop());
-                    cropChoiceBox.setTooltip(new Tooltip(
-                        gsehenInstance.localizeCropText(plot.getCrop().getDescription())));
                   }
 
                   Date date = plot.getSoilStartDate();
@@ -844,6 +846,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         if (duration == null || duration == 0) {
           break;
         }
+        // TODO
         final Integer currentPhaseDuration = devCropDurations.get(index);
         final Date currentCalendarTime = calendar.getTime();
         calendar.add(Calendar.DAY_OF_YEAR, currentPhaseDuration);
