@@ -835,10 +835,10 @@ public class FieldDataController extends Application
             && soilProfileName.getText() != null) {
           Soil soil = new Soil();
           soil.setName(soilChoiceBox.getValue().getName());
-          soil.setAvailableWaterCapacity(Double.parseDouble(soilAwc.getText()));
+          soil.setAvailableWaterCapacity(gsehenInstance.parseDouble(soilAwc.getText()));
 
           SoilProfileDepth spd = new SoilProfileDepth();
-          spd.setDepth(Double.parseDouble(depth.getText()));
+          spd.setDepth(gsehenInstance.parseDouble(depth.getText()));
 
           soilList.add(soil);
           soilDepthList.add(spd);
