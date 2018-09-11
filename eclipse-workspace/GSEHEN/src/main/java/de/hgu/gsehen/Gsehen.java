@@ -141,6 +141,7 @@ public class Gsehen extends Application {
   private Locale selectedLocale;
   private DecimalFormat oneDecimalNumberFormat;
   private DecimalFormat twoDecimalNumberFormat;
+  private DecimalFormat moreDecimalNumberFormat;
   private SimpleDateFormat dateFormat;
 
   {
@@ -844,6 +845,8 @@ public class Gsehen extends Application {
     oneDecimalNumberFormat.applyPattern("#,##0.0");
     twoDecimalNumberFormat = (DecimalFormat)NumberFormat.getNumberInstance(selectedLocale);
     twoDecimalNumberFormat.applyPattern("#,##0.00");
+    moreDecimalNumberFormat = (DecimalFormat)NumberFormat.getNumberInstance(selectedLocale);
+    moreDecimalNumberFormat.applyPattern("#,#######0.0000000");
     dateFormat = new SimpleDateFormat("dd.MM.yyyy", selectedLocale);
   }
 
@@ -859,7 +862,7 @@ public class Gsehen extends Application {
       throw new RuntimeException("Parsing double failed", e);
     }
   }
-
+  
   @SuppressWarnings("checkstyle:javadocmethod")
   public String formatDoubleOneDecimal(double value) {
     return oneDecimalNumberFormat.format(value);
@@ -868,6 +871,11 @@ public class Gsehen extends Application {
   public String formatDoubleTwoDecimal(double value) {
     return twoDecimalNumberFormat.format(value);
   }
+  
+  public String formatDoubleMoreDecimal(double value) {
+    return moreDecimalNumberFormat.format(value);
+  }
+
 
   public String localizeCropText(String messageKey) {
     return messages.get(messageKey + "." + getSelectedLocale().getLanguage()).getText();
@@ -890,4 +898,5 @@ public class Gsehen extends Application {
     }
     return true;
   }
+  
 }
