@@ -707,10 +707,13 @@ public class FieldDataController extends Application
       localeId.getSelectionModel()
           .select(getKeyForValue(selectedWeatherDataSource.getNumberLocaleId(), javaLocaleMap));
       path.setText(selectedWeatherDataSource.getDataFilePath());
-      locationLat.setText(gsehenInstance.formatDoubleMoreDecimal(selectedWeatherDataSource.getLocationLat()));
-      locationLng.setText(gsehenInstance.formatDoubleMoreDecimal(selectedWeatherDataSource.getLocationLng()));
+      locationLat.setText(gsehenInstance.formatDoubleMoreDecimal(
+          selectedWeatherDataSource.getLocationLat()));
+      locationLng.setText(gsehenInstance.formatDoubleMoreDecimal(
+          selectedWeatherDataSource.getLocationLng()));
       metersAbove
-          .setText(gsehenInstance.formatDoubleOneDecimal(selectedWeatherDataSource.getLocationMetersAboveSeaLevel()));
+          .setText(gsehenInstance.formatDoubleOneDecimal(
+              selectedWeatherDataSource.getLocationMetersAboveSeaLevel()));
     }
   }
 
