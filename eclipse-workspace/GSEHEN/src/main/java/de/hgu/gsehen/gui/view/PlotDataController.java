@@ -270,6 +270,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       public void changed(ObservableValue<? extends Crop> observable, //
           Crop oldValue, Crop newValue) {
         if (oldValue != newValue) {
+          // A tooltip, that shows the current crop description
           Tooltip tooltip = new Tooltip(
               gsehenInstance.localizeCropText(cropChoiceBox.getValue().getDescription()));
           tooltip.setStyle(
@@ -673,7 +674,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     });
 
     // Speichern
-    Button save = new Button(mainBundle.getString("menu.file.save"));
+    Button save = new Button(mainBundle.getString("button.accept"));
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {

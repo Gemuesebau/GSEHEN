@@ -279,7 +279,7 @@ public class FieldDataController extends Application
     });
 
     // Speichern
-    saveField = new Button(mainBundle.getString("menu.file.save"));
+    saveField = new Button(mainBundle.getString("button.accept"));
     saveField.setOnAction(new EventHandler<ActionEvent>() {
 
       @Override
@@ -620,7 +620,7 @@ public class FieldDataController extends Application
       }
     });
 
-    save = new Button(mainBundle.getString("menu.file.save"));
+    save = new Button(mainBundle.getString("button.accept"));
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
@@ -915,7 +915,7 @@ public class FieldDataController extends Application
       }
     });
 
-    save = new Button(mainBundle.getString("menu.file.save"));
+    save = new Button(mainBundle.getString("button.accept"));
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
