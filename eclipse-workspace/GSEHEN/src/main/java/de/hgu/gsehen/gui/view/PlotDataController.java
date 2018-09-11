@@ -270,9 +270,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       public void changed(ObservableValue<? extends Crop> observable, //
           Crop oldValue, Crop newValue) {
         if (oldValue != newValue) {
-          Tooltip t = new Tooltip(
+          Tooltip tooltip = new Tooltip(
               gsehenInstance.localizeCropText(cropChoiceBox.getValue().getDescription()));
-          cropChoiceBox.setTooltip(t);
+          tooltip.setStyle(
+              "-fx-font-style: italic; -fx-background-color: #ffffff; "
+              + "-fx-text-fill: #000000; -fx-font-size: 9pt;");
+          cropChoiceBox.setTooltip(tooltip);
 
           plot.setCrop(newValue);
           // devPhase is a helper-object where you can set the duration of each crop phase
@@ -352,6 +355,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         } else if (cropTable.getFocusModel().getFocusedIndex() == 3) {
           devPhase.setPhase4(Integer.valueOf(t.getNewValue()));
         }
+        setTableData();
       }
     });
     cropRootingZone.setCellFactory(TextFieldTableCell.forTableColumn());
