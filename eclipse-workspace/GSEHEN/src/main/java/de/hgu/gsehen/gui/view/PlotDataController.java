@@ -49,6 +49,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -748,6 +749,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
                   if (plot.getCrop() != null && cropList.size() != 0) {
                     cropChoiceBox.getSelectionModel().select(plot.getCrop());
+                    cropChoiceBox.setTooltip(new Tooltip(
+                        gsehenInstance.localizeCropText(plot.getCrop().getDescription())));
                   }
 
                   Date date = plot.getSoilStartDate();
