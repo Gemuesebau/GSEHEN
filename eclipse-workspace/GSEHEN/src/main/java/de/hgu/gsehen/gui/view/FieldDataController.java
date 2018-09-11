@@ -55,6 +55,7 @@ public class FieldDataController extends Application
     implements GsehenEventListener<FarmDataChanged> {
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   protected final ResourceBundle mainBundle;
+  private WeatherDataSource selectedWeatherDataSource;
 
   private List<SoilProfile> soilProfileList;
   private List<WeatherDataSource> weatherDataSourceList;
@@ -84,7 +85,6 @@ public class FieldDataController extends Application
   private ChoiceBox<WeatherDataSource> weatherData;
   private SoilProfile sp;
   private WeatherDataSource wds;
-  private WeatherDataSource wdsFile;
   private Button createSoil;
   private Button save;
   private Button back;
@@ -369,7 +369,6 @@ public class FieldDataController extends Application
                     if (weatherDataSource != null
                         && wds.getName().equals(weatherDataSource.getName())) {
                       weatherData.getSelectionModel().select(wds);
-                      wdsFile = wds;
                     }
                   }
 
@@ -636,7 +635,8 @@ public class FieldDataController extends Application
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
-        weatherDataSourceList.remove(wdsFile);
+        weatherDataSourceList.remove(selectedWeatherDataSource);
+        System.out.println(weatherDataSourceList.size());
         if (!weatherDataName.getText().trim().isEmpty() && !interval.getText().trim().isEmpty()
             && !windspeed.getText().trim().isEmpty() && !dateFormat.getText().trim().isEmpty()
             && !localeId.getSelectionModel().isEmpty() && !path.getText().trim().isEmpty()
@@ -704,7 +704,7 @@ public class FieldDataController extends Application
    * Fills TextFields with correct values ("Wetterdatenquelle bearbeiten").
    */
   private void setWeatherDataTexts() {
-    final WeatherDataSource selectedWeatherDataSource = weatherData.getSelectionModel()
+    selectedWeatherDataSource = weatherData.getSelectionModel()
         .getSelectedItem();
     if (selectedWeatherDataSource != null) {
       weatherDataName.setText(selectedWeatherDataSource.getName());
@@ -721,7 +721,6 @@ public class FieldDataController extends Application
           gsehenInstance.formatDoubleMoreDecimal(selectedWeatherDataSource.getLocationLng()));
       metersAbove.setText(gsehenInstance
           .formatDoubleOneDecimal(selectedWeatherDataSource.getLocationMetersAboveSeaLevel()));
-      wdsFile = selectedWeatherDataSource;
     }
   }
 
