@@ -49,6 +49,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -57,6 +58,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
@@ -65,6 +67,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
+@SuppressWarnings("static-access")
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
   private final Timeline timeline = new Timeline();
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
@@ -266,7 +269,15 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       @Override
       public void changed(ObservableValue<? extends Crop> observable, //
           Crop oldValue, Crop newValue) {
-        if (oldValue != newValue && oldValue != null) {
+        if (oldValue != newValue) {
+          // A tooltip, that shows the current crop description
+          Tooltip tooltip = new Tooltip(
+              gsehenInstance.localizeCropText(cropChoiceBox.getValue().getDescription()));
+          tooltip.setStyle(
+              "-fx-font-style: italic; -fx-background-color: #ffffff; "
+              + "-fx-text-fill: #000000; -fx-font-size: 9pt;");
+          cropChoiceBox.setTooltip(tooltip);
+
           plot.setCrop(newValue);
           // devPhase is a helper-object where you can set the duration of each crop phase
           devPhase = new CropDevelopmentStatus();
@@ -304,17 +315,22 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     // Configuration of each TableColumn
     phase.setMinWidth(30);
+    phase.setStyle("-fx-alignment:top-center; -fx-font-style: italic");
     phase.setCellValueFactory(new PropertyValueFactory<CropPhase, Integer>("phase"));
     description.setMinWidth(125);
+    description.setStyle("-fx-alignment:top-center; -fx-font-style: italic");
     description.setCellValueFactory(new PropertyValueFactory<CropPhase, String>("description"));
     today.setMinWidth(100);
     today.setStyle("-fx-alignment:top-right");
     today.setCellValueFactory(new PropertyValueFactory<CropPhase, String>("todayMarker"));
     startDate.setMinWidth(100);
+    startDate.setStyle("-fx-alignment:top-center; -fx-font-style: italic");
     startDate.setCellValueFactory(new PropertyValueFactory<CropPhase, String>("cropStart"));
     duration.setMinWidth(100);
+    duration.setStyle("-fx-alignment:top-center; -fx-font: 14px; -fx-font-weight: bold");
     duration.setCellValueFactory(new PropertyValueFactory<CropPhase, Integer>("duration"));
     cropRootingZone.setMinWidth(200);
+    cropRootingZone.setStyle("-fx-alignment:top-center; -fx-font: 14px; -fx-font-weight: bold");
     cropRootingZone
         .setCellValueFactory(new PropertyValueFactory<CropPhase, Integer>("rootingZone"));
 
@@ -340,6 +356,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         } else if (cropTable.getFocusModel().getFocusedIndex() == 3) {
           devPhase.setPhase4(Integer.valueOf(t.getNewValue()));
         }
+        setTableData();
       }
     });
     cropRootingZone.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -360,6 +377,11 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         }
       }
     });
+
+    Pane tablePane = new Pane();
+    cropTable.setMaxHeight(150);
+    tablePane.setMaxHeight(150);
+    tablePane.getChildren().add(cropTable);
 
     // Wasserbilanz
     waterBalanceLabel = new Text(mainBundle.getString("plotview.waterbalance"));
@@ -403,28 +425,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
-    // Set Nodes Vertical & Horizontal Alignment
-    GridPane.setHalignment(nameLabel, HPos.LEFT);
-    GridPane.setHalignment(name, HPos.LEFT);
-    GridPane.setHalignment(areaLabel, HPos.LEFT);
-    GridPane.setHalignment(area, HPos.LEFT);
-    GridPane.setHalignment(rootingZoneLabel, HPos.LEFT);
-    GridPane.setHalignment(rootingZone, HPos.LEFT);
-    GridPane.setHalignment(cropStartLabel, HPos.LEFT);
-    GridPane.setHalignment(cropStart, HPos.LEFT);
-    GridPane.setHalignment(soilStartLabel, HPos.LEFT);
-    GridPane.setHalignment(soilStart, HPos.LEFT);
-    GridPane.setHalignment(soilStartValueLabel, HPos.LEFT);
-    GridPane.setHalignment(soilStartValue, HPos.LEFT);
-    GridPane.setHalignment(crop, HPos.LEFT);
-    GridPane.setHalignment(cropChoiceBox, HPos.LEFT);
-    GridPane.setHalignment(cropTable, HPos.LEFT);
-    GridPane.setHalignment(waterBalanceLabel, HPos.LEFT);
-    GridPane.setHalignment(chart, HPos.LEFT);
-    GridPane.setHalignment(scalingFactorLabel, HPos.LEFT);
-    GridPane.setHalignment(scalingFactor, HPos.LEFT);
-    GridPane.setHalignment(scalingValue, HPos.LEFT);
-
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(nameLabel, 0, 0);
     GridPane.setConstraints(name, 1, 0, 2, 1);
@@ -440,8 +440,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane.setConstraints(soilStartValue, 1, 5, 2, 1);
     GridPane.setConstraints(crop, 0, 6);
     GridPane.setConstraints(cropChoiceBox, 1, 6, 2, 1);
-    GridPane.setConstraints(cropTable, 0, 7, 3, 1, HPos.CENTER, VPos.CENTER, Priority.SOMETIMES,
-        Priority.SOMETIMES);
+    GridPane.setConstraints(tablePane, 0, 7, 3, 1, HPos.CENTER, VPos.CENTER, Priority.ALWAYS,
+        Priority.ALWAYS);
     GridPane.setConstraints(waterBalanceLabel, 0, 8);
     GridPane.setConstraints(chart, 1, 8, 2, 1);
     GridPane.setConstraints(scalingFactorLabel, 0, 9);
@@ -450,7 +450,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     centerGrid.getChildren().addAll(nameLabel, name, areaLabel, area, rootingZoneLabel, rootingZone,
         cropStartLabel, cropStart, soilStartLabel, soilStart, soilStartValueLabel, soilStartValue,
-        crop, cropChoiceBox, cropTable, waterBalanceLabel, chart, scalingFactorLabel, scalingFactor,
+        crop, cropChoiceBox, tablePane, waterBalanceLabel, chart, scalingFactorLabel, scalingFactor,
         scalingValue);
 
     ScrollPane scrollPane = new ScrollPane();
@@ -583,14 +583,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           }
         });
 
-        // Set Nodes Vertical & Horizontal Alignment
-        GridPane.setHalignment(dateLabel, HPos.LEFT);
-        GridPane.setHalignment(date, HPos.LEFT);
-        GridPane.setHalignment(irrigationLabel, HPos.LEFT);
-        GridPane.setHalignment(irrigation, HPos.LEFT);
-        GridPane.setHalignment(precipitationLabel, HPos.LEFT);
-        GridPane.setHalignment(precipitation, HPos.LEFT);
-
         // Set Row & Column Index for Nodes
         GridPane.setConstraints(dateLabel, 0, 0);
         GridPane.setConstraints(date, 1, 0);
@@ -682,7 +674,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     });
 
     // Speichern
-    Button save = new Button(mainBundle.getString("menu.file.save"));
+    Button save = new Button(mainBundle.getString("button.accept"));
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
@@ -862,6 +854,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         if (duration == null || duration == 0) {
           break;
         }
+        // TODO
         final Integer currentPhaseDuration = devCropDurations.get(index);
         final Date currentCalendarTime = calendar.getTime();
         calendar.add(Calendar.DAY_OF_YEAR, currentPhaseDuration);
