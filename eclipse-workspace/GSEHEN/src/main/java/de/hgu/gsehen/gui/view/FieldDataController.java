@@ -721,6 +721,7 @@ public class FieldDataController extends Application
           gsehenInstance.formatDoubleMoreDecimal(selectedWeatherDataSource.getLocationLng()));
       metersAbove.setText(gsehenInstance
           .formatDoubleOneDecimal(selectedWeatherDataSource.getLocationMetersAboveSeaLevel()));
+      wdsFile = selectedWeatherDataSource;
     }
   }
 

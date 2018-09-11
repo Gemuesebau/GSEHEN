@@ -181,7 +181,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           String newValue) {
         if (newValue != null) {
           if (!gsehenInstance.isParseable(newValue)) {
-            soilStartValue.setText(oldValue);
+            rootingZone.setText(oldValue);
           }
         }
       }
