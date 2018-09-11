@@ -352,7 +352,8 @@ public class FieldDataController extends Application
 
                   name.setText(field.getName());
 
-                  area.setText(String.valueOf(field.getPolygon().calculateArea()));
+                  area.setText(
+                      gsehenInstance.formatDoubleOneDecimal(field.getPolygon().calculateArea()));
 
                   for (WeatherDataSource wds : weatherDataSourceList) {
                     final WeatherDataSource weatherDataSource = gsehenInstance
@@ -478,7 +479,7 @@ public class FieldDataController extends Application
       public void changed(ObservableValue<? extends String> observable, String oldValue,
           String newValue) {
         if (newValue != null) {
-          if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+          if (!gsehenInstance.isParseable(newValue)) {
             windspeed.setText(oldValue);
           }
         }
@@ -530,7 +531,7 @@ public class FieldDataController extends Application
       public void changed(ObservableValue<? extends String> observable, String oldValue,
           String newValue) {
         if (newValue != null) {
-          if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+          if (!gsehenInstance.isParseable(newValue)) {
             locationLat.setText(oldValue);
           }
         }
@@ -548,7 +549,7 @@ public class FieldDataController extends Application
       public void changed(ObservableValue<? extends String> observable, String oldValue,
           String newValue) {
         if (newValue != null) {
-          if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+          if (!gsehenInstance.isParseable(newValue)) {
             locationLng.setText(oldValue);
           }
         }
@@ -566,7 +567,7 @@ public class FieldDataController extends Application
       public void changed(ObservableValue<? extends String> observable, String oldValue,
           String newValue) {
         if (newValue != null) {
-          if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+          if (!gsehenInstance.isParseable(newValue)) {
             metersAbove.setText(oldValue);
           }
         }
@@ -696,16 +697,20 @@ public class FieldDataController extends Application
         .getSelectedItem();
     if (selectedWeatherDataSource != null) {
       weatherDataName.setText(selectedWeatherDataSource.getName());
-      interval.setText(String.valueOf(selectedWeatherDataSource.getMeasIntervalSeconds()));
-      windspeed.setText(String.valueOf(selectedWeatherDataSource.getWindspeedMeasHeightMeters()));
+      interval.setText(
+          String.valueOf(
+              selectedWeatherDataSource.getMeasIntervalSeconds()));
+      windspeed.setText(
+          gsehenInstance.formatDoubleOneDecimal(
+              selectedWeatherDataSource.getWindspeedMeasHeightMeters()));
       dateFormat.setText(selectedWeatherDataSource.getDateFormatString());
       localeId.getSelectionModel()
           .select(getKeyForValue(selectedWeatherDataSource.getNumberLocaleId(), javaLocaleMap));
       path.setText(selectedWeatherDataSource.getDataFilePath());
-      locationLat.setText(String.valueOf(selectedWeatherDataSource.getLocationLat()));
-      locationLng.setText(String.valueOf(selectedWeatherDataSource.getLocationLng()));
+      locationLat.setText(gsehenInstance.formatDoubleMoreDecimal(selectedWeatherDataSource.getLocationLat()));
+      locationLng.setText(gsehenInstance.formatDoubleMoreDecimal(selectedWeatherDataSource.getLocationLng()));
       metersAbove
-          .setText(String.valueOf(selectedWeatherDataSource.getLocationMetersAboveSeaLevel()));
+          .setText(gsehenInstance.formatDoubleOneDecimal(selectedWeatherDataSource.getLocationMetersAboveSeaLevel()));
     }
   }
 
@@ -765,7 +770,9 @@ public class FieldDataController extends Application
       public void changed(ObservableValue<? extends Soil> observable, //
           Soil oldValue, Soil newValue) {
         if (newValue != null) {
-          soilAwc.setText(String.valueOf(soilChoiceBox.getValue().getAvailableWaterCapacity()));
+          soilAwc.setText(
+              gsehenInstance.formatDoubleOneDecimal(
+                  soilChoiceBox.getValue().getAvailableWaterCapacity()));
         }
       }
     };
@@ -785,7 +792,7 @@ public class FieldDataController extends Application
       public void changed(ObservableValue<? extends String> observable, String oldValue,
           String newValue) {
         if (newValue != null) {
-          if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+          if (!gsehenInstance.isParseable(newValue)) {
             depth.setText(oldValue);
           }
         }
@@ -835,7 +842,7 @@ public class FieldDataController extends Application
 
           soilChoiceBox.setValue(null);
           soilAwc.setText(null);
-          depth.setText(String.valueOf(spd.getDepth()));
+          depth.setText(gsehenInstance.formatDoubleOneDecimal(spd.getDepth()));
 
           Text createdSoil = new Text(
               mainBundle.getString("fieldview.layer") + (layerList.size() + 1) + ": \n"
@@ -1026,7 +1033,8 @@ public class FieldDataController extends Application
         for (Soil setSoil : soilChoiceBox.getItems()) {
           if (setSoil.getName().equals(curSoil.getName())) {
             soilChoiceBox.getSelectionModel().select(setSoil);
-            soilAwc.setText(String.valueOf(setSoil.getAvailableWaterCapacity()));
+            soilAwc.setText(
+                gsehenInstance.formatDoubleOneDecimal(setSoil.getAvailableWaterCapacity()));
           }
         }
 
@@ -1040,7 +1048,9 @@ public class FieldDataController extends Application
           public void changed(ObservableValue<? extends Soil> observable, //
               Soil oldValue, Soil newValue) {
             if (newValue != null) {
-              soilAwc.setText(String.valueOf(soilChoiceBox.getValue().getAvailableWaterCapacity()));
+              soilAwc.setText(
+                  gsehenInstance.formatDoubleOneDecimal(
+                      soilChoiceBox.getValue().getAvailableWaterCapacity()));
               currentSoilBox.getValue().getSoilType().get(in)
                   .setName(soilChoiceBox.getValue().getName());
               currentSoilBox.getValue().getSoilType().get(in)
@@ -1057,7 +1067,8 @@ public class FieldDataController extends Application
 
         // Tiefe
         TextField depth = new TextField(
-            String.valueOf(currentSoilBox.getValue().getProfileDepth().get(i).getDepth()));
+            gsehenInstance.formatDoubleOneDecimal(
+                currentSoilBox.getValue().getProfileDepth().get(i).getDepth()));
         Text depthLabel = new Text(mainBundle.getString("fieldview.depth"));
         depthLabel.setFont(Font.font("Arial", 14));
         depth.textProperty().addListener(new ChangeListener<String>() {
@@ -1065,7 +1076,7 @@ public class FieldDataController extends Application
           public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
             if (newValue != null) {
-              if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+              if (!gsehenInstance.isParseable(newValue)) {
                 depth.setText(oldValue);
               } else {
                 currentSoilBox.getValue().getProfileDepth().get(in)
