@@ -103,7 +103,7 @@ public class FieldDataController extends Application
   private TextField locationLat;
   private TextField locationLng;
   private TextField metersAbove;
-  private TextField depth;
+  private TextField soilDepth;
   private TreeMap<String, String> javaLocaleMap;
   private Text dateError = new Text();
 
@@ -1085,17 +1085,17 @@ public class FieldDataController extends Application
         pane.setTop(topBox);
 
         // Tiefe
-        TextField depth = new TextField(gsehenInstance
+        soilDepth = new TextField(gsehenInstance
             .formatDoubleOneDecimal(currentSoilBox.getValue().getProfileDepth().get(i).getDepth()));
         Text depthLabel = new Text(mainBundle.getString("fieldview.depth"));
         depthLabel.setFont(Font.font("Arial", 14));
-        depth.textProperty().addListener(new ChangeListener<String>() {
+        soilDepth.textProperty().addListener(new ChangeListener<String>() {
           @Override
           public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
             if (!newValue.isEmpty()) {
               if (!gsehenInstance.isParseable(newValue)) {
-                depth.setText(oldValue);
+                soilDepth.setText(oldValue);
               } else {
                 currentSoilBox.getValue().getProfileDepth().get(in)
                     .setDepth(gsehenInstance.parseDouble(newValue));
@@ -1114,11 +1114,11 @@ public class FieldDataController extends Application
         GridPane.setConstraints(soilAwc, 1, row);
         row += 1;
         GridPane.setConstraints(depthLabel, 0, row);
-        GridPane.setConstraints(depth, 1, row);
+        GridPane.setConstraints(soilDepth, 1, row);
         row += 1;
 
         center.getChildren().addAll(layer, soil, soilChoiceBox, soilAwcLabel, soilAwc, depthLabel,
-            depth);
+            soilDepth);
       }
 
       ScrollPane scrollPane = new ScrollPane();
@@ -1131,7 +1131,7 @@ public class FieldDataController extends Application
       back.setOnAction(new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent arg0) {
-          if (!soilProfileName.getText().isEmpty() && !depth.getText().isEmpty()) {
+          if (!soilProfileName.getText().isEmpty() && !soilDepth.getText().isEmpty()) {
             pane.getChildren().clear();
             treeTableView.setVisible(true);
             tabPane.getTabs().clear();

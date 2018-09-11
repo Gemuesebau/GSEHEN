@@ -325,10 +325,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     startDate.setStyle("-fx-alignment:top-center; -fx-font-style: italic");
     startDate.setCellValueFactory(new PropertyValueFactory<CropPhase, String>("cropStart"));
     duration.setMinWidth(100);
-    duration.setStyle("-fx-alignment:top-center; -fx-font: 14px; -fx-font-weight: bold");
+    duration.setStyle("-fx-alignment:top-center; -fx-font-weight: bold; -fx-font: 14px;");
     duration.setCellValueFactory(new PropertyValueFactory<CropPhase, Integer>("duration"));
     cropRootingZone.setMinWidth(200);
-    cropRootingZone.setStyle("-fx-alignment:top-center; -fx-font: 14px; -fx-font-weight: bold");
+    cropRootingZone.setStyle("-fx-alignment:top-center;  -fx-font-weight: bold; -fx-font: 14px;");
     cropRootingZone
         .setCellValueFactory(new PropertyValueFactory<CropPhase, Integer>("rootingZone"));
 
@@ -355,7 +355,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           devPhase.setPhase4(Integer.valueOf(t.getNewValue()));
         } else {
           ((CropPhase) t.getTableView().getItems().get(t.getTablePosition().getRow()))
-          .setDuration(t.getOldValue());
+              .setDuration(t.getOldValue());
         }
         setTableData();
       }
