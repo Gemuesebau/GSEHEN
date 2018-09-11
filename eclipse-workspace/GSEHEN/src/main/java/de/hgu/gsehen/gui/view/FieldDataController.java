@@ -258,8 +258,10 @@ public class FieldDataController extends Application
 
       @Override
       public void handle(ActionEvent e) {
-        createWeatherDataSource();
-        setWeatherDataTexts();
+        if (weatherData.getValue() != null) {
+          createWeatherDataSource();
+          setWeatherDataTexts();
+        }
       }
     });
 
@@ -655,6 +657,7 @@ public class FieldDataController extends Application
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
+        weatherDataSourceList.remove(wdsFile);
         if (!weatherDataName.getText().trim().isEmpty() && !interval.getText().trim().isEmpty()
             && !windspeed.getText().trim().isEmpty() && !dateFormat.getText().trim().isEmpty()
             && !localeId.getSelectionModel().isEmpty() && !path.getText().trim().isEmpty()
@@ -736,7 +739,6 @@ public class FieldDataController extends Application
       locationLng.setText(String.valueOf(selectedWeatherDataSource.getLocationLng()));
       metersAbove
           .setText(String.valueOf(selectedWeatherDataSource.getLocationMetersAboveSeaLevel()));
-      weatherDataSourceList.remove(wdsFile);
     }
   }
 
