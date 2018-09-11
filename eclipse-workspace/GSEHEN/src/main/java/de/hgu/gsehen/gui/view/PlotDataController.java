@@ -65,6 +65,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
+@SuppressWarnings("static-access")
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
   private final Timeline timeline = new Timeline();
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
@@ -266,7 +267,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       @Override
       public void changed(ObservableValue<? extends Crop> observable, //
           Crop oldValue, Crop newValue) {
-        if (oldValue != newValue && oldValue != null) {
+        if (oldValue != newValue) {
           plot.setCrop(newValue);
           // devPhase is a helper-object where you can set the duration of each crop phase
           devPhase = new CropDevelopmentStatus();
@@ -835,7 +836,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     cropTable.getItems().clear();
 
     Date cropdate = plot.getCropStart();
-
+    
     if (cropdate != null && plot.getCropDevelopmentStatus() != null) {
       Date today = Date
           .from(java.time.LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
