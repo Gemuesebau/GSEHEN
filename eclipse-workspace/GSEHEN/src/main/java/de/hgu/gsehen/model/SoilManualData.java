@@ -51,4 +51,12 @@ public class SoilManualData {
   public void setDaysPause(Integer daysPause) {
     this.daysPause = daysPause;
   }
+
+  public Double getSoilKc() {
+    return soilKc;
+  }
+
+  public void setSoilKc(Double soilKc) {
+    this.soilKc = soilKc;
+  }
 }
