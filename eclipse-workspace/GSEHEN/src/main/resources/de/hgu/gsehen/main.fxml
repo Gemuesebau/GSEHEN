@@ -95,15 +95,6 @@
 						</AnchorPane>
 					</content>
 				</Tab>
-				<Tab fx:id="farmViewTab" closable="false" text="FarmView">
-					<content>
-						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-							<children>
-								<WebView id="farmsWebView" layoutX="48.0" layoutY="85.0" prefHeight="369.0" prefWidth="296.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-							</children>
-						</AnchorPane>
-					</content>
-				</Tab>
             <Tab fx:id="fieldViewTab" closable="false" text="FieldView">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">

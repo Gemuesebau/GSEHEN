@@ -239,7 +239,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
               if (selectedItem.getValue().getClass().getSimpleName()
                   .equals(mainBundle.getString("gui.view.Map.drawableType.Farm"))) {
                 if (!tabPane.getSelectionModel().isSelected(0)) {
-                  tabPane.getSelectionModel().select(1);
+                  tabPane.getSelectionModel().select(0);
                 }
                 Farm farm = (Farm) selectedItem.getValue();
 
@@ -253,9 +253,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 centerBox.getChildren().addAll(attribute1Box);
                 detailPane.setBottom(null);
               } else if (selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
-                if (!tabPane.getSelectionModel().isSelected(0)
-                    && !tabPane.getSelectionModel().isSelected(1)) {
-                  tabPane.getSelectionModel().select(2);
+                if (!tabPane.getSelectionModel().isSelected(0)) {
+                  tabPane.getSelectionModel().select(1);
                 }
                 Field field = (Field) selectedItem.getValue();
 
@@ -291,9 +290,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 detailPane.setBottom(null);
               } else if (selectedItem.getValue().getClass().getSimpleName()
                   .equals(mainBundle.getString("gui.view.Map.drawableType.Plot"))) {
-                if (!tabPane.getSelectionModel().isSelected(0)
-                    && !tabPane.getSelectionModel().isSelected(1)) {
-                  tabPane.getSelectionModel().select(3);
+                if (!tabPane.getSelectionModel().isSelected(0)) {
+                  tabPane.getSelectionModel().select(2);
                 }
                 Plot plot = (Plot) selectedItem.getValue();
 

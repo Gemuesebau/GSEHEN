@@ -35,8 +35,6 @@ public class MainController {
   @FXML
   private Tab mapViewTab;
   @FXML
-  private Tab farmViewTab;
-  @FXML
   private Tab fieldViewTab;
   @FXML
   private Tab plotViewTab;
@@ -93,7 +91,7 @@ public class MainController {
   @FXML
   private void backToMainView(ActionEvent b) {
     tabPane.getTabs().clear();
-    tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab, logViewTab);
+    tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
   }
 
   /**
@@ -160,14 +158,6 @@ public class MainController {
 
   public void setMapViewTab(Tab mapViewTab) {
     this.mapViewTab = mapViewTab;
-  }
-
-  public Tab getFarmViewTab() {
-    return farmViewTab;
-  }
-
-  public void setFarmViewTab(Tab farmViewTab) {
-    this.farmViewTab = farmViewTab;
   }
 
   public Tab getPlotViewTab() {
