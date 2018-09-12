@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.chart.*?>
@@ -13,7 +14,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-<SplitPane id="mainSplitPane" dividerPositions="0.2746478873239437" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="800.0" minWidth="1280.0" prefHeight="800.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
+<SplitPane id="mainSplitPane" dividerPositions="0.2746478873239437" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="800.0" minWidth="1280.0" prefHeight="800.0" prefWidth="1280.0" stylesheets="@style/global.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
 	<items>
 		<BorderPane prefHeight="200.0" prefWidth="200.0">
 			<top>
@@ -83,8 +84,8 @@
 								</AnchorPane>
          </center>
 		</BorderPane>
-		<TabPane id="tabPane" fx:id="tabPane" prefHeight="398.0" prefWidth="431.0" tabClosingPolicy="UNAVAILABLE">
-			<tabs>
+      <JFXTabPane id="tabPane" fx:id="tabPane">
+         <tabs>
 				<Tab fx:id="mapViewTab" closable="false" text="MapView">
 					<content>
 						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -132,7 +133,7 @@
 	                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
 	                     <children>
 	                        <WebView fx:id="contactWebView" layoutX="403.0" layoutY="18.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-	                        <Button cancelButton="true" layoutX="14.0" layoutY="703.0" mnemonicParsing="false" onAction="#backToMainView" prefHeight="25.0" prefWidth="60.0" text="Zurück" AnchorPane.bottomAnchor="41.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="881.0" AnchorPane.topAnchor="703.0" />
+	                        <Button cancelButton="true" layoutX="14.0" layoutY="703.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#backToMainView" prefHeight="50.0" prefWidth="100.0" text="Zurück" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="800.0" AnchorPane.topAnchor="700.0" />
 	                     </children>
 	                  </AnchorPane>
 	               </content>
@@ -147,7 +148,7 @@
 	                  </AnchorPane>
 	               </content>
 	            </Tab>
-			</tabs>
-		</TabPane>
+         </tabs>
+      </JFXTabPane>
 	</items>
 </SplitPane>

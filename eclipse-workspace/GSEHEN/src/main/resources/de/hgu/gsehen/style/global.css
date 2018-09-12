@@ -1,0 +1,26 @@
+.root {
+    -fx-base: white;
+    -fx-color: -fx-base;
+
+    -fx-font-family: "Tahoma";
+    -fx-accent: rgb(246.0, 246.0, 246.0);
+    -fx-default-button: -fx-accent;
+    -fx-focus-color: rgb(222.0, 222.0, 222.0);
+}
+
+ /* JFX Tab Pane */
+.jfx-tab-pane .headers-region {
+    -fx-background-color: #58a817;
+}
+
+.jfx-tab-pane .tab-header-background {
+    -fx-background-color: #58a817;
+}
+
+.jfx-tab-pane .tab-selected-line {
+    -fx-stroke: #7c8911;
+}
+
+.tab-selected-line {
+    -fx-background-color: -fx-focus-color;
+}
