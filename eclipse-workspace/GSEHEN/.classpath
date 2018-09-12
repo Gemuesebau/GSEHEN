@@ -34,5 +34,6 @@
 	<classpathentry kind="lib" path="lib/main/byte-buddy-1.8.15.jar"/>
 	<classpathentry kind="lib" path="lib/main/hibernate-core-5.3.4.Final.jar"/>
 	<classpathentry kind="lib" path="lib/main/javassist-3.23.1-GA.jar"/>
+	<classpathentry kind="lib" path="lib/main/jfoenix-8.0.7.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

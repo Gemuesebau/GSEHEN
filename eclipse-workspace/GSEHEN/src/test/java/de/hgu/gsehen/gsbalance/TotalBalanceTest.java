@@ -241,7 +241,7 @@ class TotalBalanceTest {
       System.out.println(elem);
       EnvCalculator.calculateEt0(elem, location);
       System.out.println("Et0 is " + elem.getEt0());
-      DailyBalance.determineCurrentKc(elem, plot);
+      DailyBalance.determineCurrentKc(elem, plot, null);
       System.out.println("Current kc " + elem.getCurrentKc());
       DailyBalance.calculateEtc(elem, plot);
       System.out.println("Current Etc " + elem.getEtc());

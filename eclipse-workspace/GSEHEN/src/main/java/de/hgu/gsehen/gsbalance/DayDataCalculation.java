@@ -1,16 +1,5 @@
 package de.hgu.gsehen.gsbalance;
 
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDialog;
-import com.jfoenix.controls.JFXDialogLayout;
-
-import de.hgu.gsehen.Gsehen;
-import de.hgu.gsehen.evapotranspiration.DayData;
-import de.hgu.gsehen.model.Field;
-import de.hgu.gsehen.model.Plot;
-import de.hgu.gsehen.model.WeatherDataSource;
-import de.hgu.gsehen.util.DateUtil;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,14 +11,25 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.controls.JFXDialogLayout;
+
+import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.evapotranspiration.DayData;
+import de.hgu.gsehen.model.Field;
+import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.model.WeatherDataSource;
+import de.hgu.gsehen.util.DateUtil;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 
 public class DayDataCalculation {
   private Gsehen gsehenInstance;
@@ -50,11 +50,9 @@ public class DayDataCalculation {
   /**
    * Reads the contents of a given utf-8-encoded resource as one String.
    *
-   * @param resourceName
-   *          the name of the resource to read
+   * @param resourceName the name of the resource to read
    * @return a String containing the given resource's contents
-   * @throws IOException
-   *           if the resource can't be read (as utf-8)
+   * @throws IOException if the resource can't be read (as utf-8)
    */
   public static String getUtf8ResourceAsOneString(String resourceName) throws IOException {
     try (BufferedReader buffer = new BufferedReader(getReaderForUtf8(resourceName))) {
@@ -149,7 +147,7 @@ public class DayDataCalculation {
   /**
    * Recalculates today's day data.
    */
-  @SuppressWarnings({ "checkstyle:rightcurly" })
+  @SuppressWarnings({"checkstyle:rightcurly"})
   public void recalculateDayData() {
     final ScriptEngine engine = prepareScriptEngine();
     final Date today = DateUtil.truncToDay(new Date());
