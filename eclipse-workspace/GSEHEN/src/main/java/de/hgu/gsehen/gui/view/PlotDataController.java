@@ -1,5 +1,9 @@
 package de.hgu.gsehen.gui.view;
 
+import com.jfoenix.controls.JFXSlider;
+import com.jfoenix.controls.JFXTabPane;
+import com.jfoenix.controls.JFXTextField;
+
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
@@ -25,6 +29,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
+
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -42,13 +47,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
@@ -84,7 +86,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private Gsehen gsehenInstance;
   private BorderPane pane;
   private TreeTableView<Drawable> treeTableView;
-  private TabPane tabPane;
+  private JFXTabPane tabPane;
   private Tab mapViewTab;
   private Tab farmViewTab;
   private Tab fieldViewTab;
@@ -100,12 +102,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private Text cropStartLabel;
   private StringConverter<LocalDate> convert;
 
-  private TextField name;
-  private TextField rootingZone;
+  private JFXTextField name;
+  private JFXTextField rootingZone;
   private Text area;
   private DatePicker soilStart;
   private DatePicker cropStart;
-  private TextField soilStartValue;
+  private JFXTextField soilStartValue;
 
   private Text waterBalanceLabel;
   private boolean isActive = true;
@@ -163,7 +165,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // Name
     nameLabel = new Text(mainBundle.getString("fieldview.name"));
     nameLabel.setFont(Font.font("Arial", 14));
-    name = new TextField("");
+    name = new JFXTextField("");
 
     // m²
     areaLabel = new Text(mainBundle.getString("fieldview.area"));
@@ -174,7 +176,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // Max. durchw. Zone
     rootingZoneLabel = new Text(mainBundle.getString("plotview.rootingzone"));
     rootingZoneLabel.setFont(Font.font("Arial", 14));
-    rootingZone = new TextField("");
+    rootingZone = new JFXTextField("");
     rootingZone.textProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -226,7 +228,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     soilStartValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
     soilStartValueLabel.setFont(Font.font("Arial", 14));
-    soilStartValue = new TextField("");
+    soilStartValue = new JFXTextField("");
     soilStartValue.textProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -408,7 +410,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // Bewässerungsfaktor
     Text scalingFactorLabel = new Text(mainBundle.getString("plotview.scalingfactor"));
     scalingFactorLabel.setFont(Font.font("Arial", 14));
-    Slider scalingFactor = new Slider();
+    JFXSlider scalingFactor = new JFXSlider();
     scalingFactor.setMin(0.0);
     scalingFactor.setMax(2.0);
     scalingFactor.setValue(1.0);
@@ -530,7 +532,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         // Bewässerung (in mm)
         Text irrigationLabel = new Text(mainBundle.getString("plotview.irrigation"));
         irrigationLabel.setFont(Font.font("Arial", 14));
-        TextField irrigation = new TextField();
+        JFXTextField irrigation = new JFXTextField();
         irrigation.textProperty().addListener(new ChangeListener<String>() {
           @Override
           public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -547,7 +549,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         // Niederschlag (in mm)
         Text precipitationLabel = new Text(mainBundle.getString("plotview.precipitation"));
         precipitationLabel.setFont(Font.font("Arial", 14));
-        TextField precipitation = new TextField();
+        JFXTextField precipitation = new JFXTextField();
         precipitation.textProperty().addListener(new ChangeListener<String>() {
           @Override
           public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -667,13 +669,13 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             }
           }
 
-          private ManualWaterSupply parseSupply(Date wateringDate, TextField irrigation,
-              TextField precipitation) {
+          private ManualWaterSupply parseSupply(Date wateringDate, JFXTextField irrigation,
+              JFXTextField precipitation) {
             return new ManualWaterSupply(wateringDate, parseDouble(irrigation),
                 parseDouble(precipitation));
           }
 
-          private Double parseDouble(TextField textField) {
+          private Double parseDouble(JFXTextField textField) {
             return gsehenInstance.parseDouble(textField.getText()); // FIXME localize! DateFormat!
           }
         });
@@ -743,7 +745,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     pane.setBottom(bottomBox);
 
-    tabPane = gsehenInstance.getMainController().getTabPane();
+    tabPane = gsehenInstance.getMainController().getJFXTabPane();
     mapViewTab = gsehenInstance.getMainController().getMapViewTab();
     farmViewTab = gsehenInstance.getMainController().getFarmViewTab();
     fieldViewTab = gsehenInstance.getMainController().getFieldViewTab();

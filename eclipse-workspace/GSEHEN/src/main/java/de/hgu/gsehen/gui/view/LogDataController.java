@@ -1,5 +1,7 @@
 package de.hgu.gsehen.gui.view;
 
+import com.jfoenix.controls.JFXDatePicker;
+
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
@@ -28,7 +30,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
@@ -54,8 +55,8 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   private static LocalDate startDate;
   private static LocalDate endDate;
   
-  DatePicker startpicker = new DatePicker();
-  DatePicker endpicker = new DatePicker();
+  JFXDatePicker startpicker = new JFXDatePicker();
+  JFXDatePicker endpicker = new JFXDatePicker();
   
   {
     gsehenInstance = Gsehen.getInstance();
@@ -200,7 +201,7 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
     Label titleTime = new Label("Zeit : ");
     titleTime.setFont(Font.font("Arial", 14));
 
-    // DatePicker and Label for Filter Date
+    // JFXDatePicker and Label for Filter Date
     Label startLabel = new Label("Von: ");
     startLabel.setFont(Font.font("Arial", 14));
 
