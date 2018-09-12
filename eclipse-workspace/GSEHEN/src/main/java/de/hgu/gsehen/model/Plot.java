@@ -1,15 +1,16 @@
 package de.hgu.gsehen.model;
 
-import de.hgu.gsehen.gsbalance.RecommendedAction;
-import de.hgu.gsehen.gui.GeoPolygon;
-
 import java.util.Date;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+
+import de.hgu.gsehen.gsbalance.RecommendedAction;
+import de.hgu.gsehen.gui.GeoPolygon;
 
 @Entity
 public class Plot extends Drawable {
@@ -27,7 +28,7 @@ public class Plot extends Drawable {
   private Double scalingFactor;
   @OneToOne(cascade = {CascadeType.ALL})
   private WeatherData weatherData;
-  private Double rootingZone;
+  private Integer rootingZone;
   @OneToOne(cascade = {CascadeType.ALL})
   private WaterBalance waterBalance;
   @OneToOne(cascade = {CascadeType.ALL})
@@ -111,11 +112,11 @@ public class Plot extends Drawable {
     this.weatherData = weatherData;
   }
 
-  public Double getRootingZone() {
+  public Integer getRootingZone() {
     return rootingZone;
   }
 
-  public void setRootingZone(Double rootingZone) {
+  public void setRootingZone(Integer rootingZone) {
     this.rootingZone = rootingZone;
   }
 
@@ -245,10 +246,11 @@ public class Plot extends Drawable {
    * @param isActive Is the plot active and not archived
    */
   public Plot(String name, double area, GeoPolygon polygon, Location location, Double scalingFactor,
-      WeatherData weatherData, Double rootingZone, WaterBalance waterBalance, ManualData manualData,
-      RecommendedAction recommendedAction, Date soilStartDate, Double soilStartValue,
-      Boolean calculationPaused, Crop crop, CropDevelopmentStatus cropDevelopmentStatus,
-      CropRootingZone cropRootingZone, Date cropStart, Date cropEnd, Boolean isActive) {
+      WeatherData weatherData, Integer rootingZone, WaterBalance waterBalance,
+      ManualData manualData, RecommendedAction recommendedAction, Date soilStartDate,
+      Double soilStartValue, Boolean calculationPaused, Crop crop,
+      CropDevelopmentStatus cropDevelopmentStatus, CropRootingZone cropRootingZone, Date cropStart,
+      Date cropEnd, Boolean isActive) {
     super();
     this.name = name;
     this.area = area;
