@@ -88,7 +88,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private TreeTableView<Drawable> treeTableView;
   private JFXTabPane tabPane;
   private Tab mapViewTab;
-  private Tab farmViewTab;
   private Tab fieldViewTab;
   private Tab plotViewTab;
   private Tab logViewTab;
@@ -491,7 +490,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       public void handle(ActionEvent e) {
         pane.getChildren().clear();
         treeTableView.setVisible(false);
-        tabPane.getTabs().removeAll(mapViewTab, farmViewTab, fieldViewTab, logViewTab);
+        tabPane.getTabs().removeAll(mapViewTab, fieldViewTab, logViewTab);
 
         // Name of the plot
         Text nameLabel = new Text(plot.getName());
@@ -606,10 +605,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             pane.getChildren().clear();
             treeTableView.setVisible(true);
             tabPane.getTabs().clear();
-            tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab,
+            tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab,
                 logViewTab);
             gsehenInstance.sendFarmDataChanged(plot, null);
-            tabPane.getSelectionModel().select(3);
+            tabPane.getSelectionModel().select(2);
             treeTableView.getSelectionModel().clearSelection();
             treeTableView.getSelectionModel().select(currentItem);
           }
@@ -654,11 +653,11 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
               pane.getChildren().clear();
               treeTableView.setVisible(true);
               tabPane.getTabs().clear();
-              tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab,
+              tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab,
                   logViewTab);
               gsehenInstance.sendFarmDataChanged(plot, null);
               gsehenInstance.sendManualDataChanged(field, plot, wateringDate, null);
-              tabPane.getSelectionModel().select(3);
+              tabPane.getSelectionModel().select(2);
               treeTableView.getSelectionModel().clearSelection();
               treeTableView.getSelectionModel().select(currentItem);
             } else {
@@ -718,7 +717,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                 bottomBox.getChildren().remove(error);
               }
               gsehenInstance.sendFarmDataChanged(plot, null);
-              tabPane.getSelectionModel().select(3);
+              tabPane.getSelectionModel().select(2);
               treeTableView.getSelectionModel().clearSelection();
               treeTableView.getSelectionModel().select(currentItem);
             }
@@ -747,7 +746,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     tabPane = gsehenInstance.getMainController().getJFXTabPane();
     mapViewTab = gsehenInstance.getMainController().getMapViewTab();
-    farmViewTab = gsehenInstance.getMainController().getFarmViewTab();
     fieldViewTab = gsehenInstance.getMainController().getFieldViewTab();
     plotViewTab = gsehenInstance.getMainController().getPlotViewTab();
     logViewTab = gsehenInstance.getMainController().getLogViewTab();

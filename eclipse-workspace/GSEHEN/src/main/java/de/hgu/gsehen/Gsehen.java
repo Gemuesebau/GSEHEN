@@ -213,7 +213,6 @@ public class Gsehen extends Application {
     stage.show();
 
     maps = new Maps(this, (WebView) scene.lookup(MAPS_WEB_VIEW_ID));
-    farms = new Farms(this, (WebView) scene.lookup(FARMS_WEB_VIEW_ID));
     fields = new Fields(this, (BorderPane) scene.lookup(FIELDS_VIEW_ID));
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
     logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
