@@ -5,6 +5,7 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class SoilManualData {
 
+  Double soilKc;
   Integer soilZone;
   Double rainMax;
   Integer daysPause;
@@ -19,8 +20,9 @@ public class SoilManualData {
    *        sheduled
    * @param daysPause manually provided period of days the calculation pause is lasting
    */
-  public SoilManualData(Integer soilZone, Double rainMax, Integer daysPause) {
+  public SoilManualData(Double soilKc, Integer soilZone, Double rainMax, Integer daysPause) {
     super();
+    this.soilKc = soilKc;
     this.soilZone = soilZone;
     this.rainMax = rainMax;
     this.daysPause = daysPause;

@@ -74,7 +74,7 @@ class TotalBalanceTest {
     plot = new Plot("Feld2", 200, null, null, 1.0, null, 120.0, null, null, null,
         soilStartDate.parse("2016-06-04"), null, false, crop, cropDevelopmentStatus,
         cropRootingZone, cropStart.parse("2016-06-06"), cropEnd.parse("2016-09-06"), true);
-    SoilManualData soilManualData = new SoilManualData(null, null, null);
+    SoilManualData soilManualData = new SoilManualData(null, null, null, null);
     soil1 = new Soil("Sand", 8.0, null);
     soil2 = new Soil("SandyLoam", 12.0, null);
     soil3 = new Soil("Loam", 17.0, null);
