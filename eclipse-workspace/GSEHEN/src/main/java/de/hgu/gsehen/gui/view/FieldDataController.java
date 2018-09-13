@@ -452,6 +452,7 @@ public class FieldDataController extends Application
 
     HBox nameBox = new HBox();
     nameBox.getChildren().addAll(weatherDataLabel, weatherDataName);
+    nameBox.setPadding(new Insets(20, 0, 20, 20));
 
     pane.setTop(nameBox);
 
@@ -513,6 +514,7 @@ public class FieldDataController extends Application
     Hyperlink dateFormatExample = new Hyperlink(
         mainBundle.getString("fieldview.dateformatexample"));
     dateFormatExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+    dateFormatExample.setTextFill(Color.BLUE);
     dateFormatExample.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
