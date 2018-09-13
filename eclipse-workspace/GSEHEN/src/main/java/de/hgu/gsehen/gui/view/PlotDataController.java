@@ -701,15 +701,14 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                     .from(localDateSoil.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 plot.setSoilStartDate(soilDate);
               }
-              if (!rootingZone.getText().equals("0") || !rootingZone.getText().isEmpty()) {
+              if (!rootingZone.getText().equals("0") && !rootingZone.getText().isEmpty()) {
                 plot.setRootingZone(Integer.valueOf(rootingZone.getText()));
               } else {
-                System.out.println("rootingZone ist null!");
+                plot.setRootingZone(null);
               }
               plot.setSoilStartValue(soilStartValue.getValue());
               plot.setIsActive(isActive);
               plot.setScalingFactor((scalingFactor.getValue() + 100) / 100);
-              System.out.println(plot.getScalingFactor());
             } finally {
               if (bottomBox.getChildren().contains(error)) {
                 bottomBox.getChildren().remove(error);
@@ -773,7 +772,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                       gsehenInstance.formatDoubleOneDecimal(plot.getPolygon().calculateArea()));
 
                   if (plot.getScalingFactor() != null) {
-                    scalingFactor.setValue(plot.getScalingFactor());
+                    scalingFactor.setValue((plot.getScalingFactor() * 100) - 100);
                   }
 
                   if (plot.getCrop() != null && cropList.size() != 0) {
