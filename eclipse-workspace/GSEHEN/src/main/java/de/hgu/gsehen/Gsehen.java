@@ -104,7 +104,7 @@ public class Gsehen extends Application {
   public static final String DEBUG_TEXTAREA_ID = "#debugTA";
   public static final String TAB_PANE_ID = "#tabPane";
   private static final String MAPS_WEB_VIEW_ID = "#mapsWebView";
-  private static final String FARMS_WEB_VIEW_ID = "#farmsWebView";
+  // private static final String FARMS_WEB_VIEW_ID = "#farmsWebView";
   private static final String FIELDS_VIEW_ID = "#fieldsBorderPane";
   private static final String PLOTS_VIEW_ID = "#plotsBorderPane";
   private static final String LOGS_VIEW_ID = "#logsBorderPane";
@@ -126,8 +126,7 @@ public class Gsehen extends Application {
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<Class<? extends GsehenEvent>, 
-      List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
+  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
 
   private boolean dataChanged;
   private List<SoilProfile> soilProfilesList;
@@ -201,9 +200,6 @@ public class Gsehen extends Application {
     }
 
     scene = new Scene(root, 1280, 800);
-    // setUserAgentStylesheet(STYLESHEET_MODENA);
-    // scene.getStylesheets().add(
-    // Gsehen.class.getResource("/de/hgu/gsehen/style/material-fx-v0_3.css").toExternalForm());
     stage.setScene(scene);
     stage.setTitle("GSEHEN");
     stage.getIcons().add(new Image("/de/hgu/gsehen/images/Logo_UniGeisenheim_36x36.png"));
