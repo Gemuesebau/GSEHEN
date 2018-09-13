@@ -104,8 +104,8 @@ public class Recommender {
     guaranteeDailyBalances(plot);
     for (DayData dayData : plot.getWaterBalance().getDailyBalances()) {
       applyManualData(dayData, plot);
-      EnvCalculator.calculateEt0(dayData, gsehenInstance
-          .getWeatherDataSourceForUuid(field.getWeatherDataSourceUuid()).getLocation());
+//      EnvCalculator.calculateEt0(dayData, gsehenInstance
+//          .getWeatherDataSourceForUuid(field.getWeatherDataSourceUuid()).getLocation());
       DailyBalance.determineCurrentKc(dayData, plot,
           gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid()));
       DailyBalance.calculateEtc(dayData, plot);

@@ -1,9 +1,6 @@
 package de.hgu.gsehen.util;
 
-import de.hgu.gsehen.Gsehen;
-
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
@@ -14,9 +11,6 @@ import javax.script.ScriptEngineManager;
 
 public class TextResourceUtil {
   private static final Logger LOGGER = Logger.getLogger(TextResourceUtil.class.getName());
-
-  public static final String JS_RESOURCE_FOLDER = "/de/hgu/gsehen/js";
-  public static final String PLUGINS_FOLDER = JS_RESOURCE_FOLDER + "/plugins";
 
   public static InputStreamReader getReaderForUtf8(String resourceName) throws IOException {
     return new InputStreamReader(TextResourceUtil.class.getResourceAsStream(resourceName), "utf-8");
@@ -53,11 +47,5 @@ public class TextResourceUtil {
       LOGGER.log(Level.SEVERE, "Can't evaluate " + jsResourceFileName, e);
     }
     return engine;
-  }
-
-  static {
-    for (File f : new File(Gsehen.class.getResource(PLUGINS_FOLDER).getPath()).listFiles()) {
-      System.out.println(f);
-    }
   }
 }

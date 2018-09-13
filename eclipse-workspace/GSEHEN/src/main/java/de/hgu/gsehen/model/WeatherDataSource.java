@@ -17,7 +17,7 @@ public class WeatherDataSource {
   private boolean automaticImportActive;
   private Double automaticImportFrequencySeconds;
   @SuppressWarnings("checkstyle:all")
-  private String pluginConfigurationJSON; // kein Feld im WDS-Anlagedialog
+  private String pluginConfigurationJSON;
 
   public WeatherDataSource(String uuid) {
     this();

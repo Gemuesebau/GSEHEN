@@ -1,6 +1,46 @@
 loadGsehenJs("commons.js");
 
-/* plugineigene Konfiguration
+/* plugineigene Konfiguration und Hilfsmethoden
+
+de.hgu.gsehen.evapotranspiration.UtilityFunctions.convertWindSpeed2m
+
+fieldview.weatherdataname                = Name der Wetterdatenquelle: 
+fieldview.interval                       = Messintervall in Sekunden: 
+fieldview.windspeed                      = Höhe der \nWindgeschwindigkeitsmessung \nin Meter: 
+fieldview.dateformat                     = Datumsformat: 
+fieldview.dateformatexample              = Beispiel: d.M.y
+fieldview.localeid                       = Zahlenformat gemäß: 
+fieldview.filepath                       = Dateipfad der \nWetterdaten-CSV-Datei: 
+fieldview.filechooserbutton              = Datei auswählen 
+fieldview.filechooser                    = Dateipfad zur Wetterdatenquelle 
+fieldview.locationlat                    = Latitude (dezimal): 
+fieldview.locationlatexample             = Beispiel: 51.869026 
+fieldview.locationlng                    = Longitude (dezimal): 
+fieldview.locationlngexample             = Beispiel: 8.917478 
+fieldview.metersabove                    = Standort der Wetterdatenquelle \n(Meter über NN): 
+fieldview.dateerror                      = Falsches Format! 
+
+private TreeMap<String, String> javaLocaleMap;
+
+private void fillJavaLocaleMap(final Locale selectedLocale) {
+  javaLocaleMap = new TreeMap<String, String>();
+  java.lang.reflect.Field[] fieldArray = Locale.class.getFields();
+  for (int i = 0; i < fieldArray.length; i++) {
+    if (fieldArray[i].getType().equals(Locale.class)) {
+      String language;
+      try {
+        language = ((Locale) fieldArray[i].get(null)).getDisplayLanguage(selectedLocale);
+      } catch (Exception e) {
+        language = null;
+      }
+      if (language != null && language.length() > 0) {
+        final String fieldName = fieldArray[i].getName();
+        javaLocaleMap.put(language + " (" + fieldName + ")", fieldName);
+      }
+    }
+  }
+}
+
 @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
 public DecimalFormat getNumberFormat() {
   Locale locale = Locale.ENGLISH;

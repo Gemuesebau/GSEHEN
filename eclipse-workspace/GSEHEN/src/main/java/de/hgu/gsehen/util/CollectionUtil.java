@@ -1,5 +1,6 @@
 package de.hgu.gsehen.util;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -103,5 +104,20 @@ public class CollectionUtil {
       result.put(keyGenerator.apply(v), v);
     }
     return result;
+  }
+
+  @SuppressWarnings("checkstyle:javadocmethod")
+  public static <S, T> T[] mapArrayValues(S[] sourceArray, Class<T> targetClass,
+      Function<S, T> mapper) {
+    if (sourceArray == null) {
+      return null;
+    }
+    @SuppressWarnings("unchecked")
+    T[] targetArray = (T[]) Array.newInstance(targetClass, sourceArray.length);
+    int index = 0;
+    for (S sourceItem : sourceArray) {
+      targetArray[index++] = mapper.apply(sourceItem);
+    }
+    return targetArray;
   }
 }
