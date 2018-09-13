@@ -1,5 +1,18 @@
 package de.hgu.gsehen.gui.view;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXTextField;
@@ -17,19 +30,6 @@ import de.hgu.gsehen.model.ManualData;
 import de.hgu.gsehen.model.ManualWaterSupply;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.util.DateUtil;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.ResourceBundle;
-
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -88,7 +88,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private TreeTableView<Drawable> treeTableView;
   private JFXTabPane tabPane;
   private Tab mapViewTab;
-  private Tab farmViewTab;
   private Tab fieldViewTab;
   private Tab plotViewTab;
   private Tab logViewTab;
@@ -107,9 +106,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private Text area;
   private DatePicker soilStart;
   private DatePicker cropStart;
-  private JFXTextField soilStartValue;
+  private JFXSlider soilStartValue;
 
-  private Text waterBalanceLabel;
   private boolean isActive = true;
   private HBox bottomBox;
   private Text error;
@@ -171,7 +169,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     areaLabel = new Text(mainBundle.getString("fieldview.area"));
     areaLabel.setFont(Font.font("Arial", 14));
     area = new Text("");
-    area.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+    area.setFont(Font.font("Arial", 14));
 
     // Max. durchw. Zone
     rootingZoneLabel = new Text(mainBundle.getString("plotview.rootingzone"));
@@ -226,20 +224,17 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     soilStart.setConverter(convert);
     soilStart.setPromptText("dd-MM-yyyy");
 
+    // Startwert der Wasserbilanz
     soilStartValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
     soilStartValueLabel.setFont(Font.font("Arial", 14));
-    soilStartValue = new JFXTextField("");
-    soilStartValue.textProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue,
-          String newValue) {
-        if (newValue != null) {
-          if (!gsehenInstance.isParseable(newValue)) {
-            soilStartValue.setText(oldValue);
-          }
-        }
-      }
-    });
+    soilStartValue = new JFXSlider();
+    soilStartValue.setMin(0.0);
+    soilStartValue.setMax(100.0);
+    soilStartValue.setValue(100.0);
+    soilStartValue.setShowTickLabels(true);
+    soilStartValue.setShowTickMarks(true);
+    soilStartValue.setMajorTickUnit(25.0);
+    soilStartValue.setBlockIncrement(5.0);
 
     // Kultur
     Text crop = new Text(mainBundle.getString("plotview.crop"));
@@ -386,10 +381,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     tablePane.setMaxHeight(150);
     tablePane.getChildren().add(cropTable);
 
-    // Wasserbilanz
-    waterBalanceLabel = new Text(mainBundle.getString("plotview.waterbalance"));
-    waterBalanceLabel.setFont(Font.font("Arial", 14));
-
     // Balkendiagramm TODO: Farben einbauen
     CategoryAxis xaxis;
     NumberAxis yaxis;
@@ -411,50 +402,54 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     Text scalingFactorLabel = new Text(mainBundle.getString("plotview.scalingfactor"));
     scalingFactorLabel.setFont(Font.font("Arial", 14));
     JFXSlider scalingFactor = new JFXSlider();
-    scalingFactor.setMin(0.0);
-    scalingFactor.setMax(2.0);
-    scalingFactor.setValue(1.0);
+    scalingFactor.setMin(-100.0);
+    scalingFactor.setMax(100.0);
+    scalingFactor.setValue(0.0);
     scalingFactor.setShowTickLabels(true);
     scalingFactor.setShowTickMarks(true);
-    scalingFactor.setMajorTickUnit(1.0);
-    scalingFactor.setBlockIncrement(0.1);
+    scalingFactor.setMajorTickUnit(25.0);
+    scalingFactor.setBlockIncrement(5.0);
 
     Text scalingValue = new Text();
-    scalingValue.setFont(Font.font("Arial", 12));
+    scalingValue.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
     scalingFactor.valueProperty().addListener(new ChangeListener<Number>() {
       public void changed(ObservableValue<? extends Number> ov, Number oldVal, Number newVal) {
-        scalingValue.setText(String.format("%.2f", newVal));
+        String factor = "";
+        if (newVal.doubleValue() > 0) {
+          factor = mainBundle.getString("plotview.wet");
+        } else if (newVal.doubleValue() < 0) {
+          factor = mainBundle.getString("plotview.dry");
+        }
+        scalingValue.setText(Math.abs(newVal.intValue()) + "% " + factor);
       }
     });
 
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(nameLabel, 0, 0);
-    GridPane.setConstraints(name, 1, 0, 2, 1);
+    GridPane.setConstraints(name, 1, 0);
     GridPane.setConstraints(areaLabel, 0, 1);
-    GridPane.setConstraints(area, 1, 1, 2, 1);
+    GridPane.setConstraints(area, 1, 1);
     GridPane.setConstraints(rootingZoneLabel, 0, 2);
-    GridPane.setConstraints(rootingZone, 1, 2, 2, 1);
+    GridPane.setConstraints(rootingZone, 1, 2);
     GridPane.setConstraints(cropStartLabel, 0, 3);
-    GridPane.setConstraints(cropStart, 1, 3, 2, 1);
+    GridPane.setConstraints(cropStart, 1, 3);
     GridPane.setConstraints(soilStartLabel, 0, 4);
-    GridPane.setConstraints(soilStart, 1, 4, 2, 1);
+    GridPane.setConstraints(soilStart, 1, 4);
     GridPane.setConstraints(soilStartValueLabel, 0, 5);
-    GridPane.setConstraints(soilStartValue, 1, 5, 2, 1);
+    GridPane.setConstraints(soilStartValue, 1, 5);
     GridPane.setConstraints(crop, 0, 6);
-    GridPane.setConstraints(cropChoiceBox, 1, 6, 2, 1);
+    GridPane.setConstraints(cropChoiceBox, 1, 6);
     GridPane.setConstraints(tablePane, 0, 7, 3, 1, HPos.CENTER, VPos.CENTER, Priority.ALWAYS,
         Priority.ALWAYS);
-    GridPane.setConstraints(waterBalanceLabel, 0, 8);
-    GridPane.setConstraints(chart, 1, 8, 2, 1);
+    GridPane.setConstraints(chart, 0, 8, 3, 1);
     GridPane.setConstraints(scalingFactorLabel, 0, 9);
-    GridPane.setConstraints(scalingFactor, 1, 9);
-    GridPane.setConstraints(scalingValue, 2, 9);
+    GridPane.setConstraints(scalingFactor, 1, 9, 2, 1);
+    GridPane.setConstraints(scalingValue, 3, 9);
 
     centerGrid.getChildren().addAll(nameLabel, name, areaLabel, area, rootingZoneLabel, rootingZone,
         cropStartLabel, cropStart, soilStartLabel, soilStart, soilStartValueLabel, soilStartValue,
-        crop, cropChoiceBox, tablePane, waterBalanceLabel, chart, scalingFactorLabel, scalingFactor,
-        scalingValue);
+        crop, cropChoiceBox, tablePane, chart, scalingFactorLabel, scalingFactor, scalingValue);
 
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setContent(centerGrid);
@@ -491,7 +486,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       public void handle(ActionEvent e) {
         pane.getChildren().clear();
         treeTableView.setVisible(false);
-        tabPane.getTabs().removeAll(mapViewTab, farmViewTab, fieldViewTab, logViewTab);
+        tabPane.getTabs().removeAll(mapViewTab, fieldViewTab, logViewTab);
 
         // Name of the plot
         Text nameLabel = new Text(plot.getName());
@@ -606,10 +601,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             pane.getChildren().clear();
             treeTableView.setVisible(true);
             tabPane.getTabs().clear();
-            tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab,
-                logViewTab);
+            tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
             gsehenInstance.sendFarmDataChanged(plot, null);
-            tabPane.getSelectionModel().select(3);
+            tabPane.getSelectionModel().select(2);
             treeTableView.getSelectionModel().clearSelection();
             treeTableView.getSelectionModel().select(currentItem);
           }
@@ -654,11 +648,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
               pane.getChildren().clear();
               treeTableView.setVisible(true);
               tabPane.getTabs().clear();
-              tabPane.getTabs().addAll(mapViewTab, farmViewTab, fieldViewTab, plotViewTab,
-                  logViewTab);
+              tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
               gsehenInstance.sendFarmDataChanged(plot, null);
               gsehenInstance.sendManualDataChanged(field, plot, wateringDate, null);
-              tabPane.getSelectionModel().select(3);
+              tabPane.getSelectionModel().select(2);
               treeTableView.getSelectionModel().clearSelection();
               treeTableView.getSelectionModel().select(currentItem);
             } else {
@@ -691,8 +684,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       @Override
       public void handle(ActionEvent e) {
         if (cropStart.getValue() != null || soilStart.getValue() != null) {
-          if (!name.getText().isEmpty() && !rootingZone.getText().isEmpty()
-              && !soilStartValue.getText().isEmpty() && cropChoiceBox.getValue() != null) {
+          if (!name.getText().isEmpty() && cropChoiceBox.getValue() != null) {
             try {
               plot.setName(name.getText());
               plot.setCrop(cropChoiceBox.getValue());
@@ -709,16 +701,20 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                     .from(localDateSoil.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 plot.setSoilStartDate(soilDate);
               }
-              plot.setRootingZone(gsehenInstance.parseDouble(rootingZone.getText()));
-              plot.setSoilStartValue(gsehenInstance.parseDouble(soilStartValue.getText()));
+              if (!rootingZone.getText().equals("0") && !rootingZone.getText().isEmpty()) {
+                plot.setRootingZone(Integer.valueOf(rootingZone.getText()));
+              } else {
+                plot.setRootingZone(null);
+              }
+              plot.setSoilStartValue(soilStartValue.getValue());
               plot.setIsActive(isActive);
-              plot.setScalingFactor(scalingFactor.getValue());
+              plot.setScalingFactor((scalingFactor.getValue() + 100) / 100);
             } finally {
               if (bottomBox.getChildren().contains(error)) {
                 bottomBox.getChildren().remove(error);
               }
               gsehenInstance.sendFarmDataChanged(plot, null);
-              tabPane.getSelectionModel().select(3);
+              tabPane.getSelectionModel().select(2);
               treeTableView.getSelectionModel().clearSelection();
               treeTableView.getSelectionModel().select(currentItem);
             }
@@ -747,7 +743,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     tabPane = gsehenInstance.getMainController().getJFXTabPane();
     mapViewTab = gsehenInstance.getMainController().getMapViewTab();
-    farmViewTab = gsehenInstance.getMainController().getFarmViewTab();
     fieldViewTab = gsehenInstance.getMainController().getFieldViewTab();
     plotViewTab = gsehenInstance.getMainController().getPlotViewTab();
     logViewTab = gsehenInstance.getMainController().getLogViewTab();
@@ -777,7 +772,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                       gsehenInstance.formatDoubleOneDecimal(plot.getPolygon().calculateArea()));
 
                   if (plot.getScalingFactor() != null) {
-                    scalingFactor.setValue(plot.getScalingFactor());
+                    scalingFactor.setValue((plot.getScalingFactor() * 100) - 100);
                   }
 
                   if (plot.getCrop() != null && cropList.size() != 0) {
@@ -807,18 +802,16 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                     cropStart.setValue(null);
                   }
 
-                  if (plot.getRootingZone() == null) {
-                    rootingZone.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
+                  if (plot.getRootingZone() != null) {
+                    rootingZone.setText(String.valueOf(plot.getRootingZone()));
                   } else {
-                    rootingZone
-                        .setText(gsehenInstance.formatDoubleOneDecimal(plot.getRootingZone()));
+                    rootingZone.setText(String.valueOf(0));
                   }
 
                   if (plot.getSoilStartValue() == null) {
-                    soilStartValue.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
+                    soilStartValue.setValue(100.0);
                   } else {
-                    soilStartValue
-                        .setText(gsehenInstance.formatDoubleOneDecimal(plot.getSoilStartValue()));
+                    soilStartValue.setValue(plot.getSoilStartValue());
                   }
 
                   if (plot.getCropDevelopmentStatus() != null) {

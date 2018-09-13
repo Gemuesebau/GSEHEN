@@ -1,5 +1,5 @@
 .root {
-    -fx-base: white;
+    -fx-base: #fdfffc;
     -fx-color: -fx-base;
 
     -fx-font-family: "Tahoma";
@@ -10,11 +10,11 @@
 
  /* JFX Tab Pane */
 .jfx-tab-pane .headers-region {
-    -fx-background-color: #58a817;
+    -fx-background-color: #668c47;
 }
 
 .jfx-tab-pane .tab-header-background {
-    -fx-background-color: #58a817;
+    -fx-background-color: #668c47;
 }
 
 .jfx-tab-pane .tab-selected-line {

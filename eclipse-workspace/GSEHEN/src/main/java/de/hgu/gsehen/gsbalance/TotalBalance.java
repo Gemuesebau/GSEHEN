@@ -1,5 +1,10 @@
 package de.hgu.gsehen.gsbalance;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
@@ -9,11 +14,6 @@ import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilManualData;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
 
 public class TotalBalance {
 
@@ -132,6 +132,12 @@ public class TotalBalance {
 
       }
     }
+    Integer maxRootingZone = plot.getRootingZone();
+    if (maxRootingZone != null) {
+      if (currentRootingZone > maxRootingZone) {
+        currentRootingZone = maxRootingZone;
+      }
+    }
     dayData.setCurrentRootingZone(currentRootingZone);
 
   }
@@ -185,7 +191,8 @@ public class TotalBalance {
       return;
     }
     if (plot.getSoilStartValue() != null) {
-      startValue = plot.getSoilStartValue();
+      startValue =
+          dailyBalances.get(0).getCurrentAvailableSoilWater() * (plot.getSoilStartValue() / 100);
     } else {
       startValue = dailyBalances.get(0).getCurrentAvailableSoilWater();
     }
@@ -245,9 +252,9 @@ public class TotalBalance {
           currentAvailableSoilWater * 0.9 - currentDay.getCurrentTotalWaterBalance();
       if (waterContentToAim > currentAvailableSoilWater) {
         recommendedAction.setRecommendation(RecommendedActionEnum.EXCESS);
-        //throw new UnsupportedOperationException(
-        //    "The water balance exceeds the total available soil water\n"
-        //        + "- your plants are dead for sure \\u2620");
+        // throw new UnsupportedOperationException(
+        // "The water balance exceeds the total available soil water\n"
+        // + "- your plants are dead for sure \\u2620");
       } else {
         Double availableWater = currentAvailableSoilWater * 0.3 - waterContentToAim;
         recommendedAction.setAvailableWater(availableWater);

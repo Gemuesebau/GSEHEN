@@ -71,7 +71,7 @@ class TotalBalanceTest {
     CropDevelopmentStatus cropDevelopmentStatus = new CropDevelopmentStatus(null, null, null, null);
     CropRootingZone cropRootingZone = new CropRootingZone(null, null, null, null);
 
-    plot = new Plot("Feld2", 200, null, null, 1.0, null, 120.0, null, null, null,
+    plot = new Plot("Feld2", 200, null, null, 1.0, null, 120, null, null, null,
         soilStartDate.parse("2016-06-04"), null, false, crop, cropDevelopmentStatus,
         cropRootingZone, cropStart.parse("2016-06-06"), cropEnd.parse("2016-09-06"), true);
     SoilManualData soilManualData = new SoilManualData(null, null, null, null);

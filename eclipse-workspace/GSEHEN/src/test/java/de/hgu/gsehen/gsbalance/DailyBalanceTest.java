@@ -49,7 +49,7 @@ class DailyBalanceTest {
     CropDevelopmentStatus cropDevelopmentStatus = new CropDevelopmentStatus(null, null, null, null);
     CropRootingZone cropRootingZone = new CropRootingZone(null, null, null, null);
     try {
-      plot = new Plot("Feld2", 200, null, null, 1.0, null, 120.0, null, null, null,
+      plot = new Plot("Feld2", 200, null, null, 1.0, null, 120, null, null, null,
           soilStartDate.parse("2016-06-04"), 100.0, false, crop, cropDevelopmentStatus,
           cropRootingZone, cropStart.parse("2016-06-06"), cropEnd.parse("2016-09-06"), true);
     } catch (ParseException r) {
