@@ -1,5 +1,7 @@
 package de.hgu.gsehen.model;
 
+import de.hgu.gsehen.evapotranspiration.GeoData;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -18,6 +20,9 @@ public class WeatherDataSource {
   private Double automaticImportFrequencySeconds;
   @SuppressWarnings("checkstyle:all")
   private String pluginConfigurationJSON;
+  private double locationLng;
+  private double locationLat;
+  private double locationMetersAboveSeaLevel;
 
   public WeatherDataSource(String uuid) {
     this();
@@ -25,6 +30,34 @@ public class WeatherDataSource {
   }
 
   public WeatherDataSource() {
+  }
+
+  public double getLocationLng() {
+    return locationLng;
+  }
+
+  public void setLocationLng(double locationLng) {
+    this.locationLng = locationLng;
+  }
+
+  public double getLocationLat() {
+    return locationLat;
+  }
+
+  public void setLocationLat(double locationLat) {
+    this.locationLat = locationLat;
+  }
+
+  public double getLocationMetersAboveSeaLevel() {
+    return locationMetersAboveSeaLevel;
+  }
+
+  public void setLocationMetersAboveSeaLevel(double locationMetersAboveSeaLevel) {
+    this.locationMetersAboveSeaLevel = locationMetersAboveSeaLevel;
+  }
+
+  public GeoData getLocation() {
+    return new GeoData(false, locationLng, locationLat, locationMetersAboveSeaLevel);
   }
 
   public long getId() {

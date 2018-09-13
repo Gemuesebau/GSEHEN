@@ -14,7 +14,7 @@ import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.GsehenViewEvent;
 import de.hgu.gsehen.event.ManualDataChanged;
 import de.hgu.gsehen.event.RecommendedActionChanged;
-import de.hgu.gsehen.gsbalance.DayDataCalculation;
+//import de.hgu.gsehen.gsbalance.DayDataCalculation;
 import de.hgu.gsehen.gsbalance.Recommender;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenTreeTable;
@@ -115,7 +115,7 @@ public class Gsehen extends Application {
   private static Fields fields;
   private static Plots plots;
   private static Logs logs;
-  private static DayDataCalculation dayDataCalculation;
+  //private static DayDataCalculation dayDataCalculation;
 
   private GsehenTreeTable treeTable;
 
@@ -126,7 +126,9 @@ public class Gsehen extends Application {
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
+  private java.util.Map<
+      Class<? extends GsehenEvent>,
+      List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
 
   private boolean dataChanged;
   private List<SoilProfile> soilProfilesList;
@@ -213,7 +215,7 @@ public class Gsehen extends Application {
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
     logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
 
-    dayDataCalculation = new DayDataCalculation();
+    //dayDataCalculation = new DayDataCalculation();
     new Recommender();
 
     InputStream input = this.getClass()
