@@ -191,7 +191,8 @@ public class TotalBalance {
       return;
     }
     if (plot.getSoilStartValue() != null) {
-      startValue = plot.getSoilStartValue();
+      startValue =
+          dailyBalances.get(0).getCurrentAvailableSoilWater() * (plot.getSoilStartValue() / 100);
     } else {
       startValue = dailyBalances.get(0).getCurrentAvailableSoilWater();
     }
