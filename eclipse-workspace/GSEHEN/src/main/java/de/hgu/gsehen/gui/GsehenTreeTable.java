@@ -378,7 +378,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   soilValueLabel.setFont(Font.font("Arial", 12));
                   soilValue.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                   actionLabel.setFont(Font.font("Arial", 14));
-                  action.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+                  action.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 } else if (plot.getIsActive() != null && !plot.getIsActive()) {
                   nameLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
                   name.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
