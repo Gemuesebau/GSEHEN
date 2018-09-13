@@ -1,10 +1,5 @@
 package de.hgu.gsehen.model;
 
-import de.hgu.gsehen.evapotranspiration.GeoData;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -17,14 +12,12 @@ public class WeatherDataSource {
   private String uuid;
 
   private String name;
-  private int measIntervalSeconds;
-  private double windspeedMeasHeightMeters;
-  private String dateFormatString;
-  private String numberLocaleId;
-  private String dataFilePath;
-  private double locationLng;
-  private double locationLat;
-  private double locationMetersAboveSeaLevel;
+  private String pluginJsFileName;
+  private boolean manualImportActive;
+  private boolean automaticImportActive;
+  private Double automaticImportFrequencySeconds;
+  @SuppressWarnings("checkstyle:all")
+  private String pluginConfigurationJSON; // kein Feld im WDS-Anlagedialog
 
   public WeatherDataSource(String uuid) {
     this();
@@ -42,6 +35,14 @@ public class WeatherDataSource {
     this.id = id;
   }
 
+  public String getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
+
   public String getName() {
     return name;
   }
@@ -50,95 +51,45 @@ public class WeatherDataSource {
     this.name = name;
   }
 
-  public int getMeasIntervalSeconds() {
-    return measIntervalSeconds;
+  public String getPluginJsFileName() {
+    return pluginJsFileName;
   }
 
-  public void setMeasIntervalSeconds(int measIntervalSeconds) {
-    this.measIntervalSeconds = measIntervalSeconds;
+  public void setPluginJsFileName(String pluginJsFileName) {
+    this.pluginJsFileName = pluginJsFileName;
   }
 
-  public double getWindspeedMeasHeightMeters() {
-    return windspeedMeasHeightMeters;
+  public boolean isManualImportActive() {
+    return manualImportActive;
   }
 
-  public void setWindspeedMeasHeightMeters(double windspeedMeasHeightMeters) {
-    this.windspeedMeasHeightMeters = windspeedMeasHeightMeters;
+  public void setManualImportActive(boolean manualImportActive) {
+    this.manualImportActive = manualImportActive;
   }
 
-  public String getDateFormatString() {
-    return dateFormatString;
+  public boolean isAutomaticImportActive() {
+    return automaticImportActive;
   }
 
-  public void setDateFormatString(String dateFormatString) {
-    this.dateFormatString = dateFormatString;
+  public void setAutomaticImportActive(boolean automaticImportActive) {
+    this.automaticImportActive = automaticImportActive;
   }
 
-  public String getNumberLocaleId() {
-    return numberLocaleId;
+  public Double getAutomaticImportFrequencySeconds() {
+    return automaticImportFrequencySeconds;
   }
 
-  public void setNumberLocaleId(String numberLocaleId) {
-    this.numberLocaleId = numberLocaleId;
+  public void setAutomaticImportFrequencySeconds(Double automaticImportFrequencySeconds) {
+    this.automaticImportFrequencySeconds = automaticImportFrequencySeconds;
   }
 
-  public String getDataFilePath() {
-    return dataFilePath;
+  @SuppressWarnings("checkstyle:all")
+  public String getPluginConfigurationJSON() {
+    return pluginConfigurationJSON;
   }
 
-  public void setDataFilePath(String dataFilePath) {
-    this.dataFilePath = dataFilePath;
-  }
-
-  public double getLocationLng() {
-    return locationLng;
-  }
-
-  public void setLocationLng(double locationLng) {
-    this.locationLng = locationLng;
-  }
-
-  public double getLocationLat() {
-    return locationLat;
-  }
-
-  public void setLocationLat(double locationLat) {
-    this.locationLat = locationLat;
-  }
-
-  public double getLocationMetersAboveSeaLevel() {
-    return locationMetersAboveSeaLevel;
-  }
-
-  public void setLocationMetersAboveSeaLevel(double locationMetersAboveSeaLevel) {
-    this.locationMetersAboveSeaLevel = locationMetersAboveSeaLevel;
-  }
-
-  public GeoData getLocation() {
-    return new GeoData(false, locationLng, locationLat, locationMetersAboveSeaLevel);
-  }
-
-  @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
-  public DecimalFormat getNumberFormat() {
-    Locale locale = Locale.ENGLISH;
-    try {
-      locale = (Locale)Locale.class.getField(numberLocaleId).get(null);
-    }
-    catch (Exception e) {
-      /* do nothing */
-    }
-    return (DecimalFormat)NumberFormat.getNumberInstance(locale);
-  }
-
-  public SimpleDateFormat getDateFormat() {
-    return new SimpleDateFormat(dateFormatString);
-  }
-
-  public String getUuid() {
-    return uuid;
-  }
-
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
+  @SuppressWarnings("checkstyle:all")
+  public void setPluginConfigurationJSON(String pluginConfigurationJSON) {
+    this.pluginConfigurationJSON = pluginConfigurationJSON;
   }
 }

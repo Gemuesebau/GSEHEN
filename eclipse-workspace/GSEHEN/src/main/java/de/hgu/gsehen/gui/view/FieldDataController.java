@@ -2,6 +2,9 @@ package de.hgu.gsehen.gui.view;
 
 import static de.hgu.gsehen.util.CollectionUtil.getKeyForValue;
 
+import com.jfoenix.controls.JFXTabPane;
+import com.jfoenix.controls.JFXTextField;
+
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
@@ -31,8 +34,6 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.BorderPane;
@@ -68,7 +69,7 @@ public class FieldDataController extends Application
   private Gsehen gsehenInstance;
   private BorderPane pane;
   private TreeTableView<Drawable> treeTableView;
-  private TabPane tabPane;
+  private JFXTabPane tabPane;
   private Tab mapViewTab;
   private Tab farmViewTab;
   private Tab fieldViewTab;
@@ -78,7 +79,7 @@ public class FieldDataController extends Application
   private Text nameLabel;
   private Text areaLabel;
 
-  private TextField name;
+  private JFXTextField name;
   private Text area;
 
   private ChoiceBox<SoilProfile> currentSoilBox;
@@ -94,16 +95,16 @@ public class FieldDataController extends Application
   private VBox center;
   private Button saveField;
 
-  private TextField weatherDataName;
-  private TextField interval;
-  private TextField windspeed;
-  private TextField dateFormat;
+  private JFXTextField weatherDataName;
+  private JFXTextField interval;
+  private JFXTextField windspeed;
+  private JFXTextField dateFormat;
   private ChoiceBox<String> localeId;
-  private TextField path;
-  private TextField locationLat;
-  private TextField locationLng;
-  private TextField metersAbove;
-  private TextField soilDepth;
+  private JFXTextField path;
+  private JFXTextField locationLat;
+  private JFXTextField locationLng;
+  private JFXTextField metersAbove;
+  private JFXTextField soilDepth;
   private TreeMap<String, String> javaLocaleMap;
   private Text dateError = new Text();
 
@@ -180,7 +181,7 @@ public class FieldDataController extends Application
     // Name
     nameLabel = new Text(mainBundle.getString("fieldview.name"));
     nameLabel.setFont(Font.font("Arial", 14));
-    name = new TextField("");
+    name = new JFXTextField("");
 
     // m²
     areaLabel = new Text(mainBundle.getString("fieldview.area"));
@@ -335,7 +336,7 @@ public class FieldDataController extends Application
     center.setSpacing(8);
     // BOTTOM END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    tabPane = gsehenInstance.getMainController().getTabPane();
+    tabPane = gsehenInstance.getMainController().getJFXTabPane();
     mapViewTab = gsehenInstance.getMainController().getMapViewTab();
     farmViewTab = gsehenInstance.getMainController().getFarmViewTab();
     fieldViewTab = gsehenInstance.getMainController().getFieldViewTab();
@@ -438,7 +439,7 @@ public class FieldDataController extends Application
     // Name
     Text weatherDataLabel = new Text(mainBundle.getString("fieldview.weatherdataname"));
     weatherDataLabel.setFont(Font.font("Arial", 14));
-    weatherDataName = new TextField();
+    weatherDataName = new JFXTextField();
 
     HBox nameBox = new HBox();
     nameBox.getChildren().addAll(weatherDataLabel, weatherDataName);
@@ -469,7 +470,7 @@ public class FieldDataController extends Application
     // Messintervall
     Text intervalLabel = new Text(mainBundle.getString("fieldview.interval"));
     intervalLabel.setFont(Font.font("Arial", 14));
-    interval = new TextField();
+    interval = new JFXTextField();
     interval.textProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -483,7 +484,7 @@ public class FieldDataController extends Application
     // Windgeschwindigkeit
     Text windspeedLabel = new Text(mainBundle.getString("fieldview.windspeed"));
     windspeedLabel.setFont(Font.font("Arial", 14));
-    windspeed = new TextField();
+    windspeed = new JFXTextField();
     windspeed.textProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -499,7 +500,7 @@ public class FieldDataController extends Application
     // Datumsformat
     Text dateFormatLabel = new Text(mainBundle.getString("fieldview.dateformat"));
     dateFormatLabel.setFont(Font.font("Arial", 14));
-    dateFormat = new TextField();
+    dateFormat = new JFXTextField();
     Hyperlink dateFormatExample = new Hyperlink(
         mainBundle.getString("fieldview.dateformatexample"));
     dateFormatExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
@@ -520,7 +521,7 @@ public class FieldDataController extends Application
     // Dateipfad
     Text filePathLabel = new Text(mainBundle.getString("fieldview.filepath"));
     filePathLabel.setFont(Font.font("Arial", 14));
-    path = new TextField();
+    path = new JFXTextField();
     Button fileChooserButton = new Button(mainBundle.getString("fieldview.filechooserbutton"));
     fileChooserButton.setOnAction(new EventHandler<ActionEvent>() {
       @Override
@@ -535,7 +536,7 @@ public class FieldDataController extends Application
     // Latitude
     Text locationLatLabel = new Text(mainBundle.getString("fieldview.locationlat"));
     locationLatLabel.setFont(Font.font("Arial", 14));
-    locationLat = new TextField();
+    locationLat = new JFXTextField();
     locationLat.textProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -553,7 +554,7 @@ public class FieldDataController extends Application
     // Longitude
     Text locationLngLabel = new Text(mainBundle.getString("fieldview.locationlng"));
     locationLngLabel.setFont(Font.font("Arial", 14));
-    locationLng = new TextField();
+    locationLng = new JFXTextField();
     locationLng.textProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -571,7 +572,7 @@ public class FieldDataController extends Application
     // Standort (Meter ü. NN)
     Text metersAboveLabel = new Text(mainBundle.getString("fieldview.metersabove"));
     metersAboveLabel.setFont(Font.font("Arial", 14));
-    metersAbove = new TextField();
+    metersAbove = new JFXTextField();
     metersAbove.textProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -701,7 +702,7 @@ public class FieldDataController extends Application
   }
 
   /**
-   * Fills TextFields with correct values ("Wetterdatenquelle bearbeiten").
+   * Fills JFXTextFields with correct values ("Wetterdatenquelle bearbeiten").
    */
   private void setWeatherDataTexts() {
     selectedWeatherDataSource = weatherData.getSelectionModel()
@@ -735,7 +736,7 @@ public class FieldDataController extends Application
     // Name
     Text soilNameLabel = new Text(mainBundle.getString("fieldview.profilename"));
     soilNameLabel.setFont(Font.font("Arial", 14));
-    TextField soilProfileName = new TextField("");
+    JFXTextField soilProfileName = new JFXTextField("");
 
     HBox nameBox = new HBox();
     nameBox.getChildren().addAll(soilNameLabel, soilProfileName);
@@ -772,7 +773,7 @@ public class FieldDataController extends Application
     // Wasserhaltekapazität
     Text soilAwcLabel = new Text(mainBundle.getString("fieldview.soilawc"));
     soilAwcLabel.setFont(Font.font("Arial", 14));
-    TextField soilAwc = new TextField();
+    JFXTextField soilAwc = new JFXTextField();
 
     // Sets the 'soilAwc', if the ChoiceBox-Value changed
     ChangeListener<Soil> changeListener = new ChangeListener<Soil>() {
@@ -793,7 +794,7 @@ public class FieldDataController extends Application
     pane.setTop(topBox);
 
     // Tiefe
-    TextField depth = new TextField("25");
+    JFXTextField depth = new JFXTextField("25");
     Text depthLabel = new Text(mainBundle.getString("fieldview.depth"));
     depthLabel.setFont(Font.font("Arial", 14));
     depth.textProperty().addListener(new ChangeListener<String>() {
@@ -981,7 +982,7 @@ public class FieldDataController extends Application
       // Name
       Text soilNameLabel = new Text(mainBundle.getString("fieldview.profilename"));
       soilNameLabel.setFont(Font.font("Arial", 14));
-      TextField soilProfileName = new TextField(currentSoilBox.getValue().getName());
+      JFXTextField soilProfileName = new JFXTextField(currentSoilBox.getValue().getName());
       soilProfileName.textProperty().addListener(new ChangeListener<String>() {
         @Override
         public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -1084,7 +1085,7 @@ public class FieldDataController extends Application
         pane.setTop(topBox);
 
         // Tiefe
-        soilDepth = new TextField(gsehenInstance
+        soilDepth = new JFXTextField(gsehenInstance
             .formatDoubleOneDecimal(currentSoilBox.getValue().getProfileDepth().get(i).getDepth()));
         Text depthLabel = new Text(mainBundle.getString("fieldview.depth"));
         depthLabel.setFont(Font.font("Arial", 14));

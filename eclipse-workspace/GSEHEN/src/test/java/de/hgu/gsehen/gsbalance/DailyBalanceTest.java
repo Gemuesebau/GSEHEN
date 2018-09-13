@@ -59,22 +59,22 @@ class DailyBalanceTest {
 
   @Test
   void testdetermineCurrentKc() throws ParseException {
-    DailyBalance.determineCurrentKc(today, plot);
+    DailyBalance.determineCurrentKc(today, plot, null);
     System.out.println(today.getCurrentKc());
     assertEquals(0.6, today.getCurrentKc(), 0.1);
 
     today.setDate(tag.parse("2016-06-16"));
-    DailyBalance.determineCurrentKc(today, plot);
+    DailyBalance.determineCurrentKc(today, plot, null);
     System.out.println(today.getCurrentKc());
     assertEquals(0.8, today.getCurrentKc(), 0.1);
 
     today.setDate(tag.parse("2016-07-16"));
-    DailyBalance.determineCurrentKc(today, plot);
+    DailyBalance.determineCurrentKc(today, plot, null);
     System.out.println(today.getCurrentKc());
     assertEquals(1.3, today.getCurrentKc(), 0.1);
 
     today.setDate(tag.parse("2016-09-06"));
-    DailyBalance.determineCurrentKc(today, plot);
+    DailyBalance.determineCurrentKc(today, plot, null);
     System.out.println(today.getCurrentKc());
     assertEquals(1.3, today.getCurrentKc(), 0.1);
 
@@ -82,7 +82,7 @@ class DailyBalanceTest {
     today.setDate(tag.parse("2016-09-06"));
     crop.setKc3(null);
     crop.setPhase3(null);
-    DailyBalance.determineCurrentKc(today, plot);
+    DailyBalance.determineCurrentKc(today, plot, null);
     System.out.println(today.getCurrentKc());
     assertEquals(0.8, today.getCurrentKc(), 0.1);
 
@@ -91,14 +91,14 @@ class DailyBalanceTest {
     crop.setPhase2(null);
     crop.setKc3(null);
     crop.setPhase3(null);
-    DailyBalance.determineCurrentKc(today, plot);
+    DailyBalance.determineCurrentKc(today, plot, null);
     System.out.println(today.getCurrentKc());
     assertEquals(0.6, today.getCurrentKc(), 0.1);
   }
 
   @Test
   void testCalculateEtc() {
-    DailyBalance.determineCurrentKc(today, plot);
+    DailyBalance.determineCurrentKc(today, plot, null);
     DailyBalance.calculateEtc(today, plot);
 
     System.out.println(today.getEtc());
@@ -106,7 +106,7 @@ class DailyBalanceTest {
 
   @Test
   void testCalculateDailyBalance() {
-    DailyBalance.determineCurrentKc(today, plot);
+    DailyBalance.determineCurrentKc(today, plot, null);
     DailyBalance.calculateEtc(today, plot);
     DailyBalance.calculateDailyBalance(today);
     System.out.println(today.getDailyBalance());

@@ -1,12 +1,13 @@
 package de.hgu.gsehen.gui.controller;
 
+import com.jfoenix.controls.JFXTabPane;
+
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.gui.GsehenSave;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.web.WebEngine;
@@ -30,7 +31,7 @@ public class MainController {
   @FXML
   private TitledPane fieldsPane;
   @FXML
-  private TabPane tabPane;
+  private JFXTabPane tabPane;
   @FXML
   private Tab mapViewTab;
   @FXML
@@ -141,7 +142,7 @@ public class MainController {
     gsehenInstance.setMapViewportFromFarm();
   }
 
-  public TabPane getTabPane() {
+  public JFXTabPane getJFXTabPane() {
     return tabPane;
   }
 

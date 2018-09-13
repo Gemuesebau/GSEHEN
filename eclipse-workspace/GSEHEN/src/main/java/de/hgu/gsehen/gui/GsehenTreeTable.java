@@ -1,5 +1,7 @@
 package de.hgu.gsehen.gui;
 
+import com.jfoenix.controls.JFXTabPane;
+
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -34,7 +37,6 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableColumn.CellEditEvent;
@@ -152,7 +154,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private HBox attribute2Box;
   private HBox attribute3Box;
 
-  private TabPane tabPane;
+  private JFXTabPane tabPane;
 
   /**
    * Adds the FarmTreeView.
@@ -166,7 +168,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     farmTreeView.setShowRoot(false);
     farmTreeView.setEditable(true);
 
-    tabPane = gsehenInstance.getMainController().getTabPane();
+    tabPane = gsehenInstance.getMainController().getJFXTabPane();
 
     farmTreeView.setRowFactory(this::rowFactory);
     addColumn(mainBundle.getString("treetableview.name"), "name");

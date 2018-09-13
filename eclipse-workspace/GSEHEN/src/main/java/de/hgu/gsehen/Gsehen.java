@@ -3,6 +3,8 @@ package de.hgu.gsehen;
 import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.DBUtil.executeQuery;
 
+import com.jfoenix.controls.JFXTabPane;
+
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.event.DayDataChanged;
 import de.hgu.gsehen.event.DrawableSelected;
@@ -66,7 +68,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -85,7 +86,7 @@ import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.hibernate.Session;
-import org.hibernate.query.Query; 
+import org.hibernate.query.Query;
 
 /**
  * The GSEHEN main application.
@@ -96,7 +97,7 @@ import org.hibernate.query.Query;
 public class Gsehen extends Application {
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   protected final ResourceBundle mainBundle;
-  
+
   private static final String MAIN_FXML = "main.fxml";
 
   public static final String MAIN_SPLIT_PANE_ID = "#mainSplitPane";
@@ -125,10 +126,8 @@ public class Gsehen extends Application {
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<
-      Class<? extends GsehenEvent>,
-      List<GsehenEventListener<?>>
-       > eventListeners = new HashMap<>();
+  private java.util.Map<Class<? extends GsehenEvent>, 
+      List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
 
   private boolean dataChanged;
   private List<SoilProfile> soilProfilesList;
@@ -202,6 +201,9 @@ public class Gsehen extends Application {
     }
 
     scene = new Scene(root, 1280, 800);
+    // setUserAgentStylesheet(STYLESHEET_MODENA);
+    // scene.getStylesheets().add(
+    // Gsehen.class.getResource("/de/hgu/gsehen/style/material-fx-v0_3.css").toExternalForm());
     stage.setScene(scene);
     stage.setTitle("GSEHEN");
     stage.getIcons().add(new Image("/de/hgu/gsehen/images/Logo_UniGeisenheim_36x36.png"));
@@ -225,7 +227,7 @@ public class Gsehen extends Application {
     ImageView imageView = (ImageView) scene.lookup(IMAGE_VIEW_ID);
     imageView.setImage(image);
 
-    TabPane tabPane = (TabPane) stage.getScene().lookup(TAB_PANE_ID);
+    JFXTabPane tabPane = (JFXTabPane) stage.getScene().lookup(TAB_PANE_ID);
     tabPane.getTabs().remove(tabPane.getTabs().size() - 2, tabPane.getTabs().size());
 
     stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -249,7 +251,8 @@ public class Gsehen extends Application {
   /**
    * PostgreSQL DB connection and storing in Persistence.
    *
-   * @throws SQLException if SELECTing from PostgreSQL, our saving into local DB, fails
+   * @throws SQLException
+   *           if SELECTing from PostgreSQL, our saving into local DB, fails
    */
   public static void importCropData() throws SQLException {
     final String url = "jdbc:postgresql:"
@@ -268,13 +271,10 @@ public class Gsehen extends Application {
     }
     try {
       em.getTransaction().begin();
-      transfer(em, builder, connection,
-          "SELECT * FROM crop;", new String[] { "cName" },
-          Crop.class, new String[] { "name" },
-          Gsehen::transferPropertiesFromPgToCrop);
-      transfer(em, builder, connection,
-          "SELECT * FROM messages;", new String[] { "key", "locale_id" },
-          Messages.class, new String[] { "key", "localeId" },
+      transfer(em, builder, connection, "SELECT * FROM crop;", new String[] { "cName" }, Crop.class,
+          new String[] { "name" }, Gsehen::transferPropertiesFromPgToCrop);
+      transfer(em, builder, connection, "SELECT * FROM messages;",
+          new String[] { "key", "locale_id" }, Messages.class, new String[] { "key", "localeId" },
           Gsehen::transferPropertiesFromPgToMessages);
       em.getTransaction().commit();
     } catch (Exception e) {
@@ -290,16 +290,12 @@ public class Gsehen extends Application {
       final String[] targetKey, BiConsumer<ResultSet, T> propertyTransfer) {
     if (sourceKey.length != targetKey.length) {
       throw new IllegalArgumentException("Transfer: source and target keys must have "
-          + "the same number of elements! "
-          + sourceKey.length
-          + " != "
-          + targetKey.length
-          + "!");
+          + "the same number of elements! " + sourceKey.length + " != " + targetKey.length + "!");
     }
     CriteriaQuery<T> cq = cb.createQuery(targetClass);
     Root<T> cropRoot = cq.from(targetClass);
-    List<ParameterExpression<String>> cropNameParameters =
-        CollectionUtil.fillList(sourceKey.length, () -> cb.parameter(String.class));
+    List<ParameterExpression<String>> cropNameParameters = CollectionUtil.fillList(sourceKey.length,
+        () -> cb.parameter(String.class));
     buildSelect(cb, cq, targetKey, cropRoot, cropNameParameters);
 
     TypedQuery<T> targetQuery = em.createQuery(cq);
@@ -323,21 +319,20 @@ public class Gsehen extends Application {
     try {
       // target object does already exist? => Update existing!
       targetObject = targetQuery.getSingleResult();
-      LOGGER.log(Level.INFO, "Target "
-          + targetClass.getSimpleName()
-          + " " + keyParts + " existing: " + targetObject, targetObject);
+      LOGGER.log(Level.INFO,
+          "Target " + targetClass.getSimpleName() + " " + keyParts + " existing: " + targetObject,
+          targetObject);
     } catch (NoResultException e) {
       // target object does not exist yet? => Create new!
       try {
         targetObject = targetClass.newInstance();
       } catch (Exception e1) {
-        throw new RuntimeException("Can't create target "
-          + targetClass.getSimpleName()
-          + " instance", e);
+        throw new RuntimeException(
+            "Can't create target " + targetClass.getSimpleName() + " instance", e);
       }
-      LOGGER.log(Level.INFO, "Target "
-          + targetClass.getSimpleName()
-          + " " + keyParts + " new: " + targetObject, targetObject);
+      LOGGER.log(Level.INFO,
+          "Target " + targetClass.getSimpleName() + " " + keyParts + " new: " + targetObject,
+          targetObject);
     }
     return targetObject;
   }
@@ -378,7 +373,7 @@ public class Gsehen extends Application {
    * @param crop
    *          New Crop
    * @throws SQLException
-   *          if SELECTing from PostgreSQL, or saving into local DB, fails
+   *           if SELECTing from PostgreSQL, or saving into local DB, fails
    */
   private static void transferPropertiesFromPgToCrop(ResultSet rs, Crop crop) {
     try {
@@ -414,7 +409,7 @@ public class Gsehen extends Application {
    * @param messages
    *          New Messages
    * @throws SQLException
-   *          if SELECTing from PostgreSQL, or saving into local DB, fails
+   *           if SELECTing from PostgreSQL, or saving into local DB, fails
    */
   private static void transferPropertiesFromPgToMessages(ResultSet rs, Messages messages) {
     try {
@@ -467,11 +462,11 @@ public class Gsehen extends Application {
         em.merge(farm);
       }
       for (SoilProfile soilProfile : soilProfilesList) {
-        em.merge(soilProfile);        
+        em.merge(soilProfile);
       }
-      
+
       for (WeatherDataSource dataSource : weatherDataSourcesList) {
-        em.merge(dataSource);        
+        em.merge(dataSource);
       }
 
       for (Farm deletedFarm : this.getDeletedFarms()) {
@@ -625,8 +620,8 @@ public class Gsehen extends Application {
   }
 
   /**
-   * Sends a "ManualDataChanged" event to all listeners registered for that kind of event,
-   * except the listeners that belong to the given "skipClass".
+   * Sends a "ManualDataChanged" event to all listeners registered for that kind of event, except
+   * the listeners that belong to the given "skipClass".
    *
    * @param field
    *          the field that is the parent of the given plot
@@ -718,7 +713,7 @@ public class Gsehen extends Application {
   public List<Farm> getFarmsList() {
     return farmsList;
   }
-  
+
   public void setFarmsList(List<Farm> farmsList) {
     this.farmsList = farmsList;
   }
@@ -750,7 +745,7 @@ public class Gsehen extends Application {
   public static Logs getLogs() {
     return logs;
   }
-  
+
   public MainController getMainController() {
     return mainController;
   }
@@ -811,7 +806,8 @@ public class Gsehen extends Application {
   /**
    * Lookup method for a SoilProfile, using its UUID.
    *
-   * @param soilProfileUuid the UUID of the SoilProfile to lookup
+   * @param soilProfileUuid
+   *          the UUID of the SoilProfile to lookup
    * @return the SoilProfile with the given UUID, or null if no such SoilProfile exists
    */
   public SoilProfile getSoilProfileForUuid(String soilProfileUuid) {
@@ -826,7 +822,8 @@ public class Gsehen extends Application {
   /**
    * Lookup method for a WeatherDataSource, using its UUID.
    *
-   * @param weatherDataSourceUuid the UUID of the WeatherDataSource to lookup
+   * @param weatherDataSourceUuid
+   *          the UUID of the WeatherDataSource to lookup
    * @return the WeatherDataSource with the given UUID, or null if no such WeatherDataSource exists
    */
   public WeatherDataSource getWeatherDataSourceForUuid(String weatherDataSourceUuid) {
@@ -841,11 +838,11 @@ public class Gsehen extends Application {
   @SuppressWarnings("checkstyle:javadocmethod")
   public void setSelectedLocale(Locale selectedLocale) {
     this.selectedLocale = selectedLocale;
-    oneDecimalNumberFormat = (DecimalFormat)NumberFormat.getNumberInstance(selectedLocale);
+    oneDecimalNumberFormat = (DecimalFormat) NumberFormat.getNumberInstance(selectedLocale);
     oneDecimalNumberFormat.applyPattern("#,##0.0");
-    twoDecimalNumberFormat = (DecimalFormat)NumberFormat.getNumberInstance(selectedLocale);
+    twoDecimalNumberFormat = (DecimalFormat) NumberFormat.getNumberInstance(selectedLocale);
     twoDecimalNumberFormat.applyPattern("#,##0.00");
-    moreDecimalNumberFormat = (DecimalFormat)NumberFormat.getNumberInstance(selectedLocale);
+    moreDecimalNumberFormat = (DecimalFormat) NumberFormat.getNumberInstance(selectedLocale);
     moreDecimalNumberFormat.applyPattern("#,#######0.0000000");
     dateFormat = new SimpleDateFormat("dd.MM.yyyy", selectedLocale);
   }
@@ -862,7 +859,7 @@ public class Gsehen extends Application {
       throw new RuntimeException("Parsing double failed", e);
     }
   }
-  
+
   @SuppressWarnings("checkstyle:javadocmethod")
   public String formatDoubleOneDecimal(double value) {
     return oneDecimalNumberFormat.format(value);
@@ -871,11 +868,10 @@ public class Gsehen extends Application {
   public String formatDoubleTwoDecimal(double value) {
     return twoDecimalNumberFormat.format(value);
   }
-  
+
   public String formatDoubleMoreDecimal(double value) {
     return moreDecimalNumberFormat.format(value);
   }
-
 
   public String localizeCropText(String messageKey) {
     return messages.get(messageKey + "." + getSelectedLocale().getLanguage()).getText();
@@ -898,5 +894,5 @@ public class Gsehen extends Application {
     }
     return true;
   }
-  
+
 }

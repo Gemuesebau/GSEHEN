@@ -1,5 +1,37 @@
 loadGsehenJs("commons.js");
 
+/* plugineigene Konfiguration
+@SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
+public DecimalFormat getNumberFormat() {
+  Locale locale = Locale.ENGLISH;
+  try {
+    locale = (Locale)Locale.class.getField(numberLocaleId).get(null);
+  }
+  catch (Exception e) {
+    // do nothing
+  }
+  return (DecimalFormat)NumberFormat.getNumberInstance(locale);
+}
+
+public SimpleDateFormat getDateFormat() {
+  return new SimpleDateFormat(dateFormatString);
+}
+private int measIntervalSeconds;
+private double windspeedMeasHeightMeters;
+private String dateFormatString;
+private String numberLocaleId;
+private String dataFilePath;
+private double locationLng;
+private double locationLat;
+private double locationMetersAboveSeaLevel;
+
+import de.hgu.gsehen.evapotranspiration.GeoData;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+*/
+
 function calculateWindspeed2m(windspeed, windspeedMeasHeightMeters) {
 	if (windspeedMeasHeightMeters == 2) {
 		return windspeed;

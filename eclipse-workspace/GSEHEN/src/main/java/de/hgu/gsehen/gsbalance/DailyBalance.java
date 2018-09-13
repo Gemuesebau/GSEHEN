@@ -8,6 +8,7 @@ import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.model.SoilProfile;
 
 
 public class DailyBalance {
@@ -19,7 +20,7 @@ public class DailyBalance {
    * @param dayData the day
    * @param plot the Plot
    */
-  public static void determineCurrentKc(DayData dayData, Plot plot) {
+  public static void determineCurrentKc(DayData dayData, Plot plot, SoilProfile soilProfile) {
     Date today = dayData.getDate();
     Date cropStart = plot.getCropStart();
     Date cropEnd = plot.getCropEnd();
@@ -30,7 +31,12 @@ public class DailyBalance {
     Double kc2 = crop.getKc2();
     Double kc3 = crop.getKc3();
     Double kc4 = crop.getKc4();
-    Double soilKc = 0.3;
+    Double soilKc;
+    if (soilProfile != null && soilProfile.getSoilManualData().getSoilKc() != null) {
+      soilKc = soilProfile.getSoilManualData().getSoilKc();
+    } else {
+      soilKc = 0.3;
+    }
     Double currentKc = null;
     int phase1;
     Integer phase2;
