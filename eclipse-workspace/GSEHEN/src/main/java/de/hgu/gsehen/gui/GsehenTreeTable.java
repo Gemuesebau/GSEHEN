@@ -305,10 +305,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 attributeLabel2 = new Text(mainBundle.getString("plotview.rootingzone"));
 
                 if (plot.getRootingZone() != null) {
-                  attribute2 = new Text(
-                      gsehenInstance.formatDoubleOneDecimal(plot.getRootingZone()));
+                  attribute2 = new Text(String.valueOf(plot.getRootingZone()));
                 } else {
-                  attribute2 = new Text("0.0");
+                  attribute2 = new Text("/");
                 }
 
                 attribute2Box = new HBox();
