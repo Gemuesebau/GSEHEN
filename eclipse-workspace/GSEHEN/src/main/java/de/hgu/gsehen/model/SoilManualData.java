@@ -1,10 +1,15 @@
 package de.hgu.gsehen.model;
 
-import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
-@Embeddable
+@Entity
 public class SoilManualData {
 
+  @Id
+  @GeneratedValue
+  private long id;
   Double soilKc;
   Integer soilZone;
   Double rainMax;
