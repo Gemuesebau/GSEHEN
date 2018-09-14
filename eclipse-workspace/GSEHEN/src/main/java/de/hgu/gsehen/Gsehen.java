@@ -773,7 +773,7 @@ public class Gsehen extends Application {
 
   @SuppressWarnings({ "checkstyle:javadocmethod" })
   public static void updateDayData() {
-    dayDataCalculation.checkCalculation();
+    dayDataCalculation.recalculateDayData();
   }
 
   @SuppressWarnings({ "checkstyle:javadocmethod" })
