@@ -241,6 +241,7 @@ public class Gsehen extends Application {
       }
     };
     treeTable.addFarmTreeView(GsehenTreeTable.class);
+    treeTable.checkCalculation();
   }
 
   /**

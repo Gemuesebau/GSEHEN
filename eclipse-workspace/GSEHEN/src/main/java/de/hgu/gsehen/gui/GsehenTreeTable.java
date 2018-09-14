@@ -1,7 +1,6 @@
 package de.hgu.gsehen.gui;
 
 import com.jfoenix.controls.JFXTabPane;
-
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -64,9 +62,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private Field autoField;
   protected final ResourceBundle mainBundle;
 
-  private Map<
-      Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>
-        > eventListeners = new HashMap<>();
+  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>> eventListeners =
+      new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -111,8 +108,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         event -> updatePlotInfo(event.getPlot()));
   }
 
-  private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat(
-      "application/x-java-serialized-object");
+  private static final DataFormat SERIALIZED_MIME_TYPE =
+      new DataFormat("application/x-java-serialized-object");
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   private static final String DETAIL_BORDER_PANE_ID = "#detailBorderPane";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
@@ -161,8 +158,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
    */
   @SuppressWarnings("unchecked")
   public void addFarmTreeView(Class<? extends GsehenEventListener<GsehenViewEvent>> skipClass) {
-    farmTreeView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
-        .lookup(FARM_TREE_VIEW_ID);
+    farmTreeView =
+        (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
     rootItem = new TreeItem<Drawable>();
     farmTreeView.setRoot(rootItem);
     farmTreeView.setShowRoot(false);
@@ -241,6 +238,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 if (!tabPane.getSelectionModel().isSelected(0)) {
                   tabPane.getSelectionModel().select(0);
                 }
+                checkCalculation();
                 Farm farm = (Farm) selectedItem.getValue();
 
                 attributeLabel1 = new Text(mainBundle.getString("treetableview.fieldnumber"));
@@ -251,7 +249,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 attribute1Box.getChildren().addAll(attributeLabel1, attribute1);
 
                 centerBox.getChildren().addAll(attribute1Box);
-                detailPane.setBottom(null);
               } else if (selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
                 if (!tabPane.getSelectionModel().isSelected(0)) {
                   tabPane.getSelectionModel().select(1);
@@ -275,8 +272,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 attributeLabel3 = new Text(mainBundle.getString("fieldview.soilprofile"));
                 attributeLabel3.setFont(Font.font("Arial", 12));
-                SoilProfile fieldSoilProfile = gsehenInstance
-                    .getSoilProfileForUuid(field.getSoilProfileUuid());
+                SoilProfile fieldSoilProfile =
+                    gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
                 if (fieldSoilProfile != null) {
                   attribute3 = new Text(fieldSoilProfile.getName());
                 } else {
@@ -335,8 +332,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 Text soilValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
                 Text soilValue;
                 if (plot.getSoilStartValue() != null) {
-                  soilValue = new Text(
-                      gsehenInstance.formatDoubleOneDecimal(plot.getSoilStartValue()));
+                  soilValue =
+                      new Text(gsehenInstance.formatDoubleOneDecimal(plot.getSoilStartValue()));
                 } else {
                   soilValue = new Text("/");
                 }
@@ -349,9 +346,12 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 Text actionLabel = new Text(mainBundle.getString("treetableview.watering"));
 
                 if (plot.getSoilStartValue() != null && plot.getRecommendedAction() != null) {
-                  action = new Text(getRecommendedActionText(plot)/* + " : "
-                      + new java.text.SimpleDateFormat("EE., dd.MM.yyyy, HH:mm:ss.SSS",
-                          gsehenInstance.getSelectedLocale()).format(new java.util.Date())*/);
+                  action = new Text(getRecommendedActionText(
+                      plot)/*
+                            * + " : " + new
+                            * java.text.SimpleDateFormat("EE., dd.MM.yyyy, HH:mm:ss.SSS",
+                            * gsehenInstance.getSelectedLocale()).format(new java.util.Date())
+                            */);
 
                 } else {
                   action = new Text("/");
@@ -396,8 +396,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   soilValue.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
                   actionLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
                   action.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
-                  Text plotIsInactive = new Text(
-                      mainBundle.getString("treetableview.plotinactive"));
+                  Text plotIsInactive =
+                      new Text(mainBundle.getString("treetableview.plotinactive"));
                   plotIsInactive.setFont(Font.font("Arial", FontWeight.BOLD, 16));
                   bottomBox.getChildren().add(plotIsInactive);
                 }
@@ -425,6 +425,102 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     farmTreeView.getSelectionModel().setCellSelectionEnabled(true);
 
     detailPane = (BorderPane) Gsehen.getInstance().getScene().lookup(DETAIL_BORDER_PANE_ID);
+  }
+
+  /**
+   * Checks, if a calculation can start.
+   */
+  public void checkCalculation() {
+
+    Text general = new Text(mainBundle.getString("treetableview.general"));
+    general.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+    Text noFarm = new Text(mainBundle.getString("treetableview.nofarm"));
+    noFarm.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+    Text noField = new Text(mainBundle.getString("treetableview.nofield"));
+    noField.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+    Text noPlot = new Text(mainBundle.getString("treetableview.noplot"));
+    noPlot.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+    Text noSoilProfile = new Text(mainBundle.getString("treetableview.nosoilprofile"));
+    noSoilProfile.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+    Text noWeatherDataSource = new Text(mainBundle.getString("treetableview.noweatherdatasource"));
+    noWeatherDataSource.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+
+    if (farmTreeView.getRoot().getChildren().isEmpty()) {
+      detailPane = (BorderPane) Gsehen.getInstance().getScene().lookup(DETAIL_BORDER_PANE_ID);
+      VBox center = new VBox(10);
+      center.setPadding(new Insets(10, 10, 10, 10));
+      center.getChildren().addAll(general, noFarm, noField, noPlot, noSoilProfile,
+          noWeatherDataSource);
+      detailPane.setCenter(center);
+    } else if (selectedItem != null && selectedItem.getValue().getClass().getSimpleName()
+        .equals(mainBundle.getString("gui.view.Map.drawableType.Farm"))) {
+      VBox bottomBox = new VBox(10);
+      bottomBox.setPadding(new Insets(10, 10, 10, 10));
+
+      Farm farm = (Farm) selectedItem.getValue();
+
+      if (!farm.getFields().isEmpty()) {
+        for (Field f : farm.getFields()) {
+          Field field = f;
+
+          if (field.getSoilProfileUuid() == null) {
+            Text needSoilProfile = new Text(
+                mainBundle.getString("gui.view.Map.drawableType.Field") + " \"" + field.getName()
+                    + "\" " + mainBundle.getString("treetableview.needsoilprofile"));
+            needSoilProfile.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+            bottomBox.getChildren().add(general);
+            bottomBox.getChildren().add(needSoilProfile);
+          }
+          if (field.getWeatherDataSourceUuid() == null) {
+            Text needWeatherDataSource = new Text(
+                mainBundle.getString("gui.view.Map.drawableType.Field") + " \"" + field.getName()
+                    + "\" " + mainBundle.getString("treetableview.needweatherdatasource"));
+            needWeatherDataSource.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+            if (!bottomBox.getChildren().contains(general)) {
+              bottomBox.getChildren().add(general);
+            }
+            bottomBox.getChildren().add(needWeatherDataSource);
+          }
+          if (!field.getPlots().isEmpty()) {
+            for (Plot p : field.getPlots()) {
+
+              Plot plot = p;
+              if (plot.getCrop() == null) {
+                if (!bottomBox.getChildren().contains(general)) {
+                  bottomBox.getChildren().add(general);
+                }
+                Text needCrop =
+                    new Text(mainBundle.getString("gui.view.Map.drawableType.Plot") + " \""
+                        + plot.getName() + "\" " + mainBundle.getString("treetableview.needcrop"));
+                needCrop.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                bottomBox.getChildren().add(needCrop);
+              }
+              if (plot.getSoilStartDate() == null && plot.getCropStart() == null) {
+                if (!bottomBox.getChildren().contains(general)) {
+                  bottomBox.getChildren().add(general);
+                }
+                Text needDate =
+                    new Text(mainBundle.getString("gui.view.Map.drawableType.Plot") + " \""
+                        + plot.getName() + "\" " + mainBundle.getString("treetableview.needdate"));
+                needDate.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                bottomBox.getChildren().add(needDate);
+              }
+            }
+          } else {
+            if (!bottomBox.getChildren().contains(general)) {
+              bottomBox.getChildren().add(general);
+            }
+            bottomBox.getChildren().add(noPlot);
+          }
+        }
+      } else {
+        bottomBox.getChildren().addAll(general, noField, noPlot, noSoilProfile,
+            noWeatherDataSource);
+      }
+      detailPane.setBottom(bottomBox);
+    } else {
+      detailPane.setBottom(null);
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -578,10 +674,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   /**
    * Adds the columns to the TreeTableView.
    * 
-   * @param label
-   *          - Name of the column.
-   * @param dataIndex
-   *          - Content of the column.
+   * @param label - Name of the column.
+   * @param dataIndex - Content of the column.
    */
   public void addColumn(String label, String dataIndex) {
 
@@ -597,8 +691,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           result = new ReadOnlyStringWrapper("/");
         } else if (param.getValue().getValue().getClass().getSimpleName().equals("Field")) {
           Field field = (Field) param.getValue().getValue();
-          SoilProfile fieldSoilProfile = gsehenInstance
-              .getSoilProfileForUuid(field.getSoilProfileUuid());
+          SoilProfile fieldSoilProfile =
+              gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
           if (fieldSoilProfile != null) {
             result = new ReadOnlyStringWrapper(fieldSoilProfile.getName());
           } else {
