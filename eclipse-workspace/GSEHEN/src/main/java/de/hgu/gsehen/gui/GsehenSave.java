@@ -42,6 +42,12 @@ public final class GsehenSave {
     final JFXButton saveButton = new JFXButton(mainBundle.getString("save.saveandexit"));
     final JFXButton exitButton = new JFXButton(mainBundle.getString("save.exitwithoutsave"));
     final JFXButton cancelButton = new JFXButton(mainBundle.getString("save.cancel"));
+    saveButton.setButtonType(com.jfoenix.controls.JFXButton.ButtonType.RAISED);
+    saveButton.setStyle("-fx-background-color: #e8e8e8; -fx-text-fill: black;");
+    exitButton.setButtonType(com.jfoenix.controls.JFXButton.ButtonType.RAISED);
+    exitButton.setStyle("-fx-background-color: #e8e8e8; -fx-text-fill: black;");
+    cancelButton.setButtonType(com.jfoenix.controls.JFXButton.ButtonType.RAISED);
+    cancelButton.setStyle("-fx-background-color: #e8e8e8; -fx-text-fill: black;");
 
     saveButton.setOnAction(new EventHandler<ActionEvent>() {
       @Override
