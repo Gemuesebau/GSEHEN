@@ -389,15 +389,15 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     // Balkendiagramm TODO: Farben einbauen
     waterLevel = 0.0;
-    CategoryAxis xAxis = new CategoryAxis();
-    NumberAxis yAxis = new NumberAxis(0, 20, 1);
-    chart = new BarChart<String, Number>(xAxis, yAxis);
+    CategoryAxis axisX = new CategoryAxis();
+    NumberAxis axisY = new NumberAxis(0, 20, 1);
+    chart = new BarChart<String, Number>(axisX, axisY);
     chart.setPrefWidth(30);
     chart.setTitle(mainBundle.getString("plotview.waterinsoil"));
     chart.setLegendSide(Side.RIGHT);
     chart.getStylesheets()
         .add(getClass().getResource("/de/hgu/gsehen/style/BarChart.css").toExternalForm());
-    yAxis.setLabel("mm");
+    axisY.setLabel("mm");
 
     series = new XYChart.Series();
     chart.getData().addAll(series);
@@ -745,7 +745,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     pane.setBottom(bottomBox);
 
-    tabPane = gsehenInstance.getMainController().getJFXTabPane();
+    tabPane = gsehenInstance.getMainController().getJfxTabPane();
     mapViewTab = gsehenInstance.getMainController().getMapViewTab();
     fieldViewTab = gsehenInstance.getMainController().getFieldViewTab();
     plotViewTab = gsehenInstance.getMainController().getPlotViewTab();
@@ -828,7 +828,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
                   setTableData();
 
-                  if (plot.getRecommendedAction() != null) {
+                  if (plot.getRecommendedAction() != null
+                      && plot.getRecommendedAction().getAvailableWater() != null) {
                     waterLevel = plot.getRecommendedAction().getAvailableWater();
                     DecimalFormat df = new DecimalFormat("#.##");
                     series.setName(String.valueOf(df.format(waterLevel)) + " mm");
@@ -836,7 +837,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                     int waterBalance = plot.getWaterBalance().getDailyBalances().size() - 1;
                     availableSoilWater = plot.getWaterBalance().getDailyBalances().get(waterBalance)
                         .getCurrentAvailableSoilWater() * 1.1;
-                    yAxis.setUpperBound(availableSoilWater);
+                    axisY.setUpperBound(availableSoilWater);
 
                     XYChart.Data data = new XYChart.Data("", waterLevel);
                     // TODO: https://docs.oracle.com/javafx/2/charts/css-styles.htm

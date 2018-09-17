@@ -62,7 +62,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private Field autoField;
   protected final ResourceBundle mainBundle;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>> eventListeners =
+  private Map<Class<? extends GsehenEvent>, Class<? extends 
+      GsehenEventListener<? extends GsehenEvent>>> eventListeners =
       new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
@@ -165,7 +166,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     farmTreeView.setShowRoot(false);
     farmTreeView.setEditable(true);
 
-    tabPane = gsehenInstance.getMainController().getJFXTabPane();
+    tabPane = gsehenInstance.getMainController().getJfxTabPane();
 
     farmTreeView.setRowFactory(this::rowFactory);
     addColumn(mainBundle.getString("treetableview.name"), "name");
@@ -421,7 +422,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     setupScrolling();
 
     farmTreeView.setContextMenu(menu);
-    farmTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    farmTreeView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     farmTreeView.getSelectionModel().setCellSelectionEnabled(true);
 
     detailPane = (BorderPane) Gsehen.getInstance().getScene().lookup(DETAIL_BORDER_PANE_ID);

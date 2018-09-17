@@ -14,9 +14,9 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-<SplitPane id="mainSplitPane" dividerPositions="0.31" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="800.0" minWidth="1280.0" prefHeight="800.0" prefWidth="1280.0" stylesheets="@style/global.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
+<SplitPane id="mainSplitPane" dividerPositions="0.31" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="800.0" minWidth="1280.0" prefHeight="800.0" prefWidth="1280.0" stylesheets="@style/Global.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
 	<items>
-		<BorderPane prefHeight="200.0" prefWidth="200.0">
+		<BorderPane id="mainBorderPane" maxWidth="-Infinity">
 			<top>
 				<MenuBar BorderPane.alignment="CENTER">
 					<menus>
@@ -50,24 +50,14 @@
          <bottom>
             <AnchorPane BorderPane.alignment="CENTER">
                <children>
-      				<ImageView id="imageView" fx:id="imageView" disable="true" fitHeight="180.0" fitWidth="348.0" layoutY="280.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+      				<ImageView id="imageView" fx:id="imageView" disable="true" fitHeight="173.0" fitWidth="393.0" layoutX="1.0" layoutY="42.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="42.0" />
                </children>
             </AnchorPane>
          </bottom>
          <center>
-								<AnchorPane BorderPane.alignment="CENTER">
+								<AnchorPane id="leftAnchorPane" maxWidth="-Infinity" BorderPane.alignment="CENTER">
                <children>
-                  <BorderPane prefHeight="200.0" prefWidth="200.0">
-                     <top>
-                        <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-                           <children>
-                              <TreeTableView id="farmTreeView" prefHeight="291.0" prefWidth="393.0">
-                                 <columnResizePolicy>
-                                    <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                 </columnResizePolicy></TreeTableView>
-                           </children>
-                        </AnchorPane>
-                     </top>
+                  <BorderPane id="tableBorderPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                      <center>
                         <AnchorPane prefHeight="36.0" prefWidth="275.0" BorderPane.alignment="CENTER">
                            <children>
@@ -82,6 +72,13 @@
                            </children>
                         </AnchorPane>
                      </center>
+                     <top>
+                        <TreeTableView id="farmTreeView" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="300.0" prefWidth="393.0" BorderPane.alignment="CENTER">
+                           <columnResizePolicy>
+                              <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                           </columnResizePolicy>
+                        </TreeTableView>
+                     </top>
                   </BorderPane>
                </children>
 								</AnchorPane>

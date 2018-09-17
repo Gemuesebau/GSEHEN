@@ -338,7 +338,7 @@ public class FieldDataController extends Application
     center.setSpacing(8);
     // BOTTOM END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    tabPane = gsehenInstance.getMainController().getJFXTabPane();
+    tabPane = gsehenInstance.getMainController().getJfxTabPane();
     mapViewTab = gsehenInstance.getMainController().getMapViewTab();
     fieldViewTab = gsehenInstance.getMainController().getFieldViewTab();
     plotViewTab = gsehenInstance.getMainController().getPlotViewTab();

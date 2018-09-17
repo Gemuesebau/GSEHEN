@@ -1,42 +1,47 @@
 package de.hgu.gsehen.gui;
 
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.controls.JFXDialogLayout;
+
 import de.hgu.gsehen.Gsehen;
 import java.util.ResourceBundle;
-import javafx.application.Application;
+
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-public final class GsehenSave extends Application {
+public final class GsehenSave {
   private Gsehen gsehenInstance;
   protected final ResourceBundle mainBundle;
 
   {
     gsehenInstance = Gsehen.getInstance();
 
-    mainBundle =
-        ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
+    mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
   }
 
-  @Override
-  public void start(final Stage stage) {
-    stage.setTitle(mainBundle.getString("save.titel"));
-    stage.getIcons().add(new Image("/de/hgu/gsehen/images/Logo_UniGeisenheim_36x36.png"));
-    stage.setAlwaysOnTop(true);
-    stage.setHeight(100);
-    stage.setWidth(420);
+  /**
+   * Shows a dialog when the user wants to exit.
+   */
+  public void exitApplication() {
+    JFXDialogLayout content = new JFXDialogLayout();
+    content.setHeading(new Text(mainBundle.getString("save.titel")));
+    StackPane stackPane = new StackPane();
+    Scene scene = new Scene(stackPane, 300, 250);
+    Stage stage = (Stage) gsehenInstance.getScene().getWindow();
+    JFXDialog dialog = new JFXDialog(stackPane, content, JFXDialog.DialogTransition.CENTER);
+    stage.setScene(scene);
+    dialog.show();
 
-    final Button saveButton = new Button(mainBundle.getString("save.saveandexit"));
-    final Button exitButton = new Button(mainBundle.getString("save.exitwithoutsave"));
-    final Button cancelButton = new Button(mainBundle.getString("save.cancel"));
+    final JFXButton saveButton = new JFXButton(mainBundle.getString("save.saveandexit"));
+    final JFXButton exitButton = new JFXButton(mainBundle.getString("save.exitwithoutsave"));
+    final JFXButton cancelButton = new JFXButton(mainBundle.getString("save.cancel"));
 
     saveButton.setOnAction(new EventHandler<ActionEvent>() {
       @Override
@@ -58,7 +63,9 @@ public final class GsehenSave extends Application {
     cancelButton.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(final ActionEvent e) {
-        stage.close();
+        dialog.close();
+        stackPane.setVisible(false);
+        stage.setScene(gsehenInstance.getScene());
       }
     });
 
@@ -71,15 +78,6 @@ public final class GsehenSave extends Application {
     inputGridPane.setVgap(6);
     inputGridPane.getChildren().addAll(saveButton, exitButton, cancelButton);
 
-    final Pane rootGroup = new VBox(12);
-    rootGroup.getChildren().addAll(inputGridPane);
-    rootGroup.setPadding(new Insets(12, 12, 12, 12));
-
-    stage.setScene(new Scene(rootGroup));
-    stage.show();
-  }
-
-  public static void main(String[] args) {
-    Application.launch(args);
+    content.setBody(inputGridPane);
   }
 }

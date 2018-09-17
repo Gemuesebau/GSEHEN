@@ -12,7 +12,6 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import javafx.stage.Stage;
 
 /**
  * The GSEHEN Main-Controller.
@@ -99,9 +98,9 @@ public class MainController {
    */
   public void exit() {
     if (gsehenInstance.isDataChanged()) {
-      Stage stage = new Stage();
+//      Stage stage = new Stage();
       GsehenSave save = new GsehenSave();
-      save.start(stage);
+      save.exitApplication();
     } else {
       Platform.exit();
       System.exit(0);
@@ -140,7 +139,7 @@ public class MainController {
     gsehenInstance.setMapViewportFromFarm();
   }
 
-  public JFXTabPane getJFXTabPane() {
+  public JFXTabPane getJfxTabPane() {
     return tabPane;
   }
 
