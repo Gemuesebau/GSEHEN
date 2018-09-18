@@ -51,6 +51,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
@@ -109,7 +110,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private JFXTextField name;
   private JFXTextField rootingZone;
   private Text area;
-  private Text location;
+  private Hyperlink location;
   private DatePicker soilStart;
   private DatePicker cropStart;
   private JFXSlider soilStartValue;
@@ -124,6 +125,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private BarChart<String, Number> chart;
   private NumberAxis axisY;
   private String pattern;
+  private Double lat = 0.0;
+  private Double lng = 0.0;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -188,7 +191,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // Lage
     locationLabel = new Text(mainBundle.getString("plotview.location"));
     locationLabel.setFont(Font.font("Arial", 14));
-    location = new Text("");
+    location = new Hyperlink("");
     location.setFont(Font.font("Arial", 14));
 
     // Max. durchw. Zone
@@ -793,11 +796,20 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
                   if (plot.getLocation() == null) {
                     DecimalFormat df = new DecimalFormat("#.######");
-                    GeoPoint location = new GeoPoint(
-                        gsehenInstance.parseDouble(
-                            df.format(plot.getPolygon().getGeoPoints().get(0).getLat())),
-                        gsehenInstance.parseDouble(
-                            df.format(plot.getPolygon().getGeoPoints().get(0).getLng())));
+                    for (int y = 0; y < plot.getPolygon().getGeoPoints().size(); y++) {
+                      lat += plot.getPolygon().getGeoPoints().get(y).getLat();
+                      if (y == plot.getPolygon().getGeoPoints().size() - 1) {
+                        lat = lat / plot.getPolygon().getGeoPoints().size();
+                      }
+                    }
+                    for (int z = 0; z < plot.getPolygon().getGeoPoints().size(); z++) {
+                      lng += plot.getPolygon().getGeoPoints().get(z).getLng();
+                      if (z == plot.getPolygon().getGeoPoints().size() - 1) {
+                        lng = lng / plot.getPolygon().getGeoPoints().size();
+                      }
+                    }
+                    GeoPoint location = new GeoPoint(gsehenInstance.parseDouble(df.format(lat)),
+                        gsehenInstance.parseDouble(df.format(lng)));
                     plot.setLocation(location);
                   }
 
@@ -812,6 +824,17 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                             + mainBundle.getString("plotview.lat") + ")\n")
                         + String.valueOf(plot.getLocation().getLng() + " ("
                             + mainBundle.getString("plotview.lng") + ")"));
+
+                    location.setTextFill(Color.BLUE);
+                    location.setOnAction(new EventHandler<ActionEvent>() {
+                      @SuppressWarnings("static-access")
+                      @Override
+                      public void handle(ActionEvent event) {
+                        gsehenInstance.getInstance().getHostServices()
+                            .showDocument("https://www.google.de/maps?ll="
+                                + plot.getLocation().getLat() + "," + plot.getLocation().getLng());
+                      }
+                    });
                   }
 
                   if (plot.getScalingFactor() != null) {
@@ -941,7 +964,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         if (duration == null || duration == 0) {
           break;
         }
-        // TODO
         final Integer currentPhaseDuration = devCropDurations.get(index);
         final Date currentCalendarTime = calendar.getTime();
         calendar.add(Calendar.DAY_OF_YEAR, currentPhaseDuration);

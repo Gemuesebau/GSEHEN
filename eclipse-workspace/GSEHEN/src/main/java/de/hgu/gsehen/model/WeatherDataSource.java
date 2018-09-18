@@ -123,7 +123,7 @@ public class WeatherDataSource {
     return "{"
         + "  \"measIntervalSeconds\": 600,"
         + "  \"windspeedMeasHeightMeters\": 2,"
-        + "  \"dataFilePath\": \"C:\\\\Users\\\\atappe\\\\Documents\\\\GSEHEN\\\\eclipse-workspace\\\\GSEHEN\\\\src\\\\main\\\\resources\\\\de\\\\hgu\\\\gsehen\\\\csv\\\\GeisenheimKlima.csv\","
+        + "  \"dataFilePath\": \"C:\\\\Users\\\\cwitzke\\\\Documents\\\\10MinDaten.csv\","
         + "  \"dateFormat\": \"d.M.y\","
         + "  \"numberFormat\": \"GERMAN\""
         + "}";
