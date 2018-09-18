@@ -118,7 +118,14 @@ public class WeatherDataSource {
 
   @SuppressWarnings("checkstyle:all")
   public String getPluginConfigurationJSON() {
-    return pluginConfigurationJSON;
+    //return pluginConfigurationJSON;
+    return "{"
+        + "  \"measIntervalSeconds\": 600,"
+        + "  \"windspeedMeasHeightMeters\": 2,"
+        + "  \"dataFilePath\": \"C:\\\\Users\\\\atappe\\\\Documents\\\\GSEHEN\\\\eclipse-workspace\\\\GSEHEN\\\\src\\\\main\\\\resources\\\\de\\\\hgu\\\\gsehen\\\\csv\\\\GeisenheimKlima.csv\","
+        + "  \"dateFormat\": \"d.M.y\","
+        + "  \"numberFormat\": \"GERMAN\""
+        + "}";
   }
 
   @SuppressWarnings("checkstyle:all")

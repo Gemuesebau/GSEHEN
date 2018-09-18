@@ -42,6 +42,7 @@
 							<items>
 								<MenuItem fx:id="contactMenuItem" mnemonicParsing="false" onAction="#openContactView" text="%menu.help.contact" />
 								<MenuItem fx:id="aboutUsMenuItem" mnemonicParsing="false" onAction="#about" text="%menu.help.about" />
+								<MenuItem fx:id="openPluginsFolderMenuItem" mnemonicParsing="false" onAction="#openPluginsFolder" text="%menu.help.openPluginsFolder" />
 							</items>
 						</Menu>
 					</menus>

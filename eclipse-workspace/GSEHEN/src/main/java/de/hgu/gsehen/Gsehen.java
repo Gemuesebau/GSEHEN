@@ -14,7 +14,7 @@ import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.GsehenViewEvent;
 import de.hgu.gsehen.event.ManualDataChanged;
 import de.hgu.gsehen.event.RecommendedActionChanged;
-//import de.hgu.gsehen.gsbalance.DayDataCalculation;
+import de.hgu.gsehen.gsbalance.DayDataCalculation;
 import de.hgu.gsehen.gsbalance.Recommender;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenTreeTable;
@@ -36,7 +36,7 @@ import de.hgu.gsehen.model.WeatherDataSource;
 import de.hgu.gsehen.util.CollectionUtil;
 import de.hgu.gsehen.util.DBUtil;
 import de.hgu.gsehen.util.Pair;
-
+import de.hgu.gsehen.util.PluginUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -115,7 +115,7 @@ public class Gsehen extends Application {
   private static Fields fields;
   private static Plots plots;
   private static Logs logs;
-  //private static DayDataCalculation dayDataCalculation;
+  private static DayDataCalculation dayDataCalculation;
 
   private GsehenTreeTable treeTable;
 
@@ -215,7 +215,7 @@ public class Gsehen extends Application {
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
     logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
 
-    //dayDataCalculation = new DayDataCalculation();
+    dayDataCalculation = new DayDataCalculation();
     new Recommender();
 
     InputStream input = this.getClass()
@@ -776,6 +776,7 @@ public class Gsehen extends Application {
   @SuppressWarnings({ "checkstyle:javadocmethod" })
   public static void updateDayData() {
     //dayDataCalculation.recalculateDayData();
+    new PluginUtil().recalculateDayData();
   }
 
   @SuppressWarnings({ "checkstyle:javadocmethod" })
@@ -870,8 +871,14 @@ public class Gsehen extends Application {
     return moreDecimalNumberFormat.format(value);
   }
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public String localizeCropText(String messageKey) {
-    return messages.get(messageKey + "." + getSelectedLocale().getLanguage()).getText();
+    final String messageKeyComplete = messageKey + "." + getSelectedLocale().getLanguage();
+    final Messages message = messages.get(messageKeyComplete);
+    if (message == null) {
+      return "[" + messageKeyComplete + "]";
+    }
+    return message.getText();
   }
 
   public String formatDate(Date date) {

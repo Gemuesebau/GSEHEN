@@ -37,11 +37,17 @@ public class TextResourceUtil {
     engine.put("LOGGER", LOGGER);
     try {
       engine.eval("function loadGsehenJs(gsehenJsFileName) {"
-          + "  eval("
-          + "    Packages." + TextResourceUtil.class.getName() + ".getUtf8ResourceAsOneString("
-          + "      \"/de/hgu/gsehen/js/\" + gsehenJsFileName)"
-          + "  )"
+          + " (function () {"
+          + "     eval.apply(this, arguments);"
+          + " }(Packages." + TextResourceUtil.class.getName() + ".getUtf8ResourceAsOneString("
+          + "     \"/de/hgu/gsehen/js/\" + gsehenJsFileName)));"
           + "}");
+//      engine.eval("function loadGsehenJs(gsehenJsFileName) {"
+//          + "  eval("
+//          + "    Packages." + TextResourceUtil.class.getName() + ".getUtf8ResourceAsOneString("
+//          + "      \"/de/hgu/gsehen/js/\" + gsehenJsFileName)"
+//          + "  )"
+//          + "}");
       engine.eval(getReaderForUtf8(jsResourceFileName));
     } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Can't evaluate " + jsResourceFileName, e);

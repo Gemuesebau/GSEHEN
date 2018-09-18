@@ -384,26 +384,55 @@ public class FieldDataController extends Application
     pane.setBottom(null);
     sp = gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
     int index = 1;
-    Text setSoil = new Text(
+
+    Text setSoilProfile = new Text(
         mainBundle.getString("fieldview.currentsoil") + " (" + sp.getName() + "):" + "\n");
-    setSoil.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-    center.getChildren().add(setSoil);
-    if (sp.getSoilType().size() != 0) {
-      for (Soil soil : sp.getSoilType()) {
-        Text createdSoil = new Text(mainBundle.getString("fieldview.layer") + (index) + ": \n"
-            + mainBundle.getString("fieldview.soiltype") + soil.getName() + ";\n"
-            + mainBundle.getString("fieldview.awc") + soil.getAvailableWaterCapacity() + ";\n"
-            + mainBundle.getString("fieldview.depth")
-            + sp.getProfileDepth().get(index - 1).getDepth() + "\n\n");
-        center.getChildren().add(createdSoil);
-        createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
-        index++;
-      }
-    } else {
-      Text noSoil = new Text(mainBundle.getString("fieldview.nosoil"));
-      noSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
-      center.getChildren().add(noSoil);
+    setSoilProfile.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+
+    String kc = "";
+    if (sp.getSoilManualData().getSoilKc() != null) {
+      kc = String.valueOf(sp.getSoilManualData().getSoilKc());
     }
+    Text setKc = new Text(mainBundle.getString("fieldview.manualkc") + " " + kc);
+    setKc.setFont(Font.font("Arial", 14));
+
+    String zone = "";
+    if (sp.getSoilManualData().getSoilZone() != null) {
+      zone = String.valueOf(sp.getSoilManualData().getSoilZone());
+    }
+    Text setZone = new Text(mainBundle.getString("fieldview.manualzone") + " " + zone);
+    setZone.setFont(Font.font("Arial", 14));
+
+    String rain = "";
+    if (sp.getSoilManualData().getRainMax() != null) {
+      rain = String.valueOf(sp.getSoilManualData().getRainMax());
+    }
+    Text setRain = new Text(mainBundle.getString("fieldview.manualrain") + " " + rain);
+    setRain.setFont(Font.font("Arial", 14));
+
+    String pause = "";
+    if (sp.getSoilManualData().getDaysPause() != null) {
+      pause = String.valueOf(sp.getSoilManualData().getDaysPause());
+    }
+    Text setPause = new Text(mainBundle.getString("fieldview.manualpause") + " " + pause);
+    setPause.setFont(Font.font("Arial", 14));
+
+    VBox topBox = new VBox();
+    topBox.getChildren().addAll(setSoilProfile, setKc, setZone, setRain, setPause);
+
+    center.getChildren().add(topBox);
+
+    for (Soil soil : sp.getSoilType()) {
+      Text createdSoil = new Text("\n" + mainBundle.getString("fieldview.layer") + (index) + ": \n"
+          + mainBundle.getString("fieldview.soiltype") + soil.getName() + ";\n"
+          + mainBundle.getString("fieldview.awc") + soil.getAvailableWaterCapacity() + ";\n"
+          + mainBundle.getString("fieldview.depth") + sp.getProfileDepth().get(index - 1).getDepth()
+          + "\n\n");
+      center.getChildren().add(createdSoil);
+      createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
+      index++;
+    }
+
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setContent(center);
     scrollPane.setPannable(true);
@@ -545,8 +574,7 @@ public class FieldDataController extends Application
             pane.getChildren().clear();
             treeTableView.setVisible(true);
             tabPane.getTabs().clear();
-            tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab,
-                logViewTab);
+            tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
             gsehenInstance.sendFarmDataChanged(field, null);
             tabPane.getSelectionModel().select(1);
             treeTableView.getSelectionModel().clearSelection();
@@ -877,38 +905,50 @@ public class FieldDataController extends Application
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
-        pane.getChildren().clear();
-        treeTableView.setVisible(true);
-        tabPane.getTabs().clear();
-        tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
+        if (!soilProfileName.getText().isEmpty() && !soilList.isEmpty()) {
+          pane.getChildren().clear();
+          treeTableView.setVisible(true);
+          tabPane.getTabs().clear();
+          tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
 
-        SoilProfile soilProfileItem = new SoilProfile(DBUtil.generateUuid());
+          SoilProfile soilProfileItem = new SoilProfile(DBUtil.generateUuid());
 
-        if (!soilList.isEmpty() && !soilDepthList.isEmpty()) {
           soilProfileItem.setSoilType(soilList);
           soilProfileItem.setProfileDepth(soilDepthList);
-        }
 
-        if (!soilManualKc.getText().isEmpty() && !soilManualZone.getText().isEmpty()
-            && !soilManualRain.getText().isEmpty() && !soilManualPause.getText().isEmpty()) {
-          soilManualData.setSoilKc(gsehenInstance.parseDouble(soilManualKc.getText()));
-          soilManualData.setSoilZone(Integer.valueOf(soilManualZone.getText()));
-          soilManualData.setRainMax(gsehenInstance.parseDouble(soilManualRain.getText()));
-          soilManualData.setDaysPause(Integer.valueOf(soilManualPause.getText()));
+          if (!soilManualKc.getText().isEmpty() && !soilManualZone.getText().isEmpty()
+              && !soilManualRain.getText().isEmpty() && !soilManualPause.getText().isEmpty()) {
+            soilManualData.setSoilKc(gsehenInstance.parseDouble(soilManualKc.getText()));
+            soilManualData.setSoilZone(Integer.valueOf(soilManualZone.getText()));
+            soilManualData.setRainMax(gsehenInstance.parseDouble(soilManualRain.getText()));
+            soilManualData.setDaysPause(Integer.valueOf(soilManualPause.getText()));
+          } else {
+            soilManualData.setSoilKc(null);
+            soilManualData.setSoilZone(null);
+            soilManualData.setRainMax(null);
+            soilManualData.setDaysPause(null);
+          }
           soilProfileItem.setSoilManualData(soilManualData);
-        }
 
-        soilProfileItem.setName(soilProfileName.getText());
-        soilProfileList.add(soilProfileItem);
-        pane.getChildren().clear();
-        gsehenInstance.sendFarmDataChanged(field, null);
-        tabPane.getSelectionModel().select(1);
-        treeTableView.getSelectionModel().clearSelection();
-        treeTableView.getSelectionModel().select(currentItem);
+          soilProfileItem.setName(soilProfileName.getText());
+          soilProfileList.add(soilProfileItem);
+          pane.getChildren().clear();
+          gsehenInstance.sendFarmDataChanged(field, null);
+          tabPane.getSelectionModel().select(1);
+          treeTableView.getSelectionModel().clearSelection();
+          treeTableView.getSelectionModel().select(currentItem);
+        } else {
+          Text noNameOrSoil = new Text(mainBundle.getString("fieldview.nonameorsoil"));
+          noNameOrSoil.setFont(Font.font("Verdana", 14));
+          noNameOrSoil.setFill(Color.RED);
+          buttonBox.getChildren().clear();
+          buttonBox.getChildren().addAll(back, save, noNameOrSoil);
+        }
       }
     });
 
     buttonBox = new HBox();
+    buttonBox.setSpacing(10.0);
     buttonBox.getChildren().addAll(back, save);
 
     VBox bottomBox = new VBox(25);
@@ -926,6 +966,27 @@ public class FieldDataController extends Application
       treeTableView.setVisible(false);
       tabPane.getTabs().removeAll(mapViewTab, plotViewTab, logViewTab);
 
+      // GridPane - Center Section
+      GridPane top = new GridPane();
+
+      // GridPane Configuration (Padding, Gaps, etc.)
+      top.setPadding(new Insets(20, 20, 20, 20));
+      top.setHgap(15);
+      top.setVgap(15);
+      top.setGridLinesVisible(false);
+
+      // Set Column and Row Constraints
+      ColumnConstraints col1 = new ColumnConstraints(200, 100, 300);
+      ColumnConstraints col2 = new ColumnConstraints(200, 100, 100);
+      col1.setHgrow(Priority.ALWAYS);
+      col2.setHgrow(Priority.ALWAYS);
+      RowConstraints rowEmpty = new RowConstraints();
+
+      // Add Constraints to Columns & Rows
+      top.getColumnConstraints().addAll(col1, col2);
+      top.getRowConstraints().add(0, rowEmpty);
+      top.getRowConstraints().add(1, rowEmpty);
+
       // Name
       Text soilNameLabel = new Text(mainBundle.getString("fieldview.profilename"));
       soilNameLabel.setFont(Font.font("Arial", 14));
@@ -940,13 +1001,116 @@ public class FieldDataController extends Application
         }
       });
 
-      HBox nameBox = new HBox();
-      nameBox.getChildren().addAll(soilNameLabel, soilProfileName);
+      // kc-Wert
+      Text soilManualKcLabel = new Text(mainBundle.getString("fieldview.manualkc"));
+      soilManualKcLabel.setFont(Font.font("Arial", 14));
+      if (currentSoilBox.getValue().getSoilManualData().getSoilKc() != null) {
+        soilManualKc = new JFXTextField(String.valueOf(gsehenInstance
+            .formatDoubleOneDecimal(currentSoilBox.getValue().getSoilManualData().getSoilKc())));
+      } else {
+        soilManualKc = new JFXTextField();
+      }
+      soilManualKc.textProperty().addListener(new ChangeListener<String>() {
+        @Override
+        public void changed(ObservableValue<? extends String> observable, String oldValue,
+            String newValue) {
+          if (!newValue.isEmpty()) {
+            if (!gsehenInstance.isParseable(newValue)) {
+              soilManualKc.setText(oldValue);
+            } else {
+              currentSoilBox.getValue().getSoilManualData()
+                  .setSoilKc(gsehenInstance.parseDouble(newValue));
+            }
+          }
+        }
+      });
 
-      VBox topBox = new VBox(25);
-      topBox.setPadding(new Insets(20, 20, 20, 20));
-      topBox.getChildren().addAll(nameBox);
-      pane.setTop(topBox);
+      // Bilanzierungstiefe (in cm)
+      Text soilManualZoneLabel = new Text(mainBundle.getString("fieldview.manualzone"));
+      soilManualZoneLabel.setFont(Font.font("Arial", 14));
+      if (currentSoilBox.getValue().getSoilManualData().getSoilZone() != null) {
+        soilManualZone = new JFXTextField(
+            String.valueOf(currentSoilBox.getValue().getSoilManualData().getSoilZone()));
+      } else {
+        soilManualZone = new JFXTextField();
+      }
+      soilManualZone.textProperty().addListener(new ChangeListener<String>() {
+        @Override
+        public void changed(ObservableValue<? extends String> observable, String oldValue,
+            String newValue) {
+          if (!newValue.isEmpty()) {
+            if (!gsehenInstance.isParseable(newValue)) {
+              soilManualZone.setText(oldValue);
+            } else {
+              currentSoilBox.getValue().getSoilManualData().setSoilZone(Integer.valueOf(newValue));
+            }
+          }
+        }
+      });
+
+      // Schwelle des Regenereignis (in mm)
+      Text soilManualRainLabel = new Text(mainBundle.getString("fieldview.manualrain"));
+      soilManualRainLabel.setFont(Font.font("Arial", 14));
+      if (currentSoilBox.getValue().getSoilManualData().getRainMax() != null) {
+        soilManualRain = new JFXTextField(String.valueOf(gsehenInstance
+            .formatDoubleOneDecimal(currentSoilBox.getValue().getSoilManualData().getRainMax())));
+      } else {
+        soilManualRain = new JFXTextField();
+      }
+      soilManualRain.textProperty().addListener(new ChangeListener<String>() {
+        @Override
+        public void changed(ObservableValue<? extends String> observable, String oldValue,
+            String newValue) {
+          if (!newValue.isEmpty()) {
+            if (!gsehenInstance.isParseable(newValue)) {
+              soilManualRain.setText(oldValue);
+            } else {
+              currentSoilBox.getValue().getSoilManualData()
+                  .setRainMax(gsehenInstance.parseDouble(newValue));
+            }
+          }
+        }
+      });
+
+      // Bewässerungspause (in Tagen)
+      Text soilManualPauseLabel = new Text(mainBundle.getString("fieldview.manualpause"));
+      soilManualPauseLabel.setFont(Font.font("Arial", 14));
+      if (currentSoilBox.getValue().getSoilManualData().getDaysPause() != null) {
+        soilManualPause = new JFXTextField(
+            String.valueOf(currentSoilBox.getValue().getSoilManualData().getDaysPause()));
+      } else {
+        soilManualPause = new JFXTextField();
+      }
+      soilManualPause.textProperty().addListener(new ChangeListener<String>() {
+        @Override
+        public void changed(ObservableValue<? extends String> observable, String oldValue,
+            String newValue) {
+          if (!newValue.isEmpty()) {
+            if (!gsehenInstance.isParseable(newValue)) {
+              soilManualPause.setText(oldValue);
+            } else {
+              currentSoilBox.getValue().getSoilManualData().setDaysPause(Integer.valueOf(newValue));
+            }
+          }
+        }
+      });
+
+      // Set Row & Column Index for Nodes
+      GridPane.setConstraints(soilNameLabel, 0, 0);
+      GridPane.setConstraints(soilProfileName, 1, 0);
+      GridPane.setConstraints(soilManualKcLabel, 0, 1);
+      GridPane.setConstraints(soilManualKc, 1, 1);
+      GridPane.setConstraints(soilManualZoneLabel, 0, 2);
+      GridPane.setConstraints(soilManualZone, 1, 2);
+      GridPane.setConstraints(soilManualRainLabel, 0, 3);
+      GridPane.setConstraints(soilManualRain, 1, 3);
+      GridPane.setConstraints(soilManualPauseLabel, 0, 4);
+      GridPane.setConstraints(soilManualPause, 1, 4);
+
+      top.getChildren().addAll(soilNameLabel, soilProfileName, soilManualKcLabel, soilManualKc,
+          soilManualZoneLabel, soilManualZone, soilManualRainLabel, soilManualRain,
+          soilManualPauseLabel, soilManualPause);
+      pane.setTop(top);
 
       // GridPane - Center Section
       GridPane center = new GridPane();
@@ -962,206 +1126,110 @@ public class FieldDataController extends Application
       ColumnConstraints column2 = new ColumnConstraints(200, 100, 100);
       column1.setHgrow(Priority.ALWAYS);
       column2.setHgrow(Priority.ALWAYS);
-      RowConstraints rowEmpty = new RowConstraints();
+      RowConstraints emptyRow = new RowConstraints();
 
       // Add Constraints to Columns & Rows
       center.getColumnConstraints().addAll(column1, column2);
-      center.getRowConstraints().add(0, rowEmpty);
-      center.getRowConstraints().add(1, rowEmpty);
+      center.getRowConstraints().add(0, emptyRow);
+      center.getRowConstraints().add(1, emptyRow);
 
-      if (currentSoilBox.getValue().getSoilType().size() != 0) {
-        int row = 0;
+      int row = 0;
 
-        // Each layer the SoilProfile has
-        for (int i = 0; i < currentSoilBox.getValue().getSoilType().size(); i++) {
-          // "Schicht #XY"
-          Text layer = new Text(mainBundle.getString("fieldview.layer") + (i + 1));
-          layer.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+      // Each layer the SoilProfile has
+      for (int i = 0; i < currentSoilBox.getValue().getSoilType().size(); i++) {
+        // "Schicht #XY"
+        Text layer = new Text(mainBundle.getString("fieldview.layer") + (i + 1));
+        layer.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
-          // Bodentyp
-          Text soil = new Text(mainBundle.getString("fieldview.soiltype"));
-          soil.setFont(Font.font("Arial", 14));
+        // Bodentyp
+        Text soil = new Text(mainBundle.getString("fieldview.soiltype"));
+        soil.setFont(Font.font("Arial", 14));
 
-          Soil s = new Soil();
-          List<Soil> soils = s.soils();
+        Soil s = new Soil();
+        List<Soil> soils = s.soils();
 
-          ChoiceBox<Soil> soilChoiceBox = new ChoiceBox<Soil>();
-          soilChoiceBox.getItems().addAll(soils);
-          soilChoiceBox.setConverter(new StringConverter<Soil>() {
+        ChoiceBox<Soil> soilChoiceBox = new ChoiceBox<Soil>();
+        soilChoiceBox.getItems().addAll(soils);
+        soilChoiceBox.setConverter(new StringConverter<Soil>() {
 
-            @Override
-            public String toString(Soil object) {
-              return object.getName();
-            }
-
-            @Override
-            public Soil fromString(String string) {
-              return soilChoiceBox.getItems().stream().filter(ap -> ap.getName().equals(string))
-                  .findFirst().orElse(null);
-            }
-          });
-
-          Soil curSoil = currentSoilBox.getValue().getSoilType().get(i);
-          Text soilAwc = new Text();
-          for (Soil setSoil : soilChoiceBox.getItems()) {
-            if (setSoil.getName().equals(curSoil.getName())) {
-              soilChoiceBox.getSelectionModel().select(setSoil);
-              soilAwc.setText(
-                  gsehenInstance.formatDoubleOneDecimal(setSoil.getAvailableWaterCapacity()));
-            }
+          @Override
+          public String toString(Soil object) {
+            return object.getName();
           }
 
-          // Wasserhaltekapazität
-          Text soilAwcLabel = new Text(mainBundle.getString("fieldview.soilawc"));
-          soilAwcLabel.setFont(Font.font("Arial", 14));
+          @Override
+          public Soil fromString(String string) {
+            return soilChoiceBox.getItems().stream().filter(ap -> ap.getName().equals(string))
+                .findFirst().orElse(null);
+          }
+        });
 
-          int in = i;
-          ChangeListener<Soil> changeListener = new ChangeListener<Soil>() {
-            @Override
-            public void changed(ObservableValue<? extends Soil> observable, //
-                Soil oldValue, Soil newValue) {
-              if (newValue != null) {
-                soilAwc.setText(gsehenInstance
-                    .formatDoubleOneDecimal(soilChoiceBox.getValue().getAvailableWaterCapacity()));
-                currentSoilBox.getValue().getSoilType().get(in)
-                    .setName(soilChoiceBox.getValue().getName());
-                currentSoilBox.getValue().getSoilType().get(in).setAvailableWaterCapacity(
-                    soilChoiceBox.getValue().getAvailableWaterCapacity());
-              }
-            }
-          };
-          soilChoiceBox.getSelectionModel().selectedItemProperty().addListener(changeListener);
-
-          // Tiefe
-          soilDepth = new JFXTextField(gsehenInstance.formatDoubleOneDecimal(
-              currentSoilBox.getValue().getProfileDepth().get(i).getDepth()));
-          Text depthLabel = new Text(mainBundle.getString("fieldview.depth"));
-          depthLabel.setFont(Font.font("Arial", 14));
-          soilDepth.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue,
-                String newValue) {
-              if (!newValue.isEmpty()) {
-                if (!gsehenInstance.isParseable(newValue)) {
-                  soilDepth.setText(oldValue);
-                } else {
-                  currentSoilBox.getValue().getProfileDepth().get(in)
-                      .setDepth(gsehenInstance.parseDouble(newValue));
-                }
-              }
-            }
-          });
-
-          // Set Row & Column Index for Nodes
-          GridPane.setConstraints(layer, 0, row);
-          row += 1;
-          GridPane.setConstraints(soil, 0, row);
-          GridPane.setConstraints(soilChoiceBox, 1, row);
-          row += 1;
-          GridPane.setConstraints(soilAwcLabel, 0, row);
-          GridPane.setConstraints(soilAwc, 1, row);
-          row += 1;
-          GridPane.setConstraints(depthLabel, 0, row);
-          GridPane.setConstraints(soilDepth, 1, row);
-          row += 1;
-
-          center.getChildren().addAll(layer, soil, soilChoiceBox, soilAwcLabel, soilAwc, depthLabel,
-              soilDepth);
+        Soil curSoil = currentSoilBox.getValue().getSoilType().get(i);
+        Text soilAwc = new Text();
+        for (Soil setSoil : soilChoiceBox.getItems()) {
+          if (setSoil.getName().equals(curSoil.getName())) {
+            soilChoiceBox.getSelectionModel().select(setSoil);
+            soilAwc.setText(
+                gsehenInstance.formatDoubleOneDecimal(setSoil.getAvailableWaterCapacity()));
+          }
         }
-      } else {
-        // kc-Wert
-        Text soilManualKcLabel = new Text(mainBundle.getString("fieldview.manualkc"));
-        soilManualKcLabel.setFont(Font.font("Arial", 14));
-        soilManualKc = new JFXTextField(String.valueOf(gsehenInstance
-            .formatDoubleOneDecimal(currentSoilBox.getValue().getSoilManualData().getSoilKc())));
-        soilManualKc.textProperty().addListener(new ChangeListener<String>() {
+
+        // Wasserhaltekapazität
+        Text soilAwcLabel = new Text(mainBundle.getString("fieldview.soilawc"));
+        soilAwcLabel.setFont(Font.font("Arial", 14));
+
+        int in = i;
+        ChangeListener<Soil> changeListener = new ChangeListener<Soil>() {
           @Override
-          public void changed(ObservableValue<? extends String> observable, String oldValue,
-              String newValue) {
-            if (!newValue.isEmpty()) {
-              if (!gsehenInstance.isParseable(newValue)) {
-                soilManualKc.setText(oldValue);
-              } else {
-                currentSoilBox.getValue().getSoilManualData()
-                    .setSoilKc(gsehenInstance.parseDouble(newValue));
-              }
+          public void changed(ObservableValue<? extends Soil> observable, //
+              Soil oldValue, Soil newValue) {
+            if (newValue != null) {
+              soilAwc.setText(gsehenInstance
+                  .formatDoubleOneDecimal(soilChoiceBox.getValue().getAvailableWaterCapacity()));
+              currentSoilBox.getValue().getSoilType().get(in)
+                  .setName(soilChoiceBox.getValue().getName());
+              currentSoilBox.getValue().getSoilType().get(in)
+                  .setAvailableWaterCapacity(soilChoiceBox.getValue().getAvailableWaterCapacity());
             }
           }
-        });
+        };
+        soilChoiceBox.getSelectionModel().selectedItemProperty().addListener(changeListener);
 
-        // Bilanzierungstiefe (in cm)
-        Text soilManualZoneLabel = new Text(mainBundle.getString("fieldview.manualzone"));
-        soilManualZoneLabel.setFont(Font.font("Arial", 14));
-        soilManualZone = new JFXTextField(
-            String.valueOf(currentSoilBox.getValue().getSoilManualData().getSoilZone()));
-        soilManualZone.textProperty().addListener(new ChangeListener<String>() {
+        // Tiefe
+        soilDepth = new JFXTextField(gsehenInstance
+            .formatDoubleOneDecimal(currentSoilBox.getValue().getProfileDepth().get(i).getDepth()));
+        Text depthLabel = new Text(mainBundle.getString("fieldview.depth"));
+        depthLabel.setFont(Font.font("Arial", 14));
+        soilDepth.textProperty().addListener(new ChangeListener<String>() {
           @Override
           public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
             if (!newValue.isEmpty()) {
               if (!gsehenInstance.isParseable(newValue)) {
-                soilManualZone.setText(oldValue);
+                soilDepth.setText(oldValue);
               } else {
-                currentSoilBox.getValue().getSoilManualData()
-                    .setSoilZone(Integer.valueOf(newValue));
-              }
-            }
-          }
-        });
-
-        // Schwelle des Regenereignis (in mm)
-        Text soilManualRainLabel = new Text(mainBundle.getString("fieldview.manualrain"));
-        soilManualRainLabel.setFont(Font.font("Arial", 14));
-        soilManualRain = new JFXTextField(String.valueOf(gsehenInstance
-            .formatDoubleOneDecimal(currentSoilBox.getValue().getSoilManualData().getRainMax())));
-        soilManualRain.textProperty().addListener(new ChangeListener<String>() {
-          @Override
-          public void changed(ObservableValue<? extends String> observable, String oldValue,
-              String newValue) {
-            if (!newValue.isEmpty()) {
-              if (!gsehenInstance.isParseable(newValue)) {
-                soilManualRain.setText(oldValue);
-              } else {
-                currentSoilBox.getValue().getSoilManualData()
-                    .setRainMax(gsehenInstance.parseDouble(newValue));
-              }
-            }
-          }
-        });
-
-        // Bewässerungspause (in Tagen)
-        Text soilManualPauseLabel = new Text(mainBundle.getString("fieldview.manualpause"));
-        soilManualPauseLabel.setFont(Font.font("Arial", 14));
-        soilManualPause = new JFXTextField(
-            String.valueOf(currentSoilBox.getValue().getSoilManualData().getDaysPause()));
-        soilManualPause.textProperty().addListener(new ChangeListener<String>() {
-          @Override
-          public void changed(ObservableValue<? extends String> observable, String oldValue,
-              String newValue) {
-            if (!newValue.isEmpty()) {
-              if (!gsehenInstance.isParseable(newValue)) {
-                soilManualPause.setText(oldValue);
-              } else {
-                currentSoilBox.getValue().getSoilManualData()
-                    .setDaysPause(Integer.valueOf(newValue));
+                currentSoilBox.getValue().getProfileDepth().get(in)
+                    .setDepth(gsehenInstance.parseDouble(newValue));
               }
             }
           }
         });
 
         // Set Row & Column Index for Nodes
-        GridPane.setConstraints(soilManualKcLabel, 0, 0);
-        GridPane.setConstraints(soilManualKc, 1, 0);
-        GridPane.setConstraints(soilManualZoneLabel, 0, 1);
-        GridPane.setConstraints(soilManualZone, 1, 1);
-        GridPane.setConstraints(soilManualRainLabel, 0, 2);
-        GridPane.setConstraints(soilManualRain, 1, 2);
-        GridPane.setConstraints(soilManualPauseLabel, 0, 3);
-        GridPane.setConstraints(soilManualPause, 1, 3);
+        GridPane.setConstraints(layer, 0, row);
+        row += 1;
+        GridPane.setConstraints(soil, 0, row);
+        GridPane.setConstraints(soilChoiceBox, 1, row);
+        row += 1;
+        GridPane.setConstraints(soilAwcLabel, 0, row);
+        GridPane.setConstraints(soilAwc, 1, row);
+        row += 1;
+        GridPane.setConstraints(depthLabel, 0, row);
+        GridPane.setConstraints(soilDepth, 1, row);
+        row += 1;
 
-        center.getChildren().addAll(soilManualKcLabel, soilManualKc, soilManualZoneLabel,
-            soilManualZone, soilManualRainLabel, soilManualRain, soilManualPauseLabel,
-            soilManualPause);
+        center.getChildren().addAll(layer, soil, soilChoiceBox, soilAwcLabel, soilAwc, depthLabel,
+            soilDepth);
       }
 
       ScrollPane scrollPane = new ScrollPane();
@@ -1181,8 +1249,7 @@ public class FieldDataController extends Application
             pane.getChildren().clear();
             treeTableView.setVisible(true);
             tabPane.getTabs().clear();
-            tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab,
-                logViewTab);
+            tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
             gsehenInstance.sendFarmDataChanged(field, null);
             tabPane.getSelectionModel().select(1);
             treeTableView.getSelectionModel().clearSelection();

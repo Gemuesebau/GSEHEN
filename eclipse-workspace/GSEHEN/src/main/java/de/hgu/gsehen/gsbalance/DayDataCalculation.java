@@ -1,7 +1,8 @@
 package de.hgu.gsehen.gsbalance;
 
 import de.hgu.gsehen.Gsehen;
-
+//import de.hgu.gsehen.model.WeatherDataSource;
+//import de.hgu.gsehen.util.PluginUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,4 +25,15 @@ public class DayDataCalculation {
       return buffer.lines().collect(Collectors.joining("\n"));
     }
   }
+
+//  /**
+//   * Recalculates today's day data.
+//   */
+//  @SuppressWarnings({"checkstyle:rightcurly"})
+//  public void recalculateDayData() {
+//    for (WeatherDataSource weatherDataSource : gsehenInstance.getWeatherDataSources()) {
+//      Gsehen.getInstance().sendDayDataChanged(
+//          PluginUtil.getPlugin(weatherDataSource.getPluginJsFileName()), weatherDataSource, null);
+//    }
+//  }
 }

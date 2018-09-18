@@ -41,21 +41,6 @@ private void fillJavaLocaleMap(final Locale selectedLocale) {
   }
 }
 
-@SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
-public DecimalFormat getNumberFormat() {
-  Locale locale = Locale.ENGLISH;
-  try {
-    locale = (Locale)Locale.class.getField(numberLocaleId).get(null);
-  }
-  catch (Exception e) {
-    // do nothing
-  }
-  return (DecimalFormat)NumberFormat.getNumberInstance(locale);
-}
-
-public SimpleDateFormat getDateFormat() {
-  return new SimpleDateFormat(dateFormatString);
-}
 private int measIntervalSeconds;
 private double windspeedMeasHeightMeters;
 private String dateFormatString;
@@ -71,17 +56,16 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 */
-
 function calculateWindspeed2m(windspeed, windspeedMeasHeightMeters) {
 	if (windspeedMeasHeightMeters == 2) {
 		return windspeed;
 	}
 	else {
-		// FIXME calculate wind speed!
+		// FIXME calculate wind speed! siehe Chat
 	}
 }
 
-function calculateDayData(weatherDataSource, date, weatherDataArray) {
+function calculateDayData(pluginConfig, date, weatherDataArray) {
 	var dayData = new (Java.type("de.hgu.gsehen.evapotranspiration.DayData"))();
 	dayData.setDate(date);
 	dayData.setTempMax(arrayUtilities.objArrayMax(weatherDataArray, "temp"));
@@ -90,22 +74,40 @@ function calculateDayData(weatherDataSource, date, weatherDataArray) {
 	dayData.setAirHumidityRelMax(arrayUtilities.objArrayMax(weatherDataArray, "airHumidityRel"));
 	dayData.setAirHumidityRelMin(arrayUtilities.objArrayMin(weatherDataArray, "airHumidityRel"));
 	dayData.setAirHumidityRelMean(arrayUtilities.objArrayMean(weatherDataArray, "airHumidityRel"));
-	dayData.setGlobalRad(arrayUtilities.objArraySum(weatherDataArray, "globalRad") * weatherDataSource.getMeasIntervalSeconds() / 1000000);
+	dayData.setGlobalRad(arrayUtilities.objArraySum(weatherDataArray, "globalRad") * pluginConfig.measIntervalSeconds / 1000000);
 	dayData.setPrecipitation(arrayUtilities.objArraySum(weatherDataArray, "precipitation"));
 	dayData.setWindspeed2m(
-		calculateWindspeed2m(arrayUtilities.objArrayMean(weatherDataArray, "windspeed"), weatherDataSource.getWindspeedMeasHeightMeters())
+		calculateWindspeed2m(arrayUtilities.objArrayMean(weatherDataArray, "windspeed"), pluginConfig.windspeedMeasHeightMeters)
 	);
 	return dayData;
 }
 
+function newNumberFormat(numberLocaleId) {
+	var locale = java.util.Locale.ENGLISH;
+	try {
+		locale = java.util.Locale.class.getField(numberLocaleId).get(null);
+	}
+	catch (e) {
+		// do nothing
+	}
+	return java.text.NumberFormat.getNumberInstance(locale);
+}
+
+function newDateFormat(dateFormatString) {
+	return new java.text.SimpleDateFormat(dateFormatString);
+}
+
 function determineDayData(weatherDataSource, date) {
+	var pluginConfig = JSON.parse(weatherDataSource.getPluginConfigurationJSON());
 	var timeStamp = date.getTime();
 	var weatherDataArray = [];
-	var lineNumberReader = new java.io.LineNumberReader(new java.io.FileReader(weatherDataSource.getDataFilePath()));
+	var lineNumberReader = new java.io.LineNumberReader(new java.io.FileReader(pluginConfig.dataFilePath));
 	var line;
-	var dateFormat = weatherDataSource.getDateFormat();
-	var numberFormat = weatherDataSource.getNumberFormat();
+	var lineNumber = 0;
+	var dateFormat = newDateFormat(pluginConfig.dateFormat);
+	var numberFormat = newNumberFormat(pluginConfig.numberFormat);
 	while ((line = lineNumberReader.readLine()) != null) {
+		lineNumber++;
 		try {
 			if (dateFormat.parse(line.replace(/ .*/,"")).getTime() >= timeStamp) {
 				weatherDataArray.push(arrayUtilities.arrayToObject(
@@ -118,11 +120,12 @@ function determineDayData(weatherDataSource, date) {
 			}
 		}
 		catch (e) {
-			/* nothing - probably header or comment */
+			// nothing - probably header or comment
+			//print("Exception in data file line number " + lineNumber + ": " + e);
 		}
 	}
 	if (weatherDataArray.length == 0) {
 		return null;
 	}
-	return calculateDayData(weatherDataSource, date, weatherDataArray);
+	return calculateDayData(pluginConfig, date, weatherDataArray);
 }
