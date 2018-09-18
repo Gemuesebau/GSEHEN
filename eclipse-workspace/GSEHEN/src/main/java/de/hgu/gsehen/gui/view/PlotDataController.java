@@ -7,6 +7,7 @@ import com.jfoenix.controls.JFXTextField;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
+import de.hgu.gsehen.event.RecommendedActionChanged;
 import de.hgu.gsehen.gui.CropPhase;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
@@ -118,6 +119,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   @SuppressWarnings("rawtypes")
   private XYChart.Series series;
   private BarChart<String, Number> chart;
+  private NumberAxis axisY;
   private String pattern;
 
   {
@@ -125,6 +127,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     cropList = gsehenInstance.getCrops();
 
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
+    
+    gsehenInstance.registerForEvent(RecommendedActionChanged.class,
+        event -> setChartData());
 
     mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
   }
@@ -395,7 +400,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // Balkendiagramm TODO: Farben einbauen
     waterLevel = 0.0;
     CategoryAxis axisX = new CategoryAxis();
-    NumberAxis axisY = new NumberAxis(0, 20, 1);
+    axisY = new NumberAxis(0, 20, 1);
     chart = new BarChart<String, Number>(axisX, axisY);
     chart.setPrefWidth(30);
     chart.setTitle(mainBundle.getString("plotview.waterinsoil"));
@@ -835,29 +840,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
                   if (plot.getRecommendedAction() != null
                       && plot.getRecommendedAction().getAvailableWater() != null) {
-                    waterLevel = plot.getRecommendedAction().getAvailableWater();
-                    DecimalFormat df = new DecimalFormat("#.##");
-                    series.setName(String.valueOf(df.format(waterLevel)) + " mm");
-
-                    int waterBalance = plot.getWaterBalance().getDailyBalances().size() - 1;
-                    availableSoilWater = plot.getWaterBalance().getDailyBalances().get(waterBalance)
-                        .getCurrentAvailableSoilWater() * 1.1;
-                    axisY.setUpperBound(availableSoilWater);
-
-                    XYChart.Data data = new XYChart.Data("", waterLevel);
-                    // TODO: https://docs.oracle.com/javafx/2/charts/css-styles.htm
-                    // Node node = data.getNode();
-                    // if (100 / availableSoilWater * ((Double) data.getYValue()).intValue() < 25) {
-                    // node.setStyle("-fx-stroke: -fx-notwatered;");
-                    // } else if (100 / availableSoilWater
-                    // * ((Double) data.getYValue()).intValue() > 25) {
-                    // node.setStyle("-fx-stroke: -fx-okay;");
-                    // } else if (100 / availableSoilWater
-                    // * ((Double) data.getYValue()).intValue() > 75) {
-                    // node.setStyle("-fx-stroke: -fx-watered;");
-                    // }
-
-                    series.getData().add(data);
+                    setChartData();
                   }
 
                 } else {
@@ -868,6 +851,33 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           }
         });
     currentItem = treeTableView.getSelectionModel().getSelectedIndex();
+  }
+
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  private void setChartData() {
+    waterLevel = plot.getRecommendedAction().getAvailableWater();
+    DecimalFormat df = new DecimalFormat("#.##");
+    series.setName(String.valueOf(df.format(waterLevel)) + " mm");
+
+    int waterBalance = plot.getWaterBalance().getDailyBalances().size() - 1;
+    availableSoilWater = plot.getWaterBalance().getDailyBalances().get(waterBalance)
+        .getCurrentAvailableSoilWater() * 1.1;
+    axisY.setUpperBound(availableSoilWater);
+
+    XYChart.Data data = new XYChart.Data("", waterLevel);
+    // TODO: https://docs.oracle.com/javafx/2/charts/css-styles.htm
+    // Node node = data.getNode();
+    // if (100 / availableSoilWater * ((Double) data.getYValue()).intValue() < 25) {
+    // node.setStyle("-fx-stroke: -fx-notwatered;");
+    // } else if (100 / availableSoilWater
+    // * ((Double) data.getYValue()).intValue() > 25) {
+    // node.setStyle("-fx-stroke: -fx-okay;");
+    // } else if (100 / availableSoilWater
+    // * ((Double) data.getYValue()).intValue() > 75) {
+    // node.setStyle("-fx-stroke: -fx-watered;");
+    // }
+
+    series.getData().add(data);
   }
 
   @SuppressWarnings("checkstyle:all")

@@ -62,7 +62,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private Field autoField;
   protected final ResourceBundle mainBundle;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
+  private Map<Class<? extends GsehenEvent>, Class<? extends 
+      GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
