@@ -7,7 +7,9 @@ import com.jfoenix.controls.JFXTextField;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
+import de.hgu.gsehen.event.RecommendedActionChanged;
 import de.hgu.gsehen.gui.CropPhase;
+import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
 import de.hgu.gsehen.model.CropRootingZone;
@@ -97,6 +99,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   private Text nameLabel;
   private Text areaLabel;
+  private Text locationLabel;
   private Text rootingZoneLabel;
   private Text soilStartLabel;
   private Text soilStartValueLabel;
@@ -106,6 +109,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private JFXTextField name;
   private JFXTextField rootingZone;
   private Text area;
+  private Text location;
   private DatePicker soilStart;
   private DatePicker cropStart;
   private JFXSlider soilStartValue;
@@ -118,12 +122,16 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   @SuppressWarnings("rawtypes")
   private XYChart.Series series;
   private BarChart<String, Number> chart;
+  private NumberAxis axisY;
+  private String pattern;
 
   {
     gsehenInstance = Gsehen.getInstance();
     cropList = gsehenInstance.getCrops();
 
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
+
+    gsehenInstance.registerForEvent(RecommendedActionChanged.class, event -> setChartData());
 
     mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
   }
@@ -177,6 +185,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     area = new Text("");
     area.setFont(Font.font("Arial", 14));
 
+    // Lage
+    locationLabel = new Text(mainBundle.getString("plotview.location"));
+    locationLabel.setFont(Font.font("Arial", 14));
+    location = new Text("");
+    location.setFont(Font.font("Arial", 14));
+
     // Max. durchw. Zone
     rootingZoneLabel = new Text(mainBundle.getString("plotview.rootingzone"));
     rootingZoneLabel.setFont(Font.font("Arial", 14));
@@ -193,13 +207,17 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
+    DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,
+        gsehenInstance.getSelectedLocale());
+    pattern = ((SimpleDateFormat) dateFormat).toPattern();
+
     // Start der Inkulturnahme
     cropStartLabel = new Text(mainBundle.getString("plotview.cropstart"));
     cropStartLabel.setFont(Font.font("Arial", 14));
     cropStart = new DatePicker();
     cropStart.setShowWeekNumbers(true);
     convert = new StringConverter<LocalDate>() {
-      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
 
       @Override
       public String toString(LocalDate date) {
@@ -220,7 +238,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     };
     cropStart.setConverter(convert);
-    cropStart.setPromptText("dd-MM-yyyy");
+    cropStart.setPromptText(pattern);
 
     // Start der Bodenwasserbilanz
     soilStartLabel = new Text(mainBundle.getString("plotview.soilstart"));
@@ -228,7 +246,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     soilStart = new DatePicker();
     soilStart.setShowWeekNumbers(true);
     soilStart.setConverter(convert);
-    soilStart.setPromptText("dd-MM-yyyy");
+    soilStart.setPromptText(pattern);
 
     // Startwert der Wasserbilanz
     soilStartValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
@@ -390,7 +408,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // Balkendiagramm TODO: Farben einbauen
     waterLevel = 0.0;
     CategoryAxis axisX = new CategoryAxis();
-    NumberAxis axisY = new NumberAxis(0, 20, 1);
+    axisY = new NumberAxis(0, 20, 1);
     chart = new BarChart<String, Number>(axisX, axisY);
     chart.setPrefWidth(30);
     chart.setTitle(mainBundle.getString("plotview.waterinsoil"));
@@ -434,26 +452,29 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane.setConstraints(name, 1, 0);
     GridPane.setConstraints(areaLabel, 0, 1);
     GridPane.setConstraints(area, 1, 1);
-    GridPane.setConstraints(rootingZoneLabel, 0, 2);
-    GridPane.setConstraints(rootingZone, 1, 2);
-    GridPane.setConstraints(cropStartLabel, 0, 3);
-    GridPane.setConstraints(cropStart, 1, 3);
-    GridPane.setConstraints(soilStartLabel, 0, 4);
-    GridPane.setConstraints(soilStart, 1, 4);
-    GridPane.setConstraints(soilStartValueLabel, 0, 5);
-    GridPane.setConstraints(soilStartValue, 1, 5);
-    GridPane.setConstraints(crop, 0, 6);
-    GridPane.setConstraints(cropChoiceBox, 1, 6);
-    GridPane.setConstraints(tablePane, 0, 7, 3, 1, HPos.CENTER, VPos.CENTER, Priority.ALWAYS,
+    GridPane.setConstraints(locationLabel, 0, 2);
+    GridPane.setConstraints(location, 1, 2);
+    GridPane.setConstraints(rootingZoneLabel, 0, 3);
+    GridPane.setConstraints(rootingZone, 1, 3);
+    GridPane.setConstraints(cropStartLabel, 0, 4);
+    GridPane.setConstraints(cropStart, 1, 4);
+    GridPane.setConstraints(soilStartLabel, 0, 5);
+    GridPane.setConstraints(soilStart, 1, 5);
+    GridPane.setConstraints(soilStartValueLabel, 0, 6);
+    GridPane.setConstraints(soilStartValue, 1, 6);
+    GridPane.setConstraints(crop, 0, 7);
+    GridPane.setConstraints(cropChoiceBox, 1, 7);
+    GridPane.setConstraints(tablePane, 0, 8, 3, 1, HPos.CENTER, VPos.CENTER, Priority.ALWAYS,
         Priority.ALWAYS);
-    GridPane.setConstraints(chart, 0, 8, 3, 1);
-    GridPane.setConstraints(scalingFactorLabel, 0, 9);
-    GridPane.setConstraints(scalingFactor, 1, 9, 2, 1);
-    GridPane.setConstraints(scalingValue, 3, 9);
+    GridPane.setConstraints(chart, 0, 9, 3, 1);
+    GridPane.setConstraints(scalingFactorLabel, 0, 10);
+    GridPane.setConstraints(scalingFactor, 1, 10, 2, 1);
+    GridPane.setConstraints(scalingValue, 3, 10);
 
-    centerGrid.getChildren().addAll(nameLabel, name, areaLabel, area, rootingZoneLabel, rootingZone,
-        cropStartLabel, cropStart, soilStartLabel, soilStart, soilStartValueLabel, soilStartValue,
-        crop, cropChoiceBox, tablePane, chart, scalingFactorLabel, scalingFactor, scalingValue);
+    centerGrid.getChildren().addAll(nameLabel, name, areaLabel, area, locationLabel, location,
+        rootingZoneLabel, rootingZone, cropStartLabel, cropStart, soilStartLabel, soilStart,
+        soilStartValueLabel, soilStartValue, crop, cropChoiceBox, tablePane, chart,
+        scalingFactorLabel, scalingFactor, scalingValue);
 
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setContent(centerGrid);
@@ -469,7 +490,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       public void handle(ActionEvent e) {
         isActive = false;
         Date date = Calendar.getInstance().getTime();
-        DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+        DateFormat formatter = new SimpleDateFormat(pattern);
         String enddate = formatter.format(date);
         Date cropEnd;
         try {
@@ -525,7 +546,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         DatePicker date = new DatePicker();
         date.setShowWeekNumbers(true);
         date.setConverter(convert);
-        date.setPromptText("dd-MM-yyyy");
+        date.setPromptText(pattern);
         date.setValue(LocalDate.now());
 
         // Bewässerung (in mm)
@@ -770,10 +791,28 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                   plot = (Plot) selectedItem.getValue();
                   field = (Field) selectedItem.getParent().getValue();
 
+                  if (plot.getLocation() == null) {
+                    DecimalFormat df = new DecimalFormat("#.######");
+                    GeoPoint location = new GeoPoint(
+                        gsehenInstance.parseDouble(
+                            df.format(plot.getPolygon().getGeoPoints().get(0).getLat())),
+                        gsehenInstance.parseDouble(
+                            df.format(plot.getPolygon().getGeoPoints().get(0).getLng())));
+                    plot.setLocation(location);
+                  }
+
                   name.setText(plot.getName());
 
                   area.setText(
                       gsehenInstance.formatDoubleOneDecimal(plot.getPolygon().calculateArea()));
+
+                  if (plot.getLocation() != null) {
+                    location.setText(String
+                        .valueOf(plot.getLocation().getLat() + " ("
+                            + mainBundle.getString("plotview.lat") + ")\n")
+                        + String.valueOf(plot.getLocation().getLng() + " ("
+                            + mainBundle.getString("plotview.lng") + ")"));
+                  }
 
                   if (plot.getScalingFactor() != null) {
                     scalingFactor.setValue((plot.getScalingFactor() * 100) - 100);
@@ -830,29 +869,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
                   if (plot.getRecommendedAction() != null
                       && plot.getRecommendedAction().getAvailableWater() != null) {
-                    waterLevel = plot.getRecommendedAction().getAvailableWater();
-                    DecimalFormat df = new DecimalFormat("#.##");
-                    series.setName(String.valueOf(df.format(waterLevel)) + " mm");
-
-                    int waterBalance = plot.getWaterBalance().getDailyBalances().size() - 1;
-                    availableSoilWater = plot.getWaterBalance().getDailyBalances().get(waterBalance)
-                        .getCurrentAvailableSoilWater() * 1.1;
-                    axisY.setUpperBound(availableSoilWater);
-
-                    XYChart.Data data = new XYChart.Data("", waterLevel);
-                    // TODO: https://docs.oracle.com/javafx/2/charts/css-styles.htm
-                    // Node node = data.getNode();
-                    // if (100 / availableSoilWater * ((Double) data.getYValue()).intValue() < 25) {
-                    // node.setStyle("-fx-stroke: -fx-notwatered;");
-                    // } else if (100 / availableSoilWater
-                    // * ((Double) data.getYValue()).intValue() > 25) {
-                    // node.setStyle("-fx-stroke: -fx-okay;");
-                    // } else if (100 / availableSoilWater
-                    // * ((Double) data.getYValue()).intValue() > 75) {
-                    // node.setStyle("-fx-stroke: -fx-watered;");
-                    // }
-
-                    series.getData().add(data);
+                    setChartData();
                   }
 
                 } else {
@@ -863,6 +880,33 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           }
         });
     currentItem = treeTableView.getSelectionModel().getSelectedIndex();
+  }
+
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  private void setChartData() {
+    waterLevel = plot.getRecommendedAction().getAvailableWater();
+    DecimalFormat df = new DecimalFormat("#.##");
+    series.setName(String.valueOf(df.format(waterLevel)) + " mm");
+
+    int waterBalance = plot.getWaterBalance().getDailyBalances().size() - 1;
+    availableSoilWater = plot.getWaterBalance().getDailyBalances().get(waterBalance)
+        .getCurrentAvailableSoilWater() * 1.1;
+    axisY.setUpperBound(availableSoilWater);
+
+    XYChart.Data data = new XYChart.Data("", waterLevel);
+    // TODO: https://docs.oracle.com/javafx/2/charts/css-styles.htm
+    // Node node = data.getNode();
+    // if (100 / availableSoilWater * ((Double) data.getYValue()).intValue() < 25) {
+    // node.setStyle("-fx-stroke: -fx-notwatered;");
+    // } else if (100 / availableSoilWater
+    // * ((Double) data.getYValue()).intValue() > 25) {
+    // node.setStyle("-fx-stroke: -fx-okay;");
+    // } else if (100 / availableSoilWater
+    // * ((Double) data.getYValue()).intValue() > 75) {
+    // node.setStyle("-fx-stroke: -fx-watered;");
+    // }
+
+    series.getData().add(data);
   }
 
   @SuppressWarnings("checkstyle:all")

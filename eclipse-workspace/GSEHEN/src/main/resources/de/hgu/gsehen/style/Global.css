@@ -8,6 +8,13 @@
     -fx-focus-color: rgb(222.0, 222.0, 222.0);
 }
 
+.jfx-text-field {
+    -fx-prompt-text-fill: #d18e8e;
+    -jfx-focus-color: #4a6d50;
+    -jfx-unfocus-color: #8ed199;
+    -fx-highlight-fill: #606060;
+}
+
 .tree-table-view {
     -fx-background-color: #fdfffc;
     -fx-font-weight: bold;
@@ -16,6 +23,7 @@
     -fx-padding: 0.1em 0.0em 0.1em 0.0em;
     -fx-background-color: #fdfffc;
     -fx-text-fill: black;
+    -fx-highlight-fill: #606060;
 }
 .tree-table-cell:selected {
     -fx-font-weight: bold;
