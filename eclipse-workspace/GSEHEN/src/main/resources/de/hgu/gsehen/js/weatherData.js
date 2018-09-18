@@ -4,16 +4,15 @@ loadGsehenJs("commons.js");
 
 de.hgu.gsehen.evapotranspiration.UtilityFunctions.convertWindSpeed2m
 
-fieldview.weatherdataname                = Name der Wetterdatenquelle: 
-fieldview.interval                       = Messintervall in Sekunden: 
-fieldview.windspeed                      = Höhe der \nWindgeschwindigkeitsmessung \nin Meter: 
-fieldview.dateformat                     = Datumsformat: 
+fieldview.interval                       = Messintervall in Sekunden:
+fieldview.windspeed                      = Höhe der\nWindgeschwindigkeitsmessung\nin Meter:
+fieldview.dateformat                     = Datumsformat:
 fieldview.dateformatexample              = Beispiel: d.M.y
-fieldview.localeid                       = Zahlenformat gemäß: 
-fieldview.filepath                       = Dateipfad der \nWetterdaten-CSV-Datei: 
-fieldview.filechooserbutton              = Datei auswählen 
-fieldview.filechooser                    = Dateipfad zur Wetterdatenquelle 
-fieldview.dateerror                      = Falsches Format! 
+fieldview.localeid                       = Zahlenformat gemäß:
+fieldview.filepath                       = Dateipfad der\nWetterdaten-CSV-Datei:
+fieldview.filechooserbutton              = Datei auswählen
+fieldview.filechooser                    = Dateipfad zur Wetterdatenquelle
+fieldview.dateerror                      = Falsches Format!
 
 private TreeMap<String, String> javaLocaleMap;
 
@@ -35,21 +34,6 @@ private void fillJavaLocaleMap(final Locale selectedLocale) {
     }
   }
 }
-
-private int measIntervalSeconds;
-private double windspeedMeasHeightMeters;
-private String dateFormatString;
-private String numberLocaleId;
-private String dataFilePath;
-private double locationLng;
-private double locationLat;
-private double locationMetersAboveSeaLevel;
-
-import de.hgu.gsehen.evapotranspiration.GeoData;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 */
 function calculateWindspeed2m(windspeed, windspeedMeasHeightMeters) {
 	if (windspeedMeasHeightMeters == 2) {
@@ -99,8 +83,8 @@ function determineDayData(weatherDataSource, date) {
 	var lineNumberReader = new java.io.LineNumberReader(new java.io.FileReader(pluginConfig.dataFilePath));
 	var line;
 	var lineNumber = 0;
-	var dateFormat = newDateFormat(pluginConfig.dateFormat);
-	var numberFormat = newNumberFormat(pluginConfig.numberFormat);
+	var dateFormat = newDateFormat(pluginConfig.dateFormatString);
+	var numberFormat = newNumberFormat(pluginConfig.numberLocaleId);
 	while ((line = lineNumberReader.readLine()) != null) {
 		lineNumber++;
 		try {

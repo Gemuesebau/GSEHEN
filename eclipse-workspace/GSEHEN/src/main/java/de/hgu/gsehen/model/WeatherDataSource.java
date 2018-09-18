@@ -124,8 +124,8 @@ public class WeatherDataSource {
         + "  \"measIntervalSeconds\": 600,"
         + "  \"windspeedMeasHeightMeters\": 2,"
         + "  \"dataFilePath\": \"C:\\\\Users\\\\atappe\\\\Downloads\\\\10MinDaten.csv\","
-        + "  \"dateFormat\": \"y-M-d\","
-        + "  \"numberFormat\": \"GERMAN\""
+        + "  \"dateFormatString\": \"y-M-d\","
+        + "  \"numberLocaleId\": \"GERMAN\""
         + "}";
   }
 

@@ -1,10 +1,5 @@
 package de.hgu.gsehen.gsbalance;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
@@ -14,6 +9,11 @@ import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilManualData;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
 
 public class TotalBalance {
 
@@ -264,10 +264,15 @@ public class TotalBalance {
           recommendedAction.setRecommendation(RecommendedActionEnum.PAUSE);
         } else {
           if (availableWater > 0) {
-            recommendedAction.setRecommendation(RecommendedActionEnum.SOON);
             recommendedAction.setAvailableWater(availableWater);
-            recommendedAction.setProjectedDaysToIrrigation(
-                (int) Math.floor(availableWater / currentDay.getEtc()));
+            final int projectedDaysToIrrigation =
+                (int) Math.floor(availableWater / currentDay.getEtc());
+            if (projectedDaysToIrrigation == 0) {
+              recommendedAction.setRecommendation(RecommendedActionEnum.NOW);
+            } else {
+              recommendedAction.setRecommendation(RecommendedActionEnum.SOON);
+              recommendedAction.setProjectedDaysToIrrigation(projectedDaysToIrrigation);
+            }
           } else {
             recommendedAction.setRecommendation(RecommendedActionEnum.IRRIGATION);
             recommendedAction.setWaterContentToAim(waterContentToAim);
