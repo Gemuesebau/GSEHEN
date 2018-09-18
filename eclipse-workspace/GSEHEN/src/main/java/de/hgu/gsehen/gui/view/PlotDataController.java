@@ -328,10 +328,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     startDate.setStyle("-fx-alignment:top-center; -fx-font-style: italic");
     startDate.setCellValueFactory(new PropertyValueFactory<CropPhase, String>("cropStart"));
     duration.setMinWidth(100);
-    duration.setStyle("-fx-alignment:top-center; -fx-font-weight: bold; -fx-font: 14px;");
+    duration.setStyle("-fx-alignment:top-center; -fx-font-weight: bold;");
     duration.setCellValueFactory(new PropertyValueFactory<CropPhase, Integer>("duration"));
     cropRootingZone.setMinWidth(200);
-    cropRootingZone.setStyle("-fx-alignment:top-center;  -fx-font-weight: bold; -fx-font: 14px;");
+    cropRootingZone.setStyle("-fx-alignment:top-center;  -fx-font-weight: bold;");
     cropRootingZone
         .setCellValueFactory(new PropertyValueFactory<CropPhase, Integer>("rootingZone"));
 
