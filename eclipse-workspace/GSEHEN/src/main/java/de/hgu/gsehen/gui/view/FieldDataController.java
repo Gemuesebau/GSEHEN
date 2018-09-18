@@ -430,7 +430,6 @@ public class FieldDataController extends Application
       createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
       index++;
     }
-
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setContent(center);
     scrollPane.setPannable(true);
@@ -559,7 +558,6 @@ public class FieldDataController extends Application
       @Override
       public void handle(ActionEvent arg0) {
         weatherDataSourceList.remove(selectedWeatherDataSource);
-        System.out.println(weatherDataSourceList.size());
         if (noneIsEmpty(new TextField[] {
             weatherDataName, weatherDataAutomaticImportIntervalSeconds
         })) {
@@ -767,7 +765,7 @@ public class FieldDataController extends Application
       public void changed(ObservableValue<? extends String> observable, String oldValue,
           String newValue) {
         if (newValue != null) {
-          if (!gsehenInstance.isParseable(newValue)) {
+          if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
             depth.setText(oldValue);
           }
         }
@@ -922,7 +920,6 @@ public class FieldDataController extends Application
             soilManualData = new SoilManualData(null, null, null, null);
           }
           soilProfileItem.setSoilManualData(soilManualData);
-          System.out.println(soilProfileItem.getSoilManualData());
 
           soilProfileItem.setName(soilProfileName.getText());
           soilProfileList.add(soilProfileItem);
@@ -1009,7 +1006,7 @@ public class FieldDataController extends Application
         public void changed(ObservableValue<? extends String> observable, String oldValue,
             String newValue) {
           if (!newValue.isEmpty()) {
-            if (!gsehenInstance.isParseable(newValue)) {
+            if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
               soilManualKc.setText(oldValue);
             } else {
               currentSoilBox.getValue().getSoilManualData()
@@ -1033,7 +1030,7 @@ public class FieldDataController extends Application
         public void changed(ObservableValue<? extends String> observable, String oldValue,
             String newValue) {
           if (!newValue.isEmpty()) {
-            if (!gsehenInstance.isParseable(newValue)) {
+            if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
               soilManualZone.setText(oldValue);
             } else {
               currentSoilBox.getValue().getSoilManualData().setSoilZone(Integer.valueOf(newValue));
@@ -1056,7 +1053,7 @@ public class FieldDataController extends Application
         public void changed(ObservableValue<? extends String> observable, String oldValue,
             String newValue) {
           if (!newValue.isEmpty()) {
-            if (!gsehenInstance.isParseable(newValue)) {
+            if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
               soilManualRain.setText(oldValue);
             } else {
               currentSoilBox.getValue().getSoilManualData()
@@ -1080,7 +1077,7 @@ public class FieldDataController extends Application
         public void changed(ObservableValue<? extends String> observable, String oldValue,
             String newValue) {
           if (!newValue.isEmpty()) {
-            if (!gsehenInstance.isParseable(newValue)) {
+            if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
               soilManualPause.setText(oldValue);
             } else {
               currentSoilBox.getValue().getSoilManualData().setDaysPause(Integer.valueOf(newValue));
@@ -1199,7 +1196,7 @@ public class FieldDataController extends Application
           public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
             if (!newValue.isEmpty()) {
-              if (!gsehenInstance.isParseable(newValue)) {
+              if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
                 soilDepth.setText(oldValue);
               } else {
                 currentSoilBox.getValue().getProfileDepth().get(in)

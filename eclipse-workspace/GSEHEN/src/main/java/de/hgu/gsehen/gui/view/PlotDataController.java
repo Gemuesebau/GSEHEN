@@ -186,7 +186,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       public void changed(ObservableValue<? extends String> observable, String oldValue,
           String newValue) {
         if (newValue != null) {
-          if (!gsehenInstance.isParseable(newValue)) {
+          if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
             rootingZone.setText(oldValue);
           }
         }
@@ -537,7 +537,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
             if (newValue != null) {
-              if (!gsehenInstance.isParseable(newValue)) {
+              if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
                 irrigation.setText(oldValue);
               }
             }
@@ -554,7 +554,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
             if (newValue != null) {
-              if (!gsehenInstance.isParseable(newValue)) {
+              if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
                 precipitation.setText(oldValue);
               }
             }
