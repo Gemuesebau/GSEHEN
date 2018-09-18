@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXTextField;
 
 import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.RecommendedActionChanged;
@@ -908,28 +909,37 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private void setChartData() {
     waterLevel = plot.getRecommendedAction().getAvailableWater();
-    DecimalFormat df = new DecimalFormat("#.##");
-    series.setName(String.valueOf(df.format(waterLevel)) + " mm");
+    if (waterLevel == null) {
+      series.setName("/");
+    } else {
+      DecimalFormat df = new DecimalFormat("#.##");
+      series.setName(df.format(waterLevel) + " mm");
+    }
 
-    int waterBalance = plot.getWaterBalance().getDailyBalances().size() - 1;
-    availableSoilWater = plot.getWaterBalance().getDailyBalances().get(waterBalance)
-        .getCurrentAvailableSoilWater() * 1.1;
-    axisY.setUpperBound(availableSoilWater);
+    final List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();
+    if (!dailyBalances.isEmpty()) {
+      int waterBalance = dailyBalances.size() - 1;
+      availableSoilWater = dailyBalances.get(waterBalance)
+          .getCurrentAvailableSoilWater() * 1.1;
+      axisY.setUpperBound(availableSoilWater);
+    }
 
-    XYChart.Data data = new XYChart.Data("", waterLevel);
-    // TODO: https://docs.oracle.com/javafx/2/charts/css-styles.htm
-    // Node node = data.getNode();
-    // if (100 / availableSoilWater * ((Double) data.getYValue()).intValue() < 25) {
-    // node.setStyle("-fx-stroke: -fx-notwatered;");
-    // } else if (100 / availableSoilWater
-    // * ((Double) data.getYValue()).intValue() > 25) {
-    // node.setStyle("-fx-stroke: -fx-okay;");
-    // } else if (100 / availableSoilWater
-    // * ((Double) data.getYValue()).intValue() > 75) {
-    // node.setStyle("-fx-stroke: -fx-watered;");
-    // }
+    if (waterLevel != null) {
+      XYChart.Data data = new XYChart.Data("", waterLevel);
+      // TODO: https://docs.oracle.com/javafx/2/charts/css-styles.htm
+      // Node node = data.getNode();
+      // if (100 / availableSoilWater * ((Double) data.getYValue()).intValue() < 25) {
+      // node.setStyle("-fx-stroke: -fx-notwatered;");
+      // } else if (100 / availableSoilWater
+      // * ((Double) data.getYValue()).intValue() > 25) {
+      // node.setStyle("-fx-stroke: -fx-okay;");
+      // } else if (100 / availableSoilWater
+      // * ((Double) data.getYValue()).intValue() > 75) {
+      // node.setStyle("-fx-stroke: -fx-watered;");
+      // }
 
-    series.getData().add(data);
+      series.getData().add(data);
+    }
   }
 
   @SuppressWarnings("checkstyle:all")
