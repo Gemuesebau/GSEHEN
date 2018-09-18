@@ -62,9 +62,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private Field autoField;
   protected final ResourceBundle mainBundle;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends 
-      GsehenEventListener<? extends GsehenEvent>>> eventListeners =
-      new HashMap<>();
+  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -109,8 +107,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         event -> updatePlotInfo(event.getPlot()));
   }
 
-  private static final DataFormat SERIALIZED_MIME_TYPE =
-      new DataFormat("application/x-java-serialized-object");
+  private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat(
+      "application/x-java-serialized-object");
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   private static final String DETAIL_BORDER_PANE_ID = "#detailBorderPane";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
@@ -159,8 +157,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
    */
   @SuppressWarnings("unchecked")
   public void addFarmTreeView(Class<? extends GsehenEventListener<GsehenViewEvent>> skipClass) {
-    farmTreeView =
-        (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
+    farmTreeView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
+        .lookup(FARM_TREE_VIEW_ID);
     rootItem = new TreeItem<Drawable>();
     farmTreeView.setRoot(rootItem);
     farmTreeView.setShowRoot(false);
@@ -273,8 +271,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 attributeLabel3 = new Text(mainBundle.getString("fieldview.soilprofile"));
                 attributeLabel3.setFont(Font.font("Arial", 12));
-                SoilProfile fieldSoilProfile =
-                    gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
+                SoilProfile fieldSoilProfile = gsehenInstance
+                    .getSoilProfileForUuid(field.getSoilProfileUuid());
                 if (fieldSoilProfile != null) {
                   attribute3 = new Text(fieldSoilProfile.getName());
                 } else {
@@ -333,8 +331,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 Text soilValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
                 Text soilValue;
                 if (plot.getSoilStartValue() != null) {
-                  soilValue =
-                      new Text(gsehenInstance.formatDoubleOneDecimal(plot.getSoilStartValue()));
+                  soilValue = new Text(
+                      gsehenInstance.formatDoubleOneDecimal(plot.getSoilStartValue()));
                 } else {
                   soilValue = new Text("/");
                 }
@@ -397,8 +395,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   soilValue.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
                   actionLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
                   action.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
-                  Text plotIsInactive =
-                      new Text(mainBundle.getString("treetableview.plotinactive"));
+                  Text plotIsInactive = new Text(
+                      mainBundle.getString("treetableview.plotinactive"));
                   plotIsInactive.setFont(Font.font("Arial", FontWeight.BOLD, 16));
                   bottomBox.getChildren().add(plotIsInactive);
                 }
@@ -490,9 +488,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 if (!bottomBox.getChildren().contains(general)) {
                   bottomBox.getChildren().add(general);
                 }
-                Text needCrop =
-                    new Text(mainBundle.getString("gui.view.Map.drawableType.Plot") + " \""
-                        + plot.getName() + "\" " + mainBundle.getString("treetableview.needcrop"));
+                Text needCrop = new Text(
+                    mainBundle.getString("gui.view.Map.drawableType.Plot") + " \"" + plot.getName()
+                        + "\" " + mainBundle.getString("treetableview.needcrop"));
                 needCrop.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 bottomBox.getChildren().add(needCrop);
               }
@@ -500,9 +498,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 if (!bottomBox.getChildren().contains(general)) {
                   bottomBox.getChildren().add(general);
                 }
-                Text needDate =
-                    new Text(mainBundle.getString("gui.view.Map.drawableType.Plot") + " \""
-                        + plot.getName() + "\" " + mainBundle.getString("treetableview.needdate"));
+                Text needDate = new Text(
+                    mainBundle.getString("gui.view.Map.drawableType.Plot") + " \"" + plot.getName()
+                        + "\" " + mainBundle.getString("treetableview.needdate"));
                 needDate.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 bottomBox.getChildren().add(needDate);
               }
@@ -572,7 +570,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           } else if (item.getParent().getValue().getName().equals("Neue Felder")) {
             autoFarm = (Farm) item.getParent().getValue();
             autoField = (Field) item.getValue();
-            System.out.println(2);
           }
 
           item.getParent().getChildren().remove(item);
@@ -618,10 +615,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
             }
           }
           if (autoFarm != null || autoField.getName().equals("Neue Plots")) {
-            System.out.println(3);
             autoFarm.getFields().remove(autoField);
             if (autoFarm.getFields().isEmpty()) {
-              System.out.println(4);
               farmsList.remove(autoFarm);
               gsehenInstance.setFarmsList(farmsList);
             }
@@ -675,8 +670,10 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   /**
    * Adds the columns to the TreeTableView.
    * 
-   * @param label - Name of the column.
-   * @param dataIndex - Content of the column.
+   * @param label
+   *          - Name of the column.
+   * @param dataIndex
+   *          - Content of the column.
    */
   public void addColumn(String label, String dataIndex) {
 
@@ -692,8 +689,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           result = new ReadOnlyStringWrapper("/");
         } else if (param.getValue().getValue().getClass().getSimpleName().equals("Field")) {
           Field field = (Field) param.getValue().getValue();
-          SoilProfile fieldSoilProfile =
-              gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
+          SoilProfile fieldSoilProfile = gsehenInstance
+              .getSoilProfileForUuid(field.getSoilProfileUuid());
           if (fieldSoilProfile != null) {
             result = new ReadOnlyStringWrapper(fieldSoilProfile.getName());
           } else {

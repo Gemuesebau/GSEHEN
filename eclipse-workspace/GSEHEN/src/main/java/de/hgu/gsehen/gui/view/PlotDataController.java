@@ -118,6 +118,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   @SuppressWarnings("rawtypes")
   private XYChart.Series series;
   private BarChart<String, Number> chart;
+  private String pattern;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -193,13 +194,17 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
+    DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,
+        gsehenInstance.getSelectedLocale());
+    pattern = ((SimpleDateFormat) dateFormat).toPattern();
+
     // Start der Inkulturnahme
     cropStartLabel = new Text(mainBundle.getString("plotview.cropstart"));
     cropStartLabel.setFont(Font.font("Arial", 14));
     cropStart = new DatePicker();
     cropStart.setShowWeekNumbers(true);
     convert = new StringConverter<LocalDate>() {
-      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
 
       @Override
       public String toString(LocalDate date) {
@@ -220,7 +225,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     };
     cropStart.setConverter(convert);
-    cropStart.setPromptText("dd-MM-yyyy");
+    cropStart.setPromptText(pattern);
 
     // Start der Bodenwasserbilanz
     soilStartLabel = new Text(mainBundle.getString("plotview.soilstart"));
@@ -228,7 +233,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     soilStart = new DatePicker();
     soilStart.setShowWeekNumbers(true);
     soilStart.setConverter(convert);
-    soilStart.setPromptText("dd-MM-yyyy");
+    soilStart.setPromptText(pattern);
 
     // Startwert der Wasserbilanz
     soilStartValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
@@ -469,7 +474,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       public void handle(ActionEvent e) {
         isActive = false;
         Date date = Calendar.getInstance().getTime();
-        DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+        DateFormat formatter = new SimpleDateFormat(pattern);
         String enddate = formatter.format(date);
         Date cropEnd;
         try {
@@ -525,7 +530,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         DatePicker date = new DatePicker();
         date.setShowWeekNumbers(true);
         date.setConverter(convert);
-        date.setPromptText("dd-MM-yyyy");
+        date.setPromptText(pattern);
         date.setValue(LocalDate.now());
 
         // Bewässerung (in mm)
