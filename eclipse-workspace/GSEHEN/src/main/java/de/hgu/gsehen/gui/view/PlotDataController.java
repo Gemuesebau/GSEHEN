@@ -1,18 +1,5 @@
 package de.hgu.gsehen.gui.view;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.ResourceBundle;
-
 import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXTextField;
@@ -30,19 +17,35 @@ import de.hgu.gsehen.model.ManualData;
 import de.hgu.gsehen.model.ManualWaterSupply;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.util.DateUtil;
-import javafx.animation.Timeline;
+
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.ResourceBundle;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Side;
 import javafx.geometry.VPos;
+//import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
@@ -70,7 +73,6 @@ import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
-  private final Timeline timeline = new Timeline();
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   protected final ResourceBundle mainBundle;
 
@@ -112,6 +114,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private HBox bottomBox;
   private Text error;
   private Double waterLevel;
+  private Double availableSoilWater;
+  @SuppressWarnings("rawtypes")
+  private XYChart.Series series;
+  private BarChart<String, Number> chart;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -382,21 +388,19 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     tablePane.getChildren().add(cropTable);
 
     // Balkendiagramm TODO: Farben einbauen
-    CategoryAxis xaxis;
-    NumberAxis yaxis;
-    String[] plote = { mainBundle.getString("gui.view.Map.drawableType.Plot") };
-    xaxis = new CategoryAxis();
-    xaxis.setCategories(FXCollections.<String>observableArrayList(plote));
-    yaxis = new NumberAxis("cm", 0.0d, 25.0d, 1);
-
     waterLevel = 0.0;
+    CategoryAxis axisX = new CategoryAxis();
+    NumberAxis axisY = new NumberAxis(0, 20, 1);
+    chart = new BarChart<String, Number>(axisX, axisY);
+    chart.setPrefWidth(30);
+    chart.setTitle(mainBundle.getString("plotview.waterinsoil"));
+    chart.setLegendSide(Side.RIGHT);
+    chart.getStylesheets()
+        .add(getClass().getResource("/de/hgu/gsehen/style/BarChart.css").toExternalForm());
+    axisY.setLabel("mm");
 
-    ObservableList<BarChart.Series> barChartData = FXCollections
-        .observableArrayList(new BarChart.Series(mainBundle.getString("plotview.waterinsoil"),
-            FXCollections.observableArrayList(new BarChart.Data(plote[0], waterLevel))));
-    BarChart chart;
-    chart = new BarChart(xaxis, yaxis, barChartData, 25.0d);
-    play();
+    series = new XYChart.Series();
+    chart.getData().addAll(series);
 
     // Bewässerungsfaktor
     Text scalingFactorLabel = new Text(mainBundle.getString("plotview.scalingfactor"));
@@ -741,7 +745,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     pane.setBottom(bottomBox);
 
-    tabPane = gsehenInstance.getMainController().getJFXTabPane();
+    tabPane = gsehenInstance.getMainController().getJfxTabPane();
     mapViewTab = gsehenInstance.getMainController().getMapViewTab();
     fieldViewTab = gsehenInstance.getMainController().getFieldViewTab();
     plotViewTab = gsehenInstance.getMainController().getPlotViewTab();
@@ -824,8 +828,31 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
                   setTableData();
 
-                  if (plot.getRecommendedAction() != null) {
+                  if (plot.getRecommendedAction() != null
+                      && plot.getRecommendedAction().getAvailableWater() != null) {
                     waterLevel = plot.getRecommendedAction().getAvailableWater();
+                    DecimalFormat df = new DecimalFormat("#.##");
+                    series.setName(String.valueOf(df.format(waterLevel)) + " mm");
+
+                    int waterBalance = plot.getWaterBalance().getDailyBalances().size() - 1;
+                    availableSoilWater = plot.getWaterBalance().getDailyBalances().get(waterBalance)
+                        .getCurrentAvailableSoilWater() * 1.1;
+                    axisY.setUpperBound(availableSoilWater);
+
+                    XYChart.Data data = new XYChart.Data("", waterLevel);
+                    // TODO: https://docs.oracle.com/javafx/2/charts/css-styles.htm
+                    // Node node = data.getNode();
+                    // if (100 / availableSoilWater * ((Double) data.getYValue()).intValue() < 25) {
+                    // node.setStyle("-fx-stroke: -fx-notwatered;");
+                    // } else if (100 / availableSoilWater
+                    // * ((Double) data.getYValue()).intValue() > 25) {
+                    // node.setStyle("-fx-stroke: -fx-okay;");
+                    // } else if (100 / availableSoilWater
+                    // * ((Double) data.getYValue()).intValue() > 75) {
+                    // node.setStyle("-fx-stroke: -fx-watered;");
+                    // }
+
+                    series.getData().add(data);
                   }
 
                 } else {
@@ -882,12 +909,5 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
       cropTable.getItems().addAll(FXCollections.observableArrayList(cropPhases));
     }
-  }
-
-  /**
-   * Necessary for the bar graph.
-   */
-  private void play() {
-    timeline.play();
   }
 }

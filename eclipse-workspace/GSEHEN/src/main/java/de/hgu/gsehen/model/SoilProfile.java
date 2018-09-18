@@ -3,11 +3,11 @@ package de.hgu.gsehen.model;
 import java.util.List;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 @Entity
 public class SoilProfile {
@@ -17,7 +17,7 @@ public class SoilProfile {
   private long id;
   private String uuid;
   private String name;
-  @Embedded
+  @OneToOne(cascade = {CascadeType.ALL})
   private SoilManualData soilManualData;
   @OneToMany(cascade = {CascadeType.ALL})
   private List<Soil> soilType;

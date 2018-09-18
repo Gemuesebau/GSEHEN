@@ -4,7 +4,6 @@ import static de.hgu.gsehen.util.JavaFxUtil.noneIsEmpty;
 
 import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXTextField;
-
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
@@ -21,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -57,6 +55,7 @@ public class FieldDataController extends Application
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   protected final ResourceBundle mainBundle;
   private WeatherDataSource selectedWeatherDataSource;
+  private SoilManualData soilManualData;
 
   private List<SoilProfile> soilProfileList;
   private List<WeatherDataSource> weatherDataSourceList;
@@ -119,8 +118,7 @@ public class FieldDataController extends Application
   /**
    * Constructs a new field data controller associated with the given BorderPane.
    *
-   * @param pane
-   *          - the associated BorderPane.
+   * @param pane - the associated BorderPane.
    */
   public FieldDataController(Gsehen application, BorderPane pane) {
     this.gsehenInstance = application;
@@ -313,23 +311,23 @@ public class FieldDataController extends Application
     center.setSpacing(8);
     // BOTTOM END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    tabPane = gsehenInstance.getMainController().getJFXTabPane();
+    tabPane = gsehenInstance.getMainController().getJfxTabPane();
     mapViewTab = gsehenInstance.getMainController().getMapViewTab();
     fieldViewTab = gsehenInstance.getMainController().getFieldViewTab();
     plotViewTab = gsehenInstance.getMainController().getPlotViewTab();
     logViewTab = gsehenInstance.getMainController().getLogViewTab();
 
     // Actions that will happen, if you click a 'field' in the TreeTableView
-    treeTableView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
-        .lookup(FARM_TREE_VIEW_ID);
+    treeTableView =
+        (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
     treeTableView.getSelectionModel().selectedItemProperty()
         .addListener(new ChangeListener<Object>() {
           @Override
           public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
             for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
               if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
-                selectedItem = treeTableView.getSelectionModel().getSelectedCells().get(i)
-                    .getTreeItem();
+                selectedItem =
+                    treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
                 if (selectedItem != null
                     && selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
                   pane.setVisible(true);
@@ -349,8 +347,8 @@ public class FieldDataController extends Application
                     }
                   }
 
-                  SoilProfile fieldSoilProfile = gsehenInstance
-                      .getSoilProfileForUuid(field.getSoilProfileUuid());
+                  SoilProfile fieldSoilProfile =
+                      gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
                   for (SoilProfile soPr : soilProfileList) {
                     if (fieldSoilProfile != null
                         && soPr.getName().equals(fieldSoilProfile.getName())) {
@@ -385,8 +383,8 @@ public class FieldDataController extends Application
     sp = gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
     int index = 1;
 
-    Text setSoilProfile = new Text(
-        mainBundle.getString("fieldview.currentsoil") + " (" + sp.getName() + "):" + "\n");
+    Text setSoilProfile =
+        new Text(mainBundle.getString("fieldview.currentsoil") + " (" + sp.getName() + "):" + "\n");
     setSoilProfile.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
     String kc = "";
@@ -505,14 +503,14 @@ public class FieldDataController extends Application
     weatherDataAutomaticImportIntervalSeconds = new JFXTextField();
     weatherDataAutomaticImportIntervalSeconds.textProperty().addListener(
         new ChangeListener<String>() {
-        @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue,
+          @Override
+          public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
-          if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
-            weatherDataAutomaticImportIntervalSeconds.setText(oldValue);
+            if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
+              weatherDataAutomaticImportIntervalSeconds.setText(oldValue);
+            }
           }
-        }
-      });
+        });
 
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(weatherDataPluginJsFileNameLabel, 0, 0);
@@ -673,8 +671,6 @@ public class FieldDataController extends Application
     // Name
     Text soilNameLabel = new Text(mainBundle.getString("fieldview.profilename"));
     soilNameLabel.setFont(Font.font("Arial", 14));
-    @SuppressWarnings("checkstyle:all")
-    JFXTextField soilProfileName = new JFXTextField("");
 
     // kc-Wert
     Text soilManualKcLabel = new Text(mainBundle.getString("fieldview.manualkc"));
@@ -696,6 +692,8 @@ public class FieldDataController extends Application
     soilManualPauseLabel.setFont(Font.font("Arial", 14));
     JFXTextField soilManualPause = new JFXTextField("");
 
+    JFXTextField soilProfileName = new JFXTextField("");
+    
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(soilNameLabel, 0, 0);
     GridPane.setConstraints(soilProfileName, 1, 0);
@@ -799,8 +797,6 @@ public class FieldDataController extends Application
 
     List<Soil> soilList = new ArrayList<Soil>();
     List<SoilProfileDepth> soilDepthList = new ArrayList<SoilProfileDepth>();
-    @SuppressWarnings("checkstyle:all")
-    SoilManualData soilManualData = new SoilManualData();
 
     // Schicht abschließen
     Button setSoil = new Button(mainBundle.getString("fieldview.setsoil"));
@@ -823,8 +819,8 @@ public class FieldDataController extends Application
           soilAwc.setText(null);
           depth.setText(gsehenInstance.formatDoubleOneDecimal(spd.getDepth()));
 
-          Text createdSoil = new Text(
-              mainBundle.getString("fieldview.layer") + (layerList.size() + 1) + ": \n"
+          Text createdSoil =
+              new Text(mainBundle.getString("fieldview.layer") + (layerList.size() + 1) + ": \n"
                   + mainBundle.getString("fieldview.soiltype") + soil.getName() + ";\n"
                   + mainBundle.getString("fieldview.awc") + soil.getAvailableWaterCapacity() + ";\n"
                   + mainBundle.getString("fieldview.depth") + spd.getDepth() + "\n\n");
@@ -918,17 +914,15 @@ public class FieldDataController extends Application
 
           if (!soilManualKc.getText().isEmpty() && !soilManualZone.getText().isEmpty()
               && !soilManualRain.getText().isEmpty() && !soilManualPause.getText().isEmpty()) {
-            soilManualData.setSoilKc(gsehenInstance.parseDouble(soilManualKc.getText()));
-            soilManualData.setSoilZone(Integer.valueOf(soilManualZone.getText()));
-            soilManualData.setRainMax(gsehenInstance.parseDouble(soilManualRain.getText()));
-            soilManualData.setDaysPause(Integer.valueOf(soilManualPause.getText()));
+            soilManualData = new SoilManualData(gsehenInstance.parseDouble(soilManualKc.getText()),
+                Integer.valueOf(soilManualZone.getText()),
+                gsehenInstance.parseDouble(soilManualRain.getText()),
+                Integer.valueOf(soilManualPause.getText()));
           } else {
-            soilManualData.setSoilKc(null);
-            soilManualData.setSoilZone(null);
-            soilManualData.setRainMax(null);
-            soilManualData.setDaysPause(null);
+            soilManualData = new SoilManualData(null, null, null, null);
           }
           soilProfileItem.setSoilManualData(soilManualData);
+          System.out.println(soilProfileItem.getSoilManualData());
 
           soilProfileItem.setName(soilProfileName.getText());
           soilProfileList.add(soilProfileItem);
@@ -1269,7 +1263,6 @@ public class FieldDataController extends Application
   }
 
   @Override
-  public void start(Stage primaryStage) throws Exception {
-  }
+  public void start(Stage primaryStage) throws Exception {}
 
 }

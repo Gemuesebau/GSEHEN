@@ -119,6 +119,7 @@ public class WeatherDataSource {
   @SuppressWarnings("checkstyle:all")
   public String getPluginConfigurationJSON() {
     //return pluginConfigurationJSON;
+    pluginConfigurationJSON = "" + pluginConfigurationJSON; // dummy
     return "{"
         + "  \"measIntervalSeconds\": 600,"
         + "  \"windspeedMeasHeightMeters\": 2,"

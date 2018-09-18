@@ -14,7 +14,7 @@ import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.GsehenViewEvent;
 import de.hgu.gsehen.event.ManualDataChanged;
 import de.hgu.gsehen.event.RecommendedActionChanged;
-import de.hgu.gsehen.gsbalance.DayDataCalculation;
+//import de.hgu.gsehen.gsbalance.DayDataCalculation;
 import de.hgu.gsehen.gsbalance.Recommender;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenTreeTable;
@@ -71,6 +71,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -101,10 +102,12 @@ public class Gsehen extends Application {
   private static final String MAIN_FXML = "main.fxml";
 
   public static final String MAIN_SPLIT_PANE_ID = "#mainSplitPane";
+  private static final String MAIN_BORDER_PANE_ID = "#mainBorderPane";
+  private static final String LEFT_ANCHOR_PANE_ID = "#leftAnchorPane";
+  private static final String TABLE_BORDER_PANE_ID = "#tableBorderPane";
   public static final String DEBUG_TEXTAREA_ID = "#debugTA";
   public static final String TAB_PANE_ID = "#tabPane";
   private static final String MAPS_WEB_VIEW_ID = "#mapsWebView";
-  // private static final String FARMS_WEB_VIEW_ID = "#farmsWebView";
   private static final String FIELDS_VIEW_ID = "#fieldsBorderPane";
   private static final String PLOTS_VIEW_ID = "#plotsBorderPane";
   private static final String LOGS_VIEW_ID = "#logsBorderPane";
@@ -115,7 +118,7 @@ public class Gsehen extends Application {
   private static Fields fields;
   private static Plots plots;
   private static Logs logs;
-  private static DayDataCalculation dayDataCalculation;
+  //private static DayDataCalculation dayDataCalculation;
 
   private GsehenTreeTable treeTable;
 
@@ -126,9 +129,8 @@ public class Gsehen extends Application {
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<
-      Class<? extends GsehenEvent>,
-      List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
+  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> 
+       eventListeners = new HashMap<>();
 
   private boolean dataChanged;
   private List<SoilProfile> soilProfilesList;
@@ -210,12 +212,24 @@ public class Gsehen extends Application {
     stage.sizeToScene();
     stage.show();
 
+    SplitPane mainSplitPane = (SplitPane) scene.lookup(MAIN_SPLIT_PANE_ID);
+
+    BorderPane mainBorderPane = (BorderPane) scene.lookup(MAIN_BORDER_PANE_ID);
+    mainBorderPane.prefHeightProperty().bind(scene.heightProperty());
+    mainBorderPane.prefWidthProperty().bind(scene.widthProperty());
+
+    AnchorPane leftAnchorPane = (AnchorPane) scene.lookup(LEFT_ANCHOR_PANE_ID);
+    leftAnchorPane.prefWidthProperty().bind(mainSplitPane.getDividers().get(0).positionProperty());
+
+    BorderPane tableBorderPane = (BorderPane) scene.lookup(TABLE_BORDER_PANE_ID);
+    tableBorderPane.prefWidthProperty().bind(leftAnchorPane.widthProperty());
+
     maps = new Maps(this, (WebView) scene.lookup(MAPS_WEB_VIEW_ID));
     fields = new Fields(this, (BorderPane) scene.lookup(FIELDS_VIEW_ID));
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
     logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
 
-    dayDataCalculation = new DayDataCalculation();
+    //dayDataCalculation = new DayDataCalculation();
     new Recommender();
 
     InputStream input = this.getClass()
@@ -243,6 +257,7 @@ public class Gsehen extends Application {
       }
     };
     treeTable.addFarmTreeView(GsehenTreeTable.class);
+    treeTable.checkCalculation();
   }
 
   /**
@@ -399,7 +414,7 @@ public class Gsehen extends Application {
   }
 
   /**
-   * Fill Messages with Data. FIXME implement!!
+   * Fills Messages with data.
    * 
    * @param rs
    *          ResultSet from PostgreSQL.
@@ -846,7 +861,7 @@ public class Gsehen extends Application {
   }
 
   public Locale getSelectedLocale() {
-    return selectedLocale; // FIXME make a user choice/option in UI
+    return selectedLocale;
   }
 
   @SuppressWarnings("checkstyle:javadocmethod")
