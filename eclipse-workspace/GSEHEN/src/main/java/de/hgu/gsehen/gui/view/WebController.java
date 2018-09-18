@@ -1,8 +1,9 @@
 package de.hgu.gsehen.gui.view;
 
 import de.hgu.gsehen.Gsehen;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,15 +32,23 @@ public abstract class WebController {
 
   @SuppressWarnings("checkstyle:rightcurly")
   private String getFileContents(String fileName) {
+    int totalRead = 0;
     try {
-      String result = processIncludes(new String(Files.readAllBytes(
-          Paths.get(Maps.class.getResource(fileName).toURI())
-      ), "utf-8"));
-      getLogger().info("finished processing " + fileName);
-      return result;
+      InputStream inputStream = getClass().getResourceAsStream(fileName);
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      byte[] buffer = new byte[4096];
+      int read;
+      while ((read = inputStream.read(buffer)) > 0) {
+        outputStream.write(buffer, 0, read);
+        totalRead += read;
+      }
+      return processIncludes(new String(outputStream.toByteArray(), "utf-8"));
     }
     catch (Exception e) {
       throw new RuntimeException(fileName + " couldn't be loaded", e);
+    }
+    finally {
+      getLogger().info("finished processing " + fileName + " (" + totalRead + " bytes read)");
     }
   }
 

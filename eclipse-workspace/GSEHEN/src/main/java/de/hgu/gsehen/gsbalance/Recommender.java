@@ -1,9 +1,5 @@
 package de.hgu.gsehen.gsbalance;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.evapotranspiration.EnvCalculator;
@@ -18,6 +14,10 @@ import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.model.WaterBalance;
 import de.hgu.gsehen.util.CollectionUtil;
 import de.hgu.gsehen.util.DateUtil;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class Recommender {
   private Gsehen gsehenInstance;

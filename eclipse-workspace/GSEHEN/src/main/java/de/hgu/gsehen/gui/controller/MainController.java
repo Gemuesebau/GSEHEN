@@ -1,5 +1,8 @@
 package de.hgu.gsehen.gui.controller;
 
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
 import com.jfoenix.controls.JFXTabPane;
 
 import de.hgu.gsehen.Gsehen;
@@ -67,6 +70,19 @@ public class MainController {
         });
       }
     });
+  }
+
+  @FXML
+  private void openPluginsFolder(ActionEvent o) {
+    File pluginsFolderObj = new File(System.getProperty("user.home")
+        + File.separator + ".gsehenIrrigationManager"
+        + File.separator + "plugins");
+    pluginsFolderObj.mkdirs();
+    try {
+      Desktop.getDesktop().open(pluginsFolderObj);
+    } catch (IOException e) {
+      throw new RuntimeException("Couldn't open plugins folder!", e);
+    }
   }
 
   @FXML

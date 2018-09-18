@@ -1,108 +1,117 @@
-function transformArray(arr, startIndex, transformFunc) {
-	for (var i=startIndex; i<arr.length; i++) {
-		arr[i] = transformFunc(arr[i]);
-	}
-	return arr;
+loadGsehenJs("commons.js");
+
+/* plugineigene Konfiguration und Hilfsmethoden
+
+de.hgu.gsehen.evapotranspiration.UtilityFunctions.convertWindSpeed2m
+
+fieldview.weatherdataname                = Name der Wetterdatenquelle: 
+fieldview.interval                       = Messintervall in Sekunden: 
+fieldview.windspeed                      = Höhe der \nWindgeschwindigkeitsmessung \nin Meter: 
+fieldview.dateformat                     = Datumsformat: 
+fieldview.dateformatexample              = Beispiel: d.M.y
+fieldview.localeid                       = Zahlenformat gemäß: 
+fieldview.filepath                       = Dateipfad der \nWetterdaten-CSV-Datei: 
+fieldview.filechooserbutton              = Datei auswählen 
+fieldview.filechooser                    = Dateipfad zur Wetterdatenquelle 
+fieldview.locationlat                    = Latitude (dezimal): 
+fieldview.locationlatexample             = Beispiel: 51.869026 
+fieldview.locationlng                    = Longitude (dezimal): 
+fieldview.locationlngexample             = Beispiel: 8.917478 
+fieldview.metersabove                    = Standort der Wetterdatenquelle \n(Meter über NN): 
+fieldview.dateerror                      = Falsches Format! 
+
+private TreeMap<String, String> javaLocaleMap;
+
+private void fillJavaLocaleMap(final Locale selectedLocale) {
+  javaLocaleMap = new TreeMap<String, String>();
+  java.lang.reflect.Field[] fieldArray = Locale.class.getFields();
+  for (int i = 0; i < fieldArray.length; i++) {
+    if (fieldArray[i].getType().equals(Locale.class)) {
+      String language;
+      try {
+        language = ((Locale) fieldArray[i].get(null)).getDisplayLanguage(selectedLocale);
+      } catch (Exception e) {
+        language = null;
+      }
+      if (language != null && language.length() > 0) {
+        final String fieldName = fieldArray[i].getName();
+        javaLocaleMap.put(language + " (" + fieldName + ")", fieldName);
+      }
+    }
+  }
 }
 
-function arrayToObject(arr, propNamesArray) {
-	var obj = {};
-	for (var i=0; i<arr.length; i++) {
-		obj[propNamesArray[i]] = arr[i];
-	}
-	return obj;
-}
+private int measIntervalSeconds;
+private double windspeedMeasHeightMeters;
+private String dateFormatString;
+private String numberLocaleId;
+private String dataFilePath;
+private double locationLng;
+private double locationLat;
+private double locationMetersAboveSeaLevel;
 
-function objArrayAggregate(arr, propName, initVal, stepFunc) {
-	if (arr==null || arr.length==0) {
-		return null;
-	}
-	var val = initVal;
-	for (var i=0; i<arr.length; i++) {
-		val = stepFunc(val, arr[i][propName]);
-	}
-	return val;
-}
-
-function objArrayMin(arr, propName) {
-	return objArrayAggregate(arr, propName,
-		java.lang.Double.MAX_VALUE,
-		function(currentValue, arrayItemValue) {
-			if (arrayItemValue < currentValue) {
-				return arrayItemValue;
-			}
-			else {
-				return currentValue;
-			}
-		});
-}
-
-function objArrayMax(arr, propName) {
-	return objArrayAggregate(arr, propName,
-		java.lang.Double.MIN_VALUE,
-		function(currentValue, arrayItemValue) {
-			if (arrayItemValue > currentValue) {
-				return arrayItemValue;
-			}
-			else {
-				return currentValue;
-			}
-		});
-}
-
-function objArraySum(arr, propName) {
-	return objArrayAggregate(arr, propName,
-		0,
-		function(currentValue, arrayItemValue) {
-			return currentValue + arrayItemValue;
-		});
-}
-
-function objArrayMean(arr, propName) {
-	if (arr==null || arr.length==0) {
-		return null;
-	}
-	return objArraySum(arr, propName) / arr.length;
-}
-
+import de.hgu.gsehen.evapotranspiration.GeoData;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+*/
 function calculateWindspeed2m(windspeed, windspeedMeasHeightMeters) {
 	if (windspeedMeasHeightMeters == 2) {
 		return windspeed;
 	}
 	else {
-		// FIXME calculate wind speed!
+		// FIXME calculate wind speed! siehe Chat
 	}
 }
 
-function calculateDayData(weatherDataSource, date, weatherDataArray) {
+function calculateDayData(pluginConfig, date, weatherDataArray) {
 	var dayData = new (Java.type("de.hgu.gsehen.evapotranspiration.DayData"))();
 	dayData.setDate(date);
-	dayData.setTempMax(objArrayMax(weatherDataArray, "temp"));
-	dayData.setTempMin(objArrayMin(weatherDataArray, "temp"));
-	dayData.setTempMean(objArrayMean(weatherDataArray, "temp"));
-	dayData.setAirHumidityRelMax(objArrayMax(weatherDataArray, "airHumidityRel"));
-	dayData.setAirHumidityRelMin(objArrayMin(weatherDataArray, "airHumidityRel"));
-	dayData.setAirHumidityRelMean(objArrayMean(weatherDataArray, "airHumidityRel"));
-	dayData.setGlobalRad(objArraySum(weatherDataArray, "globalRad") * weatherDataSource.getMeasIntervalSeconds() / 1000000);
-	dayData.setPrecipitation(objArraySum(weatherDataArray, "precipitation"));
+	dayData.setTempMax(arrayUtilities.objArrayMax(weatherDataArray, "temp"));
+	dayData.setTempMin(arrayUtilities.objArrayMin(weatherDataArray, "temp"));
+	dayData.setTempMean(arrayUtilities.objArrayMean(weatherDataArray, "temp"));
+	dayData.setAirHumidityRelMax(arrayUtilities.objArrayMax(weatherDataArray, "airHumidityRel"));
+	dayData.setAirHumidityRelMin(arrayUtilities.objArrayMin(weatherDataArray, "airHumidityRel"));
+	dayData.setAirHumidityRelMean(arrayUtilities.objArrayMean(weatherDataArray, "airHumidityRel"));
+	dayData.setGlobalRad(arrayUtilities.objArraySum(weatherDataArray, "globalRad") * pluginConfig.measIntervalSeconds / 1000000);
+	dayData.setPrecipitation(arrayUtilities.objArraySum(weatherDataArray, "precipitation"));
 	dayData.setWindspeed2m(
-		calculateWindspeed2m(objArrayMean(weatherDataArray, "windspeed"), weatherDataSource.getWindspeedMeasHeightMeters())
+		calculateWindspeed2m(arrayUtilities.objArrayMean(weatherDataArray, "windspeed"), pluginConfig.windspeedMeasHeightMeters)
 	);
 	return dayData;
 }
 
+function newNumberFormat(numberLocaleId) {
+	var locale = java.util.Locale.ENGLISH;
+	try {
+		locale = java.util.Locale.class.getField(numberLocaleId).get(null);
+	}
+	catch (e) {
+		// do nothing
+	}
+	return java.text.NumberFormat.getNumberInstance(locale);
+}
+
+function newDateFormat(dateFormatString) {
+	return new java.text.SimpleDateFormat(dateFormatString);
+}
+
 function determineDayData(weatherDataSource, date) {
+	var pluginConfig = JSON.parse(weatherDataSource.getPluginConfigurationJSON());
 	var timeStamp = date.getTime();
 	var weatherDataArray = [];
-	var lineNumberReader = new java.io.LineNumberReader(new java.io.FileReader(weatherDataSource.getDataFilePath()));
+	var lineNumberReader = new java.io.LineNumberReader(new java.io.FileReader(pluginConfig.dataFilePath));
 	var line;
-	var dateFormat = weatherDataSource.getDateFormat();
-	var numberFormat = weatherDataSource.getNumberFormat();
+	var lineNumber = 0;
+	var dateFormat = newDateFormat(pluginConfig.dateFormat);
+	var numberFormat = newNumberFormat(pluginConfig.numberFormat);
 	while ((line = lineNumberReader.readLine()) != null) {
+		lineNumber++;
 		try {
 			if (dateFormat.parse(line.replace(/ .*/,"")).getTime() >= timeStamp) {
-				weatherDataArray.push(arrayToObject(
-					transformArray(line.split(/; */), 1, function (str) {
+				weatherDataArray.push(arrayUtilities.arrayToObject(
+					arrayUtilities.transformArray(line.split(/; */), 1, function (str) {
 						return numberFormat.parse(str).doubleValue();
 					}),
 					[ "dateTimeStr", "temp", "airHumidityRel", "timeDuration",
@@ -111,11 +120,12 @@ function determineDayData(weatherDataSource, date) {
 			}
 		}
 		catch (e) {
-			/* nothing - probably header or comment */
+			// nothing - probably header or comment
+			//print("Exception in data file line number " + lineNumber + ": " + e);
 		}
 	}
 	if (weatherDataArray.length == 0) {
 		return null;
 	}
-	return calculateDayData(weatherDataSource, date, weatherDataArray);
+	return calculateDayData(pluginConfig, date, weatherDataArray);
 }

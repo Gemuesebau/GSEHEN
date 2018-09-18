@@ -1,10 +1,7 @@
 package de.hgu.gsehen.model;
 
 import de.hgu.gsehen.evapotranspiration.GeoData;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -17,11 +14,12 @@ public class WeatherDataSource {
   private String uuid;
 
   private String name;
-  private int measIntervalSeconds;
-  private double windspeedMeasHeightMeters;
-  private String dateFormatString;
-  private String numberLocaleId;
-  private String dataFilePath;
+  private String pluginJsFileName;
+  private boolean manualImportActive;
+  private boolean automaticImportActive;
+  private Double automaticImportFrequencySeconds;
+  @SuppressWarnings("checkstyle:all")
+  private String pluginConfigurationJSON;
   private double locationLng;
   private double locationLat;
   private double locationMetersAboveSeaLevel;
@@ -32,62 +30,6 @@ public class WeatherDataSource {
   }
 
   public WeatherDataSource() {
-  }
-
-  public long getId() {
-    return id;
-  }
-
-  public void setId(long id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public int getMeasIntervalSeconds() {
-    return measIntervalSeconds;
-  }
-
-  public void setMeasIntervalSeconds(int measIntervalSeconds) {
-    this.measIntervalSeconds = measIntervalSeconds;
-  }
-
-  public double getWindspeedMeasHeightMeters() {
-    return windspeedMeasHeightMeters;
-  }
-
-  public void setWindspeedMeasHeightMeters(double windspeedMeasHeightMeters) {
-    this.windspeedMeasHeightMeters = windspeedMeasHeightMeters;
-  }
-
-  public String getDateFormatString() {
-    return dateFormatString;
-  }
-
-  public void setDateFormatString(String dateFormatString) {
-    this.dateFormatString = dateFormatString;
-  }
-
-  public String getNumberLocaleId() {
-    return numberLocaleId;
-  }
-
-  public void setNumberLocaleId(String numberLocaleId) {
-    this.numberLocaleId = numberLocaleId;
-  }
-
-  public String getDataFilePath() {
-    return dataFilePath;
-  }
-
-  public void setDataFilePath(String dataFilePath) {
-    this.dataFilePath = dataFilePath;
   }
 
   public double getLocationLng() {
@@ -118,20 +60,12 @@ public class WeatherDataSource {
     return new GeoData(false, locationLng, locationLat, locationMetersAboveSeaLevel);
   }
 
-  @SuppressWarnings({"checkstyle:javadocmethod", "checkstyle:rightcurly"})
-  public DecimalFormat getNumberFormat() {
-    Locale locale = Locale.ENGLISH;
-    try {
-      locale = (Locale)Locale.class.getField(numberLocaleId).get(null);
-    }
-    catch (Exception e) {
-      /* do nothing */
-    }
-    return (DecimalFormat)NumberFormat.getNumberInstance(locale);
+  public long getId() {
+    return id;
   }
 
-  public SimpleDateFormat getDateFormat() {
-    return new SimpleDateFormat(dateFormatString);
+  public void setId(long id) {
+    this.id = id;
   }
 
   public String getUuid() {
@@ -140,5 +74,63 @@ public class WeatherDataSource {
 
   public void setUuid(String uuid) {
     this.uuid = uuid;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getPluginJsFileName() {
+    return pluginJsFileName;
+  }
+
+  public void setPluginJsFileName(String pluginJsFileName) {
+    this.pluginJsFileName = pluginJsFileName;
+  }
+
+  public boolean isManualImportActive() {
+    return manualImportActive;
+  }
+
+  public void setManualImportActive(boolean manualImportActive) {
+    this.manualImportActive = manualImportActive;
+  }
+
+  public boolean isAutomaticImportActive() {
+    return automaticImportActive;
+  }
+
+  public void setAutomaticImportActive(boolean automaticImportActive) {
+    this.automaticImportActive = automaticImportActive;
+  }
+
+  public Double getAutomaticImportFrequencySeconds() {
+    return automaticImportFrequencySeconds;
+  }
+
+  public void setAutomaticImportFrequencySeconds(Double automaticImportFrequencySeconds) {
+    this.automaticImportFrequencySeconds = automaticImportFrequencySeconds;
+  }
+
+  @SuppressWarnings("checkstyle:all")
+  public String getPluginConfigurationJSON() {
+    //return pluginConfigurationJSON;
+    pluginConfigurationJSON = "" + pluginConfigurationJSON; // dummy
+    return "{"
+        + "  \"measIntervalSeconds\": 600,"
+        + "  \"windspeedMeasHeightMeters\": 2,"
+        + "  \"dataFilePath\": \"C:\\\\Users\\\\atappe\\\\Documents\\\\GSEHEN\\\\eclipse-workspace\\\\GSEHEN\\\\src\\\\main\\\\resources\\\\de\\\\hgu\\\\gsehen\\\\csv\\\\GeisenheimKlima.csv\","
+        + "  \"dateFormat\": \"d.M.y\","
+        + "  \"numberFormat\": \"GERMAN\""
+        + "}";
+  }
+
+  @SuppressWarnings("checkstyle:all")
+  public void setPluginConfigurationJSON(String pluginConfigurationJSON) {
+    this.pluginConfigurationJSON = pluginConfigurationJSON;
   }
 }

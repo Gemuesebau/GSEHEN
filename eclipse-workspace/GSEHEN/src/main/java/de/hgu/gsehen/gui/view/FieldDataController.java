@@ -1,6 +1,6 @@
 package de.hgu.gsehen.gui.view;
 
-import static de.hgu.gsehen.util.CollectionUtil.getKeyForValue;
+import static de.hgu.gsehen.util.JavaFxUtil.noneIsEmpty;
 
 import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXTextField;
@@ -15,12 +15,11 @@ import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
 import de.hgu.gsehen.model.WeatherDataSource;
 import de.hgu.gsehen.util.DBUtil;
-import java.text.SimpleDateFormat;
+import de.hgu.gsehen.util.PluginUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.TreeMap;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -29,10 +28,11 @@ import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.BorderPane;
@@ -47,7 +47,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
@@ -60,7 +59,6 @@ public class FieldDataController extends Application
 
   private List<SoilProfile> soilProfileList;
   private List<WeatherDataSource> weatherDataSourceList;
-  private FileChooser filePath;
 
   private TreeItem<Drawable> selectedItem;
   private int currentItem;
@@ -95,40 +93,16 @@ public class FieldDataController extends Application
   private Button saveField;
 
   private JFXTextField weatherDataName;
-  private JFXTextField interval;
-  private JFXTextField windspeed;
-  private JFXTextField dateFormat;
-  private ChoiceBox<String> localeId;
-  private JFXTextField path;
-  private JFXTextField locationLat;
-  private JFXTextField locationLng;
-  private JFXTextField metersAbove;
+  private ChoiceBox<String> weatherDataPluginJsFileName;
+  private CheckBox weatherDataManualImport;
+  private CheckBox weatherDataAutomaticImport;
+  private JFXTextField weatherDataAutomaticImportIntervalSeconds;
   private JFXTextField soilDepth;
   private JFXTextField soilManualKc;
   private JFXTextField soilManualZone;
   private JFXTextField soilManualRain;
   private JFXTextField soilManualPause;
-  private TreeMap<String, String> javaLocaleMap;
   private Text dateError = new Text();
-
-  private void fillJavaLocaleMap(final Locale selectedLocale) {
-    javaLocaleMap = new TreeMap<String, String>();
-    java.lang.reflect.Field[] fieldArray = Locale.class.getFields();
-    for (int i = 0; i < fieldArray.length; i++) {
-      if (fieldArray[i].getType().equals(Locale.class)) {
-        String language;
-        try {
-          language = ((Locale) fieldArray[i].get(null)).getDisplayLanguage(selectedLocale);
-        } catch (Exception e) {
-          language = null;
-        }
-        if (language != null && language.length() > 0) {
-          final String fieldName = fieldArray[i].getName();
-          javaLocaleMap.put(language + " (" + fieldName + ")", fieldName);
-        }
-      }
-    }
-  }
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -137,7 +111,6 @@ public class FieldDataController extends Application
 
     final Locale selLocale = gsehenInstance.getSelectedLocale();
     mainBundle = ResourceBundle.getBundle("i18n.main", selLocale);
-    fillJavaLocaleMap(selLocale);
 
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
   }
@@ -473,7 +446,7 @@ public class FieldDataController extends Application
     tabPane.getTabs().removeAll(mapViewTab, plotViewTab, logViewTab);
 
     // Name
-    Text weatherDataLabel = new Text(mainBundle.getString("fieldview.weatherdataname"));
+    Text weatherDataLabel = new Text(mainBundle.getString("fieldview.weatherdatalabel"));
     weatherDataLabel.setFont(Font.font("Arial", 14));
     weatherDataName = new JFXTextField();
 
@@ -504,151 +477,62 @@ public class FieldDataController extends Application
     center.getRowConstraints().add(0, rowEmpty);
     center.getRowConstraints().add(1, rowEmpty);
 
-    // Messintervall
-    Text intervalLabel = new Text(mainBundle.getString("fieldview.interval"));
-    intervalLabel.setFont(Font.font("Arial", 14));
-    interval = new JFXTextField();
-    interval.textProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue,
-          String newValue) {
-        if (!newValue.matches("\\d*")) {
-          interval.setText(newValue.replaceAll("[^\\d]", ""));
-        }
-      }
-    });
+    // Plug-in
+    Text weatherDataPluginJsFileNameLabel =
+        new Text(mainBundle.getString("fieldview.weatherdatapluginjsfilenamelabel"));
+    weatherDataPluginJsFileNameLabel.setFont(Font.font("Arial", 14));
+    weatherDataPluginJsFileName = new ChoiceBox<String>();
+    weatherDataPluginJsFileName.getItems().addAll(PluginUtil.getPluginJsFileNames());
 
-    // Windgeschwindigkeit
-    Text windspeedLabel = new Text(mainBundle.getString("fieldview.windspeed"));
-    windspeedLabel.setFont(Font.font("Arial", 14));
-    windspeed = new JFXTextField();
-    windspeed.textProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue,
-          String newValue) {
-        if (newValue != null) {
-          if (!gsehenInstance.isParseable(newValue)) {
-            windspeed.setText(oldValue);
+    // Manual Import?
+    Text weatherDataManualImportLabel =
+        new Text(mainBundle.getString("fieldview.weatherdatamanualimportlabel"));
+    weatherDataManualImportLabel.setFont(Font.font("Arial", 14));
+    weatherDataManualImport = new CheckBox();
+
+    // Automatic Import?
+    Text weatherDataAutomaticImportLabel =
+        new Text(mainBundle.getString("fieldview.weatherdataautomaticimportlabel"));
+    weatherDataAutomaticImportLabel.setFont(Font.font("Arial", 14));
+    weatherDataAutomaticImport = new CheckBox();
+
+    // Automatic Import interval
+    Text weatherDataAutomaticImportIntervalSecondsLabel =
+        new Text(mainBundle.getString("fieldview.weatherdataautomaticimportintervalsecondslabel"));
+    weatherDataAutomaticImportIntervalSecondsLabel.setFont(Font.font("Arial", 14));
+    weatherDataAutomaticImportIntervalSeconds = new JFXTextField();
+    weatherDataAutomaticImportIntervalSeconds.textProperty().addListener(
+        new ChangeListener<String>() {
+          @Override
+          public void changed(ObservableValue<? extends String> observable, String oldValue,
+              String newValue) {
+            if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
+              weatherDataAutomaticImportIntervalSeconds.setText(oldValue);
+            }
           }
-        }
-      }
-    });
-
-    // Datumsformat
-    Text dateFormatLabel = new Text(mainBundle.getString("fieldview.dateformat"));
-    dateFormatLabel.setFont(Font.font("Arial", 14));
-    dateFormat = new JFXTextField();
-    Hyperlink dateFormatExample =
-        new Hyperlink(mainBundle.getString("fieldview.dateformatexample"));
-    dateFormatExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
-    dateFormatExample.setTextFill(Color.BLUE);
-    dateFormatExample.setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent event) {
-        getHostServices().showDocument(
-            "https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html");
-      }
-    });
-
-    // Zahlenformat
-    Text localeIdLabel = new Text(mainBundle.getString("fieldview.localeid"));
-    localeIdLabel.setFont(Font.font("Arial", 14));
-    localeId = new ChoiceBox<String>();
-    localeId.getItems().addAll(javaLocaleMap.keySet());
-
-    // Dateipfad
-    Text filePathLabel = new Text(mainBundle.getString("fieldview.filepath"));
-    filePathLabel.setFont(Font.font("Arial", 14));
-    path = new JFXTextField();
-    Button fileChooserButton = new Button(mainBundle.getString("fieldview.filechooserbutton"));
-    fileChooserButton.setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent event) {
-        Stage stage = new Stage();
-        filePath = new FileChooser();
-        filePath.setTitle(mainBundle.getString("fieldview.filechooser"));
-        path.setText(filePath.showOpenDialog(stage).getAbsolutePath());
-      }
-    });
-
-    // Latitude
-    Text locationLatLabel = new Text(mainBundle.getString("fieldview.locationlat"));
-    locationLatLabel.setFont(Font.font("Arial", 14));
-    locationLat = new JFXTextField();
-    locationLat.textProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue,
-          String newValue) {
-        if (newValue != null) {
-          if (!gsehenInstance.isParseable(newValue)) {
-            locationLat.setText(oldValue);
-          }
-        }
-      }
-    });
-    Text locationLatExample = new Text(mainBundle.getString("fieldview.locationlatexample"));
-    locationLatExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
-
-    // Longitude
-    Text locationLngLabel = new Text(mainBundle.getString("fieldview.locationlng"));
-    locationLngLabel.setFont(Font.font("Arial", 14));
-    locationLng = new JFXTextField();
-    locationLng.textProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue,
-          String newValue) {
-        if (newValue != null) {
-          if (!gsehenInstance.isParseable(newValue)) {
-            locationLng.setText(oldValue);
-          }
-        }
-      }
-    });
-    Text locationLngExample = new Text(mainBundle.getString("fieldview.locationlngexample"));
-    locationLngExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
-
-    // Standort (Meter ü. NN)
-    Text metersAboveLabel = new Text(mainBundle.getString("fieldview.metersabove"));
-    metersAboveLabel.setFont(Font.font("Arial", 14));
-    metersAbove = new JFXTextField();
-    metersAbove.textProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue,
-          String newValue) {
-        if (newValue != null) {
-          if (!gsehenInstance.isParseable(newValue)) {
-            metersAbove.setText(oldValue);
-          }
-        }
-      }
-    });
+        });
 
     // Set Row & Column Index for Nodes
-    GridPane.setConstraints(intervalLabel, 0, 0);
-    GridPane.setConstraints(interval, 1, 0);
-    GridPane.setConstraints(windspeedLabel, 0, 1);
-    GridPane.setConstraints(windspeed, 1, 1);
-    GridPane.setConstraints(dateFormatLabel, 0, 2);
-    GridPane.setConstraints(dateFormat, 1, 2);
-    GridPane.setConstraints(dateFormatExample, 2, 2);
-    GridPane.setConstraints(localeIdLabel, 0, 3);
-    GridPane.setConstraints(localeId, 1, 3);
-    GridPane.setConstraints(filePathLabel, 0, 4);
-    GridPane.setConstraints(path, 1, 4);
-    GridPane.setConstraints(fileChooserButton, 2, 4);
-    GridPane.setConstraints(locationLatLabel, 0, 5);
-    GridPane.setConstraints(locationLat, 1, 5);
-    GridPane.setConstraints(locationLatExample, 2, 5);
-    GridPane.setConstraints(locationLngLabel, 0, 6);
-    GridPane.setConstraints(locationLng, 1, 6);
-    GridPane.setConstraints(locationLngExample, 2, 6);
-    GridPane.setConstraints(metersAboveLabel, 0, 7);
-    GridPane.setConstraints(metersAbove, 1, 7);
+    GridPane.setConstraints(weatherDataPluginJsFileNameLabel, 0, 0);
+    GridPane.setConstraints(weatherDataPluginJsFileName, 1, 0);
+    GridPane.setConstraints(weatherDataManualImportLabel, 0, 1);
+    GridPane.setConstraints(weatherDataManualImport, 1, 1);
+    GridPane.setConstraints(weatherDataAutomaticImportLabel, 0, 2);
+    GridPane.setConstraints(weatherDataAutomaticImport, 1, 2);
+    GridPane.setConstraints(weatherDataAutomaticImportIntervalSecondsLabel, 0, 3);
+    GridPane.setConstraints(weatherDataAutomaticImportIntervalSeconds, 1, 3);
 
-    center.getChildren().addAll(intervalLabel, interval, windspeedLabel, windspeed, dateFormatLabel,
-        dateFormat, dateFormatExample, localeIdLabel, localeId, filePathLabel, path,
-        fileChooserButton, locationLatLabel, locationLat, locationLatExample, locationLngLabel,
-        locationLng, locationLngExample, metersAboveLabel, metersAbove);
+    // Add nodes
+    center.getChildren().addAll(
+        weatherDataPluginJsFileNameLabel,
+        weatherDataPluginJsFileName,
+        weatherDataManualImportLabel,
+        weatherDataManualImport,
+        weatherDataAutomaticImportLabel,
+        weatherDataAutomaticImport,
+        weatherDataAutomaticImportIntervalSecondsLabel,
+        weatherDataAutomaticImportIntervalSeconds
+    );
 
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setContent(center);
@@ -675,27 +559,14 @@ public class FieldDataController extends Application
       @Override
       public void handle(ActionEvent arg0) {
         weatherDataSourceList.remove(selectedWeatherDataSource);
-        if (!weatherDataName.getText().trim().isEmpty() && !interval.getText().trim().isEmpty()
-            && !windspeed.getText().trim().isEmpty() && !dateFormat.getText().trim().isEmpty()
-            && !localeId.getSelectionModel().isEmpty() && !path.getText().trim().isEmpty()
-            && !locationLat.getText().trim().isEmpty() && !locationLng.getText().trim().isEmpty()
-            && !metersAbove.getText().trim().isEmpty()) {
+        System.out.println(weatherDataSourceList.size());
+        if (noneIsEmpty(new TextField[] {
+            weatherDataName, weatherDataAutomaticImportIntervalSeconds
+        })) {
           try {
-            @SuppressWarnings("unused")
-            SimpleDateFormat sdf = new SimpleDateFormat(dateFormat.getText());
-
             pane.getChildren().clear();
             treeTableView.setVisible(true);
-            wds = new WeatherDataSource(DBUtil.generateUuid());
-            wds.setName(weatherDataName.getText());
-            wds.setMeasIntervalSeconds(Integer.valueOf(interval.getText()));
-            wds.setWindspeedMeasHeightMeters(gsehenInstance.parseDouble(windspeed.getText()));
-            wds.setDateFormatString(dateFormat.getText());
-            wds.setNumberLocaleId(javaLocaleMap.get(localeId.getValue()));
-            wds.setDataFilePath(path.getText());
-            wds.setLocationLat(gsehenInstance.parseDouble(locationLat.getText()));
-            wds.setLocationLng(gsehenInstance.parseDouble(locationLng.getText()));
-            wds.setLocationMetersAboveSeaLevel(gsehenInstance.parseDouble(metersAbove.getText()));
+            setWeatherDataAndValues();
 
             weatherDataSourceList.add(wds);
             pane.getChildren().clear();
@@ -737,6 +608,19 @@ public class FieldDataController extends Application
     pane.setBottom(bottomBox);
   }
 
+  private void setWeatherDataAndValues() {
+    wds = new WeatherDataSource(DBUtil.generateUuid());
+    wds.setName(weatherDataName.getText());
+    wds.setPluginJsFileName(weatherDataPluginJsFileName.getValue());
+    wds.setManualImportActive(weatherDataManualImport.isSelected());
+    wds.setAutomaticImportActive(weatherDataAutomaticImport.isSelected());
+    wds.setAutomaticImportFrequencySeconds(
+        gsehenInstance.parseDouble(
+            weatherDataAutomaticImportIntervalSeconds.getText()
+        )
+    );
+  }
+
   /**
    * Fills JFXTextFields with correct values ("Wetterdatenquelle bearbeiten").
    */
@@ -744,19 +628,14 @@ public class FieldDataController extends Application
     selectedWeatherDataSource = weatherData.getSelectionModel().getSelectedItem();
     if (selectedWeatherDataSource != null) {
       weatherDataName.setText(selectedWeatherDataSource.getName());
-      interval.setText(String.valueOf(selectedWeatherDataSource.getMeasIntervalSeconds()));
-      windspeed.setText(gsehenInstance
-          .formatDoubleOneDecimal(selectedWeatherDataSource.getWindspeedMeasHeightMeters()));
-      dateFormat.setText(selectedWeatherDataSource.getDateFormatString());
-      localeId.getSelectionModel()
-          .select(getKeyForValue(selectedWeatherDataSource.getNumberLocaleId(), javaLocaleMap));
-      path.setText(selectedWeatherDataSource.getDataFilePath());
-      locationLat.setText(
-          gsehenInstance.formatDoubleMoreDecimal(selectedWeatherDataSource.getLocationLat()));
-      locationLng.setText(
-          gsehenInstance.formatDoubleMoreDecimal(selectedWeatherDataSource.getLocationLng()));
-      metersAbove.setText(gsehenInstance
-          .formatDoubleOneDecimal(selectedWeatherDataSource.getLocationMetersAboveSeaLevel()));
+      weatherDataPluginJsFileName.setValue(selectedWeatherDataSource.getPluginJsFileName());
+      weatherDataManualImport.setSelected(selectedWeatherDataSource.isManualImportActive());
+      weatherDataAutomaticImport.setSelected(selectedWeatherDataSource.isAutomaticImportActive());
+      weatherDataAutomaticImportIntervalSeconds.setText(
+          gsehenInstance.formatDoubleTwoDecimal(
+              selectedWeatherDataSource.getAutomaticImportFrequencySeconds()
+          )
+      );
     }
   }
 
