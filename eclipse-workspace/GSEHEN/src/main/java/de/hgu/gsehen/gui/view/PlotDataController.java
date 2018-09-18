@@ -9,6 +9,7 @@ import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.RecommendedActionChanged;
 import de.hgu.gsehen.gui.CropPhase;
+import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
 import de.hgu.gsehen.model.CropRootingZone;
@@ -98,6 +99,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   private Text nameLabel;
   private Text areaLabel;
+  private Text locationLabel;
   private Text rootingZoneLabel;
   private Text soilStartLabel;
   private Text soilStartValueLabel;
@@ -107,6 +109,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private JFXTextField name;
   private JFXTextField rootingZone;
   private Text area;
+  private Text location;
   private DatePicker soilStart;
   private DatePicker cropStart;
   private JFXSlider soilStartValue;
@@ -127,9 +130,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     cropList = gsehenInstance.getCrops();
 
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
-    
-    gsehenInstance.registerForEvent(RecommendedActionChanged.class,
-        event -> setChartData());
+
+    gsehenInstance.registerForEvent(RecommendedActionChanged.class, event -> setChartData());
 
     mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
   }
@@ -182,6 +184,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     areaLabel.setFont(Font.font("Arial", 14));
     area = new Text("");
     area.setFont(Font.font("Arial", 14));
+
+    // Lage
+    locationLabel = new Text(mainBundle.getString("plotview.location"));
+    locationLabel.setFont(Font.font("Arial", 14));
+    location = new Text("");
+    location.setFont(Font.font("Arial", 14));
 
     // Max. durchw. Zone
     rootingZoneLabel = new Text(mainBundle.getString("plotview.rootingzone"));
@@ -444,26 +452,29 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane.setConstraints(name, 1, 0);
     GridPane.setConstraints(areaLabel, 0, 1);
     GridPane.setConstraints(area, 1, 1);
-    GridPane.setConstraints(rootingZoneLabel, 0, 2);
-    GridPane.setConstraints(rootingZone, 1, 2);
-    GridPane.setConstraints(cropStartLabel, 0, 3);
-    GridPane.setConstraints(cropStart, 1, 3);
-    GridPane.setConstraints(soilStartLabel, 0, 4);
-    GridPane.setConstraints(soilStart, 1, 4);
-    GridPane.setConstraints(soilStartValueLabel, 0, 5);
-    GridPane.setConstraints(soilStartValue, 1, 5);
-    GridPane.setConstraints(crop, 0, 6);
-    GridPane.setConstraints(cropChoiceBox, 1, 6);
-    GridPane.setConstraints(tablePane, 0, 7, 3, 1, HPos.CENTER, VPos.CENTER, Priority.ALWAYS,
+    GridPane.setConstraints(locationLabel, 0, 2);
+    GridPane.setConstraints(location, 1, 2);
+    GridPane.setConstraints(rootingZoneLabel, 0, 3);
+    GridPane.setConstraints(rootingZone, 1, 3);
+    GridPane.setConstraints(cropStartLabel, 0, 4);
+    GridPane.setConstraints(cropStart, 1, 4);
+    GridPane.setConstraints(soilStartLabel, 0, 5);
+    GridPane.setConstraints(soilStart, 1, 5);
+    GridPane.setConstraints(soilStartValueLabel, 0, 6);
+    GridPane.setConstraints(soilStartValue, 1, 6);
+    GridPane.setConstraints(crop, 0, 7);
+    GridPane.setConstraints(cropChoiceBox, 1, 7);
+    GridPane.setConstraints(tablePane, 0, 8, 3, 1, HPos.CENTER, VPos.CENTER, Priority.ALWAYS,
         Priority.ALWAYS);
-    GridPane.setConstraints(chart, 0, 8, 3, 1);
-    GridPane.setConstraints(scalingFactorLabel, 0, 9);
-    GridPane.setConstraints(scalingFactor, 1, 9, 2, 1);
-    GridPane.setConstraints(scalingValue, 3, 9);
+    GridPane.setConstraints(chart, 0, 9, 3, 1);
+    GridPane.setConstraints(scalingFactorLabel, 0, 10);
+    GridPane.setConstraints(scalingFactor, 1, 10, 2, 1);
+    GridPane.setConstraints(scalingValue, 3, 10);
 
-    centerGrid.getChildren().addAll(nameLabel, name, areaLabel, area, rootingZoneLabel, rootingZone,
-        cropStartLabel, cropStart, soilStartLabel, soilStart, soilStartValueLabel, soilStartValue,
-        crop, cropChoiceBox, tablePane, chart, scalingFactorLabel, scalingFactor, scalingValue);
+    centerGrid.getChildren().addAll(nameLabel, name, areaLabel, area, locationLabel, location,
+        rootingZoneLabel, rootingZone, cropStartLabel, cropStart, soilStartLabel, soilStart,
+        soilStartValueLabel, soilStartValue, crop, cropChoiceBox, tablePane, chart,
+        scalingFactorLabel, scalingFactor, scalingValue);
 
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setContent(centerGrid);
@@ -780,10 +791,28 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                   plot = (Plot) selectedItem.getValue();
                   field = (Field) selectedItem.getParent().getValue();
 
+                  if (plot.getLocation() == null) {
+                    DecimalFormat df = new DecimalFormat("#.######");
+                    GeoPoint location = new GeoPoint(
+                        gsehenInstance.parseDouble(
+                            df.format(plot.getPolygon().getGeoPoints().get(0).getLat())),
+                        gsehenInstance.parseDouble(
+                            df.format(plot.getPolygon().getGeoPoints().get(0).getLng())));
+                    plot.setLocation(location);
+                  }
+
                   name.setText(plot.getName());
 
                   area.setText(
                       gsehenInstance.formatDoubleOneDecimal(plot.getPolygon().calculateArea()));
+
+                  if (plot.getLocation() != null) {
+                    location.setText(String
+                        .valueOf(plot.getLocation().getLat() + " ("
+                            + mainBundle.getString("plotview.lat") + ")\n")
+                        + String.valueOf(plot.getLocation().getLng() + " ("
+                            + mainBundle.getString("plotview.lng") + ")"));
+                  }
 
                   if (plot.getScalingFactor() != null) {
                     scalingFactor.setValue((plot.getScalingFactor() * 100) - 100);

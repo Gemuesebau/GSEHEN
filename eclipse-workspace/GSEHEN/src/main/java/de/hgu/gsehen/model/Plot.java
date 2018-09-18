@@ -1,5 +1,9 @@
 package de.hgu.gsehen.model;
 
+import de.hgu.gsehen.gsbalance.RecommendedAction;
+import de.hgu.gsehen.gui.GeoPoint;
+import de.hgu.gsehen.gui.GeoPolygon;
+
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -8,9 +12,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
-
-import de.hgu.gsehen.gsbalance.RecommendedAction;
-import de.hgu.gsehen.gui.GeoPolygon;
 
 @Entity
 public class Plot extends Drawable {
@@ -24,7 +25,7 @@ public class Plot extends Drawable {
   @OneToOne(cascade = {CascadeType.ALL})
   private GeoPolygon polygon;
   @OneToOne(cascade = {CascadeType.ALL})
-  private Location location;
+  private GeoPoint location;
   private Double scalingFactor;
   @OneToOne(cascade = {CascadeType.ALL})
   private WeatherData weatherData;
@@ -88,11 +89,11 @@ public class Plot extends Drawable {
     this.polygon = polygon;
   }
 
-  public Location getLocation() {
+  public GeoPoint getLocation() {
     return location;
   }
 
-  public void setLocation(Location location) {
+  public void setLocation(GeoPoint location) {
     this.location = location;
   }
 
@@ -245,7 +246,7 @@ public class Plot extends Drawable {
    * @param cropEnd End date of the crop
    * @param isActive Is the plot active and not archived
    */
-  public Plot(String name, double area, GeoPolygon polygon, Location location, Double scalingFactor,
+  public Plot(String name, double area, GeoPolygon polygon, GeoPoint location, Double scalingFactor,
       WeatherData weatherData, Integer rootingZone, WaterBalance waterBalance,
       ManualData manualData, RecommendedAction recommendedAction, Date soilStartDate,
       Double soilStartValue, Boolean calculationPaused, Crop crop,

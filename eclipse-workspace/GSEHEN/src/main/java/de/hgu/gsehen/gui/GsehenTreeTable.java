@@ -62,8 +62,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private Field autoField;
   protected final ResourceBundle mainBundle;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends 
-      GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
+  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener
+      <? extends GsehenEvent>>> eventListeners = new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -222,12 +222,12 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
               typeLabel.setFont(Font.font("Arial", 12));
               type = new Text(selectedItem.getValue().getClass().getSimpleName());
               type.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-              HBox locationBox = new HBox();
-              locationBox.getChildren().addAll(typeLabel, type);
+              HBox typeBox = new HBox();
+              typeBox.getChildren().addAll(typeLabel, type);
 
               VBox topBox = new VBox(10);
               topBox.setPadding(new Insets(10, 10, 10, 10));
-              topBox.getChildren().addAll(nameBox, locationBox);
+              topBox.getChildren().addAll(nameBox, typeBox);
               detailPane.setTop(topBox);
 
               VBox centerBox = new VBox(10);
@@ -299,6 +299,18 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 attribute1Box = new HBox();
                 attribute1Box.getChildren().addAll(attributeLabel1, attribute1);
 
+                Text locationLatLabel = new Text(mainBundle.getString("plotview.lat") + ":");
+                Text locationLat = new Text(String.valueOf(plot.getLocation().getLat()));
+                Text locationLngLabel = new Text(mainBundle.getString("plotview.lng") + ":");
+                Text locationLng = new Text(String.valueOf(plot.getLocation().getLng()));
+
+                HBox locationLatBox = new HBox();
+                locationLatBox.getChildren().addAll(locationLatLabel, locationLat);
+                HBox locationLngBox = new HBox();
+                locationLngBox.getChildren().addAll(locationLngLabel, locationLng);
+                VBox locationBox = new VBox(10);
+                locationBox.getChildren().addAll(locationLatBox, locationLngBox);
+
                 attributeLabel2 = new Text(mainBundle.getString("plotview.rootingzone"));
 
                 if (plot.getRootingZone() != null) {
@@ -340,8 +352,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 HBox soilValueBox = new HBox();
                 soilValueBox.getChildren().addAll(soilValueLabel, soilValue);
 
-                centerBox.getChildren().addAll(attribute1Box, attribute2Box, attribute3Box,
-                    soilStartBox, soilValueBox);
+                centerBox.getChildren().addAll(attribute1Box, locationBox, attribute2Box,
+                    attribute3Box, soilStartBox, soilValueBox);
 
                 Text actionLabel = new Text(mainBundle.getString("treetableview.watering"));
 
@@ -369,6 +381,10 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 if (plot.getIsActive() != null && plot.getIsActive()) {
                   attributeLabel1.setFont(Font.font("Arial", 12));
                   attribute1.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                  locationLatLabel.setFont(Font.font("Arial", 12));
+                  locationLat.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                  locationLngLabel.setFont(Font.font("Arial", 12));
+                  locationLng.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                   attributeLabel2.setFont(Font.font("Arial", 12));
                   attribute2.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                   attributeLabel3.setFont(Font.font("Arial", 12));
@@ -386,6 +402,10 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   type.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
                   attributeLabel1.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
                   attribute1.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
+                  locationLatLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+                  locationLat.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
+                  locationLngLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+                  locationLng.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
                   attributeLabel2.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
                   attribute2.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
                   attributeLabel3.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
