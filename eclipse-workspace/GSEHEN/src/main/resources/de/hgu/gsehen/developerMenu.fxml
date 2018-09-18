@@ -7,9 +7,7 @@
 	<MenuItem fx:id="reloadMapViewHTMLMenuItem" mnemonicParsing="false" text="%menu.view.developer.reload.maps" onAction="#reloadMapViewHTML" />
 	<MenuItem fx:id="jsPromptForMapViewMenuItem" mnemonicParsing="false" text="%menu.view.developer.jsprompt.maps" onAction="#jsPromptForMapView" />
 	<SeparatorMenuItem />
-	<!-- <MenuItem fx:id="reloadFarmViewHTMLMenuItem" mnemonicParsing="false" text="%menu.view.developer.reload.farms" onAction="#reloadFarmViewHTML" />
+	<MenuItem fx:id="reloadFarmViewHTMLMenuItem" mnemonicParsing="false" text="%menu.view.developer.reload.farms" onAction="#reloadFarmViewHTML" />
 	<MenuItem fx:id="jsPromptForFarmViewMenuItem" mnemonicParsing="false" text="%menu.view.developer.jsprompt.farms" onAction="#jsPromptForFarmView" />
-	<SeparatorMenuItem /> -->
-	<MenuItem fx:id="updateDayDataMenuItem" mnemonicParsing="false" text="%menu.view.developer.update.day.data" onAction="#updateDayData" />
   </items>
 </Menu>

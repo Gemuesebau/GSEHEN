@@ -24,10 +24,13 @@
 							<items>
 								<MenuItem mnemonicParsing="false" onAction="#loadUserData" text="%menu.file.load" />
 								<MenuItem mnemonicParsing="false" onAction="#saveUserData" text="%menu.file.save" />
+								<SeparatorMenuItem />
+								<MenuItem fx:id="updateDayDataMenuItem" mnemonicParsing="false" text="%menu.view.developer.update.day.data" onAction="#updateDayData" />
+								<SeparatorMenuItem />
 								<MenuItem mnemonicParsing="false" onAction="#exit" text="%menu.file.exit" />
 							</items>
 						</Menu>
-						<Menu mnemonicParsing="false" text="%menu.view">
+						<!-- <Menu mnemonicParsing="false" text="%menu.view">
 							<items>
 								<Menu mnemonicParsing="false" text="%menu.view.bounds">
 									<items>
@@ -37,7 +40,7 @@
 								</Menu>
 								<fx:include source="developerMenu.fxml" />
 							</items>
-						</Menu>
+						</Menu> -->
 						<Menu mnemonicParsing="false" text="%menu.help">
 							<items>
 								<MenuItem fx:id="contactMenuItem" mnemonicParsing="false" onAction="#openContactView" text="%menu.help.contact" />

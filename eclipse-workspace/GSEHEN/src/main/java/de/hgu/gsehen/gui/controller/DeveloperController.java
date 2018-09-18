@@ -45,9 +45,4 @@ public class DeveloperController {
   public void jsPromptForMapView() {
     Gsehen.jsPrompt(Gsehen.getMaps());
   }
-
-  @FXML
-  public void updateDayData(ActionEvent e) {
-    Gsehen.updateDayData();
-  }
 }

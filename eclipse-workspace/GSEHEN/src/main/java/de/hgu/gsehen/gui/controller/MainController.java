@@ -190,4 +190,9 @@ public class MainController {
   public void setLogViewTab(Tab logViewTab) {
     this.logViewTab = logViewTab;
   }
+
+  @FXML
+  public void updateDayData(ActionEvent e) {
+    Gsehen.updateDayData();
+  }
 }
