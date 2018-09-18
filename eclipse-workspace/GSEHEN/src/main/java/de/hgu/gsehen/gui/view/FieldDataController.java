@@ -92,11 +92,15 @@ public class FieldDataController extends Application
   private VBox center;
   private Button saveField;
 
-  private JFXTextField weatherDataName;
+  private JFXTextField weatherDataSourceName;
   private ChoiceBox<String> weatherDataPluginJsFileName;
   private CheckBox weatherDataManualImport;
   private CheckBox weatherDataAutomaticImport;
   private JFXTextField weatherDataAutomaticImportIntervalSeconds;
+  private JFXTextField weatherDataSourceLocationLat;
+  private JFXTextField weatherDataSourceLocationLng;
+  private JFXTextField weatherDataSourceMetersAbove;
+
   private JFXTextField soilDepth;
   private JFXTextField soilManualKc;
   private JFXTextField soilManualZone;
@@ -447,10 +451,10 @@ public class FieldDataController extends Application
     // Name
     Text weatherDataLabel = new Text(mainBundle.getString("fieldview.weatherdatalabel"));
     weatherDataLabel.setFont(Font.font("Arial", 14));
-    weatherDataName = new JFXTextField();
+    weatherDataSourceName = new JFXTextField();
 
     HBox nameBox = new HBox();
-    nameBox.getChildren().addAll(weatherDataLabel, weatherDataName);
+    nameBox.getChildren().addAll(weatherDataLabel, weatherDataSourceName);
     nameBox.setPadding(new Insets(20, 0, 20, 20));
 
     pane.setTop(nameBox);
@@ -511,6 +515,63 @@ public class FieldDataController extends Application
           }
         });
 
+    // Latitude
+    Text weatherDataSourceLocationLatLabel =
+        new Text(mainBundle.getString("fieldview.locationlat"));
+    weatherDataSourceLocationLatLabel.setFont(Font.font("Arial", 14));
+    weatherDataSourceLocationLat = new JFXTextField();
+    weatherDataSourceLocationLat.textProperty().addListener(new ChangeListener<String>() {
+      @Override
+      public void changed(ObservableValue<? extends String> observable, String oldValue,
+          String newValue) {
+        if (newValue != null) {
+          if (!gsehenInstance.isParseable(newValue)) {
+            weatherDataSourceLocationLat.setText(oldValue);
+          }
+        }
+      }
+    });
+    Text weatherDataSourceLocationLatExample =
+        new Text(mainBundle.getString("fieldview.locationlatexample"));
+    weatherDataSourceLocationLatExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+
+    // Longitude
+    Text weatherDataSourceLocationLngLabel =
+        new Text(mainBundle.getString("fieldview.locationlng"));
+    weatherDataSourceLocationLngLabel.setFont(Font.font("Arial", 14));
+    weatherDataSourceLocationLng = new JFXTextField();
+    weatherDataSourceLocationLng.textProperty().addListener(new ChangeListener<String>() {
+      @Override
+      public void changed(ObservableValue<? extends String> observable, String oldValue,
+          String newValue) {
+        if (newValue != null) {
+          if (!gsehenInstance.isParseable(newValue)) {
+            weatherDataSourceLocationLng.setText(oldValue);
+          }
+        }
+      }
+    });
+    Text weatherDataSourceLocationLngExample =
+        new Text(mainBundle.getString("fieldview.locationlngexample"));
+    weatherDataSourceLocationLngExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+
+    // Standort (Meter ü. NN)
+    Text weatherDataSourceMetersAboveLabel =
+        new Text(mainBundle.getString("fieldview.metersabove"));
+    weatherDataSourceMetersAboveLabel.setFont(Font.font("Arial", 14));
+    weatherDataSourceMetersAbove = new JFXTextField();
+    weatherDataSourceMetersAbove.textProperty().addListener(new ChangeListener<String>() {
+      @Override
+      public void changed(ObservableValue<? extends String> observable, String oldValue,
+          String newValue) {
+        if (newValue != null) {
+          if (!gsehenInstance.isParseable(newValue)) {
+            weatherDataSourceMetersAbove.setText(oldValue);
+          }
+        }
+      }
+    });
+
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(weatherDataPluginJsFileNameLabel, 0, 0);
     GridPane.setConstraints(weatherDataPluginJsFileName, 1, 0);
@@ -520,6 +581,14 @@ public class FieldDataController extends Application
     GridPane.setConstraints(weatherDataAutomaticImport, 1, 2);
     GridPane.setConstraints(weatherDataAutomaticImportIntervalSecondsLabel, 0, 3);
     GridPane.setConstraints(weatherDataAutomaticImportIntervalSeconds, 1, 3);
+    GridPane.setConstraints(weatherDataSourceLocationLatLabel, 0, 4);
+    GridPane.setConstraints(weatherDataSourceLocationLat, 1, 4);
+    GridPane.setConstraints(weatherDataSourceLocationLatExample, 2, 4);
+    GridPane.setConstraints(weatherDataSourceLocationLngLabel, 0, 5);
+    GridPane.setConstraints(weatherDataSourceLocationLng, 1, 5);
+    GridPane.setConstraints(weatherDataSourceLocationLngExample, 2, 5);
+    GridPane.setConstraints(weatherDataSourceMetersAboveLabel, 0, 6);
+    GridPane.setConstraints(weatherDataSourceMetersAbove, 1, 6);
 
     // Add nodes
     center.getChildren().addAll(
@@ -530,7 +599,15 @@ public class FieldDataController extends Application
         weatherDataAutomaticImportLabel,
         weatherDataAutomaticImport,
         weatherDataAutomaticImportIntervalSecondsLabel,
-        weatherDataAutomaticImportIntervalSeconds
+        weatherDataAutomaticImportIntervalSeconds,
+        weatherDataSourceLocationLatLabel,
+        weatherDataSourceLocationLat,
+        weatherDataSourceLocationLatExample,
+        weatherDataSourceLocationLngLabel,
+        weatherDataSourceLocationLng,
+        weatherDataSourceLocationLngExample,
+        weatherDataSourceMetersAboveLabel,
+        weatherDataSourceMetersAbove
     );
 
     ScrollPane scrollPane = new ScrollPane();
@@ -559,7 +636,7 @@ public class FieldDataController extends Application
       public void handle(ActionEvent arg0) {
         weatherDataSourceList.remove(selectedWeatherDataSource);
         if (noneIsEmpty(new TextField[] {
-            weatherDataName, weatherDataAutomaticImportIntervalSeconds
+            weatherDataSourceName, weatherDataAutomaticImportIntervalSeconds
         })) {
           try {
             pane.getChildren().clear();
@@ -608,7 +685,7 @@ public class FieldDataController extends Application
 
   private void setWeatherDataAndValues() {
     wds = new WeatherDataSource(DBUtil.generateUuid());
-    wds.setName(weatherDataName.getText());
+    wds.setName(weatherDataSourceName.getText());
     wds.setPluginJsFileName(weatherDataPluginJsFileName.getValue());
     wds.setManualImportActive(weatherDataManualImport.isSelected());
     wds.setAutomaticImportActive(weatherDataAutomaticImport.isSelected());
@@ -625,7 +702,7 @@ public class FieldDataController extends Application
   private void setWeatherDataTexts() {
     selectedWeatherDataSource = weatherData.getSelectionModel().getSelectedItem();
     if (selectedWeatherDataSource != null) {
-      weatherDataName.setText(selectedWeatherDataSource.getName());
+      weatherDataSourceName.setText(selectedWeatherDataSource.getName());
       weatherDataPluginJsFileName.setValue(selectedWeatherDataSource.getPluginJsFileName());
       weatherDataManualImport.setSelected(selectedWeatherDataSource.isManualImportActive());
       weatherDataAutomaticImport.setSelected(selectedWeatherDataSource.isAutomaticImportActive());

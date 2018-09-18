@@ -123,8 +123,8 @@ public class WeatherDataSource {
     return "{"
         + "  \"measIntervalSeconds\": 600,"
         + "  \"windspeedMeasHeightMeters\": 2,"
-        + "  \"dataFilePath\": \"C:\\\\Users\\\\cwitzke\\\\Documents\\\\10MinDaten.csv\","
-        + "  \"dateFormat\": \"d.M.y\","
+        + "  \"dataFilePath\": \"C:\\\\Users\\\\atappe\\\\Downloads\\\\10MinDaten.csv\","
+        + "  \"dateFormat\": \"y-M-d\","
         + "  \"numberFormat\": \"GERMAN\""
         + "}";
   }

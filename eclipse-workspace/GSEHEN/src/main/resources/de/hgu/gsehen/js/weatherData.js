@@ -13,11 +13,6 @@ fieldview.localeid                       = Zahlenformat gemäß:
 fieldview.filepath                       = Dateipfad der \nWetterdaten-CSV-Datei: 
 fieldview.filechooserbutton              = Datei auswählen 
 fieldview.filechooser                    = Dateipfad zur Wetterdatenquelle 
-fieldview.locationlat                    = Latitude (dezimal): 
-fieldview.locationlatexample             = Beispiel: 51.869026 
-fieldview.locationlng                    = Longitude (dezimal): 
-fieldview.locationlngexample             = Beispiel: 8.917478 
-fieldview.metersabove                    = Standort der Wetterdatenquelle \n(Meter über NN): 
 fieldview.dateerror                      = Falsches Format! 
 
 private TreeMap<String, String> javaLocaleMap;
