@@ -1,5 +1,6 @@
 package de.hgu.gsehen.gui.view;
 
+import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXTextField;
@@ -50,7 +51,6 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ScrollPane;
@@ -268,7 +268,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     Text crop = new Text(mainBundle.getString("plotview.crop"));
     crop.setFont(Font.font("Arial", 14));
 
-    ChoiceBox<Crop> cropChoiceBox = new ChoiceBox<Crop>();
+    JFXComboBox<Crop> cropChoiceBox = new JFXComboBox<Crop>();
     if (!cropList.isEmpty()) {
       for (Crop c : cropList) {
         cropChoiceBox.getItems().add(c);
@@ -489,6 +489,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     // Ernte
     Button harvest = new Button(mainBundle.getString("plotview.harvest"));
+    harvest.setId("glass-grey");
+    harvest.setPrefSize(100, 25);
     harvest.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
@@ -510,6 +512,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     // Plot manuell bewässern (creates a new view)
     Button watering = new Button(mainBundle.getString("plotview.watering"));
+    watering.setId("glass-grey");
+    watering.setPrefSize(200, 25);
     watering.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
@@ -624,6 +628,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         pane.setCenter(center);
 
         Button back = new Button(mainBundle.getString("fieldview.back"));
+        back.setId("glass-grey");
+        back.setPrefSize(100, 25);
         back.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent arg0) {
@@ -642,6 +648,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
         // Bewässerung buchen
         Button book = new Button(mainBundle.getString("plotview.book"));
+        book.setId("glass-grey");
+        book.setPrefSize(200, 25);
         book.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent arg0) {
@@ -709,6 +717,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     // Speichern
     Button save = new Button(mainBundle.getString("button.accept"));
+    save.setId("glass-grey");
+    save.setPrefSize(200, 25);
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
@@ -825,8 +835,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                             + mainBundle.getString("plotview.lat") + ")\n")
                         + String.valueOf(plot.getLocation().getLng() + " ("
                             + mainBundle.getString("plotview.lng") + ")"));
-
-                    location.setTextFill(Color.BLUE);
                     location.setOnAction(new EventHandler<ActionEvent>() {
                       @SuppressWarnings("static-access")
                       @Override

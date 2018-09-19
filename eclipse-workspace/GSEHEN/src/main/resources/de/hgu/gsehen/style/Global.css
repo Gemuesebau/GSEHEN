@@ -8,6 +8,23 @@
     -fx-focus-color: rgb(222.0, 222.0, 222.0);
 }
 
+#glass-grey {
+    -fx-background-color: 
+        linear-gradient(#f2f2f2, #d6d6d6),
+        linear-gradient(#fcfcfc 0.0%, #d9d9d9 20.0%, #d6d6d6 100.0%),
+        linear-gradient(#dddddd 0.0%, #f6f6f6 50.0%);
+    -fx-background-radius: 30.0;
+    -fx-background-insets: 0.0,1.0,1.0;
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow( three-pass-box , rgba(0.0,0.0,0.0,0.6) , 5.0, 0.0 , 0.0 , 1.0 );
+}
+
+.jfx-combo-box {
+    -jfx-focus-color: #4a6d50;
+    -jfx-unfocus-color: #8ed199;
+}
+
 .jfx-text-field {
     -fx-prompt-text-fill: #d18e8e;
     -jfx-focus-color: #4a6d50;
@@ -46,4 +63,23 @@
 
 .tab-selected-line {
     -fx-background-color: -fx-focus-color;
+}
+
+.hyperlink,
+.hyperlink:hover,
+.hyperlink:hover:visited {
+    -fx-text-fill: blue;
+}
+.hyperlink:armed,
+.hyperlink:visited,
+.hyperlink:hover:armed {
+    -fx-text-fill: purple;
+}
+.hyperlink:hover,
+.hyperlink:visited,
+.hyperlink:hover:visited {
+    -fx-underline: true;
+}
+.hyperlink:visited:armed {
+    -fx-underline: false;
 }

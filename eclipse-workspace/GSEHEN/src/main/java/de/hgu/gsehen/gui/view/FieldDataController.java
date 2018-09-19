@@ -2,6 +2,7 @@ package de.hgu.gsehen.gui.view;
 
 import static de.hgu.gsehen.util.JavaFxUtil.noneIsEmpty;
 
+import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXTextField;
 import de.hgu.gsehen.Gsehen;
@@ -16,6 +17,8 @@ import de.hgu.gsehen.model.SoilProfileDepth;
 import de.hgu.gsehen.model.WeatherDataSource;
 import de.hgu.gsehen.util.DBUtil;
 import de.hgu.gsehen.util.PluginUtil;
+
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -29,7 +32,6 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
@@ -79,8 +81,8 @@ public class FieldDataController extends Application
   private JFXTextField name;
   private Text area;
 
-  private ChoiceBox<SoilProfile> currentSoilBox;
-  private ChoiceBox<WeatherDataSource> weatherData;
+  private JFXComboBox<SoilProfile> currentSoilBox;
+  private JFXComboBox<WeatherDataSource> weatherData;
   private SoilProfile sp;
   private WeatherDataSource wds;
   private Button createSoil;
@@ -93,7 +95,7 @@ public class FieldDataController extends Application
   private Button saveField;
 
   private JFXTextField weatherDataSourceName;
-  private ChoiceBox<String> weatherDataPluginJsFileName;
+  private JFXComboBox<String> weatherDataPluginJsFileName;
   private CheckBox weatherDataManualImport;
   private CheckBox weatherDataAutomaticImport;
   private JFXTextField weatherDataAutomaticImportIntervalSeconds;
@@ -162,6 +164,7 @@ public class FieldDataController extends Application
     nameLabel = new Text(mainBundle.getString("fieldview.name"));
     nameLabel.setFont(Font.font("Arial", 14));
     name = new JFXTextField("");
+    name.setPrefSize(150, 25);
 
     // m²
     areaLabel = new Text(mainBundle.getString("fieldview.area"));
@@ -172,7 +175,8 @@ public class FieldDataController extends Application
     // Bodenprofil
     Text soilProfile = new Text(mainBundle.getString("fieldview.soilprofile"));
     soilProfile.setFont(Font.font("Arial", 14));
-    currentSoilBox = new ChoiceBox<SoilProfile>();
+    currentSoilBox = new JFXComboBox<SoilProfile>();
+    currentSoilBox.setPrefSize(200, 25);
     if (!soilProfileList.isEmpty()) {
       for (SoilProfile s : soilProfileList) {
         currentSoilBox.getItems().add(s);
@@ -193,6 +197,8 @@ public class FieldDataController extends Application
     }
 
     Button editProfile = new Button(mainBundle.getString("fieldview.editprofile"));
+    editProfile.setId("glass-grey");
+    editProfile.setPrefSize(200, 25);
     editProfile.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
@@ -200,10 +206,9 @@ public class FieldDataController extends Application
       }
     });
 
-    VBox soilBox = new VBox();
-    soilBox.getChildren().addAll(currentSoilBox, editProfile);
-
     createSoil = new Button(mainBundle.getString("fieldview.createprofile"));
+    createSoil.setId("glass-grey");
+    createSoil.setPrefSize(150, 25);
     createSoil.setOnAction(new EventHandler<ActionEvent>() {
 
       @Override
@@ -212,10 +217,15 @@ public class FieldDataController extends Application
       }
     });
 
+    VBox soilBox = new VBox();
+    soilBox.setSpacing(10);
+    soilBox.getChildren().addAll(editProfile, createSoil);
+
     // Wetterdatenquelle
-    Text weatherDataSource = new Text(mainBundle.getString("fieldview.weatherdatasource"));
+    Text weatherDataSource = new Text(mainBundle.getString("fieldview.weatherdatasource") + ":");
     weatherDataSource.setFont(Font.font("Arial", 14));
-    weatherData = new ChoiceBox<WeatherDataSource>();
+    weatherData = new JFXComboBox<WeatherDataSource>();
+    weatherData.setPrefSize(150, 25);
     if (!weatherDataSourceList.isEmpty()) {
       for (WeatherDataSource s : weatherDataSourceList) {
         weatherData.getItems().add(s);
@@ -236,6 +246,8 @@ public class FieldDataController extends Application
     }
 
     Button editWds = new Button(mainBundle.getString("fieldview.editwds"));
+    editWds.setId("glass-grey");
+    editWds.setPrefSize(200, 25);
     editWds.setOnAction(new EventHandler<ActionEvent>() {
 
       @Override
@@ -247,10 +259,9 @@ public class FieldDataController extends Application
       }
     });
 
-    VBox weatherBox = new VBox();
-    weatherBox.getChildren().addAll(weatherData, editWds);
-
     Button createWds = new Button(mainBundle.getString("fieldview.createwds"));
+    createWds.setId("glass-grey");
+    createWds.setPrefSize(200, 25);
     createWds.setOnAction(new EventHandler<ActionEvent>() {
 
       @Override
@@ -259,8 +270,14 @@ public class FieldDataController extends Application
       }
     });
 
+    VBox weatherBox = new VBox();
+    weatherBox.setSpacing(10);
+    weatherBox.getChildren().addAll(editWds, createWds);
+
     // Speichern
     saveField = new Button(mainBundle.getString("button.accept"));
+    saveField.setId("glass-grey");
+    saveField.setPrefSize(150, 25);
     Text nameError = new Text(mainBundle.getString("fieldview.nameerror"));
     nameError.setFont(Font.font("Verdana", 14));
     nameError.setFill(Color.RED);
@@ -297,15 +314,15 @@ public class FieldDataController extends Application
     GridPane.setConstraints(areaLabel, 0, 1);
     GridPane.setConstraints(area, 1, 1);
     GridPane.setConstraints(soilProfile, 0, 2);
-    GridPane.setConstraints(soilBox, 1, 2);
-    GridPane.setConstraints(createSoil, 2, 2);
+    GridPane.setConstraints(currentSoilBox, 1, 2);
+    GridPane.setConstraints(soilBox, 2, 2);
     GridPane.setConstraints(weatherDataSource, 0, 3);
-    GridPane.setConstraints(weatherBox, 1, 3);
-    GridPane.setConstraints(createWds, 2, 3);
+    GridPane.setConstraints(weatherData, 1, 3);
+    GridPane.setConstraints(weatherBox, 2, 3);
     GridPane.setConstraints(saveField, 0, 5);
 
     grid.getChildren().addAll(nameLabel, name, areaLabel, area, soilProfile, soilBox,
-        weatherDataSource, weatherBox, createSoil, createWds, saveField);
+        weatherDataSource, weatherBox, currentSoilBox, weatherData, saveField);
 
     pane.setTop(grid);
     // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -313,7 +330,7 @@ public class FieldDataController extends Application
     // BOTTOM (necessary for "Aktuell gespeichertes Profil)
     center = new VBox();
     center.setPadding(new Insets(10));
-    center.setSpacing(8);
+    center.setSpacing(10);
     // BOTTOM END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     tabPane = gsehenInstance.getMainController().getJfxTabPane();
@@ -449,16 +466,26 @@ public class FieldDataController extends Application
     treeTableView.setVisible(false);
     tabPane.getTabs().removeAll(mapViewTab, plotViewTab, logViewTab);
 
+    // GridPane - Center Section
+    GridPane top = new GridPane();
+
+    // GridPane Configuration (Padding, Gaps, etc.)
+    top.setPadding(new Insets(20, 20, 20, 20));
+    top.setHgap(15);
+    top.setVgap(15);
+    top.setGridLinesVisible(false);
+
     // Name
     Text weatherDataLabel = new Text(mainBundle.getString("fieldview.weatherdatalabel"));
     weatherDataLabel.setFont(Font.font("Arial", 14));
     weatherDataSourceName = new JFXTextField();
 
-    HBox nameBox = new HBox();
-    nameBox.getChildren().addAll(weatherDataLabel, weatherDataSourceName);
-    nameBox.setPadding(new Insets(20, 0, 20, 20));
+    GridPane.setConstraints(weatherDataLabel, 0, 0);
+    GridPane.setConstraints(weatherDataSourceName, 1, 0);
 
-    pane.setTop(nameBox);
+    top.getChildren().addAll(weatherDataLabel, weatherDataSourceName);
+
+    pane.setTop(top);
 
     // GridPane - Center Section
     GridPane center = new GridPane();
@@ -485,7 +512,7 @@ public class FieldDataController extends Application
     Text weatherDataPluginJsFileNameLabel = new Text(
         mainBundle.getString("fieldview.weatherdatapluginjsfilenamelabel"));
     weatherDataPluginJsFileNameLabel.setFont(Font.font("Arial", 14));
-    weatherDataPluginJsFileName = new ChoiceBox<String>();
+    weatherDataPluginJsFileName = new JFXComboBox<String>();
     weatherDataPluginJsFileName.getItems().addAll(PluginUtil.getPluginJsFileNames());
 
     // Manual Import?
@@ -532,8 +559,10 @@ public class FieldDataController extends Application
         }
       }
     });
+    NumberFormat formatter = NumberFormat.getInstance(gsehenInstance.getSelectedLocale());
     Text weatherDataSourceLocationLatExample = new Text(
-        mainBundle.getString("fieldview.locationlatexample"));
+        mainBundle.getString("fieldview.example") + " " + formatter.format(
+            gsehenInstance.parseDouble(mainBundle.getString("fieldview.locationlatvalue"))));
     weatherDataSourceLocationLatExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
 
     // Longitude
@@ -553,7 +582,8 @@ public class FieldDataController extends Application
       }
     });
     Text weatherDataSourceLocationLngExample = new Text(
-        mainBundle.getString("fieldview.locationlngexample"));
+        mainBundle.getString("fieldview.example") + " " + formatter.format(
+            gsehenInstance.parseDouble(mainBundle.getString("fieldview.locationlngvalue"))));
     weatherDataSourceLocationLngExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
 
     // Standort (Meter ü. NN)
@@ -607,6 +637,8 @@ public class FieldDataController extends Application
     pane.setCenter(scrollPane);
 
     back = new Button(mainBundle.getString("fieldview.back"));
+    back.setId("glass-grey");
+    back.setPrefSize(150, 25);
     back.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
@@ -622,6 +654,8 @@ public class FieldDataController extends Application
     });
 
     save = new Button(mainBundle.getString("button.accept"));
+    save.setId("glass-grey");
+    save.setPrefSize(150, 25);
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
@@ -661,9 +695,11 @@ public class FieldDataController extends Application
     });
 
     buttonBox = new HBox();
+    buttonBox.setSpacing(10);
     buttonBox.getChildren().addAll(back, save);
 
     VBox bottomBox = new VBox(25);
+    bottomBox.setSpacing(10);
     bottomBox.setPadding(new Insets(20, 20, 20, 20));
     bottomBox.getChildren().addAll(buttonBox);
     pane.setBottom(bottomBox);
@@ -796,7 +832,7 @@ public class FieldDataController extends Application
     Soil s = new Soil();
     List<Soil> soils = s.soils();
 
-    ChoiceBox<Soil> soilChoiceBox = new ChoiceBox<Soil>();
+    JFXComboBox<Soil> soilChoiceBox = new JFXComboBox<Soil>();
     soilChoiceBox.getItems().addAll(soils);
     soilChoiceBox.setConverter(new StringConverter<Soil>() {
 
@@ -872,6 +908,8 @@ public class FieldDataController extends Application
 
     // Schicht abschließen
     Button setSoil = new Button(mainBundle.getString("fieldview.setsoil"));
+    setSoil.setId("glass-grey");
+    setSoil.setPrefSize(200, 25);
     setSoil.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
@@ -905,6 +943,8 @@ public class FieldDataController extends Application
 
           // Deletes a soil layer.
           Button delSoil = new Button(mainBundle.getString("fieldview.delsoil"));
+          delSoil.setId("glass-grey");
+          delSoil.setPrefSize(150, 25);
           delSoil.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
@@ -955,6 +995,8 @@ public class FieldDataController extends Application
     // CREATE SOILPROFILE END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     back = new Button(mainBundle.getString("fieldview.back"));
+    back.setId("glass-grey");
+    back.setPrefSize(150, 25);
     back.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
@@ -970,6 +1012,8 @@ public class FieldDataController extends Application
     });
 
     save = new Button(mainBundle.getString("button.accept"));
+    save.setId("glass-grey");
+    save.setPrefSize(150, 25);
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
@@ -1017,6 +1061,7 @@ public class FieldDataController extends Application
     buttonBox.getChildren().addAll(back, save);
 
     VBox bottomBox = new VBox(25);
+    bottomBox.setSpacing(10);
     bottomBox.setPadding(new Insets(20, 20, 20, 20));
     bottomBox.getChildren().addAll(buttonBox);
     pane.setBottom(bottomBox);
@@ -1053,7 +1098,7 @@ public class FieldDataController extends Application
       top.getRowConstraints().add(1, rowEmpty);
 
       SoilProfile currentSoilProfile = currentSoilBox.getValue();
-      
+
       // Name
       Text soilNameLabel = new Text(mainBundle.getString("fieldview.profilename"));
       soilNameLabel.setFont(Font.font("Arial", 14));
@@ -1215,7 +1260,7 @@ public class FieldDataController extends Application
         Soil s = new Soil();
         List<Soil> soils = s.soils();
 
-        ChoiceBox<Soil> soilChoiceBox = new ChoiceBox<Soil>();
+        JFXComboBox<Soil> soilChoiceBox = new JFXComboBox<Soil>();
         soilChoiceBox.getItems().addAll(soils);
         soilChoiceBox.setConverter(new StringConverter<Soil>() {
 
@@ -1305,6 +1350,8 @@ public class FieldDataController extends Application
 
       // Bearbeitung abschließen
       back = new Button(mainBundle.getString("fieldview.editend"));
+      back.setId("glass-grey");
+      back.setPrefSize(200, 25);
       back.setOnAction(new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent arg0) {
@@ -1325,6 +1372,7 @@ public class FieldDataController extends Application
             profileChangeError.setFont(Font.font("Verdana", 14));
             profileChangeError.setFill(Color.RED);
             HBox bottom = new HBox();
+            bottom.setSpacing(10);
             bottom.getChildren().addAll(back, profileChangeError);
             pane.setBottom(bottom);
           }
