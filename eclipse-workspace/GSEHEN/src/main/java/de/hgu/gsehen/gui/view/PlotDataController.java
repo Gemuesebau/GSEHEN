@@ -45,7 +45,7 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
 import javafx.geometry.VPos;
-//import javafx.scene.Node;
+import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -899,6 +899,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
                   setTableData();
 
+                  // setChartData();
                   if (plot.getRecommendedAction() != null
                       && plot.getRecommendedAction().getAvailableWater() != null) {
                     setChartData();
@@ -916,7 +917,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private void setChartData() {
-    waterLevel = plot.getRecommendedAction().getAvailableWater();
+    // waterLevel = plot.getRecommendedAction().getAvailableWater();
+    waterLevel = 1.0;
     if (waterLevel == null) {
       series.setName("/");
     } else {
@@ -927,27 +929,38 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     final List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();
     if (!dailyBalances.isEmpty()) {
       int waterBalance = dailyBalances.size() - 1;
-      availableSoilWater = dailyBalances.get(waterBalance)
-          .getCurrentAvailableSoilWater() * 1.1;
+      availableSoilWater = dailyBalances.get(waterBalance).getCurrentAvailableSoilWater() * 1.1;
       axisY.setUpperBound(availableSoilWater);
     }
 
+    // availableSoilWater = 22.0;
+    // axisY.setUpperBound(availableSoilWater);
+    //
     if (waterLevel != null) {
       XYChart.Data data = new XYChart.Data("", waterLevel);
-      // TODO: https://docs.oracle.com/javafx/2/charts/css-styles.htm
-      // Node node = data.getNode();
+      // // TODO: https://docs.oracle.com/javafx/2/charts/css-styles.htm
+      // // Node node = data.getNode();
       // if (100 / availableSoilWater * ((Double) data.getYValue()).intValue() < 25) {
-      // node.setStyle("-fx-stroke: -fx-notwatered;");
-      // } else if (100 / availableSoilWater
-      // * ((Double) data.getYValue()).intValue() > 25) {
-      // node.setStyle("-fx-stroke: -fx-okay;");
-      // } else if (100 / availableSoilWater
-      // * ((Double) data.getYValue()).intValue() > 75) {
-      // node.setStyle("-fx-stroke: -fx-watered;");
+      // System.out.println("kleiner 25");
+      // for (Node node : chart.lookupAll(".default-color2.chart-bar")) {
+      // System.out.println(node);
+      // node.setStyle("-fx-bar-fill: red;");
+      // }
+      // } else if (100 / availableSoilWater * ((Double) data.getYValue()).intValue() >= 25) {
+      // System.out.println("größer-gleich 25");
+      // for (Node node : chart.lookupAll(".default-color1.chart-bar")) {
+      // node.setStyle("-fx-bar-fill: purple;");
+      // }
+      // } else if (100 / availableSoilWater * ((Double) data.getYValue()).intValue() >= 75) {
+      // System.out.println("größer-gleich 75");
+      // for (Node node : chart.lookupAll(".default-color0.chart-bar")) {
+      // node.setStyle("-fx-bar-fill: blue;");
+      // }
       // }
 
       series.getData().add(data);
     }
+
   }
 
   @SuppressWarnings("checkstyle:all")
