@@ -122,7 +122,8 @@ public class FieldDataController extends Application
   /**
    * Constructs a new field data controller associated with the given BorderPane.
    *
-   * @param pane - the associated BorderPane.
+   * @param pane
+   *          - the associated BorderPane.
    */
   public FieldDataController(Gsehen application, BorderPane pane) {
     this.gsehenInstance = application;
@@ -322,16 +323,16 @@ public class FieldDataController extends Application
     logViewTab = gsehenInstance.getMainController().getLogViewTab();
 
     // Actions that will happen, if you click a 'field' in the TreeTableView
-    treeTableView =
-        (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
+    treeTableView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
+        .lookup(FARM_TREE_VIEW_ID);
     treeTableView.getSelectionModel().selectedItemProperty()
         .addListener(new ChangeListener<Object>() {
           @Override
           public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
             for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
               if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
-                selectedItem =
-                    treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
+                selectedItem = treeTableView.getSelectionModel().getSelectedCells().get(i)
+                    .getTreeItem();
                 if (selectedItem != null
                     && selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
                   pane.setVisible(true);
@@ -351,8 +352,8 @@ public class FieldDataController extends Application
                     }
                   }
 
-                  SoilProfile fieldSoilProfile =
-                      gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
+                  SoilProfile fieldSoilProfile = gsehenInstance
+                      .getSoilProfileForUuid(field.getSoilProfileUuid());
                   for (SoilProfile soPr : soilProfileList) {
                     if (fieldSoilProfile != null
                         && soPr.getName().equals(fieldSoilProfile.getName())) {
@@ -387,8 +388,8 @@ public class FieldDataController extends Application
     sp = gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
     int index = 1;
 
-    Text setSoilProfile =
-        new Text(mainBundle.getString("fieldview.currentsoil") + " (" + sp.getName() + "):" + "\n");
+    Text setSoilProfile = new Text(
+        mainBundle.getString("fieldview.currentsoil") + " (" + sp.getName() + "):" + "\n");
     setSoilProfile.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
     String kc = "";
@@ -481,31 +482,31 @@ public class FieldDataController extends Application
     center.getRowConstraints().add(1, rowEmpty);
 
     // Plug-in
-    Text weatherDataPluginJsFileNameLabel =
-        new Text(mainBundle.getString("fieldview.weatherdatapluginjsfilenamelabel"));
+    Text weatherDataPluginJsFileNameLabel = new Text(
+        mainBundle.getString("fieldview.weatherdatapluginjsfilenamelabel"));
     weatherDataPluginJsFileNameLabel.setFont(Font.font("Arial", 14));
     weatherDataPluginJsFileName = new ChoiceBox<String>();
     weatherDataPluginJsFileName.getItems().addAll(PluginUtil.getPluginJsFileNames());
 
     // Manual Import?
-    Text weatherDataManualImportLabel =
-        new Text(mainBundle.getString("fieldview.weatherdatamanualimportlabel"));
+    Text weatherDataManualImportLabel = new Text(
+        mainBundle.getString("fieldview.weatherdatamanualimportlabel"));
     weatherDataManualImportLabel.setFont(Font.font("Arial", 14));
     weatherDataManualImport = new CheckBox();
 
     // Automatic Import?
-    Text weatherDataAutomaticImportLabel =
-        new Text(mainBundle.getString("fieldview.weatherdataautomaticimportlabel"));
+    Text weatherDataAutomaticImportLabel = new Text(
+        mainBundle.getString("fieldview.weatherdataautomaticimportlabel"));
     weatherDataAutomaticImportLabel.setFont(Font.font("Arial", 14));
     weatherDataAutomaticImport = new CheckBox();
 
     // Automatic Import interval
-    Text weatherDataAutomaticImportIntervalSecondsLabel =
-        new Text(mainBundle.getString("fieldview.weatherdataautomaticimportintervalsecondslabel"));
+    Text weatherDataAutomaticImportIntervalSecondsLabel = new Text(
+        mainBundle.getString("fieldview.weatherdataautomaticimportintervalsecondslabel"));
     weatherDataAutomaticImportIntervalSecondsLabel.setFont(Font.font("Arial", 14));
     weatherDataAutomaticImportIntervalSeconds = new JFXTextField();
-    weatherDataAutomaticImportIntervalSeconds.textProperty().addListener(
-        new ChangeListener<String>() {
+    weatherDataAutomaticImportIntervalSeconds.textProperty()
+        .addListener(new ChangeListener<String>() {
           @Override
           public void changed(ObservableValue<? extends String> observable, String oldValue,
               String newValue) {
@@ -516,8 +517,8 @@ public class FieldDataController extends Application
         });
 
     // Latitude
-    Text weatherDataSourceLocationLatLabel =
-        new Text(mainBundle.getString("fieldview.locationlat"));
+    Text weatherDataSourceLocationLatLabel = new Text(
+        mainBundle.getString("fieldview.locationlat"));
     weatherDataSourceLocationLatLabel.setFont(Font.font("Arial", 14));
     weatherDataSourceLocationLat = new JFXTextField();
     weatherDataSourceLocationLat.textProperty().addListener(new ChangeListener<String>() {
@@ -531,13 +532,13 @@ public class FieldDataController extends Application
         }
       }
     });
-    Text weatherDataSourceLocationLatExample =
-        new Text(mainBundle.getString("fieldview.locationlatexample"));
+    Text weatherDataSourceLocationLatExample = new Text(
+        mainBundle.getString("fieldview.locationlatexample"));
     weatherDataSourceLocationLatExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
 
     // Longitude
-    Text weatherDataSourceLocationLngLabel =
-        new Text(mainBundle.getString("fieldview.locationlng"));
+    Text weatherDataSourceLocationLngLabel = new Text(
+        mainBundle.getString("fieldview.locationlng"));
     weatherDataSourceLocationLngLabel.setFont(Font.font("Arial", 14));
     weatherDataSourceLocationLng = new JFXTextField();
     weatherDataSourceLocationLng.textProperty().addListener(new ChangeListener<String>() {
@@ -551,13 +552,13 @@ public class FieldDataController extends Application
         }
       }
     });
-    Text weatherDataSourceLocationLngExample =
-        new Text(mainBundle.getString("fieldview.locationlngexample"));
+    Text weatherDataSourceLocationLngExample = new Text(
+        mainBundle.getString("fieldview.locationlngexample"));
     weatherDataSourceLocationLngExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
 
     // Standort (Meter ü. NN)
-    Text weatherDataSourceMetersAboveLabel =
-        new Text(mainBundle.getString("fieldview.metersabove"));
+    Text weatherDataSourceMetersAboveLabel = new Text(
+        mainBundle.getString("fieldview.metersabove"));
     weatherDataSourceMetersAboveLabel.setFont(Font.font("Arial", 14));
     weatherDataSourceMetersAbove = new JFXTextField();
     weatherDataSourceMetersAbove.textProperty().addListener(new ChangeListener<String>() {
@@ -591,24 +592,14 @@ public class FieldDataController extends Application
     GridPane.setConstraints(weatherDataSourceMetersAbove, 1, 6);
 
     // Add nodes
-    center.getChildren().addAll(
-        weatherDataPluginJsFileNameLabel,
-        weatherDataPluginJsFileName,
-        weatherDataManualImportLabel,
-        weatherDataManualImport,
-        weatherDataAutomaticImportLabel,
-        weatherDataAutomaticImport,
-        weatherDataAutomaticImportIntervalSecondsLabel,
-        weatherDataAutomaticImportIntervalSeconds,
-        weatherDataSourceLocationLatLabel,
-        weatherDataSourceLocationLat,
-        weatherDataSourceLocationLatExample,
-        weatherDataSourceLocationLngLabel,
-        weatherDataSourceLocationLng,
-        weatherDataSourceLocationLngExample,
-        weatherDataSourceMetersAboveLabel,
-        weatherDataSourceMetersAbove
-    );
+    center.getChildren().addAll(weatherDataPluginJsFileNameLabel, weatherDataPluginJsFileName,
+        weatherDataManualImportLabel, weatherDataManualImport, weatherDataAutomaticImportLabel,
+        weatherDataAutomaticImport, weatherDataAutomaticImportIntervalSecondsLabel,
+        weatherDataAutomaticImportIntervalSeconds, weatherDataSourceLocationLatLabel,
+        weatherDataSourceLocationLat, weatherDataSourceLocationLatExample,
+        weatherDataSourceLocationLngLabel, weatherDataSourceLocationLng,
+        weatherDataSourceLocationLngExample, weatherDataSourceMetersAboveLabel,
+        weatherDataSourceMetersAbove);
 
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setContent(center);
@@ -634,16 +625,11 @@ public class FieldDataController extends Application
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
-        weatherDataSourceList.remove(selectedWeatherDataSource);
-        if (noneIsEmpty(new TextField[] {
-            weatherDataSourceName, weatherDataAutomaticImportIntervalSeconds
-        })) {
+        if (noneIsEmpty(
+            new TextField[] { weatherDataSourceName, weatherDataAutomaticImportIntervalSeconds })) {
           try {
-            pane.getChildren().clear();
-            treeTableView.setVisible(true);
             setWeatherDataAndValues();
 
-            weatherDataSourceList.add(wds);
             pane.getChildren().clear();
             treeTableView.setVisible(true);
             tabPane.getTabs().clear();
@@ -684,16 +670,24 @@ public class FieldDataController extends Application
   }
 
   private void setWeatherDataAndValues() {
-    wds = new WeatherDataSource(DBUtil.generateUuid());
+    if (selectedWeatherDataSource != null) {
+      System.out.println("Vorhanden");
+      wds = selectedWeatherDataSource;
+    } else {
+      System.out.println("Neu");
+      wds = new WeatherDataSource(DBUtil.generateUuid());
+      weatherDataSourceList.add(wds);
+    }
     wds.setName(weatherDataSourceName.getText());
     wds.setPluginJsFileName(weatherDataPluginJsFileName.getValue());
     wds.setManualImportActive(weatherDataManualImport.isSelected());
     wds.setAutomaticImportActive(weatherDataAutomaticImport.isSelected());
     wds.setAutomaticImportFrequencySeconds(
-        gsehenInstance.parseDouble(
-            weatherDataAutomaticImportIntervalSeconds.getText()
-        )
-    );
+        gsehenInstance.parseDouble(weatherDataAutomaticImportIntervalSeconds.getText()));
+    wds.setLocationLat(gsehenInstance.parseDouble(weatherDataSourceLocationLat.getText()));
+    wds.setLocationLng(gsehenInstance.parseDouble(weatherDataSourceLocationLng.getText()));
+    wds.setLocationMetersAboveSeaLevel(
+        gsehenInstance.parseDouble(weatherDataSourceMetersAbove.getText()));
   }
 
   /**
@@ -706,11 +700,14 @@ public class FieldDataController extends Application
       weatherDataPluginJsFileName.setValue(selectedWeatherDataSource.getPluginJsFileName());
       weatherDataManualImport.setSelected(selectedWeatherDataSource.isManualImportActive());
       weatherDataAutomaticImport.setSelected(selectedWeatherDataSource.isAutomaticImportActive());
-      weatherDataAutomaticImportIntervalSeconds.setText(
-          gsehenInstance.formatDoubleTwoDecimal(
-              selectedWeatherDataSource.getAutomaticImportFrequencySeconds()
-          )
-      );
+      weatherDataAutomaticImportIntervalSeconds.setText(gsehenInstance
+          .formatDoubleTwoDecimal(selectedWeatherDataSource.getAutomaticImportFrequencySeconds()));
+      weatherDataSourceLocationLat.setText(
+          gsehenInstance.formatDoubleTwoDecimal(selectedWeatherDataSource.getLocationLat()));
+      weatherDataSourceLocationLng.setText(
+          gsehenInstance.formatDoubleTwoDecimal(selectedWeatherDataSource.getLocationLng()));
+      weatherDataSourceMetersAbove.setText(gsehenInstance
+          .formatDoubleTwoDecimal(selectedWeatherDataSource.getLocationMetersAboveSeaLevel()));
     }
   }
 
@@ -768,7 +765,7 @@ public class FieldDataController extends Application
     JFXTextField soilManualPause = new JFXTextField("");
 
     JFXTextField soilProfileName = new JFXTextField("");
-    
+
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(soilNameLabel, 0, 0);
     GridPane.setConstraints(soilProfileName, 1, 0);
@@ -894,8 +891,8 @@ public class FieldDataController extends Application
           soilAwc.setText(null);
           depth.setText(gsehenInstance.formatDoubleOneDecimal(spd.getDepth()));
 
-          Text createdSoil =
-              new Text(mainBundle.getString("fieldview.layer") + (layerList.size() + 1) + ": \n"
+          Text createdSoil = new Text(
+              mainBundle.getString("fieldview.layer") + (layerList.size() + 1) + ": \n"
                   + mainBundle.getString("fieldview.soiltype") + soil.getName() + ";\n"
                   + mainBundle.getString("fieldview.awc") + soil.getAvailableWaterCapacity() + ";\n"
                   + mainBundle.getString("fieldview.depth") + spd.getDepth() + "\n\n");
@@ -1055,16 +1052,18 @@ public class FieldDataController extends Application
       top.getRowConstraints().add(0, rowEmpty);
       top.getRowConstraints().add(1, rowEmpty);
 
+      SoilProfile currentSoilProfile = currentSoilBox.getValue();
+      
       // Name
       Text soilNameLabel = new Text(mainBundle.getString("fieldview.profilename"));
       soilNameLabel.setFont(Font.font("Arial", 14));
-      JFXTextField soilProfileName = new JFXTextField(currentSoilBox.getValue().getName());
+      JFXTextField soilProfileName = new JFXTextField(currentSoilProfile.getName());
       soilProfileName.textProperty().addListener(new ChangeListener<String>() {
         @Override
         public void changed(ObservableValue<? extends String> observable, String oldValue,
             String newValue) {
           if (!newValue.isEmpty()) {
-            currentSoilBox.getValue().setName(soilProfileName.getText());
+            currentSoilProfile.setName(soilProfileName.getText());
           }
         }
       });
@@ -1074,7 +1073,7 @@ public class FieldDataController extends Application
       soilManualKcLabel.setFont(Font.font("Arial", 14));
       if (currentSoilBox.getValue().getSoilManualData().getSoilKc() != null) {
         soilManualKc = new JFXTextField(String.valueOf(gsehenInstance
-            .formatDoubleOneDecimal(currentSoilBox.getValue().getSoilManualData().getSoilKc())));
+            .formatDoubleOneDecimal(currentSoilProfile.getSoilManualData().getSoilKc())));
       } else {
         soilManualKc = new JFXTextField();
       }
@@ -1086,7 +1085,7 @@ public class FieldDataController extends Application
             if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
               soilManualKc.setText(oldValue);
             } else {
-              currentSoilBox.getValue().getSoilManualData()
+              currentSoilProfile.getSoilManualData()
                   .setSoilKc(gsehenInstance.parseDouble(newValue));
             }
           }
@@ -1096,9 +1095,9 @@ public class FieldDataController extends Application
       // Bilanzierungstiefe (in cm)
       Text soilManualZoneLabel = new Text(mainBundle.getString("fieldview.manualzone"));
       soilManualZoneLabel.setFont(Font.font("Arial", 14));
-      if (currentSoilBox.getValue().getSoilManualData().getSoilZone() != null) {
+      if (currentSoilProfile.getSoilManualData().getSoilZone() != null) {
         soilManualZone = new JFXTextField(
-            String.valueOf(currentSoilBox.getValue().getSoilManualData().getSoilZone()));
+            String.valueOf(currentSoilProfile.getSoilManualData().getSoilZone()));
       } else {
         soilManualZone = new JFXTextField();
       }
@@ -1110,7 +1109,7 @@ public class FieldDataController extends Application
             if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
               soilManualZone.setText(oldValue);
             } else {
-              currentSoilBox.getValue().getSoilManualData().setSoilZone(Integer.valueOf(newValue));
+              currentSoilProfile.getSoilManualData().setSoilZone(Integer.valueOf(newValue));
             }
           }
         }
@@ -1121,7 +1120,7 @@ public class FieldDataController extends Application
       soilManualRainLabel.setFont(Font.font("Arial", 14));
       if (currentSoilBox.getValue().getSoilManualData().getRainMax() != null) {
         soilManualRain = new JFXTextField(String.valueOf(gsehenInstance
-            .formatDoubleOneDecimal(currentSoilBox.getValue().getSoilManualData().getRainMax())));
+            .formatDoubleOneDecimal(currentSoilProfile.getSoilManualData().getRainMax())));
       } else {
         soilManualRain = new JFXTextField();
       }
@@ -1133,7 +1132,7 @@ public class FieldDataController extends Application
             if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
               soilManualRain.setText(oldValue);
             } else {
-              currentSoilBox.getValue().getSoilManualData()
+              currentSoilProfile.getSoilManualData()
                   .setRainMax(gsehenInstance.parseDouble(newValue));
             }
           }
@@ -1143,9 +1142,9 @@ public class FieldDataController extends Application
       // Bewässerungspause (in Tagen)
       Text soilManualPauseLabel = new Text(mainBundle.getString("fieldview.manualpause"));
       soilManualPauseLabel.setFont(Font.font("Arial", 14));
-      if (currentSoilBox.getValue().getSoilManualData().getDaysPause() != null) {
+      if (currentSoilProfile.getSoilManualData().getDaysPause() != null) {
         soilManualPause = new JFXTextField(
-            String.valueOf(currentSoilBox.getValue().getSoilManualData().getDaysPause()));
+            String.valueOf(currentSoilProfile.getSoilManualData().getDaysPause()));
       } else {
         soilManualPause = new JFXTextField();
       }
@@ -1157,7 +1156,7 @@ public class FieldDataController extends Application
             if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
               soilManualPause.setText(oldValue);
             } else {
-              currentSoilBox.getValue().getSoilManualData().setDaysPause(Integer.valueOf(newValue));
+              currentSoilProfile.getSoilManualData().setDaysPause(Integer.valueOf(newValue));
             }
           }
         }
@@ -1204,7 +1203,7 @@ public class FieldDataController extends Application
       int row = 0;
 
       // Each layer the SoilProfile has
-      for (int i = 0; i < currentSoilBox.getValue().getSoilType().size(); i++) {
+      for (int i = 0; i < currentSoilProfile.getSoilType().size(); i++) {
         // "Schicht #XY"
         Text layer = new Text(mainBundle.getString("fieldview.layer") + (i + 1));
         layer.setFont(Font.font("Arial", FontWeight.BOLD, 14));
@@ -1232,7 +1231,7 @@ public class FieldDataController extends Application
           }
         });
 
-        Soil curSoil = currentSoilBox.getValue().getSoilType().get(i);
+        Soil curSoil = currentSoilProfile.getSoilType().get(i);
         Text soilAwc = new Text();
         for (Soil setSoil : soilChoiceBox.getItems()) {
           if (setSoil.getName().equals(curSoil.getName())) {
@@ -1254,9 +1253,8 @@ public class FieldDataController extends Application
             if (newValue != null) {
               soilAwc.setText(gsehenInstance
                   .formatDoubleOneDecimal(soilChoiceBox.getValue().getAvailableWaterCapacity()));
-              currentSoilBox.getValue().getSoilType().get(in)
-                  .setName(soilChoiceBox.getValue().getName());
-              currentSoilBox.getValue().getSoilType().get(in)
+              currentSoilProfile.getSoilType().get(in).setName(soilChoiceBox.getValue().getName());
+              currentSoilProfile.getSoilType().get(in)
                   .setAvailableWaterCapacity(soilChoiceBox.getValue().getAvailableWaterCapacity());
             }
           }
@@ -1265,7 +1263,7 @@ public class FieldDataController extends Application
 
         // Tiefe
         soilDepth = new JFXTextField(gsehenInstance
-            .formatDoubleOneDecimal(currentSoilBox.getValue().getProfileDepth().get(i).getDepth()));
+            .formatDoubleOneDecimal(currentSoilProfile.getProfileDepth().get(i).getDepth()));
         Text depthLabel = new Text(mainBundle.getString("fieldview.depth"));
         depthLabel.setFont(Font.font("Arial", 14));
         soilDepth.textProperty().addListener(new ChangeListener<String>() {
@@ -1276,7 +1274,7 @@ public class FieldDataController extends Application
               if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
                 soilDepth.setText(oldValue);
               } else {
-                currentSoilBox.getValue().getProfileDepth().get(in)
+                currentSoilProfile.getProfileDepth().get(in)
                     .setDepth(gsehenInstance.parseDouble(newValue));
               }
             }
@@ -1337,6 +1335,7 @@ public class FieldDataController extends Application
   }
 
   @Override
-  public void start(Stage primaryStage) throws Exception {}
+  public void start(Stage primaryStage) throws Exception {
+  }
 
 }
