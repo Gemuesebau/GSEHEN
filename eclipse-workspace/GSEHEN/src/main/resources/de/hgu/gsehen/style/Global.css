@@ -65,18 +65,6 @@
     -fx-background-color: -fx-focus-color;
 }
 
-.default-color0.chart-bar { 
-    -fx-bar-fill: blue;
-}
-
-.default-color1.chart-bar { 
-    -fx-bar-fill: purple;
-}
-
-.default-color2.chart-bar { 
-    -fx-bar-fill: red;
-}
-
 .hyperlink,
 .hyperlink:hover,
 .hyperlink:hover:visited {

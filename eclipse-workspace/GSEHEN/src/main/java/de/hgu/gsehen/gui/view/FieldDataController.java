@@ -707,10 +707,8 @@ public class FieldDataController extends Application
 
   private void setWeatherDataAndValues() {
     if (selectedWeatherDataSource != null) {
-      System.out.println("Vorhanden");
       wds = selectedWeatherDataSource;
     } else {
-      System.out.println("Neu");
       wds = new WeatherDataSource(DBUtil.generateUuid());
       weatherDataSourceList.add(wds);
     }

@@ -1,9 +1,0 @@
-.root {
-  -fx-notwatered: red;
-  -fx-okay:     purple;
-  -fx-watered:      blue;
-}
-
-.default-color0.chart-series-line { -fx-stroke: -fx-notwatered; }
-.default-color1.chart-series-line { -fx-stroke: -fx-okay; }
-.default-color2.chart-series-line { -fx-stroke: -fx-watered; }
