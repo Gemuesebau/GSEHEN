@@ -118,7 +118,7 @@ public class Gsehen extends Application {
   private static Fields fields;
   private static Plots plots;
   private static Logs logs;
-  //private static DayDataCalculation dayDataCalculation;
+  // private static DayDataCalculation dayDataCalculation;
 
   private GsehenTreeTable treeTable;
 
@@ -129,8 +129,7 @@ public class Gsehen extends Application {
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> 
-       eventListeners = new HashMap<>();
+  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
 
   private boolean dataChanged;
   private List<SoilProfile> soilProfilesList;
@@ -229,7 +228,7 @@ public class Gsehen extends Application {
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
     logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
 
-    //dayDataCalculation = new DayDataCalculation();
+    // dayDataCalculation = new DayDataCalculation();
     new Recommender();
 
     InputStream input = this.getClass()
@@ -441,18 +440,12 @@ public class Gsehen extends Application {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
     EntityManager em = emf.createEntityManager();
     try {
-
-      // möglichkeit 1, mit bekannter ID
-      // em.getTransaction();
-      // Farm testfarm = em.find(Farm.class, 132l);
-      // if(testfarm != null) {
-      // System.out.print(testfarm.getName());
-      // }
-
-      // möglichkeit 2, alle möglichen objekte
       Session session = em.unwrap(Session.class);
       Query<Farm> query = session.createQuery("from Farm");
       farmsList = query.list();
+      // for (Farm farm : farmsList) {
+      // System.out.println(farm.getUuid());
+      // }
     } finally {
       em.close();
     }
@@ -790,7 +783,7 @@ public class Gsehen extends Application {
 
   @SuppressWarnings({ "checkstyle:javadocmethod" })
   public static void updateDayData() {
-    //dayDataCalculation.recalculateDayData();
+    // dayDataCalculation.recalculateDayData();
     new PluginUtil().recalculateDayData();
   }
 
