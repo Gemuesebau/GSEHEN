@@ -499,7 +499,11 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           cropEnd = formatter.parse(enddate);
           plot.setCropEnd(cropEnd);
           plot.setIsActive(isActive);
+          gsehenInstance.sendFarmDataChanged(plot, null);
           gsehenInstance.saveUserData();
+          tabPane.getSelectionModel().select(2);
+          treeTableView.getSelectionModel().clearSelection();
+          treeTableView.getSelectionModel().select(currentItem);
         } catch (ParseException e1) {
           e1.printStackTrace();
         }

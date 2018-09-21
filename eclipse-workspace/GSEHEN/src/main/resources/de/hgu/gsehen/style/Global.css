@@ -20,6 +20,10 @@
     -fx-effect: dropshadow( three-pass-box , rgba(0.0,0.0,0.0,0.6) , 5.0, 0.0 , 0.0 , 1.0 );
 }
 
+#glass-grey:hover {
+    -fx-background-color: linear-gradient(#d6d6d6, #f2f2f2);
+}
+
 .jfx-combo-box {
     -jfx-focus-color: #4a6d50;
     -jfx-unfocus-color: #8ed199;
@@ -82,4 +86,18 @@
 }
 .hyperlink:visited:armed {
     -fx-underline: false;
+}
+
+#plotRecommendedActionText {
+   -fx-font-size: 14.0px;
+   -fx-font-family: "Arial Black";
+   -fx-fill: Forestgreen;
+   -fx-effect: innershadow( three-pass-box , rgba(0.0,0.0,0.0,0.7) , 6.0, 0.0 , 0.0 , 2.0 );
+}
+
+#inactivePlot {
+  -fx-font-size: 16.0px;
+  -fx-fill: FIREBRICK;
+  -fx-font-weight: bold;
+  -fx-effect: dropshadow( gaussian , rgba(255.0,255.0,255.0,0.5) , 0.0,0.0,0.0,1.0 );  
 }

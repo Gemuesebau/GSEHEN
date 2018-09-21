@@ -91,7 +91,6 @@ public class FieldDataController extends Application
   private HBox buttonBox;
   private List<Text> layerList;
   private int index;
-  private VBox center;
   private Button saveField;
 
   private JFXTextField weatherDataSourceName;
@@ -327,12 +326,6 @@ public class FieldDataController extends Application
     pane.setTop(grid);
     // TOP END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // BOTTOM (necessary for "Aktuell gespeichertes Profil)
-    center = new VBox();
-    center.setPadding(new Insets(10));
-    center.setSpacing(10);
-    // BOTTOM END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     tabPane = gsehenInstance.getMainController().getJfxTabPane();
     mapViewTab = gsehenInstance.getMainController().getMapViewTab();
     fieldViewTab = gsehenInstance.getMainController().getFieldViewTab();
@@ -400,62 +393,120 @@ public class FieldDataController extends Application
    * Shows current SoilProfile at bottom of the 'MainView'.
    */
   private void getCurrentSoilProfile() {
-    center.getChildren().clear();
-    pane.setBottom(null);
+    pane.setCenter(null);
     sp = gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
     int index = 1;
+
+    // TODO
+    GridPane grid = new GridPane();
+
+    grid.setPadding(new Insets(20, 0, 0, 20));
+    grid.setVgap(5);
+    grid.setGridLinesVisible(false);
+
+    ColumnConstraints column1 = new ColumnConstraints(200, 100, 300);
+    ColumnConstraints column2 = new ColumnConstraints(200, 100, 100);
+    column1.setHgrow(Priority.ALWAYS);
+    column2.setHgrow(Priority.ALWAYS);
+    RowConstraints rowEmpty = new RowConstraints();
+
+    grid.getColumnConstraints().addAll(column1, column2);
+    grid.getRowConstraints().add(0, rowEmpty);
+    grid.getRowConstraints().add(1, rowEmpty);
 
     Text setSoilProfile = new Text(
         mainBundle.getString("fieldview.currentsoil") + " (" + sp.getName() + "):" + "\n");
     setSoilProfile.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
+    Text setKcLabel = new Text(mainBundle.getString("fieldview.manualkc"));
+    setKcLabel.setFont(Font.font("Arial", 14));
+
+    Text setKc = new Text();
     String kc = "";
     if (sp.getSoilManualData().getSoilKc() != null) {
       kc = String.valueOf(sp.getSoilManualData().getSoilKc());
+      setKc.setText(kc);
     }
-    Text setKc = new Text(mainBundle.getString("fieldview.manualkc") + " " + kc);
-    setKc.setFont(Font.font("Arial", 14));
 
+    Text setZoneLabel = new Text(mainBundle.getString("fieldview.manualzone"));
+    setZoneLabel.setFont(Font.font("Arial", 14));
+
+    Text setZone = new Text();
     String zone = "";
     if (sp.getSoilManualData().getSoilZone() != null) {
       zone = String.valueOf(sp.getSoilManualData().getSoilZone());
+      setZone.setText(zone);
     }
-    Text setZone = new Text(mainBundle.getString("fieldview.manualzone") + " " + zone);
-    setZone.setFont(Font.font("Arial", 14));
 
+    Text setRainLabel = new Text(mainBundle.getString("fieldview.manualrain"));
+    setRainLabel.setFont(Font.font("Arial", 14));
+
+    Text setRain = new Text();
     String rain = "";
     if (sp.getSoilManualData().getRainMax() != null) {
       rain = String.valueOf(sp.getSoilManualData().getRainMax());
+      setRain.setText(rain);
     }
-    Text setRain = new Text(mainBundle.getString("fieldview.manualrain") + " " + rain);
-    setRain.setFont(Font.font("Arial", 14));
 
+    Text setPauseLabel = new Text(mainBundle.getString("fieldview.manualpause"));
+    setPauseLabel.setFont(Font.font("Arial", 14));
+
+    Text setPause = new Text();
     String pause = "";
     if (sp.getSoilManualData().getDaysPause() != null) {
       pause = String.valueOf(sp.getSoilManualData().getDaysPause());
+      setPause.setText(pause);
     }
-    Text setPause = new Text(mainBundle.getString("fieldview.manualpause") + " " + pause);
-    setPause.setFont(Font.font("Arial", 14));
 
-    VBox topBox = new VBox();
-    topBox.getChildren().addAll(setSoilProfile, setKc, setZone, setRain, setPause);
+    GridPane.setConstraints(setSoilProfile, 0, 0);
+    GridPane.setConstraints(setKcLabel, 0, 1);
+    GridPane.setConstraints(setKc, 1, 1);
+    GridPane.setConstraints(setZoneLabel, 0, 2);
+    GridPane.setConstraints(setZone, 1, 2);
+    GridPane.setConstraints(setRainLabel, 0, 3);
+    GridPane.setConstraints(setRain, 1, 3);
+    GridPane.setConstraints(setPauseLabel, 0, 4);
+    GridPane.setConstraints(setPause, 1, 4);
 
-    center.getChildren().add(topBox);
+    grid.getChildren().addAll(setSoilProfile, setKcLabel, setZoneLabel, setRainLabel, setPauseLabel,
+        setKc, setZone, setRain, setPause);
 
+    int col = 5;
     for (Soil soil : sp.getSoilType()) {
-      Text createdSoil = new Text("\n" + mainBundle.getString("fieldview.layer") + (index) + ": \n"
-          + mainBundle.getString("fieldview.soiltype") + soil.getName() + ";\n"
-          + mainBundle.getString("fieldview.awc") + soil.getAvailableWaterCapacity() + ";\n"
-          + mainBundle.getString("fieldview.depth") + sp.getProfileDepth().get(index - 1).getDepth()
-          + "\n\n");
-      center.getChildren().add(createdSoil);
+      Text createdSoilLayer = new Text(
+          "\n" + mainBundle.getString("fieldview.layer") + (index) + ":");
+      Text createdSoil = new Text(mainBundle.getString("fieldview.soiltype"));
+      Text soilName = new Text(soil.getName());
+      Text createdSoilWater = new Text(mainBundle.getString("fieldview.awc"));
+      Text water = new Text(String.valueOf(soil.getAvailableWaterCapacity()));
+      Text createdSoilDepth = new Text(mainBundle.getString("fieldview.depth"));
+      Text depth = new Text(String.valueOf(sp.getProfileDepth().get(index - 1).getDepth()));
+      GridPane.setConstraints(createdSoilLayer, 0, col);
+      col++;
+      GridPane.setConstraints(createdSoil, 0, col);
+      GridPane.setConstraints(soilName, 1, col);
+      col++;
+      GridPane.setConstraints(createdSoilWater, 0, col);
+      GridPane.setConstraints(water, 1, col);
+      col++;
+      GridPane.setConstraints(createdSoilDepth, 0, col);
+      GridPane.setConstraints(depth, 1, col);
+      col++;
+      grid.getChildren().addAll(createdSoilLayer, createdSoil, soilName, createdSoilWater, water,
+          createdSoilDepth, depth);
+      createdSoilLayer.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
       createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
+      soilName.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
+      createdSoilWater.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
+      water.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
+      createdSoilDepth.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
+      depth.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
       index++;
     }
     ScrollPane scrollPane = new ScrollPane();
-    scrollPane.setContent(center);
+    scrollPane.setContent(grid);
     scrollPane.setPannable(true);
-    pane.setBottom(scrollPane);
+    pane.setCenter(scrollPane);
   }
 
   /**
