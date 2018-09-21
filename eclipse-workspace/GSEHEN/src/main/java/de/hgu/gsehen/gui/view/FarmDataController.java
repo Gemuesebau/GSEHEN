@@ -1,6 +1,7 @@
 package de.hgu.gsehen.gui.view;
 
 import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
@@ -9,6 +10,7 @@ import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
+import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.util.Pair;
 
 import java.util.ArrayList;
@@ -17,15 +19,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.SplitPane;
 import javafx.scene.web.WebView;
 
 public abstract class FarmDataController extends WebController {
   private Gsehen gsehenInstance;
-  private
-      Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>>
-      eventListeners = new HashMap<>();
+  private Map<Class<? extends GsehenEvent>, Class<? extends 
+      GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -33,8 +35,8 @@ public abstract class FarmDataController extends WebController {
   }
 
   @SuppressWarnings("unchecked")
-  protected <T extends GsehenEvent> Class<? extends GsehenEventListener<T>>
-      getEventListenerClass(Class<T> eventClass) {
+  protected <T extends GsehenEvent> Class<? extends GsehenEventListener<T>> getEventListenerClass(
+      Class<T> eventClass) {
     return (Class<? extends GsehenEventListener<T>>) eventListeners.get(eventClass);
   }
 
@@ -115,9 +117,9 @@ public abstract class FarmDataController extends WebController {
   }
 
   private void logAboutToReload(String reason, String verb) {
-    getLogger().log(Level.INFO, "About to " + verb + " " + this.getClass().getSimpleName()
-        + " web view due to " + reason + ", with drawables=" + Arrays.asList(drawables)
-        + " and lastViewport=" + lastViewport);
+    getLogger().log(Level.INFO,
+        "About to " + verb + " " + this.getClass().getSimpleName() + " web view due to " + reason
+            + ", with drawables=" + Arrays.asList(drawables) + " and lastViewport=" + lastViewport);
   }
 
   private Drawable[] drawables;
@@ -126,18 +128,19 @@ public abstract class FarmDataController extends WebController {
   /**
    * Constructs a new farm data controller associated with the given WebView.
    *
-   * @param webView the associated WebView
+   * @param webView
+   *          the associated WebView
    */
   public FarmDataController(Gsehen application, WebView webView) {
     super(application, webView);
 
-    ChangeListener<Number> splitPaneWidthHeightDividerPositionListener =
-        (observable, oldValue, newValue) -> redrawOrReload(observable);
+    ChangeListener<Number> splitPaneWidthHeightDividerPositionListener = (observable, oldValue,
+        newValue) -> redrawOrReload(observable);
     SplitPane mainSplitPane = getMainSplitPane();
     mainSplitPane.widthProperty().addListener(splitPaneWidthHeightDividerPositionListener);
     mainSplitPane.heightProperty().addListener(splitPaneWidthHeightDividerPositionListener);
-    mainSplitPane.getDividers().get(0)
-        .positionProperty().addListener(splitPaneWidthHeightDividerPositionListener);
+    mainSplitPane.getDividers().get(0).positionProperty()
+        .addListener(splitPaneWidthHeightDividerPositionListener);
   }
 
   public SplitPane getMainSplitPane() {
@@ -161,8 +164,8 @@ public abstract class FarmDataController extends WebController {
   }
 
   private Pair<GeoPoint> findBounds(Drawable[] drawables) {
-    double minX =  180;
-    double minY =  90;
+    double minX = 180;
+    double minY = 90;
     double maxX = -180;
     double maxY = -90;
     for (Drawable drawable : drawables) {
@@ -209,21 +212,49 @@ public abstract class FarmDataController extends WebController {
   /**
    * Determines the map or farm view polygon color for the given type (object).
    *
-   * @param typeObject a "Drawable", or a String
+   * @param typeObject
+   *          a "Drawable", or a String
    * @return the appropriate stroke and fill color for the given type
    */
   public String getFillStyle(Object typeObject) {
-    String type = (typeObject instanceof String)
-        ? ((String) typeObject)
+    String type = (typeObject instanceof String) ? ((String) typeObject)
         : typeObject.getClass().getSimpleName();
     switch (type) {
       case "Farm":
         return "black";
       case "Field":
-        return "blue";
+        return "green";
       case "Plot":
-        // FIXME: depending on water balance! (according to most recent calculation)
-        return "orange";
+        Plot plot = (Plot) typeObject;
+        Double waterLevel = 0.0;
+        if (plot.getRecommendedAction() != null) {
+          waterLevel = plot.getRecommendedAction().getAvailableWater();
+        }
+        Double availableSoilWater = 0.0;
+
+        if (plot.getWaterBalance() != null) {
+          final List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();
+          if (!dailyBalances.isEmpty()) {
+            int waterBalance = dailyBalances.size() - 1;
+            availableSoilWater = dailyBalances.get(waterBalance).getCurrentAvailableSoilWater() 
+                * 1.1;
+          }
+        }
+
+        // TODO: Prozentwerte anpassen!
+        String color = "white";
+        if (waterLevel != null) {
+          if (100 / (availableSoilWater / 1.1) * waterLevel < 25) {
+            color = "red";
+          } else if (100 / (availableSoilWater / 1.1) * waterLevel >= 25) {
+            color = "purple";
+          } else if (100 / (availableSoilWater / 1.1) * waterLevel >= 75) {
+            color = "blue";
+          }
+        }
+        
+        return color;
+
       default:
         return "white";
     }
