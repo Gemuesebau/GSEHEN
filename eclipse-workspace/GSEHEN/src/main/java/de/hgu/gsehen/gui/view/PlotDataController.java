@@ -12,6 +12,7 @@ import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.RecommendedActionChanged;
 import de.hgu.gsehen.gui.CropPhase;
 import de.hgu.gsehen.gui.GeoPoint;
+import de.hgu.gsehen.gui.GsehenGuiElements;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
 import de.hgu.gsehen.model.CropRootingZone;
@@ -27,7 +28,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -62,12 +62,10 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -78,6 +76,7 @@ import javafx.util.StringConverter;
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   protected final ResourceBundle mainBundle;
+  private GsehenGuiElements gsehenGuiElements;
 
   private List<Crop> cropList = new ArrayList<>();
   private CropDevelopmentStatus devPhase;
@@ -105,7 +104,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private Text soilStartLabel;
   private Text soilStartValueLabel;
   private Text cropStartLabel;
-  private StringConverter<LocalDate> convert;
 
   private JFXTextField name;
   private JFXTextField rootingZone;
@@ -131,6 +129,11 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   {
     gsehenInstance = Gsehen.getInstance();
     cropList = gsehenInstance.getCrops();
+    gsehenGuiElements = new GsehenGuiElements();
+    
+    DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,
+        gsehenInstance.getSelectedLocale());
+    pattern = ((SimpleDateFormat) dateFormat).toPattern();
 
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
 
@@ -155,48 +158,26 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   public void handle(FarmDataChanged event) {
     pane.setVisible(false);
 
-    // GridPane - Center Section
-    GridPane centerGrid = new GridPane();
-
-    // GridPane Configuration (Padding, Gaps, etc.)
-    centerGrid.setPadding(new Insets(20, 20, 20, 20));
-    centerGrid.setHgap(15);
-    centerGrid.setVgap(15);
-    centerGrid.setGridLinesVisible(false);
-
-    // Set Column and Row Constraints
-    ColumnConstraints column1 = new ColumnConstraints(200, 100, 300);
-    ColumnConstraints column2 = new ColumnConstraints(200, 100, 100);
-    column1.setHgrow(Priority.ALWAYS);
-    column2.setHgrow(Priority.ALWAYS);
-    RowConstraints rowEmpty = new RowConstraints();
-
-    // Add Constraints to Columns & Rows
-    centerGrid.getColumnConstraints().addAll(column1, column2);
-    centerGrid.getRowConstraints().add(0, rowEmpty);
-    centerGrid.getRowConstraints().add(1, rowEmpty);
-
     // CENTER (From "Name" to "Bewässerungsfaktor")
     // Name
-    nameLabel = new Text(mainBundle.getString("fieldview.name"));
-    nameLabel.setFont(Font.font("Arial", 14));
+    nameLabel = gsehenGuiElements.text();
+    nameLabel.setText(mainBundle.getString("fieldview.name"));
     name = new JFXTextField("");
 
     // m²
-    areaLabel = new Text(mainBundle.getString("fieldview.area"));
-    areaLabel.setFont(Font.font("Arial", 14));
-    area = new Text("");
-    area.setFont(Font.font("Arial", 14));
+    areaLabel = gsehenGuiElements.text();
+    areaLabel.setText(mainBundle.getString("fieldview.area"));
+    area = gsehenGuiElements.text();
 
     // Lage
-    locationLabel = new Text(mainBundle.getString("plotview.location"));
-    locationLabel.setFont(Font.font("Arial", 14));
+    locationLabel = gsehenGuiElements.text();
+    locationLabel.setText(mainBundle.getString("plotview.location"));
     location = new Hyperlink("");
     location.setFont(Font.font("Arial", 14));
 
     // Max. durchw. Zone
-    rootingZoneLabel = new Text(mainBundle.getString("plotview.rootingzone"));
-    rootingZoneLabel.setFont(Font.font("Arial", 14));
+    rootingZoneLabel = gsehenGuiElements.text();
+    rootingZoneLabel.setText(mainBundle.getString("plotview.rootingzone"));
     rootingZone = new JFXTextField("");
     rootingZone.textProperty().addListener(new ChangeListener<String>() {
       @Override
@@ -210,50 +191,19 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
-    DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,
-        gsehenInstance.getSelectedLocale());
-    pattern = ((SimpleDateFormat) dateFormat).toPattern();
-
     // Start der Inkulturnahme
-    cropStartLabel = new Text(mainBundle.getString("plotview.cropstart"));
-    cropStartLabel.setFont(Font.font("Arial", 14));
-    cropStart = new DatePicker();
-    cropStart.setShowWeekNumbers(true);
-    convert = new StringConverter<LocalDate>() {
-      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-
-      @Override
-      public String toString(LocalDate date) {
-        if (date != null) {
-          return dateFormatter.format(date);
-        } else {
-          return "";
-        }
-      }
-
-      @Override
-      public LocalDate fromString(String string) {
-        if (string != null && !string.isEmpty()) {
-          return LocalDate.parse(string, dateFormatter);
-        } else {
-          return null;
-        }
-      }
-    };
-    cropStart.setConverter(convert);
-    cropStart.setPromptText(pattern);
+    cropStartLabel = gsehenGuiElements.text();
+    cropStartLabel.setText(mainBundle.getString("plotview.cropstart"));
+    cropStart = gsehenGuiElements.datepicker();
 
     // Start der Bodenwasserbilanz
-    soilStartLabel = new Text(mainBundle.getString("plotview.soilstart"));
-    soilStartLabel.setFont(Font.font("Arial", 14));
-    soilStart = new DatePicker();
-    soilStart.setShowWeekNumbers(true);
-    soilStart.setConverter(convert);
-    soilStart.setPromptText(pattern);
+    soilStartLabel = gsehenGuiElements.text();
+    soilStartLabel.setText(mainBundle.getString("plotview.soilstart"));
+    soilStart = gsehenGuiElements.datepicker();
 
     // Startwert der Wasserbilanz
-    soilStartValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
-    soilStartValueLabel.setFont(Font.font("Arial", 14));
+    soilStartValueLabel = gsehenGuiElements.text();
+    soilStartValueLabel.setText(mainBundle.getString("plotview.soilstartvalue"));
     soilStartValue = new JFXSlider();
     soilStartValue.setMin(0.0);
     soilStartValue.setMax(100.0);
@@ -264,8 +214,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     soilStartValue.setBlockIncrement(5.0);
 
     // Kultur
-    Text crop = new Text(mainBundle.getString("plotview.crop"));
-    crop.setFont(Font.font("Arial", 14));
+    Text crop = gsehenGuiElements.text();
+    crop.setText(mainBundle.getString("plotview.crop"));
 
     JFXComboBox<Crop> cropChoiceBox = new JFXComboBox<Crop>();
     if (!cropList.isEmpty()) {
@@ -422,8 +372,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     chart.getData().addAll(series);
 
     // Bewässerungsfaktor
-    Text scalingFactorLabel = new Text(mainBundle.getString("plotview.scalingfactor"));
-    scalingFactorLabel.setFont(Font.font("Arial", 14));
+    Text scalingFactorLabel = gsehenGuiElements.text();
+    scalingFactorLabel.setText(mainBundle.getString("plotview.scalingfactor"));
     JFXSlider scalingFactor = new JFXSlider();
     scalingFactor.setMin(-100.0);
     scalingFactor.setMax(100.0);
@@ -472,6 +422,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane.setConstraints(scalingFactor, 1, 10, 2, 1);
     GridPane.setConstraints(scalingValue, 3, 10);
 
+    // GridPane - Center Section
+    GridPane centerGrid = gsehenGuiElements.gridPane();
+    
     centerGrid.getChildren().addAll(nameLabel, name, areaLabel, area, locationLabel, location,
         rootingZoneLabel, rootingZone, cropStartLabel, cropStart, soilStartLabel, soilStart,
         soilStartValueLabel, soilStartValue, crop, cropChoiceBox, tablePane, chart,
@@ -485,9 +438,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // CENTER END ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Ernte
-    Button harvest = new Button(mainBundle.getString("plotview.harvest"));
-    harvest.setId("glass-grey");
-    harvest.setPrefSize(100, 25);
+    Button harvest = gsehenGuiElements.button(100);
+    harvest.setText(mainBundle.getString("plotview.harvest"));
     harvest.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
@@ -512,9 +464,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     });
 
     // Plot manuell bewässern (creates a new view)
-    Button watering = new Button(mainBundle.getString("plotview.watering"));
-    watering.setId("glass-grey");
-    watering.setPrefSize(200, 25);
+    Button watering = gsehenGuiElements.button(200);
+    watering.setText(mainBundle.getString("plotview.watering"));
     watering.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
@@ -528,39 +479,15 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
         pane.setTop(nameLabel);
 
-        // GridPane - Center Section
-        GridPane center = new GridPane();
-
-        // GridPane Configuration (Padding, Gaps, etc.)
-        center.setPadding(new Insets(20, 20, 20, 20));
-        center.setHgap(15);
-        center.setVgap(15);
-        center.setGridLinesVisible(false);
-
-        // Set Column and Row Constraints
-        ColumnConstraints column1 = new ColumnConstraints(200, 100, 300);
-        ColumnConstraints column2 = new ColumnConstraints(200, 100, 100);
-        column1.setHgrow(Priority.ALWAYS);
-        column2.setHgrow(Priority.ALWAYS);
-        RowConstraints rowEmpty = new RowConstraints();
-
-        // Add Constraints to Columns & Rows
-        center.getColumnConstraints().addAll(column1, column2);
-        center.getRowConstraints().add(0, rowEmpty);
-        center.getRowConstraints().add(1, rowEmpty);
-
         // Datum (when the irrigation/precipitation should be booked)
-        Text dateLabel = new Text(mainBundle.getString("plotview.date"));
-        dateLabel.setFont(Font.font("Arial", 14));
-        DatePicker date = new DatePicker();
-        date.setShowWeekNumbers(true);
-        date.setConverter(convert);
-        date.setPromptText(pattern);
+        Text dateLabel = gsehenGuiElements.text();
+        dateLabel.setText(mainBundle.getString("plotview.date"));
+        DatePicker date = gsehenGuiElements.datepicker();
         date.setValue(LocalDate.now());
 
         // Bewässerung (in mm)
-        Text irrigationLabel = new Text(mainBundle.getString("plotview.irrigation"));
-        irrigationLabel.setFont(Font.font("Arial", 14));
+        Text irrigationLabel = gsehenGuiElements.text();
+        irrigationLabel.setText(mainBundle.getString("plotview.irrigation"));
         JFXTextField irrigation = new JFXTextField();
         irrigation.textProperty().addListener(new ChangeListener<String>() {
           @Override
@@ -576,8 +503,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(0.0));
 
         // Niederschlag (in mm)
-        Text precipitationLabel = new Text(mainBundle.getString("plotview.precipitation"));
-        precipitationLabel.setFont(Font.font("Arial", 14));
+        Text precipitationLabel = gsehenGuiElements.text();
+        precipitationLabel.setText(mainBundle.getString("plotview.precipitation"));
         JFXTextField precipitation = new JFXTextField();
         precipitation.textProperty().addListener(new ChangeListener<String>() {
           @Override
@@ -623,14 +550,16 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         GridPane.setConstraints(precipitationLabel, 0, 2);
         GridPane.setConstraints(precipitation, 1, 2);
 
+        // GridPane - Center Section
+        GridPane center = gsehenGuiElements.gridPane();
+        
         center.getChildren().addAll(dateLabel, date, irrigationLabel, irrigation,
             precipitationLabel, precipitation);
 
         pane.setCenter(center);
 
-        Button back = new Button(mainBundle.getString("fieldview.back"));
-        back.setId("glass-grey");
-        back.setPrefSize(100, 25);
+        Button back = gsehenGuiElements.button(100);
+        back.setText(mainBundle.getString("fieldview.back"));
         back.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent arg0) {
@@ -648,9 +577,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         HBox buttonBox = new HBox();
 
         // Bewässerung buchen
-        Button book = new Button(mainBundle.getString("plotview.book"));
-        book.setId("glass-grey");
-        book.setPrefSize(200, 25);
+        Button book = gsehenGuiElements.button(200);
+        book.setText(mainBundle.getString("plotview.book"));
         book.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent arg0) {
@@ -717,9 +645,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     });
 
     // Speichern
-    Button save = new Button(mainBundle.getString("button.accept"));
-    save.setId("glass-grey");
-    save.setPrefSize(200, 25);
+    Button save = gsehenGuiElements.button(200);
+    save.setText(mainBundle.getString("button.accept"));
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
