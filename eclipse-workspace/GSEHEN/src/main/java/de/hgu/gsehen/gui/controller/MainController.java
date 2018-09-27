@@ -6,10 +6,12 @@ import java.io.IOException;
 import com.jfoenix.controls.JFXTabPane;
 
 import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.gui.GsehenGuiElements;
 import de.hgu.gsehen.gui.GsehenSave;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
@@ -24,9 +26,11 @@ import javafx.scene.web.WebView;
 @SuppressWarnings({ "checkstyle:commentsindentation" })
 public class MainController {
   private Gsehen gsehenInstance;
+  private GsehenGuiElements gsehenGuiElements;
 
   {
     gsehenInstance = Gsehen.getInstance();
+    gsehenGuiElements = new GsehenGuiElements();
   }
 
   // Views
@@ -52,11 +56,18 @@ public class MainController {
   private WebView aboutWebView;
   @FXML
   private ImageView imageView;
+  @FXML
+  private Button aboutBack;
+  @FXML
+  private Button contactBack;
 
   @FXML
   private void about(ActionEvent a) {
     tabPane.getTabs().clear();
     tabPane.getTabs().add(aboutViewTab);
+    
+    aboutBack = gsehenGuiElements.button(100);
+    
     WebEngine engine = aboutWebView.getEngine();
     engine.load(
         "https://www.hs-geisenheim.de/forschung/institute/gemuesebau/ueberblick-institut-fuer-gemuesebau/bewaesserung/ble-gsehen/");
@@ -89,6 +100,9 @@ public class MainController {
   private void openContactView(ActionEvent o) {
     tabPane.getTabs().clear();
     tabPane.getTabs().add(contactViewTab);
+    
+    contactBack = gsehenGuiElements.button(100);
+    
     WebEngine engine = contactWebView.getEngine();
     engine.load("https://www.hs-geisenheim.de/personen/person/231/");
 

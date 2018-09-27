@@ -259,7 +259,7 @@ public class FieldDataController extends Application
     nameError.setFont(Font.font("Verdana", 14));
     nameError.setFill(Color.RED);
 
-    GridPane grid = gsehenGuiElements.gridPane();
+    GridPane grid = gsehenGuiElements.gridPane(pane);
     saveField.setOnAction(new EventHandler<ActionEvent>() {
 
       @Override
@@ -433,7 +433,7 @@ public class FieldDataController extends Application
     GridPane.setConstraints(setPauseLabel, 0, 4);
     GridPane.setConstraints(setPause, 1, 4);
 
-    GridPane grid = gsehenGuiElements.gridPane();
+    GridPane grid = gsehenGuiElements.gridPane(pane);
     grid.getChildren().addAll(setSoilProfile, setKcLabel, setZoneLabel, setRainLabel, setPauseLabel,
         setKc, setZone, setRain, setPause);
 
@@ -499,7 +499,7 @@ public class FieldDataController extends Application
     GridPane.setConstraints(weatherDataSourceName, 1, 0);
 
     // GridPane - Top Section
-    GridPane top = gsehenGuiElements.gridPane();
+    GridPane top = gsehenGuiElements.gridPane(pane);
     top.getChildren().addAll(weatherDataLabel, weatherDataSourceName);
 
     pane.setTop(top);
@@ -616,7 +616,7 @@ public class FieldDataController extends Application
     GridPane.setConstraints(weatherDataSourceMetersAbove, 1, 6);
 
     // GridPane - Center Section
-    GridPane center = gsehenGuiElements.gridPane();
+    GridPane center = gsehenGuiElements.gridPane(pane);
     
     // Add nodes
     center.getChildren().addAll(weatherDataPluginJsFileNameLabel, weatherDataPluginJsFileName,
@@ -787,7 +787,7 @@ public class FieldDataController extends Application
     GridPane.setConstraints(soilManualPause, 1, 4);
 
     // GridPane - Top Section
-    GridPane top = gsehenGuiElements.gridPane();
+    GridPane top = gsehenGuiElements.gridPane(pane);
     
     top.getChildren().addAll(soilNameLabel, soilProfileName, soilManualKcLabel, soilManualKc,
         soilManualZoneLabel, soilManualZone, soilManualRainLabel, soilManualRain,
@@ -858,7 +858,7 @@ public class FieldDataController extends Application
     });
 
     // GridPane - Center Section
-    GridPane center = gsehenGuiElements.gridPane();
+    GridPane center = gsehenGuiElements.gridPane(pane);
 
     List<Soil> soilList = new ArrayList<Soil>();
     List<SoilProfileDepth> soilDepthList = new ArrayList<SoilProfileDepth>();
@@ -1152,7 +1152,7 @@ public class FieldDataController extends Application
       GridPane.setConstraints(soilManualPause, 1, 4);
 
       // GridPane - Top Section
-      GridPane top = gsehenGuiElements.gridPane();
+      GridPane top = gsehenGuiElements.gridPane(pane);
       
       top.getChildren().addAll(soilNameLabel, soilProfileName, soilManualKcLabel, soilManualKc,
           soilManualZoneLabel, soilManualZone, soilManualRainLabel, soilManualRain,
@@ -1160,7 +1160,7 @@ public class FieldDataController extends Application
       pane.setTop(top);
 
       // GridPane - Center Section
-      GridPane center = gsehenGuiElements.gridPane();
+      GridPane center = gsehenGuiElements.gridPane(pane);
 
       int row = 0;
 

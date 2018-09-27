@@ -16,7 +16,7 @@
 
 <SplitPane id="mainSplitPane" dividerPositions="0.31" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="800.0" minWidth="1280.0" prefHeight="800.0" prefWidth="1280.0" stylesheets="@style/Global.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
 	<items>
-		<BorderPane id="mainBorderPane" maxWidth="-Infinity">
+		<BorderPane id="mainBorderPane">
 			<top>
 				<MenuBar BorderPane.alignment="CENTER">
 					<menus>
@@ -25,7 +25,7 @@
 								<MenuItem mnemonicParsing="false" onAction="#loadUserData" text="%menu.file.load" />
 								<MenuItem mnemonicParsing="false" onAction="#saveUserData" text="%menu.file.save" />
 								<SeparatorMenuItem />
-								<MenuItem fx:id="updateDayDataMenuItem" mnemonicParsing="false" text="%menu.view.developer.update.day.data" onAction="#updateDayData" />
+								<MenuItem fx:id="updateDayDataMenuItem" mnemonicParsing="false" onAction="#updateDayData" text="%menu.view.developer.update.day.data" />
 								<SeparatorMenuItem />
 								<MenuItem mnemonicParsing="false" onAction="#exit" text="%menu.file.exit" />
 							</items>
@@ -52,24 +52,24 @@
 				</MenuBar>
 			</top>
          <bottom>
-            <AnchorPane BorderPane.alignment="CENTER">
+            <AnchorPane prefWidth="385.0" BorderPane.alignment="CENTER">
                <children>
-      				<ImageView id="imageView" fx:id="imageView" disable="true" fitHeight="173.0" fitWidth="393.0" layoutX="1.0" layoutY="42.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="42.0" />
+      				<ImageView id="imageView" fx:id="imageView" disable="true" fitHeight="175.0" fitWidth="385.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children>
             </AnchorPane>
          </bottom>
          <center>
-								<AnchorPane id="leftAnchorPane" maxWidth="-Infinity" BorderPane.alignment="CENTER">
+								<AnchorPane id="leftAnchorPane" prefHeight="800.0" prefWidth="385.0" BorderPane.alignment="CENTER">
                <children>
-                  <BorderPane id="tableBorderPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                  <BorderPane id="tableBorderPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <center>
-                        <AnchorPane prefHeight="36.0" prefWidth="275.0" BorderPane.alignment="CENTER">
+                        <AnchorPane prefWidth="385.0" BorderPane.alignment="CENTER">
                            <children>
-                              <ScrollPane prefHeight="301.0" prefWidth="317.0" AnchorPane.bottomAnchor="-301.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <ScrollPane prefWidth="385.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <content>
-                                  <AnchorPane prefHeight="299.0" prefWidth="346.0">
+                                  <AnchorPane prefWidth="385.0">
                                        <children>
-                                          <BorderPane id="detailBorderPane" prefHeight="300.0" prefWidth="348.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                          <BorderPane id="detailBorderPane" prefWidth="385.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                        </children></AnchorPane>
                                 </content>
                               </ScrollPane>
@@ -77,7 +77,7 @@
                         </AnchorPane>
                      </center>
                      <top>
-                        <TreeTableView id="farmTreeView" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="300.0" prefWidth="393.0" BorderPane.alignment="CENTER">
+                        <TreeTableView id="farmTreeView" prefHeight="250.0" prefWidth="393.0" BorderPane.alignment="CENTER">
                            <columnResizePolicy>
                               <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                            </columnResizePolicy>
@@ -128,7 +128,7 @@
 	                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
 	                     <children>
 	                        <WebView fx:id="contactWebView" layoutX="403.0" layoutY="18.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-	                        <Button cancelButton="true" layoutX="14.0" layoutY="703.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#backToMainView" prefHeight="50.0" prefWidth="100.0" text="Zurück" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="800.0" AnchorPane.topAnchor="700.0" />
+	                        <Button fx:id="contactBack" cancelButton="true" layoutX="15.0" layoutY="700.0" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" onAction="#backToMainView" text="Zurück" AnchorPane.bottomAnchor="36.0" AnchorPane.leftAnchor="20.0" />
 	                     </children>
 	                  </AnchorPane>
 	               </content>
@@ -138,7 +138,7 @@
 	                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
 	                     <children>
 	                        <WebView fx:id="aboutWebView" layoutX="403.0" layoutY="18.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-	                        <Button cancelButton="true" layoutX="14.0" layoutY="703.0" mnemonicParsing="false" onAction="#backToMainView" prefHeight="25.0" prefWidth="60.0" text="Zurück" AnchorPane.bottomAnchor="41.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="881.0" AnchorPane.topAnchor="703.0" />
+	                        <Button fx:id="aboutBack" cancelButton="true" layoutX="20.0" layoutY="700.0" mnemonicParsing="false" onAction="#backToMainView" text="Zurück" AnchorPane.bottomAnchor="36.0" AnchorPane.leftAnchor="20.0" />
 	                     </children>
 	                  </AnchorPane>
 	               </content>

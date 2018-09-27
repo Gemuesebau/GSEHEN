@@ -39,10 +39,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
-import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -65,7 +63,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -415,15 +412,14 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane.setConstraints(soilStartValue, 1, 6);
     GridPane.setConstraints(crop, 0, 7);
     GridPane.setConstraints(cropChoiceBox, 1, 7);
-    GridPane.setConstraints(tablePane, 0, 8, 3, 1, HPos.CENTER, VPos.CENTER, Priority.ALWAYS,
-        Priority.ALWAYS);
+    GridPane.setConstraints(tablePane, 0, 8, 3, 1);
     GridPane.setConstraints(chart, 0, 9, 3, 1);
     GridPane.setConstraints(scalingFactorLabel, 0, 10);
     GridPane.setConstraints(scalingFactor, 1, 10, 2, 1);
     GridPane.setConstraints(scalingValue, 3, 10);
 
     // GridPane - Center Section
-    GridPane centerGrid = gsehenGuiElements.gridPane();
+    GridPane centerGrid = gsehenGuiElements.gridPane(pane);
     
     centerGrid.getChildren().addAll(nameLabel, name, areaLabel, area, locationLabel, location,
         rootingZoneLabel, rootingZone, cropStartLabel, cropStart, soilStartLabel, soilStart,
@@ -551,7 +547,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         GridPane.setConstraints(precipitation, 1, 2);
 
         // GridPane - Center Section
-        GridPane center = gsehenGuiElements.gridPane();
+        GridPane center = gsehenGuiElements.gridPane(pane);
         
         center.getChildren().addAll(dateLabel, date, irrigationLabel, irrigation,
             precipitationLabel, precipitation);

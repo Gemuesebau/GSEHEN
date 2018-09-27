@@ -7,9 +7,11 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -28,9 +30,10 @@ public class GsehenGuiElements {
 
   /**
    * Creates a GridPane.
+   * 
    * @return - the GridPane.
    */
-  public GridPane gridPane() {
+  public GridPane gridPane(BorderPane pane) {
     GridPane grid = new GridPane();
 
     grid.setPadding(new Insets(20, 0, 10, 20));
@@ -38,21 +41,26 @@ public class GsehenGuiElements {
     grid.setVgap(15);
     grid.setGridLinesVisible(false);
 
-    ColumnConstraints column1 = new ColumnConstraints(200, 100, 300);
-    ColumnConstraints column2 = new ColumnConstraints(200, 100, 100);
+    ColumnConstraints column1 = new ColumnConstraints(100, 200, 300, Priority.ALWAYS, HPos.LEFT,
+        true);
+    ColumnConstraints column2 = new ColumnConstraints(100, 200, 300, Priority.ALWAYS, HPos.LEFT,
+        true);
     column1.setHgrow(Priority.ALWAYS);
     column2.setHgrow(Priority.ALWAYS);
-    RowConstraints rowEmpty = new RowConstraints();
 
-    grid.getColumnConstraints().addAll(column1, column2);
+    grid.getColumnConstraints().add(column1);
+    grid.getColumnConstraints().add(column2);
+    grid.setMaxSize(pane.getMaxWidth(), pane.getMaxHeight());
+
+    RowConstraints rowEmpty = new RowConstraints();
     grid.getRowConstraints().add(0, rowEmpty);
-    grid.getRowConstraints().add(1, rowEmpty);
 
     return grid;
   }
 
   /**
    * Creates a Text.
+   * 
    * @return - the Text.
    */
   public Text text() {
@@ -64,6 +72,7 @@ public class GsehenGuiElements {
 
   /**
    * Creates a Button.
+   * 
    * @return - the Button.
    */
   public Button button(double width) {
@@ -76,6 +85,7 @@ public class GsehenGuiElements {
 
   /**
    * Creates a DatePicker.
+   * 
    * @return - the DatePicker.
    */
   public DatePicker datepicker() {

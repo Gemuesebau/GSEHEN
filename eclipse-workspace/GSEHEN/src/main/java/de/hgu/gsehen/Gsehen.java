@@ -71,7 +71,6 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -102,9 +101,6 @@ public class Gsehen extends Application {
   private static final String MAIN_FXML = "main.fxml";
 
   public static final String MAIN_SPLIT_PANE_ID = "#mainSplitPane";
-  private static final String MAIN_BORDER_PANE_ID = "#mainBorderPane";
-  private static final String LEFT_ANCHOR_PANE_ID = "#leftAnchorPane";
-  private static final String TABLE_BORDER_PANE_ID = "#tableBorderPane";
   public static final String DEBUG_TEXTAREA_ID = "#debugTA";
   public static final String TAB_PANE_ID = "#tabPane";
   private static final String MAPS_WEB_VIEW_ID = "#mapsWebView";
@@ -122,6 +118,9 @@ public class Gsehen extends Application {
 
   private GsehenTreeTable treeTable;
 
+  @SuppressWarnings("unused")
+  private SplitPane mainSplitPane;
+
   private List<Farm> farmsList = new ArrayList<>();
 
   private List<Farm> deletedFarms = new ArrayList<>();
@@ -129,7 +128,8 @@ public class Gsehen extends Application {
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
+  private java.util.Map<Class<? extends GsehenEvent>, 
+      List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
 
   private boolean dataChanged;
   private List<SoilProfile> soilProfilesList;
@@ -211,17 +211,7 @@ public class Gsehen extends Application {
     stage.sizeToScene();
     stage.show();
 
-    SplitPane mainSplitPane = (SplitPane) scene.lookup(MAIN_SPLIT_PANE_ID);
-
-    BorderPane mainBorderPane = (BorderPane) scene.lookup(MAIN_BORDER_PANE_ID);
-    mainBorderPane.prefHeightProperty().bind(scene.heightProperty());
-    mainBorderPane.prefWidthProperty().bind(scene.widthProperty());
-
-    AnchorPane leftAnchorPane = (AnchorPane) scene.lookup(LEFT_ANCHOR_PANE_ID);
-    leftAnchorPane.prefWidthProperty().bind(mainSplitPane.getDividers().get(0).positionProperty());
-
-    BorderPane tableBorderPane = (BorderPane) scene.lookup(TABLE_BORDER_PANE_ID);
-    tableBorderPane.prefWidthProperty().bind(leftAnchorPane.widthProperty());
+    mainSplitPane = (SplitPane) scene.lookup(MAIN_SPLIT_PANE_ID);
 
     maps = new Maps(this, (WebView) scene.lookup(MAPS_WEB_VIEW_ID));
     fields = new Fields(this, (BorderPane) scene.lookup(FIELDS_VIEW_ID));
