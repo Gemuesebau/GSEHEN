@@ -267,11 +267,11 @@ public class TotalBalance {
             recommendedAction.setAvailableWater(availableWater);
             final int projectedDaysToIrrigation =
                 (int) Math.floor(availableWater / currentDay.getEtc());
+            recommendedAction.setProjectedDaysToIrrigation(projectedDaysToIrrigation);
             if (projectedDaysToIrrigation == 0) {
               recommendedAction.setRecommendation(RecommendedActionEnum.NOW);
             } else {
               recommendedAction.setRecommendation(RecommendedActionEnum.SOON);
-              recommendedAction.setProjectedDaysToIrrigation(projectedDaysToIrrigation);
             }
           } else {
             recommendedAction.setRecommendation(RecommendedActionEnum.IRRIGATION);
