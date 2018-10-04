@@ -301,19 +301,19 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     cropTable.getColumns().addAll(phase, description, today, startDate, duration, cropRootingZone);
 
     // Configuration of each TableColumn
-    phase.setMinWidth(30);
+    phase.setMinWidth(20);
     phase.setStyle("-fx-alignment:top-center; -fx-font-style: italic");
     phase.setCellValueFactory(new PropertyValueFactory<CropPhase, Integer>("phase"));
     description.setMinWidth(125);
     description.setStyle("-fx-alignment:top-center; -fx-font-style: italic");
     description.setCellValueFactory(new PropertyValueFactory<CropPhase, String>("description"));
-    today.setMinWidth(100);
+    today.setMinWidth(125);
     today.setStyle("-fx-alignment:top-right");
     today.setCellValueFactory(new PropertyValueFactory<CropPhase, String>("todayMarker"));
     startDate.setMinWidth(100);
     startDate.setStyle("-fx-alignment:top-center; -fx-font-style: italic");
     startDate.setCellValueFactory(new PropertyValueFactory<CropPhase, String>("cropStart"));
-    duration.setMinWidth(100);
+    duration.setMinWidth(125);
     duration.setStyle("-fx-alignment:top-center; -fx-font-weight: bold;");
     duration.setCellValueFactory(new PropertyValueFactory<CropPhase, Integer>("duration"));
     cropRootingZone.setMinWidth(200);

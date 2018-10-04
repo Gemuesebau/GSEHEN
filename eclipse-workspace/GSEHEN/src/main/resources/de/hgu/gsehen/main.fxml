@@ -14,7 +14,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-<SplitPane id="mainSplitPane" dividerPositions="0.31" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="800.0" minWidth="1280.0" prefHeight="800.0" prefWidth="1280.0" stylesheets="@style/Global.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
+<SplitPane id="mainSplitPane" dividerPositions="0.31" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="768.0" minWidth="1280.0" prefHeight="768.0" prefWidth="1366.0" stylesheets="@style/Global.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
 	<items>
 		<BorderPane id="mainBorderPane">
 			<top>
@@ -54,7 +54,7 @@
          <bottom>
             <AnchorPane prefWidth="385.0" BorderPane.alignment="CENTER">
                <children>
-      				<ImageView id="imageView" fx:id="imageView" disable="true" fitHeight="175.0" fitWidth="385.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+      				<ImageView id="imageView" fx:id="imageView" disable="true" fitHeight="175.0" fitWidth="420.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children>
             </AnchorPane>
          </bottom>

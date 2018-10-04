@@ -202,7 +202,7 @@ public class Gsehen extends Application {
       throw new RuntimeException(MAIN_FXML + " couldn't be loaded", e);
     }
 
-    scene = new Scene(root, 1280, 800);
+    scene = new Scene(root, 1366, 768);
     stage.setScene(scene);
     stage.setTitle("GSEHEN");
     stage.getIcons().add(new Image("/de/hgu/gsehen/images/Logo_UniGeisenheim_36x36.png"));

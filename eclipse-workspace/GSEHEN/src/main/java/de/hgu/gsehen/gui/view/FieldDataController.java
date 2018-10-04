@@ -187,7 +187,7 @@ public class FieldDataController extends Application
       }
     });
 
-    createSoil = gsehenGuiElements.button(150);
+    createSoil = gsehenGuiElements.button(200);
     createSoil.setText(mainBundle.getString("fieldview.createprofile"));
     createSoil.setOnAction(new EventHandler<ActionEvent>() {
 
