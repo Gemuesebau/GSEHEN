@@ -46,6 +46,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Hyperlink;
@@ -54,6 +55,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
@@ -128,8 +130,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     cropList = gsehenInstance.getCrops();
     gsehenGuiElements = new GsehenGuiElements();
 
-    DateFormat dateFormat =
-        DateFormat.getDateInstance(DateFormat.SHORT, gsehenInstance.getSelectedLocale());
+    DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,
+        gsehenInstance.getSelectedLocale());
     pattern = ((SimpleDateFormat) dateFormat).toPattern();
 
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
@@ -142,14 +144,15 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   /**
    * Constructs a new plot data controller associated with the given BorderPane.
    *
-   * @param pane - the associated BorderPane.
+   * @param pane
+   *          - the associated BorderPane.
    */
   public PlotDataController(Gsehen application, BorderPane pane) {
     this.gsehenInstance = application;
     this.pane = pane;
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public void handle(FarmDataChanged event) {
     pane.setVisible(false);
@@ -234,6 +237,18 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
+    // Beschreibung (Accordion)
+    TitledPane descriptionPane = new TitledPane();
+    descriptionPane.setText(mainBundle.getString("plotview.description"));
+    HBox descriptionBox = new HBox();
+    Text descriptionText = gsehenGuiElements.text();
+    descriptionText.wrappingWidthProperty().bind(pane.widthProperty().divide(3.5));
+    descriptionBox.setPadding(new Insets(5, 5, 5, 5));
+    descriptionBox.getChildren().add(descriptionText);
+    descriptionPane.setContent(descriptionBox);
+    Accordion descriptionAccordion = new Accordion();
+    descriptionAccordion.getPanes().add(descriptionPane);
+
     ChangeListener<Crop> changeListener = new ChangeListener<Crop>() {
       @Override
       public void changed(ObservableValue<? extends Crop> observable, //
@@ -245,6 +260,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           tooltip.setStyle("-fx-font-style: italic; -fx-background-color: #ffffff; "
               + "-fx-text-fill: #000000; -fx-font-size: 9pt;");
           cropChoiceBox.setTooltip(tooltip);
+
+          // Sets the accordion-content
+          descriptionText
+              .setText(gsehenInstance.localizeCropText(cropChoiceBox.getValue().getDescription()));
 
           plot.setCrop(newValue);
           // devPhase is a helper-object where you can set the duration of each crop phase
@@ -411,6 +430,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane.setConstraints(soilStartValue, 1, 6);
     GridPane.setConstraints(crop, 0, 7);
     GridPane.setConstraints(cropChoiceBox, 1, 7);
+    GridPane.setConstraints(descriptionAccordion, 2, 7);
     GridPane.setConstraints(tablePane, 0, 8, 3, 1);
     GridPane.setConstraints(chart, 0, 9, 3, 1);
     GridPane.setConstraints(scalingFactorLabel, 0, 10);
@@ -422,8 +442,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     centerGrid.getChildren().addAll(nameLabel, name, areaLabel, area, locationLabel, location,
         rootingZoneLabel, rootingZone, cropStartLabel, cropStart, soilStartLabel, soilStart,
-        soilStartValueLabel, soilStartValue, crop, cropChoiceBox, tablePane, chart,
-        scalingFactorLabel, scalingFactor, scalingValue);
+        soilStartValueLabel, soilStartValue, crop, cropChoiceBox, descriptionAccordion, tablePane,
+        chart, scalingFactorLabel, scalingFactor, scalingValue);
 
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setContent(centerGrid);
@@ -524,8 +544,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
           // Books the irrigation/precipitation for the right day
           for (ManualWaterSupply mws : md.getManualWaterSupply()) {
-            Date wateringDate =
-                Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date wateringDate = Date
+                .from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
             if ((wateringDate.compareTo(mws.getDate()) == 0)) {
               irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(mws.getIrrigation()));
               precipitation.setText(gsehenInstance.formatDoubleOneDecimal(mws.getPrecipitation()));
@@ -653,14 +673,14 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
               if (cropStart.getValue() != null) {
                 LocalDate localDateCrop = cropStart.getValue();
-                Date cropDate =
-                    Date.from(localDateCrop.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                Date cropDate = Date
+                    .from(localDateCrop.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 plot.setCropStart(cropDate);
               }
               if (soilStart.getValue() != null) {
                 LocalDate localDateSoil = soilStart.getValue();
-                Date soilDate =
-                    Date.from(localDateSoil.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                Date soilDate = Date
+                    .from(localDateSoil.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 plot.setSoilStartDate(soilDate);
               }
               if (!rootingZone.getText().equals("0") && !rootingZone.getText().isEmpty()) {
@@ -710,8 +730,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     logViewTab = gsehenInstance.getMainController().getLogViewTab();
 
     // Actions that will happen, if you click a 'plot' in the TreeTableView
-    treeTableView =
-        (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
+    treeTableView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
+        .lookup(FARM_TREE_VIEW_ID);
     treeTableView.getSelectionModel().selectedItemProperty()
         .addListener(new ChangeListener<Object>() {
           @Override
@@ -720,8 +740,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             bottomBox.getChildren().addAll(harvest, watering, save);
             for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
               if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
-                selectedItem =
-                    treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
+                selectedItem = treeTableView.getSelectionModel().getSelectedCells().get(i)
+                    .getTreeItem();
                 if (selectedItem != null
                     && selectedItem.getValue().getClass().getSimpleName().equals("Plot")) {
                   pane.setVisible(true);
@@ -781,10 +801,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                   Date cropdate = plot.getCropStart();
 
                   if (date != null) {
-                    LocalDate localDate =
-                        date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                    LocalDate cropDate =
-                        date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault())
+                        .toLocalDate();
+                    LocalDate cropDate = date.toInstant().atZone(ZoneId.systemDefault())
+                        .toLocalDate();
                     soilStart.setValue(localDate);
                     cropStart.setValue(cropDate);
                   } else {
@@ -793,8 +813,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                   }
 
                   if (cropdate != null) {
-                    LocalDate cropDate =
-                        cropdate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    LocalDate cropDate = cropdate.toInstant().atZone(ZoneId.systemDefault())
+                        .toLocalDate();
                     cropStart.setValue(cropDate);
                   } else {
                     cropStart.setValue(null);
@@ -838,7 +858,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     currentItem = treeTableView.getSelectionModel().getSelectedIndex();
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   private void setChartData() {
     waterLevel = plot.getRecommendedAction().getAvailableWater();
     Double percent = plot.getRecommendedAction().getAvailableWaterPercent();
@@ -908,8 +928,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     Date cropdate = plot.getCropStart();
 
     if (cropdate != null && plot.getCropDevelopmentStatus() != null) {
-      Date today =
-          Date.from(java.time.LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+      Date today = Date
+          .from(java.time.LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
       Date cropStartDate = plot.getCropStart();
       Calendar calendar = Calendar.getInstance();
