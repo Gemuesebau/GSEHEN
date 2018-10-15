@@ -164,24 +164,24 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     // CENTER (From "Name" to "Bewässerungsfaktor")
     // Name
-    nameLabel = gsehenGuiElements.text();
-    nameLabel.setText(mainBundle.getString("fieldview.name"));
+    nameLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.name"));
+    
     name = new JFXTextField("");
 
     // m²
-    areaLabel = gsehenGuiElements.text();
-    areaLabel.setText(mainBundle.getString("fieldview.area"));
-    area = gsehenGuiElements.text();
+    areaLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.area"));
+    
+    area = gsehenGuiElements.text("");
 
     // Lage
-    locationLabel = gsehenGuiElements.text();
-    locationLabel.setText(mainBundle.getString("plotview.location"));
+    locationLabel = gsehenGuiElements.text(mainBundle.getString("plotview.location"));
+    
     location = new Hyperlink("");
     location.setFont(Font.font("Arial", 14));
 
     // Max. durchw. Zone
-    rootingZoneLabel = gsehenGuiElements.text();
-    rootingZoneLabel.setText(mainBundle.getString("plotview.rootingzone"));
+    rootingZoneLabel = gsehenGuiElements.text(mainBundle.getString("plotview.rootingzone"));
+    
     rootingZone = new JFXTextField("");
     rootingZone.textProperty().addListener(new ChangeListener<String>() {
       @Override
@@ -196,18 +196,18 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     });
 
     // Start der Inkulturnahme
-    cropStartLabel = gsehenGuiElements.text();
-    cropStartLabel.setText(mainBundle.getString("plotview.cropstart"));
+    cropStartLabel = gsehenGuiElements.text(mainBundle.getString("plotview.cropstart"));
+    
     cropStart = gsehenGuiElements.datepicker();
 
     // Start der Bodenwasserbilanz
-    soilStartLabel = gsehenGuiElements.text();
-    soilStartLabel.setText(mainBundle.getString("plotview.soilstart"));
+    soilStartLabel = gsehenGuiElements.text(mainBundle.getString("plotview.soilstart"));
+    
     soilStart = gsehenGuiElements.datepicker();
 
     // Startwert der Wasserbilanz
-    soilStartValueLabel = gsehenGuiElements.text();
-    soilStartValueLabel.setText(mainBundle.getString("plotview.soilstartvalue"));
+    soilStartValueLabel = gsehenGuiElements.text(mainBundle.getString("plotview.soilstartvalue"));
+    
     soilStartValue = new JFXSlider();
     soilStartValue.setMin(0.0);
     soilStartValue.setMax(100.0);
@@ -218,8 +218,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     soilStartValue.setBlockIncrement(5.0);
 
     // Kultur
-    Text crop = gsehenGuiElements.text();
-    crop.setText(mainBundle.getString("plotview.crop"));
+    Text cropLabel = gsehenGuiElements.text(mainBundle.getString("plotview.crop"));
 
     cropChoiceBox = new JFXComboBox<Crop>();
     if (!cropList.isEmpty()) {
@@ -246,7 +245,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     TitledPane descriptionPane = new TitledPane();
     descriptionPane.setText(mainBundle.getString("plotview.description"));
     HBox descriptionBox = new HBox();
-    Text descriptionText = gsehenGuiElements.text();
+    Text descriptionText = gsehenGuiElements.text("");
     descriptionText.wrappingWidthProperty().bind(pane.widthProperty().divide(3.5));
     descriptionBox.setPadding(new Insets(5, 5, 5, 5));
     descriptionBox.getChildren().add(descriptionText);
@@ -392,8 +391,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     chart.getData().addAll(series);
 
     // Bewässerungsfaktor
-    Text scalingFactorLabel = gsehenGuiElements.text();
-    scalingFactorLabel.setText(mainBundle.getString("plotview.scalingfactor"));
+    Text scalingFactorLabel =
+        gsehenGuiElements.text(mainBundle.getString("plotview.scalingfactor"));
+    
     scalingFactor = new JFXSlider();
     scalingFactor.setMin(-100.0);
     scalingFactor.setMax(100.0);
@@ -433,7 +433,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane.setConstraints(soilStart, 1, 5);
     GridPane.setConstraints(soilStartValueLabel, 0, 6);
     GridPane.setConstraints(soilStartValue, 1, 6);
-    GridPane.setConstraints(crop, 0, 7);
+    GridPane.setConstraints(cropLabel, 0, 7);
     GridPane.setConstraints(cropChoiceBox, 1, 7);
     GridPane.setConstraints(descriptionAccordion, 2, 7);
     GridPane.setConstraints(tablePane, 0, 8, 3, 1);
@@ -447,8 +447,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     centerGrid.getChildren().addAll(nameLabel, name, areaLabel, area, locationLabel, location,
         rootingZoneLabel, rootingZone, cropStartLabel, cropStart, soilStartLabel, soilStart,
-        soilStartValueLabel, soilStartValue, crop, cropChoiceBox, descriptionAccordion, tablePane,
-        chart, scalingFactorLabel, scalingFactor, scalingValue);
+        soilStartValueLabel, soilStartValue, cropLabel, cropChoiceBox, descriptionAccordion,
+        tablePane, chart, scalingFactorLabel, scalingFactor, scalingValue);
 
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setContent(centerGrid);
@@ -645,14 +645,14 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     pane.setTop(nameLabel);
 
     // Datum (when the irrigation/precipitation should be booked)
-    Text dateLabel = gsehenGuiElements.text();
-    dateLabel.setText(mainBundle.getString("plotview.date"));
+    Text dateLabel = gsehenGuiElements.text(mainBundle.getString("plotview.date"));
+    
     DatePicker date = gsehenGuiElements.datepicker();
     date.setValue(LocalDate.now());
 
     // Bewässerung (in mm)
-    Text irrigationLabel = gsehenGuiElements.text();
-    irrigationLabel.setText(mainBundle.getString("plotview.irrigation"));
+    Text irrigationLabel = gsehenGuiElements.text(mainBundle.getString("plotview.irrigation"));
+    
     JFXTextField irrigation = new JFXTextField();
     irrigation.textProperty().addListener(new ChangeListener<String>() {
       @Override
@@ -668,8 +668,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(0.0));
 
     // Niederschlag (in mm)
-    Text precipitationLabel = gsehenGuiElements.text();
-    precipitationLabel.setText(mainBundle.getString("plotview.precipitation"));
+    Text precipitationLabel =
+        gsehenGuiElements.text(mainBundle.getString("plotview.precipitation"));
+    
     JFXTextField precipitation = new JFXTextField();
     precipitation.textProperty().addListener(new ChangeListener<String>() {
       @Override

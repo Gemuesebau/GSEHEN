@@ -17,6 +17,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
@@ -60,14 +61,31 @@ public class GsehenGuiElements {
 
   /**
    * Creates a Text.
-   * 
+   *
+   * @param text the initial text of this Text element
+   * @param fontWeight a particular font weight for this text
    * @return - the Text.
    */
-  public Text text() {
-    Text text = new Text();
-    text.setFont(Font.font("Arial", 14));
+  public Text text(String text, FontWeight fontWeight) {
+    Text textElement = new Text();
+    if (fontWeight != null) {
+      textElement.setFont(Font.font("Arial", fontWeight, 14));
+    }
+    else {
+      textElement.setFont(Font.font("Arial", 14));
+    }
+    textElement.setText(text);
+    return textElement;
+  }
 
-    return text;
+  /**
+   * Creates a Text.
+   *
+   * @param text the initial text of this Text element
+   * @return - the Text.
+   */
+  public Text text(String text) {
+    return text(text, null);
   }
 
   /**
