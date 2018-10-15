@@ -144,13 +144,13 @@ public class FieldDataController extends Application
     // TOP (The FieldView, you will see first)
     // Name
     nameLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.name"));
-    
+
     name = new JFXTextField("");
     name.setPrefSize(150, 25);
 
     // m²
     areaLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.area"));
-    
+
     area = gsehenGuiElements.text("", FontWeight.BOLD);
 
     // Bodenprofil
@@ -201,9 +201,7 @@ public class FieldDataController extends Application
     soilBox.getChildren().addAll(editProfile, createSoil);
 
     // Wetterdatenquelle
-    Text weatherDataSourceLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatasource") + ":");
-    
+
     weatherData = new JFXComboBox<WeatherDataSource>();
     weatherData.setPrefSize(150, 25);
     if (!weatherDataSourceList.isEmpty()) {
@@ -255,8 +253,7 @@ public class FieldDataController extends Application
     // Speichern
     saveField = gsehenGuiElements.button(150);
     saveField.setText(mainBundle.getString("button.accept"));
-    Text nameError = new Text(mainBundle.getString("fieldview.nameerror"));
-    nameError.setFont(Font.font("Verdana", 14));
+    Text nameError = gsehenGuiElements.text(mainBundle.getString("fieldview.nameerror"));
     nameError.setFill(Color.RED);
 
     GridPane grid = gsehenGuiElements.gridPane(pane);
@@ -287,6 +284,9 @@ public class FieldDataController extends Application
         }
       }
     });
+
+    Text weatherDataSourceLabel = gsehenGuiElements
+        .text(mainBundle.getString("fieldview.weatherdatasource") + ":");
 
     GridPane.setConstraints(nameLabel, 0, 0);
     GridPane.setConstraints(name, 1, 0);
@@ -377,22 +377,12 @@ public class FieldDataController extends Application
     sp = gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
     int index = 1;
 
-    Text soilProfileLabel =
-        gsehenGuiElements.text(
-            mainBundle.getString("fieldview.currentsoil") + " (" + sp.getName() + "):" + "\n",
-            FontWeight.BOLD);
-
-    Text setKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
-
     Text setKc = new Text();
     String kc = "";
     if (sp.getSoilManualData().getSoilKc() != null) {
       kc = String.valueOf(sp.getSoilManualData().getSoilKc());
       setKc.setText(kc);
     }
-
-    Text setZoneLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualzone"));
-    
 
     Text setZone = new Text();
     String zone = "";
@@ -401,9 +391,6 @@ public class FieldDataController extends Application
       setZone.setText(zone);
     }
 
-    Text setRainLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualrain"));
-    
-
     Text setRain = new Text();
     String rain = "";
     if (sp.getSoilManualData().getRainMax() != null) {
@@ -411,15 +398,20 @@ public class FieldDataController extends Application
       setRain.setText(rain);
     }
 
-    Text setPauseLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualpause"));
-    
-
     Text setPause = new Text();
     String pause = "";
     if (sp.getSoilManualData().getDaysPause() != null) {
       pause = String.valueOf(sp.getSoilManualData().getDaysPause());
       setPause.setText(pause);
     }
+
+    Text soilProfileLabel = gsehenGuiElements.text(
+        mainBundle.getString("fieldview.currentsoil") + " (" + sp.getName() + "):" + "\n",
+        FontWeight.BOLD);
+    Text setKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
+    Text setZoneLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualzone"));
+    Text setRainLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualrain"));
+    Text setPauseLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualpause"));
 
     GridPane.setConstraints(soilProfileLabel, 0, 0);
     GridPane.setConstraints(setKcLabel, 0, 1);
@@ -489,9 +481,9 @@ public class FieldDataController extends Application
     tabPane.getTabs().removeAll(mapViewTab, plotViewTab, logViewTab);
 
     // Name
-    Text weatherDataLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatalabel"));
-    
+    Text weatherDataLabel = gsehenGuiElements
+        .text(mainBundle.getString("fieldview.weatherdatalabel"));
+
     weatherDataSourceName = new JFXTextField();
 
     GridPane.setConstraints(weatherDataLabel, 0, 0);
@@ -504,30 +496,21 @@ public class FieldDataController extends Application
     pane.setTop(top);
 
     // Plug-in
-    Text weatherDataPluginJsFileNameLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatapluginjsfilenamelabel"));
-    
     weatherDataPluginJsFileName = new JFXComboBox<String>();
     weatherDataPluginJsFileName.getItems().addAll(PluginUtil.getPluginJsFileNames());
 
     // Manual Import?
-    Text weatherDataManualImportLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatamanualimportlabel"));
-    
+    Text weatherDataManualImportLabel = gsehenGuiElements
+        .text(mainBundle.getString("fieldview.weatherdatamanualimportlabel"));
+
     weatherDataManualImportLabel.setFont(Font.font("Arial", 14));
     weatherDataManualImport = new CheckBox();
 
     // Automatic Import?
-    Text weatherDataAutomaticImportLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdataautomaticimportlabel"));
-    
     weatherDataAutomaticImport = new CheckBox();
 
     // Automatic Import interval
-    Text weatherDataAutomaticImportIntervalSecondsLabel =
-        gsehenGuiElements.text(
-            mainBundle.getString("fieldview.weatherdataautomaticimportintervalsecondslabel"));
-    
+
     weatherDataAutomaticImportIntervalSeconds = new JFXTextField();
     weatherDataAutomaticImportIntervalSeconds.textProperty()
         .addListener(new ChangeListener<String>() {
@@ -541,9 +524,6 @@ public class FieldDataController extends Application
         });
 
     // Latitude
-    Text weatherDataSourceLocationLatLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.locationlat"));
-    
     weatherDataSourceLocationLat = new JFXTextField();
     weatherDataSourceLocationLat.textProperty().addListener(new ChangeListener<String>() {
       @Override
@@ -563,9 +543,6 @@ public class FieldDataController extends Application
     weatherDataSourceLocationLatExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
 
     // Longitude
-    Text weatherDataSourceLocationLngLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.locationlng"));
-    
     weatherDataSourceLocationLng = new JFXTextField();
     weatherDataSourceLocationLng.textProperty().addListener(new ChangeListener<String>() {
       @Override
@@ -584,9 +561,6 @@ public class FieldDataController extends Application
     weatherDataSourceLocationLngExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
 
     // Standort (Meter ü. NN)
-    Text weatherDataSourceMetersAboveLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.metersabove"));
-    
     weatherDataSourceMetersAbove = new JFXTextField();
     weatherDataSourceMetersAbove.textProperty().addListener(new ChangeListener<String>() {
       @Override
@@ -599,6 +573,19 @@ public class FieldDataController extends Application
         }
       }
     });
+
+    Text weatherDataPluginJsFileNameLabel = gsehenGuiElements
+        .text(mainBundle.getString("fieldview.weatherdatapluginjsfilenamelabel"));
+    Text weatherDataAutomaticImportLabel = gsehenGuiElements
+        .text(mainBundle.getString("fieldview.weatherdataautomaticimportlabel"));
+    Text weatherDataAutomaticImportIntervalSecondsLabel = gsehenGuiElements
+        .text(mainBundle.getString("fieldview.weatherdataautomaticimportintervalsecondslabel"));
+    Text weatherDataSourceLocationLatLabel = gsehenGuiElements
+        .text(mainBundle.getString("fieldview.locationlat"));
+    Text weatherDataSourceLocationLngLabel = gsehenGuiElements
+        .text(mainBundle.getString("fieldview.locationlng"));
+    Text weatherDataSourceMetersAboveLabel = gsehenGuiElements
+        .text(mainBundle.getString("fieldview.metersabove"));
 
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(weatherDataPluginJsFileNameLabel, 0, 0);
@@ -620,7 +607,7 @@ public class FieldDataController extends Application
 
     // GridPane - Center Section
     GridPane center = gsehenGuiElements.gridPane(pane);
-    
+
     // Add nodes
     center.getChildren().addAll(weatherDataPluginJsFileNameLabel, weatherDataPluginJsFileName,
         weatherDataManualImportLabel, weatherDataManualImport, weatherDataAutomaticImportLabel,
@@ -683,8 +670,7 @@ public class FieldDataController extends Application
             center.getChildren().add(dateError);
           }
         } else {
-          Text error = new Text(mainBundle.getString("fieldview.error"));
-          error.setFont(Font.font("Verdana", 14));
+          Text error = gsehenGuiElements.text(mainBundle.getString("fieldview.error"));
           error.setFill(Color.RED);
           buttonBox.getChildren().clear();
           buttonBox.getChildren().addAll(back, save, error);
@@ -751,32 +737,27 @@ public class FieldDataController extends Application
     treeTableView.setVisible(false);
     tabPane.getTabs().removeAll(mapViewTab, plotViewTab, logViewTab);
 
-    // Name
-    Text soilNameLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.profilename"));
-    
-
     // kc-Wert
-    Text soilManualKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
-    
     soilManualKc = new JFXTextField("");
 
     // Bilanzierungstiefe (in cm)
-    Text soilManualZoneLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualzone"));
-    
     soilManualZone = new JFXTextField("");
 
     // Schwelle des Regenereignis (in mm)
-    Text soilManualRainLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualrain"));
-    
     soilManualRain = new JFXTextField("");
 
     // Bewässerungspause (in Tagen)
-    Text soilManualPauseLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.manualpause"));
-    
+    Text soilManualPauseLabel = gsehenGuiElements
+        .text(mainBundle.getString("fieldview.manualpause"));
+
     JFXTextField soilManualPause = new JFXTextField("");
 
     JFXTextField soilProfileName = new JFXTextField("");
+
+    Text soilNameLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.profilename"));
+    Text soilManualKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
+    Text soilManualZoneLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualzone"));
+    Text soilManualRainLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualrain"));
 
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(soilNameLabel, 0, 0);
@@ -792,7 +773,7 @@ public class FieldDataController extends Application
 
     // GridPane - Top Section
     GridPane top = gsehenGuiElements.gridPane(pane);
-    
+
     top.getChildren().addAll(soilNameLabel, soilProfileName, soilManualKcLabel, soilManualKc,
         soilManualZoneLabel, soilManualZone, soilManualRainLabel, soilManualRain,
         soilManualPauseLabel, soilManualPause);
@@ -805,9 +786,6 @@ public class FieldDataController extends Application
     layerText.setFont(Font.font("Arial", FontWeight.BOLD, 18));
 
     // Bodentyp
-    Text soilLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soiltype"));
-    
-
     Soil s = new Soil();
     List<Soil> soils = s.soils();
 
@@ -828,8 +806,6 @@ public class FieldDataController extends Application
     });
 
     // Wasserhaltekapazität
-    Text soilAwcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soilawc"));
-    
     JFXTextField soilAwc = new JFXTextField();
 
     // Sets the 'soilAwc', if the ChoiceBox-Value changed
@@ -847,8 +823,6 @@ public class FieldDataController extends Application
 
     // Tiefe
     JFXTextField depth = new JFXTextField("25");
-    Text depthLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.depth"));
-    
     depth.textProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -926,14 +900,17 @@ public class FieldDataController extends Application
           center.getChildren().addAll(createdSoil, delSoil);
           depth.setText(mainBundle.getString("fieldview.layer") + (layerList.size() + 1));
         } else {
-          Text error = new Text(mainBundle.getString("fieldview.error"));
-          error.setFont(Font.font("Verdana", 14));
+          Text error = gsehenGuiElements.text(mainBundle.getString("fieldview.error"));
           error.setFill(Color.RED);
           buttonBox.getChildren().clear();
           buttonBox.getChildren().addAll(back, save, error);
         }
       }
     });
+
+    Text soilLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soiltype"));
+    Text soilAwcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soilawc"));
+    Text depthLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.depth"));
 
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(layerText, 0, 0, 2, 1);
@@ -1004,8 +981,8 @@ public class FieldDataController extends Application
           treeTableView.getSelectionModel().clearSelection();
           treeTableView.getSelectionModel().select(currentItem);
         } else {
-          Text noNameOrSoil = new Text(mainBundle.getString("fieldview.nonameorsoil"));
-          noNameOrSoil.setFont(Font.font("Verdana", 14));
+          Text noNameOrSoil = gsehenGuiElements
+              .text(mainBundle.getString("fieldview.nonameorsoil"));
           noNameOrSoil.setFill(Color.RED);
           buttonBox.getChildren().clear();
           buttonBox.getChildren().addAll(back, save, noNameOrSoil);
@@ -1036,8 +1013,6 @@ public class FieldDataController extends Application
       SoilProfile currentSoilProfile = currentSoilBox.getValue();
 
       // Name
-      Text soilNameLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.profilename"));
-      
       JFXTextField soilProfileName = new JFXTextField(currentSoilProfile.getName());
       soilProfileName.textProperty().addListener(new ChangeListener<String>() {
         @Override
@@ -1050,8 +1025,6 @@ public class FieldDataController extends Application
       });
 
       // kc-Wert
-      Text soilManualKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
-      
       if (currentSoilBox.getValue().getSoilManualData().getSoilKc() != null) {
         soilManualKc = new JFXTextField(String.valueOf(gsehenInstance
             .formatDoubleOneDecimal(currentSoilProfile.getSoilManualData().getSoilKc())));
@@ -1074,9 +1047,6 @@ public class FieldDataController extends Application
       });
 
       // Bilanzierungstiefe (in cm)
-      Text soilManualZoneLabel =
-          gsehenGuiElements.text(mainBundle.getString("fieldview.manualzone"));
-      
       if (currentSoilProfile.getSoilManualData().getSoilZone() != null) {
         soilManualZone = new JFXTextField(
             String.valueOf(currentSoilProfile.getSoilManualData().getSoilZone()));
@@ -1098,9 +1068,6 @@ public class FieldDataController extends Application
       });
 
       // Schwelle des Regenereignis (in mm)
-      Text soilManualRainLabel =
-          gsehenGuiElements.text(mainBundle.getString("fieldview.manualrain"));
-      
       if (currentSoilBox.getValue().getSoilManualData().getRainMax() != null) {
         soilManualRain = new JFXTextField(String.valueOf(gsehenInstance
             .formatDoubleOneDecimal(currentSoilProfile.getSoilManualData().getRainMax())));
@@ -1123,9 +1090,6 @@ public class FieldDataController extends Application
       });
 
       // Bewässerungspause (in Tagen)
-      Text soilManualPauseLabel =
-          gsehenGuiElements.text(mainBundle.getString("fieldview.manualpause"));
-      
       if (currentSoilProfile.getSoilManualData().getDaysPause() != null) {
         soilManualPause = new JFXTextField(
             String.valueOf(currentSoilProfile.getSoilManualData().getDaysPause()));
@@ -1146,6 +1110,15 @@ public class FieldDataController extends Application
         }
       });
 
+      Text soilNameLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.profilename"));
+      Text soilManualKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
+      Text soilManualZoneLabel = gsehenGuiElements
+          .text(mainBundle.getString("fieldview.manualzone"));
+      Text soilManualRainLabel = gsehenGuiElements
+          .text(mainBundle.getString("fieldview.manualrain"));
+      Text soilManualPauseLabel = gsehenGuiElements
+          .text(mainBundle.getString("fieldview.manualpause"));
+
       // Set Row & Column Index for Nodes
       GridPane.setConstraints(soilNameLabel, 0, 0);
       GridPane.setConstraints(soilProfileName, 1, 0);
@@ -1160,7 +1133,7 @@ public class FieldDataController extends Application
 
       // GridPane - Top Section
       GridPane top = gsehenGuiElements.gridPane(pane);
-      
+
       top.getChildren().addAll(soilNameLabel, soilProfileName, soilManualKcLabel, soilManualKc,
           soilManualZoneLabel, soilManualZone, soilManualRainLabel, soilManualRain,
           soilManualPauseLabel, soilManualPause);
@@ -1173,14 +1146,7 @@ public class FieldDataController extends Application
 
       // Each layer the SoilProfile has
       for (int i = 0; i < currentSoilProfile.getSoilType().size(); i++) {
-        // "Schicht #XY"
-        Text layer = new Text(mainBundle.getString("fieldview.layer") + (i + 1));
-        layer.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-
         // Bodentyp
-        Text soilLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soiltype"));
-        
-
         Soil s = new Soil();
         List<Soil> soils = s.soils();
 
@@ -1211,9 +1177,6 @@ public class FieldDataController extends Application
         }
 
         // Wasserhaltekapazität
-        Text soilAwcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soilawc"));
-        
-
         int in = i;
         ChangeListener<Soil> changeListener = new ChangeListener<Soil>() {
           @Override
@@ -1233,8 +1196,7 @@ public class FieldDataController extends Application
         // Tiefe
         soilDepth = new JFXTextField(gsehenInstance
             .formatDoubleOneDecimal(currentSoilProfile.getProfileDepth().get(i).getDepth()));
-        Text depthLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.depth"));
-        
+
         soilDepth.textProperty().addListener(new ChangeListener<String>() {
           @Override
           public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -1250,15 +1212,21 @@ public class FieldDataController extends Application
           }
         });
 
+        // "Schicht #XY"
+        Text layer = gsehenGuiElements.text(mainBundle.getString("fieldview.layer") + (i + 1));
+        Text soilLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soiltype"));
+
         // Set Row & Column Index for Nodes
         GridPane.setConstraints(layer, 0, row);
         row += 1;
         GridPane.setConstraints(soilLabel, 0, row);
         GridPane.setConstraints(soilChoiceBox, 1, row);
         row += 1;
+        Text soilAwcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soilawc"));
         GridPane.setConstraints(soilAwcLabel, 0, row);
         GridPane.setConstraints(soilAwc, 1, row);
         row += 1;
+        Text depthLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.depth"));
         GridPane.setConstraints(depthLabel, 0, row);
         GridPane.setConstraints(soilDepth, 1, row);
         row += 1;
@@ -1291,8 +1259,8 @@ public class FieldDataController extends Application
             treeTableView.getSelectionModel().clearSelection();
             treeTableView.getSelectionModel().select(currentItem);
           } else {
-            Text profileChangeError = new Text(mainBundle.getString("fieldview.error"));
-            profileChangeError.setFont(Font.font("Verdana", 14));
+            Text profileChangeError = gsehenGuiElements
+                .text(mainBundle.getString("fieldview.error"));
             profileChangeError.setFill(Color.RED);
             HBox bottom = new HBox();
             bottom.setSpacing(10);

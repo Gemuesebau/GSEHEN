@@ -218,8 +218,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     soilStartValue.setBlockIncrement(5.0);
 
     // Kultur
-    Text cropLabel = gsehenGuiElements.text(mainBundle.getString("plotview.crop"));
-
     cropChoiceBox = new JFXComboBox<Crop>();
     if (!cropList.isEmpty()) {
       for (Crop c : cropList) {
@@ -391,8 +389,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     chart.getData().addAll(series);
 
     // Bewässerungsfaktor
-    Text scalingFactorLabel =
-        gsehenGuiElements.text(mainBundle.getString("plotview.scalingfactor"));
     
     scalingFactor = new JFXSlider();
     scalingFactor.setMin(-100.0);
@@ -403,8 +399,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     scalingFactor.setMajorTickUnit(25.0);
     scalingFactor.setBlockIncrement(5.0);
 
-    Text scalingValue = new Text();
-    scalingValue.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+    Text scalingValue = gsehenGuiElements.text("", FontWeight.BOLD);
 
     scalingFactor.valueProperty().addListener(new ChangeListener<Number>() {
       public void changed(ObservableValue<? extends Number> ov, Number oldVal, Number newVal) {
@@ -417,6 +412,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         scalingValue.setText(Math.abs(newVal.intValue()) + "% " + factor);
       }
     });
+    
+    Text cropLabel = gsehenGuiElements.text(mainBundle.getString("plotview.crop"));
+    Text scalingFactorLabel =
+        gsehenGuiElements.text(mainBundle.getString("plotview.scalingfactor"));
 
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(nameLabel, 0, 0);
@@ -639,19 +638,16 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     tabPane.getTabs().removeAll(mapViewTab, fieldViewTab, logViewTab);
 
     // Name of the plot
-    Text nameLabel = new Text(plot.getName());
-    nameLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
+    Text nameLabel = gsehenGuiElements.text("", FontWeight.BOLD);
 
     pane.setTop(nameLabel);
 
     // Datum (when the irrigation/precipitation should be booked)
-    Text dateLabel = gsehenGuiElements.text(mainBundle.getString("plotview.date"));
     
     DatePicker date = gsehenGuiElements.datepicker();
     date.setValue(LocalDate.now());
 
     // Bewässerung (in mm)
-    Text irrigationLabel = gsehenGuiElements.text(mainBundle.getString("plotview.irrigation"));
     
     JFXTextField irrigation = new JFXTextField();
     irrigation.textProperty().addListener(new ChangeListener<String>() {
@@ -668,8 +664,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(0.0));
 
     // Niederschlag (in mm)
-    Text precipitationLabel =
-        gsehenGuiElements.text(mainBundle.getString("plotview.precipitation"));
     
     JFXTextField precipitation = new JFXTextField();
     precipitation.textProperty().addListener(new ChangeListener<String>() {
@@ -706,6 +700,11 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         }
       }
     });
+    
+    Text dateLabel = gsehenGuiElements.text(mainBundle.getString("plotview.date"));
+    Text irrigationLabel = gsehenGuiElements.text(mainBundle.getString("plotview.irrigation"));
+    Text precipitationLabel =
+        gsehenGuiElements.text(mainBundle.getString("plotview.precipitation"));
 
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(dateLabel, 0, 0);
@@ -786,8 +785,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           treeTableView.getSelectionModel().clearSelection();
           treeTableView.getSelectionModel().select(currentItem);
         } else {
-          Text wateringError = new Text(mainBundle.getString("fieldview.error"));
-          wateringError.setFont(Font.font("Verdana", 14));
+          Text wateringError = gsehenGuiElements.text(mainBundle.getString("fieldview.error"));
           wateringError.setFill(Color.RED);
           buttonBox.getChildren().add(wateringError);
         }
@@ -845,15 +843,13 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           treeTableView.getSelectionModel().select(currentItem);
         }
       } else {
-        Text plotError = new Text(mainBundle.getString("fieldview.error"));
-        plotError.setFont(Font.font("Verdana", 14));
+        Text plotError = gsehenGuiElements.text(mainBundle.getString("fieldview.error"));
         plotError.setFill(Color.RED);
         bottomBox.getChildren().clear();
         bottomBox.getChildren().addAll(harvest, watering, save, plotError);
       }
     } else {
-      error = new Text(mainBundle.getString("plotview.error"));
-      error.setFont(Font.font("Verdana", 14));
+      error = gsehenGuiElements.text(mainBundle.getString("plotview.error"));
       error.setFill(Color.RED);
       bottomBox.getChildren().clear();
       bottomBox.getChildren().addAll(harvest, watering, save, error);
