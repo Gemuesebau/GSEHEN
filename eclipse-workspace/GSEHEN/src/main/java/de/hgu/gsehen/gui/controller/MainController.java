@@ -1,13 +1,15 @@
 package de.hgu.gsehen.gui.controller;
 
-import java.awt.Desktop;
-import java.io.File;
-import java.io.IOException;
 import com.jfoenix.controls.JFXTabPane;
 
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.gui.GsehenGuiElements;
 import de.hgu.gsehen.gui.GsehenSave;
+
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
+
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -65,9 +67,9 @@ public class MainController {
   private void about(ActionEvent a) {
     tabPane.getTabs().clear();
     tabPane.getTabs().add(aboutViewTab);
-    
+
     aboutBack = gsehenGuiElements.button(100);
-    
+
     WebEngine engine = aboutWebView.getEngine();
     engine.load(
         "https://www.hs-geisenheim.de/forschung/institute/gemuesebau/ueberblick-institut-fuer-gemuesebau/bewaesserung/ble-gsehen/");
@@ -85,9 +87,8 @@ public class MainController {
 
   @FXML
   private void openPluginsFolder(ActionEvent o) {
-    File pluginsFolderObj = new File(System.getProperty("user.home")
-        + File.separator + ".gsehenIrrigationManager"
-        + File.separator + "plugins");
+    File pluginsFolderObj = new File(System.getProperty("user.home") + File.separator
+        + ".gsehenIrrigationManager" + File.separator + "plugins");
     pluginsFolderObj.mkdirs();
     try {
       Desktop.getDesktop().open(pluginsFolderObj);
@@ -100,9 +101,9 @@ public class MainController {
   private void openContactView(ActionEvent o) {
     tabPane.getTabs().clear();
     tabPane.getTabs().add(contactViewTab);
-    
+
     contactBack = gsehenGuiElements.button(100);
-    
+
     WebEngine engine = contactWebView.getEngine();
     engine.load("https://www.hs-geisenheim.de/personen/person/231/");
 
@@ -128,7 +129,7 @@ public class MainController {
    */
   public void exit() {
     if (gsehenInstance.isDataChanged()) {
-//      Stage stage = new Stage();
+      // Stage stage = new Stage();
       GsehenSave save = new GsehenSave();
       save.exitApplication();
     } else {
