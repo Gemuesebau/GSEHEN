@@ -144,20 +144,15 @@ public class FieldDataController extends Application
     // TOP (The FieldView, you will see first)
     // Name
     nameLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.name"));
-
     name = new JFXTextField("");
-    name.setPrefSize(150, 25);
 
     // m²
     areaLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.area"));
-
     area = gsehenGuiElements.text("", FontWeight.BOLD);
 
     // Bodenprofil
-    Text soilProfile = gsehenGuiElements.text(mainBundle.getString("fieldview.soilprofile"));
-    soilProfile.setText("");
     currentSoilBox = new JFXComboBox<SoilProfile>();
-    currentSoilBox.setPrefSize(200, 25);
+    currentSoilBox.setPrefSize(300, 25);
     if (!soilProfileList.isEmpty()) {
       for (SoilProfile s : soilProfileList) {
         currentSoilBox.getItems().add(s);
@@ -201,9 +196,8 @@ public class FieldDataController extends Application
     soilBox.getChildren().addAll(editProfile, createSoil);
 
     // Wetterdatenquelle
-
     weatherData = new JFXComboBox<WeatherDataSource>();
-    weatherData.setPrefSize(150, 25);
+    weatherData.setPrefSize(300, 25);
     if (!weatherDataSourceList.isEmpty()) {
       for (WeatherDataSource s : weatherDataSourceList) {
         weatherData.getItems().add(s);
@@ -287,6 +281,7 @@ public class FieldDataController extends Application
 
     Text weatherDataSourceLabel = gsehenGuiElements
         .text(mainBundle.getString("fieldview.weatherdatasource") + ":");
+    Text soilProfile = gsehenGuiElements.text(mainBundle.getString("fieldview.soilprofile"));
 
     GridPane.setConstraints(nameLabel, 0, 0);
     GridPane.setConstraints(name, 1, 0);
@@ -483,7 +478,6 @@ public class FieldDataController extends Application
     // Name
     Text weatherDataLabel = gsehenGuiElements
         .text(mainBundle.getString("fieldview.weatherdatalabel"));
-
     weatherDataSourceName = new JFXTextField();
 
     GridPane.setConstraints(weatherDataLabel, 0, 0);
