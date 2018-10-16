@@ -62,16 +62,17 @@ public class GsehenGuiElements {
   /**
    * Creates a Text.
    *
-   * @param text the initial text of this Text element
-   * @param fontWeight a particular font weight for this text
+   * @param text
+   *          the initial text of this Text element
+   * @param fontWeight
+   *          a particular font weight for this text
    * @return - the Text.
    */
   public Text text(String text, FontWeight fontWeight) {
     Text textElement = new Text();
     if (fontWeight != null) {
       textElement.setFont(Font.font("Arial", fontWeight, 14));
-    }
-    else {
+    } else {
       textElement.setFont(Font.font("Arial", 14));
     }
     textElement.setText(text);
@@ -81,7 +82,8 @@ public class GsehenGuiElements {
   /**
    * Creates a Text.
    *
-   * @param text the initial text of this Text element
+   * @param text
+   *          the initial text of this Text element
    * @return - the Text.
    */
   public Text text(String text) {

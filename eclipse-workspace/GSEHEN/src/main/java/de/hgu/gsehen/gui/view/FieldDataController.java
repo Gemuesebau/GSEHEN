@@ -663,7 +663,7 @@ public class FieldDataController extends Application
             }
             dateError.setText(
                 mainBundle.getString("fieldview.dateerror") + "\"" + iae.getMessage() + "\"");
-            dateError.setFont(Font.font("Verdana", 14));
+            dateError.setFont(Font.font("Arial", 14));
             dateError.setFill(Color.RED);
             GridPane.setHalignment(dateError, HPos.LEFT);
             GridPane.setConstraints(dateError, 3, 2);
