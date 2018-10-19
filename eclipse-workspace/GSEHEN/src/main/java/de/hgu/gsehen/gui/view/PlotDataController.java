@@ -479,7 +479,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     });
 
     // Plot manuell bewässern (creates a new view)
-    watering = gsehenGuiElements.button(200);
+    watering = gsehenGuiElements.button(250);
     watering.setText(mainBundle.getString("plotview.watering"));
     watering.setOnAction(new EventHandler<ActionEvent>() {
       @Override
