@@ -1,7 +1,6 @@
 package de.hgu.gsehen.gui.view;
 
 import de.hgu.gsehen.Gsehen;
-import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
@@ -226,29 +225,18 @@ public abstract class FarmDataController extends WebController {
         return "green";
       case "Plot":
         Plot plot = (Plot) typeObject;
-        Double waterLevel = 0.0;
+        int daysToIrrigation = 0;
         if (plot.getRecommendedAction() != null) {
-          waterLevel = plot.getRecommendedAction().getAvailableWater();
+          daysToIrrigation = plot.getRecommendedAction().getProjectedDaysToIrrigation();
         }
-        Double availableSoilWater = 0.0;
-
-        if (plot.getWaterBalance() != null) {
-          final List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();
-          if (!dailyBalances.isEmpty()) {
-            int waterBalance = dailyBalances.size() - 1;
-            availableSoilWater = dailyBalances.get(waterBalance).getCurrentAvailableSoilWater() 
-                * 1.1;
-          }
-        }
-
-        // TODO: Prozentwerte anpassen!
+        
         String color = "white";
-        if (waterLevel != null) {
-          if (100 / (availableSoilWater / 1.1) * waterLevel < 25) {
+        if (plot.getRecommendedAction() != null) {
+          if (daysToIrrigation == 0) {
             color = "red";
-          } else if (100 / (availableSoilWater / 1.1) * waterLevel >= 25) {
+          } else if (daysToIrrigation == 1) {
             color = "purple";
-          } else if (100 / (availableSoilWater / 1.1) * waterLevel >= 75) {
+          } else {
             color = "blue";
           }
         }

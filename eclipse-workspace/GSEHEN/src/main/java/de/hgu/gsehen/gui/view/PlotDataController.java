@@ -525,7 +525,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private void setChartData() {
     waterLevel = plot.getRecommendedAction().getAvailableWater();
-    Double percent = plot.getRecommendedAction().getAvailableWaterPercent();
     int daysToIrrigation = plot.getRecommendedAction().getProjectedDaysToIrrigation();
 
     if (!plot.getWaterBalance().equals(null)) {
@@ -546,36 +545,16 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       series.getData().add(data);
       Node node = data.getNode();
 
-      // TODO: Schauen, ob die Einteilung so passt.
-      // System.out.println(percent);
-      // System.out.println(daysToIrrigation);
-
-      if (percent < 21 && daysToIrrigation == 0) {
+      if (daysToIrrigation == 0) {
         node.setStyle("-fx-bar-fill: #ff0000;");
         li = new Legend.LegendItem(df.format(waterLevel) + " mm", new Rectangle(10, 4, Color.RED));
-      } else if (percent < 21 && daysToIrrigation != 0) {
-        node.setStyle("-fx-bar-fill: #ff4500;");
-        li = new Legend.LegendItem(df.format(waterLevel) + " mm",
-            new Rectangle(10, 4, Color.ORANGERED));
-      }
-
-      if (percent >= 21 && daysToIrrigation > 3) {
+      } else if (daysToIrrigation == 1) {
         node.setStyle("-fx-bar-fill: #800080;");
         li = new Legend.LegendItem(df.format(waterLevel) + " mm",
             new Rectangle(10, 4, Color.PURPLE));
-      } else if (percent >= 21 && daysToIrrigation <= 3) {
-        node.setStyle("-fx-bar-fill: #8a2be2;");
-        li = new Legend.LegendItem(df.format(waterLevel) + " mm",
-            new Rectangle(10, 4, Color.BLUEVIOLET));
-      }
-
-      if (percent >= 40 && daysToIrrigation > 5) {
+      } else {
         node.setStyle("-fx-bar-fill: #0000ff;");
         li = new Legend.LegendItem(df.format(waterLevel) + " mm", new Rectangle(10, 4, Color.BLUE));
-      } else if (percent >= 40 && daysToIrrigation <= 5) {
-        node.setStyle("-fx-bar-fill: #1e90ff;");
-        li = new Legend.LegendItem(df.format(waterLevel) + " mm",
-            new Rectangle(10, 4, Color.DODGERBLUE));
       }
 
       legend.getItems().setAll(li);
