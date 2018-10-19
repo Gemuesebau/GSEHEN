@@ -1,5 +1,5 @@
 .root {
-    -fx-base: #fdfffc;
+    -fx-base: #fcfcfc;
     -fx-color: -fx-base;
 
     -fx-font-family: "Tahoma";
@@ -11,7 +11,7 @@
 #glass-grey {
     -fx-background-color: 
         linear-gradient(#f2f2f2, #d6d6d6),
-        linear-gradient(#fcfcfc 0.0%, #d9d9d9 20.0%, #d6d6d6 100.0%),
+        linear-gradient(#f2f2f2 0.0%, #d9d9d9 20.0%, #d6d6d6 100.0%),
         linear-gradient(#dddddd 0.0%, #f6f6f6 50.0%);
     -fx-background-radius: 30.0;
     -fx-background-insets: 0.0,1.0,1.0;
@@ -21,7 +21,7 @@
 }
 
 #glass-grey:hover {
-    -fx-background-color: linear-gradient(#d6d6d6, #f2f2f2);
+    -fx-background-color: linear-gradient(#d6d6d6, #e8e8e8);
 }
 
 .jfx-combo-box {
@@ -37,32 +37,32 @@
 }
 
 .tree-table-view {
-    -fx-background-color: #fdfffc;
+    -fx-background-color: #fcfcfc;
     -fx-font-weight: bold;
 }
 .tree-table-cell {
     -fx-padding: 0.1em 0.0em 0.1em 0.0em;
-    -fx-background-color: #fdfffc;
+    -fx-background-color: #fcfcfc;
     -fx-text-fill: black;
-    -fx-highlight-fill: #606060;
+    -fx-highlight-fill: #e8e8e8;
 }
 .tree-table-cell:selected {
     -fx-font-weight: bold;
     -fx-font-size: 14.0px;
-    -fx-background-color: #668c47;
+    -fx-background-color: #e8e8e8;
 }
 
  /* JFX Tab Pane */
 .jfx-tab-pane .headers-region {
-    -fx-background-color: #668c47;
+    -fx-background-color: #afafaf;
 }
 
 .jfx-tab-pane .tab-header-background {
-    -fx-background-color: #668c47;
+    -fx-background-color: #afafaf;
 }
 
 .jfx-tab-pane .tab-selected-line {
-    -fx-stroke: #7c8911;
+    -fx-stroke: #c1c1c1;
 }
 
 .tab-selected-line {

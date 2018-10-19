@@ -50,7 +50,6 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
@@ -66,7 +65,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private Field autoField;
   protected final ResourceBundle mainBundle;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
+  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener
+      <? extends GsehenEvent>>> eventListeners = new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -116,7 +116,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   private static final String DETAIL_BORDER_PANE_ID = "#detailBorderPane";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
-//  private static final String PLOT_RECOMMENDED_ACTION_TEXT_ID = "#plotRecommendedActionText";
+  // private static final String PLOT_RECOMMENDED_ACTION_TEXT_ID = "#plotRecommendedActionText";
 
   private Farm farm;
   private Timeline scrolltimeline = new Timeline();
@@ -317,11 +317,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 attribute1 = new Text(
                     gsehenInstance.formatDoubleOneDecimal(plot.getPolygon().calculateArea()));
 
-                Text locationLatLabel = new Text(mainBundle.getString("plotview.lat") + ":");
-                Text locationLat = new Text(String.valueOf(plot.getLocation().getLat()));
-                Text locationLngLabel = new Text(mainBundle.getString("plotview.lng") + ":");
-                Text locationLng = new Text(String.valueOf(plot.getLocation().getLng()));
-
                 attributeLabel2 = new Text(mainBundle.getString("plotview.rootingzone"));
 
                 if (plot.getRootingZone() != null) {
@@ -337,7 +332,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   attribute3 = new Text(mainBundle.getString("treetableview.nocrop"));
                 }
 
-                Text soilStartLabel = new Text(mainBundle.getString("plotview.soilstart"));
                 Text soilStart;
                 if (plot.getSoilStartDate() != null) {
                   soilStart = new Text(gsehenInstance.formatDate(plot.getSoilStartDate()));
@@ -345,7 +339,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   soilStart = new Text("/");
                 }
 
-                Text soilValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
                 Text soilValue;
                 if (plot.getSoilStartValue() != null) {
                   soilValue = new Text(
@@ -354,6 +347,13 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   soilValue = new Text("/");
                 }
 
+                Text locationLatLabel = new Text(mainBundle.getString("plotview.lat") + ":");
+                Text locationLat = new Text(String.valueOf(plot.getLocation().getLat()));
+                Text locationLngLabel = new Text(mainBundle.getString("plotview.lng") + ":");
+                Text locationLng = new Text(String.valueOf(plot.getLocation().getLng()));
+                Text soilStartLabel = new Text(mainBundle.getString("plotview.soilstart"));
+                Text soilValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
+                
                 // Set Row & Column Index for Nodes
                 GridPane.setConstraints(attributeLabel1, 0, 2);
                 GridPane.setConstraints(attribute1, 1, 2);
@@ -375,8 +375,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                     attributeLabel3, attribute3, soilStartLabel, soilStart, soilValueLabel,
                     soilValue);
 
-                Text actionLabel = new Text(mainBundle.getString("treetableview.watering"));
-
                 if (plot.getSoilStartValue() != null && plot.getRecommendedAction() != null) {
                   action = new Text(getRecommendedActionText(
                       plot)/*
@@ -391,6 +389,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 action.setId("plotRecommendedActionText");
 
+                Text actionLabel = new Text(mainBundle.getString("treetableview.watering"));
+                
                 VBox bottomBox = new VBox(10);
                 bottomBox.setPadding(new Insets(0, 0, 5, 20));
                 bottomBox.getChildren().addAll(actionLabel, action);
@@ -603,7 +603,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           if (item.getParent().getValue().getName().equals("Neue Plots")) {
             autoFarm = (Farm) item.getParent().getParent().getValue();
             autoField = (Field) item.getParent().getValue();
-            System.out.println(1);
           } else if (item.getParent().getValue().getName().equals("Neue Felder")) {
             autoFarm = (Farm) item.getParent().getValue();
             autoField = (Field) item.getValue();
