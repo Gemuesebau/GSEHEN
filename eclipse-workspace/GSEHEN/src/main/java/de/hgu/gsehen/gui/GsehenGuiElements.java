@@ -1,5 +1,7 @@
 package de.hgu.gsehen.gui;
 
+import com.jfoenix.controls.JFXButton;
+
 import de.hgu.gsehen.Gsehen;
 
 import java.text.DateFormat;
@@ -101,6 +103,19 @@ public class GsehenGuiElements {
     button.setPrefSize(width, 25);
 
     return button;
+  }
+  
+  /**
+   * Creates a JFXButton.
+   * 
+   * @return - the JFXButton.
+   */
+  public JFXButton jfxButton(String label) {
+    final JFXButton jfxButton = new JFXButton(label);
+    jfxButton.setButtonType(com.jfoenix.controls.JFXButton.ButtonType.RAISED);
+    jfxButton.setStyle("-fx-background-color: #e8e8e8; -fx-text-fill: black;");
+
+    return jfxButton;
   }
 
   /**

@@ -1,6 +1,9 @@
 package de.hgu.gsehen.gui.view;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
+import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXTextField;
@@ -42,6 +45,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -51,7 +55,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
@@ -65,11 +68,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
@@ -90,10 +95,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private BorderPane pane;
   private TreeTableView<Drawable> treeTableView;
   private JFXTabPane tabPane;
-  private Tab mapViewTab;
-  private Tab fieldViewTab;
-  private Tab plotViewTab;
-  private Tab logViewTab;
   private TableView<CropPhase> cropTable;
 
   private Text nameLabel;
@@ -504,10 +505,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     pane.setBottom(bottomBox);
 
     tabPane = gsehenInstance.getMainController().getJfxTabPane();
-    mapViewTab = gsehenInstance.getMainController().getMapViewTab();
-    fieldViewTab = gsehenInstance.getMainController().getFieldViewTab();
-    plotViewTab = gsehenInstance.getMainController().getPlotViewTab();
-    logViewTab = gsehenInstance.getMainController().getLogViewTab();
 
     // Actions that will happen, if you click a 'plot' in the TreeTableView
     treeTableView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
@@ -607,13 +604,18 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   }
 
   private void wateringView() {
-    pane.getChildren().clear();
-    treeTableView.setVisible(false);
-    tabPane.getTabs().removeAll(mapViewTab, fieldViewTab, logViewTab);
+    JFXDialogLayout content = new JFXDialogLayout();
+    content.setHeading(new Text(mainBundle.getString("plotview.manual")));
+    StackPane stackPane = new StackPane();
+    Scene scene = new Scene(stackPane, 300, 250);
+    Stage stage = (Stage) gsehenInstance.getScene().getWindow();
+    JFXDialog dialog = new JFXDialog(stackPane, content, JFXDialog.DialogTransition.CENTER);
+    stage.setScene(scene);
+    dialog.show();
 
     // Name of the plot
     Text nameLabel = gsehenGuiElements.text("", FontWeight.BOLD);
-    
+
     pane.setTop(nameLabel);
 
     // Datum (when the irrigation/precipitation should be booked)
@@ -691,29 +693,22 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     center.getChildren().addAll(dateLabel, date, irrigationLabel, irrigation, precipitationLabel,
         precipitation);
 
-    pane.setCenter(center);
-
-    Button back = gsehenGuiElements.button(100);
-    back.setText(mainBundle.getString("fieldview.back"));
+    JFXButton back = gsehenGuiElements.jfxButton(mainBundle.getString("fieldview.back"));
     back.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
-        pane.getChildren().clear();
-        treeTableView.setVisible(true);
-        tabPane.getTabs().clear();
-        tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
         gsehenInstance.sendFarmDataChanged(plot, null);
+        dialog.close();
+        stackPane.setVisible(false);
+        stage.setScene(gsehenInstance.getScene());
         tabPane.getSelectionModel().select(2);
         treeTableView.getSelectionModel().clearSelection();
         treeTableView.getSelectionModel().select(currentItem);
       }
     });
 
-    HBox buttonBox = new HBox();
-
     // Bewässerung buchen
-    Button book = gsehenGuiElements.button(200);
-    book.setText(mainBundle.getString("plotview.book"));
+    JFXButton book = gsehenGuiElements.jfxButton(mainBundle.getString("plotview.book"));
     book.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
@@ -746,19 +741,19 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             }
           }
 
-          pane.getChildren().clear();
-          treeTableView.setVisible(true);
-          tabPane.getTabs().clear();
-          tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
           gsehenInstance.sendFarmDataChanged(plot, null);
           gsehenInstance.sendManualDataChanged(field, plot, wateringDate, null);
+          dialog.close();
+          stackPane.setVisible(false);
+          stage.setScene(gsehenInstance.getScene());
           tabPane.getSelectionModel().select(2);
           treeTableView.getSelectionModel().clearSelection();
           treeTableView.getSelectionModel().select(currentItem);
         } else {
           Text wateringError = gsehenGuiElements.text(mainBundle.getString("fieldview.error"));
           wateringError.setFill(Color.RED);
-          buttonBox.getChildren().add(wateringError);
+          GridPane.setConstraints(wateringError, 0, 4);
+          center.getChildren().add(wateringError);
         }
       }
 
@@ -769,12 +764,14 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
 
       private Double parseDouble(JFXTextField textField) {
-        return gsehenInstance.parseDouble(textField.getText()); // FIXME localize! DateFormat!
+        return gsehenInstance.parseDouble(textField.getText());
       }
     });
 
-    buttonBox.getChildren().addAll(back, book);
-    pane.setBottom(buttonBox);
+    GridPane.setConstraints(back, 0, 3);
+    GridPane.setConstraints(book, 1, 3);
+    center.getChildren().addAll(back, book);
+    content.setBody(center);
   }
 
   private void savePlot() {
