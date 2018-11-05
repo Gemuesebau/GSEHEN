@@ -100,6 +100,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private TableView<CropPhase> cropTable;
   private List<CropPhase> cropPhases;
   private Date todayDate;
+  private JFXComboBox<String> startType;
 
   private Text nameLabel;
   private Text areaLabel;
@@ -196,6 +197,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
+    // TODO
+    startType = new JFXComboBox<String>();
+    startType.getItems().addAll(mainBundle.getString("plotview.directstart"),
+        mainBundle.getString("plotview.delayedstart"));
+    startType.setPrefSize(200, 25);
+
     // Start der Inkulturnahme
     cropStartLabel = gsehenGuiElements.text(mainBundle.getString("plotview.cropstart"));
     cropStart = gsehenGuiElements.datepicker();
@@ -219,6 +226,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     // Kultur
     cropChoiceBox = new JFXComboBox<Crop>();
+    cropChoiceBox.setPrefSize(200, 25);
     if (!cropList.isEmpty()) {
       for (Crop c : cropList) {
         cropChoiceBox.getItems().add(c);
@@ -429,6 +437,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     Text cropLabel = gsehenGuiElements.text(mainBundle.getString("plotview.crop"));
     Text scalingFactorLabel = gsehenGuiElements
         .text(mainBundle.getString("plotview.scalingfactor"));
+    Text startTypeLabel = gsehenGuiElements.text(mainBundle.getString("plotview.starttype"));
 
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(nameLabel, 0, 0);
@@ -439,12 +448,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane.setConstraints(location, 1, 2);
     GridPane.setConstraints(rootingZoneLabel, 0, 3);
     GridPane.setConstraints(rootingZone, 1, 3);
-    GridPane.setConstraints(cropStartLabel, 0, 4);
-    GridPane.setConstraints(cropStart, 1, 4);
-    GridPane.setConstraints(soilStartLabel, 0, 5);
-    GridPane.setConstraints(soilStart, 1, 5);
-    GridPane.setConstraints(soilStartValueLabel, 0, 6);
-    GridPane.setConstraints(soilStartValue, 1, 6);
+    GridPane.setConstraints(startTypeLabel, 0, 4);
+    GridPane.setConstraints(startType, 1, 4);
+
     GridPane.setConstraints(cropLabel, 0, 7);
     GridPane.setConstraints(cropChoiceBox, 1, 7);
     GridPane.setConstraints(descriptionAccordion, 2, 7);
@@ -458,9 +464,30 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // GridPane - Center Section
     GridPane centerGrid = gsehenGuiElements.gridPane(pane);
     centerGrid.getChildren().addAll(nameLabel, name, areaLabel, area, locationLabel, location,
-        rootingZoneLabel, rootingZone, cropStartLabel, cropStart, soilStartLabel, soilStart,
-        soilStartValueLabel, soilStartValue, cropLabel, cropChoiceBox, descriptionAccordion,
-        tablePane, nextPhase, chart, scalingFactorLabel, scalingFactor, scalingValue);
+        rootingZoneLabel, rootingZone, startTypeLabel, startType, cropLabel, cropChoiceBox,
+        descriptionAccordion, tablePane, nextPhase, chart, scalingFactorLabel, scalingFactor,
+        scalingValue);
+
+    startType.valueProperty().addListener(new ChangeListener<String>() {
+      @Override
+      public void changed(ObservableValue ov, String t, String t1) {
+        if (startType.getValue().equals(mainBundle.getString("plotview.directstart"))) {
+          GridPane.setConstraints(cropStartLabel, 0, 5);
+          GridPane.setConstraints(cropStart, 1, 5);
+          centerGrid.getChildren().removeAll(soilStartLabel, soilStart, soilStartValueLabel,
+              soilStartValue);
+          centerGrid.getChildren().addAll(cropStartLabel, cropStart);
+        } else {
+          GridPane.setConstraints(soilStartLabel, 0, 5);
+          GridPane.setConstraints(soilStart, 1, 5);
+          GridPane.setConstraints(soilStartValueLabel, 0, 6);
+          GridPane.setConstraints(soilStartValue, 1, 6);
+          centerGrid.getChildren().removeAll(cropStartLabel, cropStart);
+          centerGrid.getChildren().addAll(soilStartLabel, soilStart, soilStartValueLabel,
+              soilStartValue);
+        }
+      }
+    });
 
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setContent(centerGrid);
@@ -616,14 +643,20 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     cropTable.getItems().clear();
 
     Date cropdate = plot.getCropStart();
+    Date soildate = plot.getSoilStartDate();
 
-    if (cropdate != null && plot.getCropDevelopmentStatus() != null) {
+    if (cropdate != null || soildate != null && plot.getCropDevelopmentStatus() != null) {
       todayDate = Date
           .from(java.time.LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-      Date cropStartDate = plot.getCropStart();
+      Date startDate = null;
+      if (cropdate != null) {
+        startDate = cropdate;
+      } else if (soildate != null) {
+        startDate = soildate;
+      }
       Calendar calendar = Calendar.getInstance();
-      calendar.setTime(cropStartDate);
+      calendar.setTime(startDate);
 
       List<Integer> durations = Arrays.asList(plot.getCrop().getPhase1(),
           plot.getCrop().getPhase2(), plot.getCrop().getPhase3(), plot.getCrop().getPhase4());
@@ -964,17 +997,16 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
           if (date != null) {
             LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            LocalDate cropDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             soilStart.setValue(localDate);
-            cropStart.setValue(cropDate);
+            startType.getSelectionModel().select(mainBundle.getString("plotview.delayedstart"));
           } else {
             soilStart.setValue(null);
-            cropStart.setValue(null);
           }
 
           if (cropdate != null) {
             LocalDate cropDate = cropdate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             cropStart.setValue(cropDate);
+            startType.getSelectionModel().select(mainBundle.getString("plotview.directstart"));
           } else {
             cropStart.setValue(null);
           }
