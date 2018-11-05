@@ -65,8 +65,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private Field autoField;
   protected final ResourceBundle mainBundle;
 
-  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener
-      <? extends GsehenEvent>>> eventListeners = new HashMap<>();
+  private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -332,11 +331,13 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   attribute3 = new Text(mainBundle.getString("treetableview.nocrop"));
                 }
 
-                Text soilStart;
+                Text startDate;
                 if (plot.getSoilStartDate() != null) {
-                  soilStart = new Text(gsehenInstance.formatDate(plot.getSoilStartDate()));
+                  startDate = new Text(gsehenInstance.formatDate(plot.getSoilStartDate()));
+                } else if (plot.getCropStart() != null) {
+                  startDate = new Text(gsehenInstance.formatDate(plot.getCropStart()));
                 } else {
-                  soilStart = new Text("/");
+                  startDate = new Text("/");
                 }
 
                 Text soilValue;
@@ -351,9 +352,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 Text locationLat = new Text(String.valueOf(plot.getLocation().getLat()));
                 Text locationLngLabel = new Text(mainBundle.getString("plotview.lng") + ":");
                 Text locationLng = new Text(String.valueOf(plot.getLocation().getLng()));
-                Text soilStartLabel = new Text(mainBundle.getString("plotview.soilstart"));
+                Text startLabel = new Text(mainBundle.getString("plotview.cropstart"));
                 Text soilValueLabel = new Text(mainBundle.getString("plotview.soilstartvalue"));
-                
+
                 // Set Row & Column Index for Nodes
                 GridPane.setConstraints(attributeLabel1, 0, 2);
                 GridPane.setConstraints(attribute1, 1, 2);
@@ -365,15 +366,14 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 GridPane.setConstraints(attribute2, 1, 5);
                 GridPane.setConstraints(attributeLabel3, 0, 6);
                 GridPane.setConstraints(attribute3, 1, 6);
-                GridPane.setConstraints(soilStartLabel, 0, 7);
-                GridPane.setConstraints(soilStart, 1, 7);
+                GridPane.setConstraints(startLabel, 0, 7);
+                GridPane.setConstraints(startDate, 1, 7);
                 GridPane.setConstraints(soilValueLabel, 0, 8);
                 GridPane.setConstraints(soilValue, 1, 8);
 
                 gridPane.getChildren().addAll(attributeLabel1, attribute1, locationLatLabel,
                     locationLat, locationLngLabel, locationLng, attributeLabel2, attribute2,
-                    attributeLabel3, attribute3, soilStartLabel, soilStart, soilValueLabel,
-                    soilValue);
+                    attributeLabel3, attribute3, startLabel, startDate, soilValueLabel, soilValue);
 
                 if (plot.getSoilStartValue() != null && plot.getRecommendedAction() != null) {
                   action = new Text(getRecommendedActionText(
@@ -390,7 +390,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 action.setId("plotRecommendedActionText");
 
                 Text actionLabel = new Text(mainBundle.getString("treetableview.watering"));
-                
+
                 VBox bottomBox = new VBox(10);
                 bottomBox.setPadding(new Insets(0, 0, 5, 20));
                 bottomBox.getChildren().addAll(actionLabel, action);
@@ -406,8 +406,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   attribute2.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                   attributeLabel3.setFont(Font.font("Arial", 12));
                   attribute3.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-                  soilStartLabel.setFont(Font.font("Arial", 12));
-                  soilStart.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+                  startLabel.setFont(Font.font("Arial", 12));
+                  startDate.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                   soilValueLabel.setFont(Font.font("Arial", 12));
                   soilValue.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                   actionLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
@@ -426,8 +426,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   attribute2.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
                   attributeLabel3.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
                   attribute3.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
-                  soilStartLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
-                  soilStart.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
+                  startLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+                  startDate.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
                   soilValueLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
                   soilValue.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
                   actionLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
