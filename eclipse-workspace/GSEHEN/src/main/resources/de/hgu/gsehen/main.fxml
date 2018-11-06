@@ -14,7 +14,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-<SplitPane id="mainSplitPane" dividerPositions="0.31" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="768.0" minWidth="1280.0" prefHeight="768.0" prefWidth="1366.0" stylesheets="@style/Global.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
+<SplitPane id="mainSplitPane" minHeight="768.0" minWidth="1280.0" prefHeight="768.0" prefWidth="1366.0" stylesheets="@style/Global.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
 	<items>
 		<BorderPane id="mainBorderPane">
 			<top>
@@ -62,20 +62,6 @@
 								<AnchorPane id="leftAnchorPane" prefHeight="800.0" prefWidth="385.0" BorderPane.alignment="CENTER">
                <children>
                   <BorderPane id="tableBorderPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <center>
-                        <AnchorPane prefWidth="385.0" BorderPane.alignment="CENTER">
-                           <children>
-                              <ScrollPane prefWidth="385.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                <content>
-                                  <AnchorPane prefWidth="385.0">
-                                       <children>
-                                          <BorderPane id="detailBorderPane" prefWidth="385.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                       </children></AnchorPane>
-                                </content>
-                              </ScrollPane>
-                           </children>
-                        </AnchorPane>
-                     </center>
                      <top>
                         <TreeTableView id="farmTreeView" prefHeight="250.0" prefWidth="393.0" BorderPane.alignment="CENTER">
                            <columnResizePolicy>
@@ -83,6 +69,27 @@
                            </columnResizePolicy>
                         </TreeTableView>
                      </top>
+                     <center>
+                        <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <ToggleButton id="archiveButton" mnemonicParsing="false" text="Archiv" />
+                              <TextField id="filterField" />
+                              <AnchorPane prefWidth="385.0">
+                                 <children>
+                                    <ScrollPane prefWidth="385.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <content>
+                                          <AnchorPane prefWidth="385.0">
+                                             <children>
+                                                <BorderPane id="detailBorderPane" prefWidth="385.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                             </children>
+                                          </AnchorPane>
+                                       </content>
+                                    </ScrollPane>
+                                 </children>
+                              </AnchorPane>
+                           </children>
+                        </VBox>
+                     </center>
                   </BorderPane>
                </children>
 								</AnchorPane>
