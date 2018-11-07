@@ -152,24 +152,6 @@ public class MainController {
     gsehenInstance.saveUserData();
   }
 
-  /**
-   * Handles the user's request to set the farm viewport according to the current map viewport.
-   *
-   * @see de.hgu.gsehen.Gsehen.setFarmViewportFromMap
-   */
-  public void setFarmViewportFromMap() {
-    gsehenInstance.setFarmViewportFromMap();
-  }
-
-  /**
-   * Handles the user's request to set the map viewport according to the current farm viewport.
-   *
-   * @see de.hgu.gsehen.Gsehen.setMapViewportFromFarm
-   */
-  public void setMapViewportFromFarm() {
-    gsehenInstance.setMapViewportFromFarm();
-  }
-
   public JFXTabPane getJfxTabPane() {
     return tabPane;
   }

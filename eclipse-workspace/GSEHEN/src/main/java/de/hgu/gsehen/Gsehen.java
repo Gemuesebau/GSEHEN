@@ -20,7 +20,6 @@ import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
 import de.hgu.gsehen.gui.view.FarmDataController;
-import de.hgu.gsehen.gui.view.Farms;
 import de.hgu.gsehen.gui.view.Fields;
 import de.hgu.gsehen.gui.view.Logs;
 import de.hgu.gsehen.gui.view.Maps;
@@ -110,7 +109,7 @@ public class Gsehen extends Application {
   private static final String IMAGE_VIEW_ID = "#imageView";
 
   private static Maps maps;
-  private static Farms farms;
+//  private static Farms farms;
   private static Fields fields;
   private static Plots plots;
   private static Logs logs;
@@ -697,10 +696,6 @@ public class Gsehen extends Application {
     return maps;
   }
 
-  public static Farms getFarms() {
-    return farms;
-  }
-
   public ResourceBundle getBundle() {
     return mainBundle;
   }
@@ -719,14 +714,6 @@ public class Gsehen extends Application {
 
   public boolean isDataChanged() {
     return dataChanged;
-  }
-
-  public void setMapViewportFromFarm() {
-    maps.reloadWithViewport(farms.getLastViewport());
-  }
-
-  public void setFarmViewportFromMap() {
-    farms.reloadWithViewport(maps.getLastViewport());
   }
 
   public static Fields getFields() {

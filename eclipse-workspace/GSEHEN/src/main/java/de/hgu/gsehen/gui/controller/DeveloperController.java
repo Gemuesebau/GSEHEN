@@ -31,17 +31,6 @@ public class DeveloperController {
   }
 
   @FXML
-  @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
-  public void reloadFarmViewHTML(ActionEvent e) {
-    Gsehen.getFarms().reload();
-  }
-
-  @FXML
-  public void jsPromptForFarmView() {
-    Gsehen.jsPrompt(Gsehen.getFarms());
-  }
-
-  @FXML
   public void jsPromptForMapView() {
     Gsehen.jsPrompt(Gsehen.getMaps());
   }
