@@ -32,6 +32,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -174,7 +175,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         .lookup(FARM_TREE_VIEW_ID);
     filterHBox = (HBox) Gsehen.getInstance().getScene().lookup(FILTER_HBOX_ID);
     filterHBox.setSpacing(10);
-    filterHBox.setPadding(new Insets(20, 20, 20, 20));
+    filterHBox.setPadding(new Insets(0, 10, 0, 10));
+    filterHBox.setAlignment(Pos.CENTER_LEFT);
     archiveButton = (JFXToggleButton) Gsehen.getInstance().getScene().lookup(ARCHIVE_BUTTON_ID);
     archiveButton.setText(mainBundle.getString("treetableview.archive"));
 
