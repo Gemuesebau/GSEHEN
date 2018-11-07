@@ -1,6 +1,8 @@
 package de.hgu.gsehen.gui;
 
 import com.jfoenix.controls.JFXTabPane;
+import com.jfoenix.controls.JFXToggleButton;
+
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
@@ -32,11 +34,11 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableColumn.CellEditEvent;
@@ -52,6 +54,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
@@ -113,10 +116,12 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         event -> updatePlotInfo(event.getPlot()));
   }
 
-  private static final DataFormat SERIALIZED_MIME_TYPE =
-      new DataFormat("application/x-java-serialized-object");
+  private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat(
+      "application/x-java-serialized-object");
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
+  private static final String FILTER_HBOX_ID = "#filterHBox";
   private static final String ARCHIVE_BUTTON_ID = "#archiveButton";
+  private static final String FILTER_LABEL_ID = "#filterLabel";
   private static final String FILTER_FIELD_ID = "#filterField";
   private static final String DETAIL_BORDER_PANE_ID = "#detailBorderPane";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
@@ -127,7 +132,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private double scrollDirection = 0;
 
   private TreeTableView<Drawable> farmTreeView;
-  private ToggleButton archiveButton;
+  private HBox filterHBox;
+  private JFXToggleButton archiveButton;
+  private Label filterLabel;
   private TextField filter;
   private TreeTableColumn<Drawable, String> column;
   private TreeItem<Drawable> farmItem;
@@ -163,9 +170,24 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
    */
   @SuppressWarnings("unchecked")
   public void addFarmTreeView(Class<? extends GsehenEventListener<GsehenViewEvent>> skipClass) {
-    farmTreeView =
-        (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
-    archiveButton = (ToggleButton) Gsehen.getInstance().getScene().lookup(ARCHIVE_BUTTON_ID);
+    farmTreeView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
+        .lookup(FARM_TREE_VIEW_ID);
+    filterHBox = (HBox) Gsehen.getInstance().getScene().lookup(FILTER_HBOX_ID);
+    filterHBox.setSpacing(10);
+    filterHBox.setPadding(new Insets(20, 20, 20, 20));
+    archiveButton = (JFXToggleButton) Gsehen.getInstance().getScene().lookup(ARCHIVE_BUTTON_ID);
+    archiveButton.setText(mainBundle.getString("treetableview.archive"));
+
+    archiveButton.selectedProperty().addListener(((observable, oldValue, newValue) -> {
+      if (newValue == true) {
+        showArchive();
+      } else {
+        fillTreeView();
+      }
+    }));
+
+    filterLabel = (Label) Gsehen.getInstance().getScene().lookup(FILTER_LABEL_ID);
+    filterLabel.setText(mainBundle.getString("treetableview.filterlabel"));
     filter = (TextField) Gsehen.getInstance().getScene().lookup(FILTER_FIELD_ID);
     filter.textProperty().addListener((observable, oldValue, newValue) -> filterChanged(newValue));
     rootItem = new TreeItem<Drawable>();
@@ -294,8 +316,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 attributeLabel3 = new Text(mainBundle.getString("fieldview.soilprofile"));
                 attributeLabel3.setFont(Font.font("Arial", 12));
-                SoilProfile fieldSoilProfile =
-                    gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
+                SoilProfile fieldSoilProfile = gsehenInstance
+                    .getSoilProfileForUuid(field.getSoilProfileUuid());
                 if (fieldSoilProfile != null) {
                   attribute3 = new Text(fieldSoilProfile.getName());
                 } else {
@@ -352,8 +374,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 Text soilValue;
                 if (plot.getSoilStartValue() != null) {
-                  soilValue =
-                      new Text(gsehenInstance.formatDoubleOneDecimal(plot.getSoilStartValue()));
+                  soilValue = new Text(
+                      gsehenInstance.formatDoubleOneDecimal(plot.getSoilStartValue()));
                 } else {
                   soilValue = new Text("/");
                 }
@@ -442,8 +464,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   soilValue.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
                   actionLabel.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
                   action.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 12));
-                  Text plotIsInactive =
-                      new Text(mainBundle.getString("treetableview.plotinactive"));
+                  Text plotIsInactive = new Text(
+                      mainBundle.getString("treetableview.plotinactive"));
                   plotIsInactive.setId("inactivePlot");
                   bottomBox.getChildren().add(plotIsInactive);
                 }
@@ -473,6 +495,27 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     detailPane = (BorderPane) Gsehen.getInstance().getScene().lookup(DETAIL_BORDER_PANE_ID);
   }
 
+  /**
+   * Fills the TreeView with Farms, Fields and (inactive) Plots.
+   */
+  private void showArchive() {
+    farmsList = Gsehen.getInstance().getFarmsList();
+    farmTreeView.getRoot().getChildren().clear();
+    for (Farm farm : farmsList) {
+      if (farm.getFields() != null) {
+        for (Field field : farm.getFields()) {
+          if (field.getPlots() != null) {
+            for (Plot plot : field.getPlots()) {
+              if (!plot.getIsActive()) {
+                plotItem = createItem(rootItem, plot);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   private void filterChanged(String filter) {
     if (filter.isEmpty()) {
       farmTreeView.setRoot(rootItem);
@@ -483,9 +526,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     }
   }
 
-
-  private void filter(TreeItem<Drawable> root, String filter,
-      TreeItem<Drawable> filteredRoot) {
+  private void filter(TreeItem<Drawable> root, String filter, TreeItem<Drawable> filteredRoot) {
     for (TreeItem<Drawable> child : root.getChildren()) {
       TreeItem<Drawable> filteredChild = new TreeItem<>();
       filteredChild.setValue(child.getValue());
@@ -563,9 +604,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 if (!bottomBox.getChildren().contains(general)) {
                   bottomBox.getChildren().add(general);
                 }
-                Text needCrop =
-                    new Text(mainBundle.getString("gui.view.Map.drawableType.Plot") + " \""
-                        + plot.getName() + "\" " + mainBundle.getString("treetableview.needcrop"));
+                Text needCrop = new Text(
+                    mainBundle.getString("gui.view.Map.drawableType.Plot") + " \"" + plot.getName()
+                        + "\" " + mainBundle.getString("treetableview.needcrop"));
                 needCrop.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 bottomBox.getChildren().add(needCrop);
               }
@@ -573,9 +614,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 if (!bottomBox.getChildren().contains(general)) {
                   bottomBox.getChildren().add(general);
                 }
-                Text needDate =
-                    new Text(mainBundle.getString("gui.view.Map.drawableType.Plot") + " \""
-                        + plot.getName() + "\" " + mainBundle.getString("treetableview.needdate"));
+                Text needDate = new Text(
+                    mainBundle.getString("gui.view.Map.drawableType.Plot") + " \"" + plot.getName()
+                        + "\" " + mainBundle.getString("treetableview.needdate"));
                 needDate.setFont(Font.font("Arial", FontWeight.BOLD, 12));
                 bottomBox.getChildren().add(needDate);
               }
@@ -744,8 +785,10 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   /**
    * Adds the columns to the TreeTableView.
    * 
-   * @param label - Name of the column.
-   * @param dataIndex - Content of the column.
+   * @param label
+   *          - Name of the column.
+   * @param dataIndex
+   *          - Content of the column.
    */
   public void addColumn(String label, String dataIndex) {
 
@@ -761,8 +804,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           result = new ReadOnlyStringWrapper("/");
         } else if (param.getValue().getValue().getClass().getSimpleName().equals("Field")) {
           Field field = (Field) param.getValue().getValue();
-          SoilProfile fieldSoilProfile =
-              gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
+          SoilProfile fieldSoilProfile = gsehenInstance
+              .getSoilProfileForUuid(field.getSoilProfileUuid());
           if (fieldSoilProfile != null) {
             result = new ReadOnlyStringWrapper(fieldSoilProfile.getName());
           } else {
@@ -877,7 +920,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   }
 
   /**
-   * Fills the TreeView with Farms, Fields and Plots.
+   * Fills the TreeView with Farms, Fields and (active) Plots.
    */
   public void fillTreeView() {
     farmsList = Gsehen.getInstance().getFarmsList();
@@ -889,7 +932,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           fieldItem = createItem(farmItem, field);
           if (field.getPlots() != null) {
             for (Plot plot : field.getPlots()) {
-              plotItem = createItem(fieldItem, plot);
+              if (plot.getIsActive()) {
+                plotItem = createItem(fieldItem, plot);
+              }
             }
           }
         }

@@ -226,7 +226,8 @@ public abstract class FarmDataController extends WebController {
       case "Plot":
         Plot plot = (Plot) typeObject;
         int daysToIrrigation = 0;
-        if (plot.getRecommendedAction() != null) {
+        if (plot.getRecommendedAction() != null 
+            && plot.getRecommendedAction().getProjectedDaysToIrrigation() != null) {
           daysToIrrigation = plot.getRecommendedAction().getProjectedDaysToIrrigation();
         }
         
