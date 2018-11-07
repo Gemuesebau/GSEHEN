@@ -12,6 +12,9 @@ hierfür müsste noch eine Lizenz besorgt werden.
 Install4J
 
 Nach dem öffnen von Install4j wird der Nutzer durch einige Formulare geleitet.
+
+Falls bereits ein Profil bestehet, kann dies über den menüpunkt „Open Project“ geladen werden (Gsehen_conf.install4j). Wichtig!!!! Beim nutzen des Projekts müssen die Formulare gepflegt werden bzw. Pfade angepasst werden.
+
 In den „General Settings“ werden grundlegende Einstellungen getroffen, wie Name und Herausgeber der Software. Ebenso wichtig muss dort auch die Minimale Java Version angegeben werden. Es können verschiedene Sprachen für den Installer hinzugefügt werden, und je nach Location wird die passende Sprache ausgeführt. Bei dem Punkt „Media File Options“ kann das Output directory angegeben werden, dieser gibt an, wo am Ende der Kompilierte Installer gespeichert wird. Die anderen Formulare können weitestgehend ignoriert werden und nur noch bei „Project Options“ sollte bei : Make all paths relative … ein Häkchen gesetzt werden.
 Unter dem Menüpunkt „Files“ muss der Pfad zum projekt angegeben werden.
  
@@ -39,6 +42,5 @@ Für den Mac sollte ebenfalls ein Archive gewählt werden.
 Hier kann bis zur Auswahl des Lauschers durchgeklickt werden. Es muss der vorher erstellte Launcher nun im Dropdown ausgewählt werden.
 Als Format sollte das DMG Format gewählt werden, da dies das üblichste für Mac ist. Ebenso muss wieder ein Bundled JRE angegeben werden.
 
-Nach der Erstellung der Medias, kann nun ein build gestartet werden (die Medias auswählen, falls nicht Build all ausgewählt ist). 
-Falls bereits ein Profil bestehet, kann dies über den menüpunkt „Open Project“ geladen werden (Gsehen_conf.install4j). Bei Abschluss des Projekts müssen die Formulare gepflegt werden bzw. Pfade angepasst werden.
+Nach der Erstellung der Medias, kann nun ein build gestartet werden (die Medias auswählen, falls nicht Build all ausgewählt ist).
 
