@@ -1,12 +1,11 @@
 package de.hgu.gsehen.gui;
 
+import com.jfoenix.controls.JFXComboBox;
 import de.hgu.gsehen.Gsehen;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -70,8 +69,7 @@ public class GsehenGuiElements {
     Text textElement = new Text();
     if (fontWeight != null) {
       textElement.setFont(Font.font("Arial", fontWeight, 14));
-    }
-    else {
+    } else {
       textElement.setFont(Font.font("Arial", 14));
     }
     textElement.setText(text);
@@ -141,4 +139,15 @@ public class GsehenGuiElements {
     return datePicker;
   }
 
+  /**
+   * Creates a combo box.
+   *
+   * @param items the items to put into the combo box initially
+   * @return the new combo box
+   */
+  public <T> JFXComboBox<T> comboBox(T[] items) {
+    JFXComboBox<T> comboBox = new JFXComboBox<T>();
+    comboBox.getItems().addAll(items);
+    return comboBox;
+  }
 }

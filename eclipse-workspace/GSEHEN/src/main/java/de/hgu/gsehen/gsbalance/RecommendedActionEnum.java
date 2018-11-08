@@ -6,7 +6,8 @@ public enum RecommendedActionEnum {
   SOON("gsbalance.recommended.action.SOON"),
   NOW("gsbalance.recommended.action.NOW"),
   IRRIGATION("gsbalance.recommended.action.IRRIGATION"),
-  NO_DATA("gsbalance.recommended.action.NO_DATA");
+  NO_DATA("gsbalance.recommended.action.NO_DATA"),
+  TOMORROW("gsbalance.recommended.action.TOMORROW");
 
   private String messagePropertyKey;
 

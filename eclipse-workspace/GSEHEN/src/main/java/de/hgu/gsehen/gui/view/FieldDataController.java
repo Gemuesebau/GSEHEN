@@ -19,7 +19,6 @@ import de.hgu.gsehen.model.WeatherDataSource;
 import de.hgu.gsehen.util.DBUtil;
 import de.hgu.gsehen.util.PluginUtil;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -27,10 +26,12 @@ import java.util.ResourceBundle;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ScrollPane;
@@ -93,13 +94,13 @@ public class FieldDataController extends Application
   private Button saveField;
 
   private JFXTextField weatherDataSourceName;
-  private JFXComboBox<String> weatherDataPluginJsFileName;
-  private CheckBox weatherDataManualImport;
-  private CheckBox weatherDataAutomaticImport;
-  private JFXTextField weatherDataAutomaticImportIntervalSeconds;
-  private JFXTextField weatherDataSourceLocationLat;
-  private JFXTextField weatherDataSourceLocationLng;
-  private JFXTextField weatherDataSourceMetersAbove;
+  private ConfigDialogElement<JFXComboBox<String>, String> pluginJsFileName;
+  private ConfigDialogElement<CheckBox, Boolean> manualImport;
+  private ConfigDialogElement<CheckBox, Boolean> automaticImport;
+  private ConfigDialogElement<JFXTextField, Double> automaticImportIntervalSeconds;
+  private ConfigDialogElement<JFXTextField, Double> locationLat;
+  private ConfigDialogElement<JFXTextField, Double> locationLng;
+  private ConfigDialogElement<JFXTextField, Double> metersAbove;
 
   private JFXTextField soilDepth;
   private JFXTextField soilManualKc;
@@ -201,6 +202,7 @@ public class FieldDataController extends Application
     soilBox.getChildren().addAll(editProfile, createSoil);
 
     // Wetterdatenquelle
+    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
     Text weatherDataSourceLabel =
         gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatasource") + ":");
     
@@ -377,11 +379,13 @@ public class FieldDataController extends Application
     sp = gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
     int index = 1;
 
+    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
     Text soilProfileLabel =
         gsehenGuiElements.text(
             mainBundle.getString("fieldview.currentsoil") + " (" + sp.getName() + "):" + "\n",
             FontWeight.BOLD);
 
+    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
     Text setKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
 
     Text setKc = new Text();
@@ -391,6 +395,7 @@ public class FieldDataController extends Application
       setKc.setText(kc);
     }
 
+    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
     Text setZoneLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualzone"));
     
 
@@ -401,6 +406,7 @@ public class FieldDataController extends Application
       setZone.setText(zone);
     }
 
+    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
     Text setRainLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualrain"));
     
 
@@ -411,6 +417,7 @@ public class FieldDataController extends Application
       setRain.setText(rain);
     }
 
+    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
     Text setPauseLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualpause"));
     
 
@@ -500,137 +507,11 @@ public class FieldDataController extends Application
     // GridPane - Top Section
     GridPane top = gsehenGuiElements.gridPane(pane);
     top.getChildren().addAll(weatherDataLabel, weatherDataSourceName);
-
     pane.setTop(top);
 
-    // Plug-in
-    Text weatherDataPluginJsFileNameLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatapluginjsfilenamelabel"));
-    
-    weatherDataPluginJsFileName = new JFXComboBox<String>();
-    weatherDataPluginJsFileName.getItems().addAll(PluginUtil.getPluginJsFileNames());
-
-    // Manual Import?
-    Text weatherDataManualImportLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatamanualimportlabel"));
-    
-    weatherDataManualImportLabel.setFont(Font.font("Arial", 14));
-    weatherDataManualImport = new CheckBox();
-
-    // Automatic Import?
-    Text weatherDataAutomaticImportLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdataautomaticimportlabel"));
-    
-    weatherDataAutomaticImport = new CheckBox();
-
-    // Automatic Import interval
-    Text weatherDataAutomaticImportIntervalSecondsLabel =
-        gsehenGuiElements.text(
-            mainBundle.getString("fieldview.weatherdataautomaticimportintervalsecondslabel"));
-    
-    weatherDataAutomaticImportIntervalSeconds = new JFXTextField();
-    weatherDataAutomaticImportIntervalSeconds.textProperty()
-        .addListener(new ChangeListener<String>() {
-          @Override
-          public void changed(ObservableValue<? extends String> observable, String oldValue,
-              String newValue) {
-            if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
-              weatherDataAutomaticImportIntervalSeconds.setText(oldValue);
-            }
-          }
-        });
-
-    // Latitude
-    Text weatherDataSourceLocationLatLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.locationlat"));
-    
-    weatherDataSourceLocationLat = new JFXTextField();
-    weatherDataSourceLocationLat.textProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue,
-          String newValue) {
-        if (newValue != null) {
-          if (!gsehenInstance.isParseable(newValue)) {
-            weatherDataSourceLocationLat.setText(oldValue);
-          }
-        }
-      }
-    });
-    NumberFormat formatter = NumberFormat.getInstance(gsehenInstance.getSelectedLocale());
-    Text weatherDataSourceLocationLatExample = new Text(
-        mainBundle.getString("fieldview.example") + " " + formatter.format(
-            gsehenInstance.parseDouble(mainBundle.getString("fieldview.locationlatvalue"))));
-    weatherDataSourceLocationLatExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
-
-    // Longitude
-    Text weatherDataSourceLocationLngLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.locationlng"));
-    
-    weatherDataSourceLocationLng = new JFXTextField();
-    weatherDataSourceLocationLng.textProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue,
-          String newValue) {
-        if (newValue != null) {
-          if (!gsehenInstance.isParseable(newValue)) {
-            weatherDataSourceLocationLng.setText(oldValue);
-          }
-        }
-      }
-    });
-    Text weatherDataSourceLocationLngExample = new Text(
-        mainBundle.getString("fieldview.example") + " " + formatter.format(
-            gsehenInstance.parseDouble(mainBundle.getString("fieldview.locationlngvalue"))));
-    weatherDataSourceLocationLngExample.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
-
-    // Standort (Meter ü. NN)
-    Text weatherDataSourceMetersAboveLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.metersabove"));
-    
-    weatherDataSourceMetersAbove = new JFXTextField();
-    weatherDataSourceMetersAbove.textProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue,
-          String newValue) {
-        if (newValue != null) {
-          if (!gsehenInstance.isParseable(newValue)) {
-            weatherDataSourceMetersAbove.setText(oldValue);
-          }
-        }
-      }
-    });
-
-    // Set Row & Column Index for Nodes
-    GridPane.setConstraints(weatherDataPluginJsFileNameLabel, 0, 0);
-    GridPane.setConstraints(weatherDataPluginJsFileName, 1, 0);
-    GridPane.setConstraints(weatherDataManualImportLabel, 0, 1);
-    GridPane.setConstraints(weatherDataManualImport, 1, 1);
-    GridPane.setConstraints(weatherDataAutomaticImportLabel, 0, 2);
-    GridPane.setConstraints(weatherDataAutomaticImport, 1, 2);
-    GridPane.setConstraints(weatherDataAutomaticImportIntervalSecondsLabel, 0, 3);
-    GridPane.setConstraints(weatherDataAutomaticImportIntervalSeconds, 1, 3);
-    GridPane.setConstraints(weatherDataSourceLocationLatLabel, 0, 4);
-    GridPane.setConstraints(weatherDataSourceLocationLat, 1, 4);
-    GridPane.setConstraints(weatherDataSourceLocationLatExample, 2, 4);
-    GridPane.setConstraints(weatherDataSourceLocationLngLabel, 0, 5);
-    GridPane.setConstraints(weatherDataSourceLocationLng, 1, 5);
-    GridPane.setConstraints(weatherDataSourceLocationLngExample, 2, 5);
-    GridPane.setConstraints(weatherDataSourceMetersAboveLabel, 0, 6);
-    GridPane.setConstraints(weatherDataSourceMetersAbove, 1, 6);
-
-    // GridPane - Center Section
-    GridPane center = gsehenGuiElements.gridPane(pane);
-    
-    // Add nodes
-    center.getChildren().addAll(weatherDataPluginJsFileNameLabel, weatherDataPluginJsFileName,
-        weatherDataManualImportLabel, weatherDataManualImport, weatherDataAutomaticImportLabel,
-        weatherDataAutomaticImport, weatherDataAutomaticImportIntervalSecondsLabel,
-        weatherDataAutomaticImportIntervalSeconds, weatherDataSourceLocationLatLabel,
-        weatherDataSourceLocationLat, weatherDataSourceLocationLatExample,
-        weatherDataSourceLocationLngLabel, weatherDataSourceLocationLng,
-        weatherDataSourceLocationLngExample, weatherDataSourceMetersAboveLabel,
-        weatherDataSourceMetersAbove);
-
+    List<ConfigDialogElement<Node, Object>> weatherDataSourceConfigItems = createNodes();
+    configureNodes(weatherDataSourceConfigItems);
+    GridPane center = createGridPaneWithNodes(weatherDataSourceConfigItems);
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setContent(center);
     scrollPane.setPannable(true);
@@ -658,7 +539,7 @@ public class FieldDataController extends Application
       @Override
       public void handle(ActionEvent arg0) {
         if (noneIsEmpty(
-            new TextField[] { weatherDataSourceName, weatherDataAutomaticImportIntervalSeconds })) {
+            new TextField[] { weatherDataSourceName, automaticImportIntervalSeconds.getNode() })) {
           try {
             setWeatherDataAndValues();
 
@@ -703,6 +584,76 @@ public class FieldDataController extends Application
     pane.setBottom(bottomBox);
   }
 
+  private List<ConfigDialogElement<Node, Object>> createNodes() {
+    List<ConfigDialogElement<Node, Object>> weatherDataSourceConfigItems = new ArrayList<>();
+    pluginJsFileName = new ConfigDialogComboBox(
+        gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatapluginjsfilenamelabel")),
+        gsehenGuiElements.comboBox(PluginUtil.getPluginJsFileNames()),
+        null, weatherDataSourceConfigItems
+    );
+    manualImport = new ConfigDialogCheckBox(
+        gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatamanualimportlabel")),
+        null, weatherDataSourceConfigItems
+    );
+    automaticImport = new ConfigDialogCheckBox(
+        gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdataautomaticimportlabel")),
+        null, weatherDataSourceConfigItems
+    );
+    automaticImportIntervalSeconds = new ConfigDialogDoubleField(
+        gsehenGuiElements.text(
+            mainBundle.getString("fieldview.weatherdataautomaticimportintervalsecondslabel")),
+        null, weatherDataSourceConfigItems, gsehenInstance
+    );
+    locationLat = new ConfigDialogDoubleField(
+        gsehenGuiElements.text(mainBundle.getString("fieldview.locationlat")),
+        gsehenGuiElements.text(
+            mainBundle.getString("fieldview.example")
+            + numberExample(mainBundle.getString("fieldview.locationlatvalue"))
+        ),
+        weatherDataSourceConfigItems, gsehenInstance
+    );
+    locationLng = new ConfigDialogDoubleField(
+        gsehenGuiElements.text(mainBundle.getString("fieldview.locationlng")),
+        gsehenGuiElements.text(
+            mainBundle.getString("fieldview.example")
+            + numberExample(mainBundle.getString("fieldview.locationlngvalue"))
+        ),
+        weatherDataSourceConfigItems, gsehenInstance
+    );
+    metersAbove = new ConfigDialogDoubleField(
+        gsehenGuiElements.text(mainBundle.getString("fieldview.metersabove")),
+        null, weatherDataSourceConfigItems, gsehenInstance
+    );
+    return weatherDataSourceConfigItems;
+  }
+
+  private String numberExample(final String string) {
+    return " " + gsehenInstance.formatDoubleOneDecimal(gsehenInstance.parseDouble(string));
+  }
+
+  private void configureNodes(List<ConfigDialogElement<Node, Object>> nodes) {
+    int nodeIndex = 0;
+    for (ConfigDialogElement<Node, Object> node : nodes) {
+      GridPane.setConstraints(node.getLabel(), 0, nodeIndex);
+      GridPane.setConstraints(node.getNode(), 1, nodeIndex);
+      final Text example = node.getExample();
+      if (example != null) {
+        example.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+        GridPane.setConstraints(example, 2, nodeIndex);
+      }
+      nodeIndex++;
+    }
+  }
+
+  private GridPane createGridPaneWithNodes(List<ConfigDialogElement<Node, Object>> nodes) {
+    GridPane gridPane = gsehenGuiElements.gridPane(pane);
+    ObservableList<Node> children = gridPane.getChildren();
+    for (ConfigDialogElement<Node, Object> node : nodes) {
+      children.add(node.getNode());
+    }
+    return gridPane;
+  }
+
   private void setWeatherDataAndValues() {
     if (selectedWeatherDataSource != null) {
       wds = selectedWeatherDataSource;
@@ -711,15 +662,13 @@ public class FieldDataController extends Application
       weatherDataSourceList.add(wds);
     }
     wds.setName(weatherDataSourceName.getText());
-    wds.setPluginJsFileName(weatherDataPluginJsFileName.getValue());
-    wds.setManualImportActive(weatherDataManualImport.isSelected());
-    wds.setAutomaticImportActive(weatherDataAutomaticImport.isSelected());
-    wds.setAutomaticImportFrequencySeconds(
-        gsehenInstance.parseDouble(weatherDataAutomaticImportIntervalSeconds.getText()));
-    wds.setLocationLat(gsehenInstance.parseDouble(weatherDataSourceLocationLat.getText()));
-    wds.setLocationLng(gsehenInstance.parseDouble(weatherDataSourceLocationLng.getText()));
-    wds.setLocationMetersAboveSeaLevel(
-        gsehenInstance.parseDouble(weatherDataSourceMetersAbove.getText()));
+    wds.setPluginJsFileName(pluginJsFileName.getNodeValue());
+    wds.setManualImportActive(manualImport.getNodeValue());
+    wds.setAutomaticImportActive(automaticImport.getNodeValue());
+    wds.setAutomaticImportFrequencySeconds(automaticImportIntervalSeconds.getNodeValue());
+    wds.setLocationLat(locationLat.getNodeValue());
+    wds.setLocationLng(locationLng.getNodeValue());
+    wds.setLocationMetersAboveSeaLevel(metersAbove.getNodeValue());
   }
 
   /**
@@ -729,17 +678,14 @@ public class FieldDataController extends Application
     selectedWeatherDataSource = weatherData.getSelectionModel().getSelectedItem();
     if (selectedWeatherDataSource != null) {
       weatherDataSourceName.setText(selectedWeatherDataSource.getName());
-      weatherDataPluginJsFileName.setValue(selectedWeatherDataSource.getPluginJsFileName());
-      weatherDataManualImport.setSelected(selectedWeatherDataSource.isManualImportActive());
-      weatherDataAutomaticImport.setSelected(selectedWeatherDataSource.isAutomaticImportActive());
-      weatherDataAutomaticImportIntervalSeconds.setText(gsehenInstance
-          .formatDoubleTwoDecimal(selectedWeatherDataSource.getAutomaticImportFrequencySeconds()));
-      weatherDataSourceLocationLat.setText(
-          gsehenInstance.formatDoubleTwoDecimal(selectedWeatherDataSource.getLocationLat()));
-      weatherDataSourceLocationLng.setText(
-          gsehenInstance.formatDoubleTwoDecimal(selectedWeatherDataSource.getLocationLng()));
-      weatherDataSourceMetersAbove.setText(gsehenInstance
-          .formatDoubleTwoDecimal(selectedWeatherDataSource.getLocationMetersAboveSeaLevel()));
+      pluginJsFileName.setNodeValue(selectedWeatherDataSource.getPluginJsFileName());
+      manualImport.setNodeValue(selectedWeatherDataSource.isManualImportActive());
+      automaticImport.setNodeValue(selectedWeatherDataSource.isAutomaticImportActive());
+      automaticImportIntervalSeconds.setNodeValue(
+          selectedWeatherDataSource.getAutomaticImportFrequencySeconds());
+      locationLat.setNodeValue(selectedWeatherDataSource.getLocationLat());
+      locationLng.setNodeValue(selectedWeatherDataSource.getLocationLng());
+      metersAbove.setNodeValue(selectedWeatherDataSource.getLocationMetersAboveSeaLevel());
     }
   }
 
@@ -752,20 +698,24 @@ public class FieldDataController extends Application
     tabPane.getTabs().removeAll(mapViewTab, plotViewTab, logViewTab);
 
     // Name
+    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
     Text soilNameLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.profilename"));
     
 
     // kc-Wert
+    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
     Text soilManualKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
     
     soilManualKc = new JFXTextField("");
 
     // Bilanzierungstiefe (in cm)
+    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
     Text soilManualZoneLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualzone"));
     
     soilManualZone = new JFXTextField("");
 
     // Schwelle des Regenereignis (in mm)
+    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
     Text soilManualRainLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualrain"));
     
     soilManualRain = new JFXTextField("");
@@ -805,6 +755,7 @@ public class FieldDataController extends Application
     layerText.setFont(Font.font("Arial", FontWeight.BOLD, 18));
 
     // Bodentyp
+    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
     Text soilLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soiltype"));
     
 
@@ -828,6 +779,7 @@ public class FieldDataController extends Application
     });
 
     // Wasserhaltekapazität
+    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
     Text soilAwcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soilawc"));
     
     JFXTextField soilAwc = new JFXTextField();
@@ -847,6 +799,7 @@ public class FieldDataController extends Application
 
     // Tiefe
     JFXTextField depth = new JFXTextField("25");
+    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
     Text depthLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.depth"));
     
     depth.textProperty().addListener(new ChangeListener<String>() {
@@ -1036,6 +989,7 @@ public class FieldDataController extends Application
       SoilProfile currentSoilProfile = currentSoilBox.getValue();
 
       // Name
+      @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
       Text soilNameLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.profilename"));
       
       JFXTextField soilProfileName = new JFXTextField(currentSoilProfile.getName());
@@ -1050,6 +1004,7 @@ public class FieldDataController extends Application
       });
 
       // kc-Wert
+      @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
       Text soilManualKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
       
       if (currentSoilBox.getValue().getSoilManualData().getSoilKc() != null) {
@@ -1074,6 +1029,7 @@ public class FieldDataController extends Application
       });
 
       // Bilanzierungstiefe (in cm)
+      @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
       Text soilManualZoneLabel =
           gsehenGuiElements.text(mainBundle.getString("fieldview.manualzone"));
       
@@ -1098,6 +1054,7 @@ public class FieldDataController extends Application
       });
 
       // Schwelle des Regenereignis (in mm)
+      @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
       Text soilManualRainLabel =
           gsehenGuiElements.text(mainBundle.getString("fieldview.manualrain"));
       
@@ -1123,6 +1080,7 @@ public class FieldDataController extends Application
       });
 
       // Bewässerungspause (in Tagen)
+      @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
       Text soilManualPauseLabel =
           gsehenGuiElements.text(mainBundle.getString("fieldview.manualpause"));
       
@@ -1178,6 +1136,7 @@ public class FieldDataController extends Application
         layer.setFont(Font.font("Arial", FontWeight.BOLD, 14));
 
         // Bodentyp
+        @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
         Text soilLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soiltype"));
         
 
@@ -1211,6 +1170,7 @@ public class FieldDataController extends Application
         }
 
         // Wasserhaltekapazität
+        @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
         Text soilAwcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soilawc"));
         
 
@@ -1233,6 +1193,7 @@ public class FieldDataController extends Application
         // Tiefe
         soilDepth = new JFXTextField(gsehenInstance
             .formatDoubleOneDecimal(currentSoilProfile.getProfileDepth().get(i).getDepth()));
+        @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
         Text depthLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.depth"));
         
         soilDepth.textProperty().addListener(new ChangeListener<String>() {
@@ -1308,5 +1269,4 @@ public class FieldDataController extends Application
   @Override
   public void start(Stage primaryStage) throws Exception {
   }
-
 }

@@ -270,6 +270,8 @@ public class TotalBalance {
             recommendedAction.setProjectedDaysToIrrigation(projectedDaysToIrrigation);
             if (projectedDaysToIrrigation == 0) {
               recommendedAction.setRecommendation(RecommendedActionEnum.NOW);
+            } else if (projectedDaysToIrrigation == 1) {
+              recommendedAction.setRecommendation(RecommendedActionEnum.TOMORROW);
             } else {
               recommendedAction.setRecommendation(RecommendedActionEnum.SOON);
             }
