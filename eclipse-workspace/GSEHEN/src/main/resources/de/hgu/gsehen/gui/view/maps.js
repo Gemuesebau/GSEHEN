@@ -140,12 +140,14 @@ function redraw() {
     else {
       for (var j = 0; j < drawables.length; j++) {
         var drawable = drawables[j];
-        var style = webController.getFillStyle(drawable);
-        var mapsPolygon = new google.maps.Polygon(addPolygonOptions({
-          paths: buildJavaScriptPolygon(drawable.getPolygon(), null)
-        }, style));
-        polygons[drawable.getUuid()] = mapsPolygon;
-        mapsPolygon.setMap(map);
+        if (webController.passesFilter(drawable)) {
+          var style = webController.getFillStyle(drawable);
+          var mapsPolygon = new google.maps.Polygon(addPolygonOptions({
+            paths: buildJavaScriptPolygon(drawable.getPolygon(), null)
+          }, style));
+          polygons[drawable.getUuid()] = mapsPolygon;
+          mapsPolygon.setMap(map);
+        }
       }
       setViewportByController();
     }

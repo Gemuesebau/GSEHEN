@@ -1,6 +1,7 @@
 package de.hgu.gsehen.gui.view;
 
 import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.event.DrawableFilterChanged;
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 
 import javafx.beans.value.ChangeListener;
@@ -27,6 +29,7 @@ public abstract class FarmDataController extends WebController {
   private Gsehen gsehenInstance;
   private Map<Class<? extends GsehenEvent>, Class<? extends 
       GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
+  private Predicate<Drawable> currentFilter = drawable -> true;
 
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
@@ -58,7 +61,7 @@ public abstract class FarmDataController extends WebController {
             drawables = flattenDrawables(farmsArray);
             Pair<GeoPoint> viewport = event.getViewport();
             lastViewport = viewport != null ? viewport : findBounds(drawables);
-            redrawOrReload(event);
+            redrawOrReload(event.getClass().getSimpleName());
           }
         });
     gsehenInstance.registerForEvent(DrawableSelected.class,
@@ -73,6 +76,19 @@ public abstract class FarmDataController extends WebController {
             Pair<GeoPoint> viewport = event.getViewport();
             lastViewport = viewport != null ? viewport : findBounds(new Drawable[] { drawable });
             refocusOrReload(event);
+          }
+        });
+    gsehenInstance.registerForEvent(DrawableFilterChanged.class,
+        new GsehenEventListener<DrawableFilterChanged>() {
+          {
+            setEventListenerClass(DrawableFilterChanged.class, getClass());
+          }
+
+          @Override
+          public void handle(DrawableFilterChanged event) {
+            currentFilter = event.getFilter();
+            lastViewport = findBounds(drawables);
+            redrawOrReload(event.getClass().getSimpleName());
           }
         });
   }
@@ -94,12 +110,12 @@ public abstract class FarmDataController extends WebController {
     engine.executeScript("redraw();");
   }
 
-  private void redrawOrReload(Object event) {
+  private void redrawOrReload(String reason) {
     if (!isLoaded()) {
-      logAboutToReload(event.getClass().getSimpleName(), "reload");
+      logAboutToReload(reason, "reload");
       reload();
     } else {
-      logAboutToReload(event.getClass().getSimpleName(), "redraw");
+      logAboutToReload(reason, "redraw");
       redraw();
     }
   }
@@ -134,7 +150,7 @@ public abstract class FarmDataController extends WebController {
     super(application, webView);
 
     ChangeListener<Number> splitPaneWidthHeightDividerPositionListener = (observable, oldValue,
-        newValue) -> redrawOrReload(observable);
+        newValue) -> redrawOrReload(observable.getClass().getSimpleName());
     SplitPane mainSplitPane = getMainSplitPane();
     mainSplitPane.widthProperty().addListener(splitPaneWidthHeightDividerPositionListener);
     mainSplitPane.heightProperty().addListener(splitPaneWidthHeightDividerPositionListener);
@@ -168,6 +184,9 @@ public abstract class FarmDataController extends WebController {
     double maxX = -180;
     double maxY = -90;
     for (Drawable drawable : drawables) {
+      if (!passesFilter(drawable)) {
+        continue;
+      }
       try {
         double drawableMinX = drawable.getPolygon().getMinX();
         if (drawableMinX < minX) {
@@ -206,6 +225,10 @@ public abstract class FarmDataController extends WebController {
 
   public Drawable[] getDrawables() {
     return drawables;
+  }
+
+  public boolean passesFilter(Drawable drawable) {
+    return currentFilter.test(drawable);
   }
 
   /**

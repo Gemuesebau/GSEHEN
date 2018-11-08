@@ -7,6 +7,7 @@ import com.jfoenix.controls.JFXTabPane;
 
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.event.DayDataChanged;
+import de.hgu.gsehen.event.DrawableFilterChanged;
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
@@ -610,6 +611,14 @@ public class Gsehen extends Application {
     DayDataChanged event = new DayDataChanged();
     event.setDayData(dayData);
     event.setWeatherDataSource(weatherDataSource);
+    notifyEventListeners(event, skipClass);
+  }
+
+  @SuppressWarnings("checkstyle:javadocmethod")
+  public void sendDrawableFilterChanged(java.util.function.Predicate<Drawable> filter,
+      Class<? extends GsehenEventListener<DrawableFilterChanged>> skipClass) {
+    DrawableFilterChanged event = new DrawableFilterChanged();
+    event.setFilter(filter);
     notifyEventListeners(event, skipClass);
   }
 

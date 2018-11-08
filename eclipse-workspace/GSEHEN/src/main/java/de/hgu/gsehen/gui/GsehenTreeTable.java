@@ -183,8 +183,10 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     archiveButton.selectedProperty().addListener(((observable, oldValue, newValue) -> {
       if (newValue == true) {
         showArchive();
+        showAllDrawables();
       } else {
         fillTreeView();
+        showActiveDrawables();
       }
     }));
 
@@ -488,6 +490,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         });
 
     fillTreeView();
+    showActiveDrawables();
     setupScrolling();
 
     farmTreeView.setContextMenu(menu);
@@ -495,6 +498,20 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     farmTreeView.getSelectionModel().setCellSelectionEnabled(true);
 
     detailPane = (BorderPane) Gsehen.getInstance().getScene().lookup(DETAIL_BORDER_PANE_ID);
+  }
+
+  private void showActiveDrawables() {
+    gsehenInstance.sendDrawableFilterChanged(drawable -> {
+      if (drawable instanceof Plot) {
+        return ((Plot)drawable).getIsActive();
+      } else {
+        return true;
+      }
+    }, null);
+  }
+
+  private void showAllDrawables() {
+    gsehenInstance.sendDrawableFilterChanged(drawable -> true, null);
   }
 
   /**
