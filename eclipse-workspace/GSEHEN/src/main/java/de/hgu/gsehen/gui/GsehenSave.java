@@ -18,10 +18,13 @@ import javafx.stage.Stage;
 
 public final class GsehenSave {
   private Gsehen gsehenInstance;
+  private GsehenGuiElements gsehenGuiElements;
   protected final ResourceBundle mainBundle;
 
   {
     gsehenInstance = Gsehen.getInstance();
+
+    gsehenGuiElements = new GsehenGuiElements();
 
     mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
   }
@@ -39,15 +42,11 @@ public final class GsehenSave {
     stage.setScene(scene);
     dialog.show();
 
-    final JFXButton saveButton = new JFXButton(mainBundle.getString("save.saveandexit"));
-    final JFXButton exitButton = new JFXButton(mainBundle.getString("save.exitwithoutsave"));
-    final JFXButton cancelButton = new JFXButton(mainBundle.getString("save.cancel"));
-    saveButton.setButtonType(com.jfoenix.controls.JFXButton.ButtonType.RAISED);
-    saveButton.setStyle("-fx-background-color: #e8e8e8; -fx-text-fill: black;");
-    exitButton.setButtonType(com.jfoenix.controls.JFXButton.ButtonType.RAISED);
-    exitButton.setStyle("-fx-background-color: #e8e8e8; -fx-text-fill: black;");
-    cancelButton.setButtonType(com.jfoenix.controls.JFXButton.ButtonType.RAISED);
-    cancelButton.setStyle("-fx-background-color: #e8e8e8; -fx-text-fill: black;");
+    final JFXButton saveButton = gsehenGuiElements
+        .jfxButton(mainBundle.getString("save.saveandexit"));
+    final JFXButton exitButton = gsehenGuiElements
+        .jfxButton(mainBundle.getString("save.exitwithoutsave"));
+    final JFXButton cancelButton = gsehenGuiElements.jfxButton(mainBundle.getString("save.cancel"));
 
     saveButton.setOnAction(new EventHandler<ActionEvent>() {
       @Override

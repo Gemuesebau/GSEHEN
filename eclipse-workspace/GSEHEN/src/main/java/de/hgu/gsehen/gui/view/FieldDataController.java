@@ -155,10 +155,10 @@ public class FieldDataController extends Application
     area = gsehenGuiElements.text("", FontWeight.BOLD);
 
     // Bodenprofil
+    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
     Text soilProfile = gsehenGuiElements.text(mainBundle.getString("fieldview.soilprofile"));
-    soilProfile.setText("");
     currentSoilBox = new JFXComboBox<SoilProfile>();
-    currentSoilBox.setPrefSize(200, 25);
+    currentSoilBox.setPrefSize(300, 25);
     if (!soilProfileList.isEmpty()) {
       for (SoilProfile s : soilProfileList) {
         currentSoilBox.getItems().add(s);
@@ -207,7 +207,7 @@ public class FieldDataController extends Application
         gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatasource") + ":");
     
     weatherData = new JFXComboBox<WeatherDataSource>();
-    weatherData.setPrefSize(150, 25);
+    weatherData.setPrefSize(300, 25);
     if (!weatherDataSourceList.isEmpty()) {
       for (WeatherDataSource s : weatherDataSourceList) {
         weatherData.getItems().add(s);
@@ -379,25 +379,12 @@ public class FieldDataController extends Application
     sp = gsehenInstance.getSoilProfileForUuid(field.getSoilProfileUuid());
     int index = 1;
 
-    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-    Text soilProfileLabel =
-        gsehenGuiElements.text(
-            mainBundle.getString("fieldview.currentsoil") + " (" + sp.getName() + "):" + "\n",
-            FontWeight.BOLD);
-
-    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-    Text setKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
-
     Text setKc = new Text();
     String kc = "";
     if (sp.getSoilManualData().getSoilKc() != null) {
       kc = String.valueOf(sp.getSoilManualData().getSoilKc());
       setKc.setText(kc);
     }
-
-    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-    Text setZoneLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualzone"));
-    
 
     Text setZone = new Text();
     String zone = "";
@@ -406,10 +393,6 @@ public class FieldDataController extends Application
       setZone.setText(zone);
     }
 
-    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-    Text setRainLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualrain"));
-    
-
     Text setRain = new Text();
     String rain = "";
     if (sp.getSoilManualData().getRainMax() != null) {
@@ -417,16 +400,20 @@ public class FieldDataController extends Application
       setRain.setText(rain);
     }
 
-    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-    Text setPauseLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualpause"));
-    
-
     Text setPause = new Text();
     String pause = "";
     if (sp.getSoilManualData().getDaysPause() != null) {
       pause = String.valueOf(sp.getSoilManualData().getDaysPause());
       setPause.setText(pause);
     }
+
+    Text soilProfileLabel = gsehenGuiElements.text(
+        mainBundle.getString("fieldview.currentsoil") + " (" + sp.getName() + "):" + "\n",
+        FontWeight.BOLD);
+    Text setKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
+    Text setZoneLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualzone"));
+    Text setRainLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualrain"));
+    Text setPauseLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualpause"));
 
     GridPane.setConstraints(soilProfileLabel, 0, 0);
     GridPane.setConstraints(setKcLabel, 0, 1);
@@ -649,7 +636,12 @@ public class FieldDataController extends Application
     GridPane gridPane = gsehenGuiElements.gridPane(pane);
     ObservableList<Node> children = gridPane.getChildren();
     for (ConfigDialogElement<Node, Object> node : nodes) {
+      children.add(node.getLabel());
       children.add(node.getNode());
+      final Text example = node.getExample();
+      if (example != null) {
+        children.add(example);
+      }
     }
     return gridPane;
   }
@@ -697,36 +689,27 @@ public class FieldDataController extends Application
     treeTableView.setVisible(false);
     tabPane.getTabs().removeAll(mapViewTab, plotViewTab, logViewTab);
 
-    // Name
-    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-    Text soilNameLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.profilename"));
-    
-
     // kc-Wert
-    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-    Text soilManualKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
-    
     soilManualKc = new JFXTextField("");
 
     // Bilanzierungstiefe (in cm)
-    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-    Text soilManualZoneLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualzone"));
-    
     soilManualZone = new JFXTextField("");
 
     // Schwelle des Regenereignis (in mm)
-    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-    Text soilManualRainLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualrain"));
-    
     soilManualRain = new JFXTextField("");
 
     // Bewässerungspause (in Tagen)
-    Text soilManualPauseLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.manualpause"));
-    
+    Text soilManualPauseLabel = gsehenGuiElements
+        .text(mainBundle.getString("fieldview.manualpause"));
+
     JFXTextField soilManualPause = new JFXTextField("");
 
     JFXTextField soilProfileName = new JFXTextField("");
+
+    Text soilNameLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.profilename"));
+    Text soilManualKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
+    Text soilManualZoneLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualzone"));
+    Text soilManualRainLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualrain"));
 
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(soilNameLabel, 0, 0);
@@ -742,7 +725,7 @@ public class FieldDataController extends Application
 
     // GridPane - Top Section
     GridPane top = gsehenGuiElements.gridPane(pane);
-    
+
     top.getChildren().addAll(soilNameLabel, soilProfileName, soilManualKcLabel, soilManualKc,
         soilManualZoneLabel, soilManualZone, soilManualRainLabel, soilManualRain,
         soilManualPauseLabel, soilManualPause);
@@ -755,10 +738,6 @@ public class FieldDataController extends Application
     layerText.setFont(Font.font("Arial", FontWeight.BOLD, 18));
 
     // Bodentyp
-    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-    Text soilLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soiltype"));
-    
-
     Soil s = new Soil();
     List<Soil> soils = s.soils();
 
@@ -779,9 +758,6 @@ public class FieldDataController extends Application
     });
 
     // Wasserhaltekapazität
-    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-    Text soilAwcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soilawc"));
-    
     JFXTextField soilAwc = new JFXTextField();
 
     // Sets the 'soilAwc', if the ChoiceBox-Value changed
@@ -799,9 +775,6 @@ public class FieldDataController extends Application
 
     // Tiefe
     JFXTextField depth = new JFXTextField("25");
-    @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-    Text depthLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.depth"));
-    
     depth.textProperty().addListener(new ChangeListener<String>() {
       @Override
       public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -879,14 +852,17 @@ public class FieldDataController extends Application
           center.getChildren().addAll(createdSoil, delSoil);
           depth.setText(mainBundle.getString("fieldview.layer") + (layerList.size() + 1));
         } else {
-          Text error = new Text(mainBundle.getString("fieldview.error"));
-          error.setFont(Font.font("Verdana", 14));
+          Text error = gsehenGuiElements.text(mainBundle.getString("fieldview.error"));
           error.setFill(Color.RED);
           buttonBox.getChildren().clear();
           buttonBox.getChildren().addAll(back, save, error);
         }
       }
     });
+
+    Text soilLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soiltype"));
+    Text soilAwcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soilawc"));
+    Text depthLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.depth"));
 
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(layerText, 0, 0, 2, 1);
@@ -957,8 +933,8 @@ public class FieldDataController extends Application
           treeTableView.getSelectionModel().clearSelection();
           treeTableView.getSelectionModel().select(currentItem);
         } else {
-          Text noNameOrSoil = new Text(mainBundle.getString("fieldview.nonameorsoil"));
-          noNameOrSoil.setFont(Font.font("Verdana", 14));
+          Text noNameOrSoil = gsehenGuiElements
+              .text(mainBundle.getString("fieldview.nonameorsoil"));
           noNameOrSoil.setFill(Color.RED);
           buttonBox.getChildren().clear();
           buttonBox.getChildren().addAll(back, save, noNameOrSoil);
@@ -989,9 +965,6 @@ public class FieldDataController extends Application
       SoilProfile currentSoilProfile = currentSoilBox.getValue();
 
       // Name
-      @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-      Text soilNameLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.profilename"));
-      
       JFXTextField soilProfileName = new JFXTextField(currentSoilProfile.getName());
       soilProfileName.textProperty().addListener(new ChangeListener<String>() {
         @Override
@@ -1004,9 +977,6 @@ public class FieldDataController extends Application
       });
 
       // kc-Wert
-      @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-      Text soilManualKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
-      
       if (currentSoilBox.getValue().getSoilManualData().getSoilKc() != null) {
         soilManualKc = new JFXTextField(String.valueOf(gsehenInstance
             .formatDoubleOneDecimal(currentSoilProfile.getSoilManualData().getSoilKc())));
@@ -1029,10 +999,6 @@ public class FieldDataController extends Application
       });
 
       // Bilanzierungstiefe (in cm)
-      @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-      Text soilManualZoneLabel =
-          gsehenGuiElements.text(mainBundle.getString("fieldview.manualzone"));
-      
       if (currentSoilProfile.getSoilManualData().getSoilZone() != null) {
         soilManualZone = new JFXTextField(
             String.valueOf(currentSoilProfile.getSoilManualData().getSoilZone()));
@@ -1054,10 +1020,6 @@ public class FieldDataController extends Application
       });
 
       // Schwelle des Regenereignis (in mm)
-      @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-      Text soilManualRainLabel =
-          gsehenGuiElements.text(mainBundle.getString("fieldview.manualrain"));
-      
       if (currentSoilBox.getValue().getSoilManualData().getRainMax() != null) {
         soilManualRain = new JFXTextField(String.valueOf(gsehenInstance
             .formatDoubleOneDecimal(currentSoilProfile.getSoilManualData().getRainMax())));
@@ -1080,10 +1042,6 @@ public class FieldDataController extends Application
       });
 
       // Bewässerungspause (in Tagen)
-      @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-      Text soilManualPauseLabel =
-          gsehenGuiElements.text(mainBundle.getString("fieldview.manualpause"));
-      
       if (currentSoilProfile.getSoilManualData().getDaysPause() != null) {
         soilManualPause = new JFXTextField(
             String.valueOf(currentSoilProfile.getSoilManualData().getDaysPause()));
@@ -1104,6 +1062,15 @@ public class FieldDataController extends Application
         }
       });
 
+      Text soilNameLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.profilename"));
+      Text soilManualKcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.manualkc"));
+      Text soilManualZoneLabel = gsehenGuiElements
+          .text(mainBundle.getString("fieldview.manualzone"));
+      Text soilManualRainLabel = gsehenGuiElements
+          .text(mainBundle.getString("fieldview.manualrain"));
+      Text soilManualPauseLabel = gsehenGuiElements
+          .text(mainBundle.getString("fieldview.manualpause"));
+
       // Set Row & Column Index for Nodes
       GridPane.setConstraints(soilNameLabel, 0, 0);
       GridPane.setConstraints(soilProfileName, 1, 0);
@@ -1118,7 +1085,7 @@ public class FieldDataController extends Application
 
       // GridPane - Top Section
       GridPane top = gsehenGuiElements.gridPane(pane);
-      
+
       top.getChildren().addAll(soilNameLabel, soilProfileName, soilManualKcLabel, soilManualKc,
           soilManualZoneLabel, soilManualZone, soilManualRainLabel, soilManualRain,
           soilManualPauseLabel, soilManualPause);
@@ -1131,15 +1098,7 @@ public class FieldDataController extends Application
 
       // Each layer the SoilProfile has
       for (int i = 0; i < currentSoilProfile.getSoilType().size(); i++) {
-        // "Schicht #XY"
-        Text layer = new Text(mainBundle.getString("fieldview.layer") + (i + 1));
-        layer.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-
         // Bodentyp
-        @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-        Text soilLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soiltype"));
-        
-
         Soil s = new Soil();
         List<Soil> soils = s.soils();
 
@@ -1170,10 +1129,6 @@ public class FieldDataController extends Application
         }
 
         // Wasserhaltekapazität
-        @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-        Text soilAwcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soilawc"));
-        
-
         int in = i;
         ChangeListener<Soil> changeListener = new ChangeListener<Soil>() {
           @Override
@@ -1193,9 +1148,7 @@ public class FieldDataController extends Application
         // Tiefe
         soilDepth = new JFXTextField(gsehenInstance
             .formatDoubleOneDecimal(currentSoilProfile.getProfileDepth().get(i).getDepth()));
-        @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-        Text depthLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.depth"));
-        
+
         soilDepth.textProperty().addListener(new ChangeListener<String>() {
           @Override
           public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -1211,15 +1164,21 @@ public class FieldDataController extends Application
           }
         });
 
+        // "Schicht #XY"
+        Text layer = gsehenGuiElements.text(mainBundle.getString("fieldview.layer") + (i + 1));
+        Text soilLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soiltype"));
+
         // Set Row & Column Index for Nodes
         GridPane.setConstraints(layer, 0, row);
         row += 1;
         GridPane.setConstraints(soilLabel, 0, row);
         GridPane.setConstraints(soilChoiceBox, 1, row);
         row += 1;
+        Text soilAwcLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.soilawc"));
         GridPane.setConstraints(soilAwcLabel, 0, row);
         GridPane.setConstraints(soilAwc, 1, row);
         row += 1;
+        Text depthLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.depth"));
         GridPane.setConstraints(depthLabel, 0, row);
         GridPane.setConstraints(soilDepth, 1, row);
         row += 1;
@@ -1252,8 +1211,8 @@ public class FieldDataController extends Application
             treeTableView.getSelectionModel().clearSelection();
             treeTableView.getSelectionModel().select(currentItem);
           } else {
-            Text profileChangeError = new Text(mainBundle.getString("fieldview.error"));
-            profileChangeError.setFont(Font.font("Verdana", 14));
+            Text profileChangeError = gsehenGuiElements
+                .text(mainBundle.getString("fieldview.error"));
             profileChangeError.setFill(Color.RED);
             HBox bottom = new HBox();
             bottom.setSpacing(10);
@@ -1269,4 +1228,5 @@ public class FieldDataController extends Application
   @Override
   public void start(Stage primaryStage) throws Exception {
   }
+
 }

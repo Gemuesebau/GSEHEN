@@ -1,5 +1,10 @@
 package de.hgu.gsehen.gsbalance;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
@@ -9,11 +14,6 @@ import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilManualData;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
 
 public class TotalBalance {
 
@@ -250,24 +250,25 @@ public class TotalBalance {
       Double currentAvailableSoilWater = currentDay.getCurrentAvailableSoilWater();
       Double waterContentToAim =
           currentAvailableSoilWater * 0.9 - currentDay.getCurrentTotalWaterBalance();
+      Double availableWater = currentAvailableSoilWater * 0.3 - waterContentToAim;
+      recommendedAction.setAvailableWater(availableWater);
+      recommendedAction
+          .setAvailableWaterPercent((availableWater / (currentAvailableSoilWater * 0.3)) * 100);
+      recommendedAction.setAvailableWater(availableWater);
+      final int projectedDaysToIrrigation = (int) Math.floor(availableWater / currentDay.getEtc());
+      recommendedAction.setProjectedDaysToIrrigation(projectedDaysToIrrigation);
+      recommendedAction.setWaterContentToAim(waterContentToAim);
+
       if (waterContentToAim > currentAvailableSoilWater) {
         recommendedAction.setRecommendation(RecommendedActionEnum.EXCESS);
         // throw new UnsupportedOperationException(
         // "The water balance exceeds the total available soil water\n"
         // + "- your plants are dead for sure \\u2620");
       } else {
-        Double availableWater = currentAvailableSoilWater * 0.3 - waterContentToAim;
-        recommendedAction.setAvailableWater(availableWater);
-        recommendedAction
-            .setAvailableWaterPercent((availableWater / (currentAvailableSoilWater * 0.3)) * 100);
         if (plot.getCalculationPaused()) {
           recommendedAction.setRecommendation(RecommendedActionEnum.PAUSE);
         } else {
           if (availableWater > 0) {
-            recommendedAction.setAvailableWater(availableWater);
-            final int projectedDaysToIrrigation =
-                (int) Math.floor(availableWater / currentDay.getEtc());
-            recommendedAction.setProjectedDaysToIrrigation(projectedDaysToIrrigation);
             if (projectedDaysToIrrigation == 0) {
               recommendedAction.setRecommendation(RecommendedActionEnum.NOW);
             } else if (projectedDaysToIrrigation == 1) {
@@ -277,7 +278,6 @@ public class TotalBalance {
             }
           } else {
             recommendedAction.setRecommendation(RecommendedActionEnum.IRRIGATION);
-            recommendedAction.setWaterContentToAim(waterContentToAim);
           }
         }
       }

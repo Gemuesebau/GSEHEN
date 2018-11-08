@@ -1,5 +1,6 @@
 package de.hgu.gsehen.gui;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import de.hgu.gsehen.Gsehen;
 import java.text.DateFormat;
@@ -61,8 +62,10 @@ public class GsehenGuiElements {
   /**
    * Creates a Text.
    *
-   * @param text the initial text of this Text element
-   * @param fontWeight a particular font weight for this text
+   * @param text
+   *          the initial text of this Text element
+   * @param fontWeight
+   *          a particular font weight for this text
    * @return - the Text.
    */
   public Text text(String text, FontWeight fontWeight) {
@@ -79,7 +82,8 @@ public class GsehenGuiElements {
   /**
    * Creates a Text.
    *
-   * @param text the initial text of this Text element
+   * @param text
+   *          the initial text of this Text element
    * @return - the Text.
    */
   public Text text(String text) {
@@ -97,6 +101,19 @@ public class GsehenGuiElements {
     button.setPrefSize(width, 25);
 
     return button;
+  }
+  
+  /**
+   * Creates a JFXButton.
+   * 
+   * @return - the JFXButton.
+   */
+  public JFXButton jfxButton(String label) {
+    final JFXButton jfxButton = new JFXButton(label);
+    jfxButton.setButtonType(com.jfoenix.controls.JFXButton.ButtonType.RAISED);
+    jfxButton.setStyle("-fx-background-color: #e8e8e8; -fx-text-fill: black;");
+
+    return jfxButton;
   }
 
   /**
