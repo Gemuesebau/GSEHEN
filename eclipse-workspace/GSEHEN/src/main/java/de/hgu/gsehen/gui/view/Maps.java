@@ -74,7 +74,7 @@ public class Maps extends FarmDataController {
    *
    * @param drawable a Drawable (containing a GeoPolygon), usually first created via
    *        de.hgu.gsehen.gui.view.Map.getDrawableWithEmptyPolygon() and with points added as needed
-   * @see de.hgu.gsehen.gui.view.Maps.getDrawableWithEmptyPolygon
+   * @see de.hgu.gsehen.view.view.Maps.getDrawableWithEmptyPolygon
    */
   public void drawableDone(Drawable drawable) {
     application.drawableAdded(drawable, getEventListenerClass(FarmDataChanged.class));
