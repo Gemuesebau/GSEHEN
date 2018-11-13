@@ -15,7 +15,6 @@ import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.GsehenViewEvent;
 import de.hgu.gsehen.event.ManualDataChanged;
 import de.hgu.gsehen.event.RecommendedActionChanged;
-//import de.hgu.gsehen.gsbalance.DayDataCalculation;
 import de.hgu.gsehen.gsbalance.Recommender;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenTreeTable;
@@ -31,6 +30,7 @@ import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Messages;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.model.Preferences;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.WeatherDataSource;
 import de.hgu.gsehen.util.CollectionUtil;
@@ -110,11 +110,9 @@ public class Gsehen extends Application {
   private static final String IMAGE_VIEW_ID = "#imageView";
 
   private static Maps maps;
-//  private static Farms farms;
   private static Fields fields;
   private static Plots plots;
   private static Logs logs;
-  // private static DayDataCalculation dayDataCalculation;
 
   private GsehenTreeTable treeTable;
 
@@ -144,6 +142,8 @@ public class Gsehen extends Application {
   private DecimalFormat twoDecimalNumberFormat;
   private DecimalFormat moreDecimalNumberFormat;
   private SimpleDateFormat dateFormat;
+  private List<Preferences> preferences;
+  private Map<String, String> preferencesMap;
 
   {
     instance = this;
@@ -423,25 +423,28 @@ public class Gsehen extends Application {
   }
 
   /**
-   * Loads the user-created data (farms, fields, plots, ..)
+   * Loads the user-created data (preferences, farms, fields, plots, ..)
    */
-  @SuppressWarnings("unchecked")
   public void loadUserData() {
+    preferences = loadEntities(Preferences.class);
+    preferencesMap = CollectionUtil.listToMap(preferences, p -> p.getKey(), p -> p.getValue());
+
+    farmsList = loadEntities(Farm.class);
+    dataChanged = false;
+    sendFarmDataChanged(null, null);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T> List<T> loadEntities(Class<T> entityClass) {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("GSEHEN");
     EntityManager em = emf.createEntityManager();
     try {
       Session session = em.unwrap(Session.class);
-      Query<Farm> query = session.createQuery("from Farm");
-      farmsList = query.list();
-      // for (Farm farm : farmsList) {
-      // System.out.println(farm.getUuid());
-      // }
+      Query<T> query = session.createQuery("from " + entityClass.getSimpleName());
+      return query.list();
     } finally {
       em.close();
     }
-
-    dataChanged = false;
-    sendFarmDataChanged(null, null);
   }
 
   /**
@@ -453,22 +456,10 @@ public class Gsehen extends Application {
 
     try {
       em.getTransaction().begin();
-      for (Farm farm : farmsList) {
-        em.merge(farm);
-      }
-      for (SoilProfile soilProfile : soilProfilesList) {
-        em.merge(soilProfile);
-      }
-
-      for (WeatherDataSource dataSource : weatherDataSourcesList) {
-        em.merge(dataSource);
-      }
-
-      for (Farm deletedFarm : this.getDeletedFarms()) {
-        em.remove(em.contains(deletedFarm) ? deletedFarm : em.merge(deletedFarm));
-      }
-      this.getDeletedFarms().clear();
-
+      preferences = CollectionUtil.mapToList(preferencesMap,
+          me -> new Preferences(me.getKey(), me.getValue()));
+      processPreferences(em);
+      processFarmsEtc(em);
       em.getTransaction().commit();
     } catch (Exception e) {
       System.out.println("Problem: " + e.getMessage());
@@ -478,6 +469,29 @@ public class Gsehen extends Application {
     }
 
     dataChanged = false;
+  }
+
+  private void processPreferences(EntityManager entityManager) {
+    for (Preferences preferences : preferences) {
+      entityManager.merge(preferences);
+    }
+  }
+
+  private void processFarmsEtc(EntityManager entityManager) {
+    for (Farm farm : farmsList) {
+      entityManager.merge(farm);
+    }
+    for (SoilProfile soilProfile : soilProfilesList) {
+      entityManager.merge(soilProfile);
+    }
+    for (WeatherDataSource dataSource : weatherDataSourcesList) {
+      entityManager.merge(dataSource);
+    }
+    for (Farm deletedFarm : this.getDeletedFarms()) {
+      entityManager.remove(
+          entityManager.contains(deletedFarm) ? deletedFarm : entityManager.merge(deletedFarm));
+    }
+    getDeletedFarms().clear();
   }
 
   public <T extends GsehenEvent> void registerForEvent(Class<T> eventClass,
@@ -539,6 +553,14 @@ public class Gsehen extends Application {
       farmsList.add(newFieldsFarm);
     }
     return newFieldsFarm;
+  }
+
+  public String getPreferenceValue(String key) {
+    return preferencesMap.get(key);
+  }
+
+  public void setPreferenceValue(String key, String value) {
+    preferencesMap.put(key, value);
   }
 
   /**
