@@ -107,6 +107,25 @@ public class CollectionUtil {
   }
 
   @SuppressWarnings("checkstyle:javadocmethod")
+  public static <T, K, V> Map<K, V> listToMap(List<T> list,
+      Function<T, K> keyGenerator, Function<T, V> valueGenerator) {
+    Map<K, V> result = new HashMap<>();
+    for (T t : list) {
+      result.put(keyGenerator.apply(t), valueGenerator.apply(t));
+    }
+    return result;
+  }
+
+  public static <T, K, V> List<T> mapToList(Map<K, V> map,
+      Function<Entry<K, V>, T> listItemGenerator) {
+    List<T> result = new ArrayList<>();
+    for (Entry<K, V> mapEntry : map.entrySet()) {
+      result.add(listItemGenerator.apply(mapEntry));
+    }
+    return result;
+  }
+
+  @SuppressWarnings("checkstyle:javadocmethod")
   public static <S, T> T[] mapArrayValues(S[] sourceArray, Class<T> targetClass,
       Function<S, T> mapper) {
     if (sourceArray == null) {
