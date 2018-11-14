@@ -248,6 +248,7 @@ public abstract class FarmDataController extends WebController {
         return "green";
       case "Plot":
         Plot plot = (Plot) typeObject;
+        plot.setIsActive(true);
         int daysToIrrigation = 0;
         if (plot.getRecommendedAction() != null 
             && plot.getRecommendedAction().getProjectedDaysToIrrigation() != null) {
