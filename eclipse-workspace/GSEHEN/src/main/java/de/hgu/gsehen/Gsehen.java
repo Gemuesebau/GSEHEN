@@ -517,6 +517,7 @@ public class Gsehen extends Application {
       getNewFieldsFarm().getFields().add((Field) object);
       LOGGER.info("Added field " + object.getName());
     } else if (object instanceof Plot) {
+      ((Plot) object).setIsActive(true);
       getNewPlotsField(getNewFieldsFarm()).getPlots().add((Plot) object);
       LOGGER.info("Added plot " + object.getName());
     }

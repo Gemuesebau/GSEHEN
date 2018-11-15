@@ -145,13 +145,13 @@ public class FieldDataController extends Application
     // TOP (The FieldView, you will see first)
     // Name
     nameLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.name"));
-    
+
     name = new JFXTextField("");
     name.setPrefSize(150, 25);
 
     // m²
     areaLabel = gsehenGuiElements.text(mainBundle.getString("fieldview.area"));
-    
+
     area = gsehenGuiElements.text("", FontWeight.BOLD);
 
     // Bodenprofil
@@ -203,9 +203,9 @@ public class FieldDataController extends Application
 
     // Wetterdatenquelle
     @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
-    Text weatherDataSourceLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatasource") + ":");
-    
+    Text weatherDataSourceLabel = gsehenGuiElements
+        .text(mainBundle.getString("fieldview.weatherdatasource") + ":");
+
     weatherData = new JFXComboBox<WeatherDataSource>();
     weatherData.setPrefSize(300, 25);
     if (!weatherDataSourceList.isEmpty()) {
@@ -332,8 +332,8 @@ public class FieldDataController extends Application
 
                   name.setText(field.getName());
 
-                  area.setText(
-                      gsehenInstance.formatDoubleOneDecimal(field.getPolygon().calculateArea()));
+                  area.setText(gsehenInstance.formatDoubleOneDecimal(
+                      field.getPolygon().calculateArea(field.getPolygon().getGeoPoints())));
 
                   for (WeatherDataSource wds : weatherDataSourceList) {
                     final WeatherDataSource weatherDataSource = gsehenInstance
@@ -483,9 +483,9 @@ public class FieldDataController extends Application
     tabPane.getTabs().removeAll(mapViewTab, plotViewTab, logViewTab);
 
     // Name
-    Text weatherDataLabel =
-        gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatalabel"));
-    
+    Text weatherDataLabel = gsehenGuiElements
+        .text(mainBundle.getString("fieldview.weatherdatalabel"));
+
     weatherDataSourceName = new JFXTextField();
 
     GridPane.setConstraints(weatherDataLabel, 0, 0);
@@ -575,42 +575,31 @@ public class FieldDataController extends Application
     List<ConfigDialogElement<Node, Object>> weatherDataSourceConfigItems = new ArrayList<>();
     pluginJsFileName = new ConfigDialogComboBox(
         gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatapluginjsfilenamelabel")),
-        gsehenGuiElements.comboBox(PluginUtil.getPluginJsFileNames()),
-        null, weatherDataSourceConfigItems
-    );
+        gsehenGuiElements.comboBox(PluginUtil.getPluginJsFileNames()), null,
+        weatherDataSourceConfigItems);
     manualImport = new ConfigDialogCheckBox(
         gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatamanualimportlabel")),
-        null, weatherDataSourceConfigItems
-    );
+        null, weatherDataSourceConfigItems);
     automaticImport = new ConfigDialogCheckBox(
         gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdataautomaticimportlabel")),
-        null, weatherDataSourceConfigItems
-    );
+        null, weatherDataSourceConfigItems);
     automaticImportIntervalSeconds = new ConfigDialogDoubleField(
-        gsehenGuiElements.text(
-            mainBundle.getString("fieldview.weatherdataautomaticimportintervalsecondslabel")),
-        null, weatherDataSourceConfigItems, gsehenInstance
-    );
+        gsehenGuiElements
+            .text(mainBundle.getString("fieldview.weatherdataautomaticimportintervalsecondslabel")),
+        null, weatherDataSourceConfigItems, gsehenInstance);
     locationLat = new ConfigDialogDoubleField(
         gsehenGuiElements.text(mainBundle.getString("fieldview.locationlat")),
-        gsehenGuiElements.text(
-            mainBundle.getString("fieldview.example")
-            + numberExample(mainBundle.getString("fieldview.locationlatvalue"))
-        ),
-        weatherDataSourceConfigItems, gsehenInstance
-    );
+        gsehenGuiElements.text(mainBundle.getString("fieldview.example")
+            + numberExample(mainBundle.getString("fieldview.locationlatvalue"))),
+        weatherDataSourceConfigItems, gsehenInstance);
     locationLng = new ConfigDialogDoubleField(
         gsehenGuiElements.text(mainBundle.getString("fieldview.locationlng")),
-        gsehenGuiElements.text(
-            mainBundle.getString("fieldview.example")
-            + numberExample(mainBundle.getString("fieldview.locationlngvalue"))
-        ),
-        weatherDataSourceConfigItems, gsehenInstance
-    );
+        gsehenGuiElements.text(mainBundle.getString("fieldview.example")
+            + numberExample(mainBundle.getString("fieldview.locationlngvalue"))),
+        weatherDataSourceConfigItems, gsehenInstance);
     metersAbove = new ConfigDialogDoubleField(
-        gsehenGuiElements.text(mainBundle.getString("fieldview.metersabove")),
-        null, weatherDataSourceConfigItems, gsehenInstance
-    );
+        gsehenGuiElements.text(mainBundle.getString("fieldview.metersabove")), null,
+        weatherDataSourceConfigItems, gsehenInstance);
     return weatherDataSourceConfigItems;
   }
 
@@ -673,8 +662,8 @@ public class FieldDataController extends Application
       pluginJsFileName.setNodeValue(selectedWeatherDataSource.getPluginJsFileName());
       manualImport.setNodeValue(selectedWeatherDataSource.isManualImportActive());
       automaticImport.setNodeValue(selectedWeatherDataSource.isAutomaticImportActive());
-      automaticImportIntervalSeconds.setNodeValue(
-          selectedWeatherDataSource.getAutomaticImportFrequencySeconds());
+      automaticImportIntervalSeconds
+          .setNodeValue(selectedWeatherDataSource.getAutomaticImportFrequencySeconds());
       locationLat.setNodeValue(selectedWeatherDataSource.getLocationLat());
       locationLng.setNodeValue(selectedWeatherDataSource.getLocationLng());
       metersAbove.setNodeValue(selectedWeatherDataSource.getLocationMetersAboveSeaLevel());

@@ -7,13 +7,12 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 @Entity
 public class GeoPolygon {
 
-  private static final String POLYGON_MUST_HAVE_AT_LEAST_ONE_POINT =
+  private static final String POLYGON_MUST_HAVE_AT_LEAST_ONE_POINT = 
       "the polygon must have at least one point";
 
   @Id
@@ -37,7 +36,8 @@ public class GeoPolygon {
   /**
    * Constructs from a variable amount of GeoPoint instances.
    *
-   * @param geoPoints the points to be added to this polygon
+   * @param geoPoints
+   *          the points to be added to this polygon
    */
   public GeoPolygon(GeoPoint... geoPoints) {
     this();
@@ -151,43 +151,36 @@ public class GeoPolygon {
    * 
    * @return - The calculeted area.
    */
-  public double calculateArea() {
-    double distM = 0.0;
-    double[] x = new double[geoPoints.size()];
-    double[] y = new double[geoPoints.size()];
-    for (int i = 0; i < geoPoints.size(); i++) {
-      double latMid = (getMinX() + getMaxX()) / 2.0;
-      double meterLat =
-          111132.954 - 559.822 * Math.cos(2.0 * latMid) + 1.175 * Math.cos(4.0 * latMid);
-      double meterLon = (3.14159265359 / 180) * 6367449 * Math.cos(latMid);
+  public double calculateArea(List<GeoPoint> coordinates) {
+    double area = 0.0;
+    if (coordinates.size() > 2) {
+      for (int i = 0; i < coordinates.size(); i++) {
+        GeoPoint p1 = coordinates.get(i);
+        GeoPoint p2;
+        if (coordinates.get(i) == coordinates.get(coordinates.size() - 1)) {
+          p2 = coordinates.get(0);
+        } else {
+          p2 = coordinates.get(i + 1);
+        }
+        area += Math.toRadians(p2.getLng() - p1.getLng())
+            * (2 + Math.sin(Math.toRadians(p1.getLat())) + Math.sin(Math.toRadians(p2.getLat())));
+      }
 
-      double deltaLat = Math.abs(getMinX() - getMaxX());
-      double deltaLon = Math.abs(getMinY() - getMaxY());
-
-      distM = Math.sqrt(Math.pow(deltaLat * meterLat, 2) + Math.pow(deltaLon * meterLon, 2));
-
-      x[i] = Math.sqrt(Math.pow(deltaLat * meterLat, 2));
-      y[i] = Math.sqrt(Math.pow(deltaLon * meterLon, 2));
-
-      // System.out.println(x[i]);
-      // System.out.println(y[i]);
+      area = area * 6378137.0 * 6378137.0 / 2.0;
     }
-    // return distM; // meters
-    // TODO: Herausfinden, ob das Ergebnis stimmt.
-    polygonArea(x, y, geoPoints.size());
-    return 0.0;
+    return Math.abs(area);
   }
 
-  public double polygonArea(double[] X, double[] Y, int numPoints) {
-    double area = 0; // Accumulates area in the loop
-    int j = numPoints - 1; // The last vertex is the 'previous' one to the first
-
-    for (int i = 0; i < numPoints; i++) {
-      area = area + (X[j] + X[i]) * (Y[j] - Y[i]);
-      j = i; // j is previous vertex to i
-      // System.out.println(area / 2);
-    }
-    return area / 2;
-  }
+  // public double polygonArea(double[] X, double[] Y, int numPoints) {
+  // double area = 0; // Accumulates area in the loop
+  // int j = numPoints - 1; // The last vertex is the 'previous' one to the first
+  //
+  // for (int i = 0; i < numPoints; i++) {
+  // area = area + (X[j] + X[i]) * (Y[j] - Y[i]);
+  // j = i; // j is previous vertex to i
+  // // System.out.println(area / 2);
+  // }
+  // return area / 2;
+  // }
 
 }

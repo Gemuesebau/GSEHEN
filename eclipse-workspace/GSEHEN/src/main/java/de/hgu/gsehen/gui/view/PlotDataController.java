@@ -966,7 +966,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
           name.setText(plot.getName());
 
-          area.setText(gsehenInstance.formatDoubleOneDecimal(plot.getPolygon().calculateArea()));
+          area.setText(gsehenInstance.formatDoubleOneDecimal(
+              plot.getPolygon().calculateArea(plot.getPolygon().getGeoPoints())));
 
           if (plot.getLocation() != null) {
             location.setText(String.valueOf(
