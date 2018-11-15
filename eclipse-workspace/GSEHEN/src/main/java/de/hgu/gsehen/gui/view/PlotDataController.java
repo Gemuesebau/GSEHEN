@@ -136,6 +136,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private String pattern;
   private Double lat = 0.0;
   private Double lng = 0.0;
+  private boolean newData;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -565,40 +566,44 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private void setChartData() {
-    waterLevel = plot.getRecommendedAction().getAvailableWater();
-    int daysToIrrigation = plot.getRecommendedAction().getProjectedDaysToIrrigation();
+    if (plot.getRecommendedAction().getProjectedDaysToIrrigation() != null) {
+      waterLevel = plot.getRecommendedAction().getAvailableWater();
+      int daysToIrrigation = plot.getRecommendedAction().getProjectedDaysToIrrigation();
 
-    if (!plot.getWaterBalance().equals(null)) {
-      final List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();
-      if (!dailyBalances.isEmpty()) {
-        int waterBalance = dailyBalances.size() - 1;
-        availableSoilWater = dailyBalances.get(waterBalance).getCurrentAvailableSoilWater() * 1.1;
-        axisY.setUpperBound(availableSoilWater);
-      }
-    }
-
-    Legend legend = (Legend) chart.lookup(".chart-legend");
-    Legend.LegendItem li = null;
-    DecimalFormat df = new DecimalFormat("#.##");
-
-    if (waterLevel != null) {
-      XYChart.Data data = new XYChart.Data("waterLevel", waterLevel);
-      series.getData().add(data);
-      Node node = data.getNode();
-
-      if (daysToIrrigation == 0) {
-        node.setStyle("-fx-bar-fill: #ff0000;");
-        li = new Legend.LegendItem(df.format(waterLevel) + " mm", new Rectangle(10, 4, Color.RED));
-      } else if (daysToIrrigation == 1) {
-        node.setStyle("-fx-bar-fill: #800080;");
-        li = new Legend.LegendItem(df.format(waterLevel) + " mm",
-            new Rectangle(10, 4, Color.PURPLE));
-      } else {
-        node.setStyle("-fx-bar-fill: #0000ff;");
-        li = new Legend.LegendItem(df.format(waterLevel) + " mm", new Rectangle(10, 4, Color.BLUE));
+      if (!plot.getWaterBalance().equals(null)) {
+        final List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();
+        if (!dailyBalances.isEmpty()) {
+          int waterBalance = dailyBalances.size() - 1;
+          availableSoilWater = dailyBalances.get(waterBalance).getCurrentAvailableSoilWater() * 1.1;
+          axisY.setUpperBound(availableSoilWater);
+        }
       }
 
-      legend.getItems().setAll(li);
+      Legend legend = (Legend) chart.lookup(".chart-legend");
+      Legend.LegendItem li = null;
+      DecimalFormat df = new DecimalFormat("#.##");
+
+      if (waterLevel != null) {
+        XYChart.Data data = new XYChart.Data("waterLevel", waterLevel);
+        series.getData().add(data);
+        Node node = data.getNode();
+
+        if (daysToIrrigation == 0) {
+          node.setStyle("-fx-bar-fill: #ff0000;");
+          li = new Legend.LegendItem(df.format(waterLevel) + " mm",
+              new Rectangle(10, 4, Color.RED));
+        } else if (daysToIrrigation == 1) {
+          node.setStyle("-fx-bar-fill: #800080;");
+          li = new Legend.LegendItem(df.format(waterLevel) + " mm",
+              new Rectangle(10, 4, Color.PURPLE));
+        } else {
+          node.setStyle("-fx-bar-fill: #0000ff;");
+          li = new Legend.LegendItem(df.format(waterLevel) + " mm",
+              new Rectangle(10, 4, Color.BLUE));
+        }
+
+        legend.getItems().setAll(li);
+      }
     }
   }
 
@@ -690,6 +695,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   private void wateringView() {
     md = new ManualData();
+    newData = true;
 
     if (plot.getManualData() != null) {
       md = plot.getManualData();
@@ -753,22 +759,52 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       if ((wateringDate.compareTo(mws.getDate()) == 0)) {
         irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(mws.getIrrigation()));
         precipitation.setText(gsehenInstance.formatDoubleOneDecimal(mws.getPrecipitation()));
+        break;
       } else {
         irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(0.0));
         precipitation.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
       }
+      System.out.println(irrigation.getText());
     }
 
-    date.valueProperty().addListener((ov, oldValue, newValue) -> {
-      boolean newData = true;
+    unit.valueProperty().addListener((ov, oldValue, newValue) -> {
+      for (ManualWaterSupply mws : md.getManualWaterSupply()) {
+        Date wateringDate = Date
+            .from(date.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        if ((wateringDate.compareTo(mws.getDate()) == 0)
+            && unit.getSelectionModel().getSelectedItem().equals("Liter")) {
+          irrigation
+              .setText(gsehenInstance.formatDoubleTwoDecimal(mws.getIrrigation() * plot.getArea()));
+          precipitation.setText(
+              gsehenInstance.formatDoubleOneDecimal(mws.getPrecipitation() * plot.getArea()));
+          break;
+        } else if ((wateringDate.compareTo(mws.getDate()) == 0)
+            && unit.getSelectionModel().getSelectedItem().equals("mm")) {
+          irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(mws.getIrrigation()));
+          precipitation.setText(gsehenInstance.formatDoubleOneDecimal(mws.getPrecipitation()));
+          break;
+        }
+      }
+    });
 
+    date.valueProperty().addListener((ov, oldValue, newValue) -> {
       // Books the irrigation/precipitation for the right day
       for (ManualWaterSupply mws : md.getManualWaterSupply()) {
         Date wateringDate = Date.from(newValue.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        if ((wateringDate.compareTo(mws.getDate()) == 0)) {
+        if ((wateringDate.compareTo(mws.getDate()) == 0)
+            && unit.getSelectionModel().getSelectedItem().equals("Liter")) {
+          irrigation
+              .setText(gsehenInstance.formatDoubleTwoDecimal(mws.getIrrigation() * plot.getArea()));
+          precipitation.setText(
+              gsehenInstance.formatDoubleOneDecimal(mws.getPrecipitation() * plot.getArea()));
+          newData = false;
+          break;
+        } else if ((wateringDate.compareTo(mws.getDate()) == 0)
+            && unit.getSelectionModel().getSelectedItem().equals("mm")) {
           irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(mws.getIrrigation()));
           precipitation.setText(gsehenInstance.formatDoubleOneDecimal(mws.getPrecipitation()));
           newData = false;
+          break;
         } else if (newData) {
           irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(0.0));
           precipitation.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
@@ -800,6 +836,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     JFXButton back = gsehenGuiElements.jfxButton(mainBundle.getString("fieldview.back"));
     back.setOnAction(new EventHandler<ActionEvent>() {
+
       @Override
       public void handle(ActionEvent arg0) {
         gsehenInstance.sendFarmDataChanged(plot, null);
