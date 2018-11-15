@@ -314,8 +314,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 attributeLabel2 = new Text(mainBundle.getString("fieldview.area"));
                 attributeLabel2.setFont(Font.font("Arial", 12));
-                attribute2 = new Text(
-                    gsehenInstance.formatDoubleOneDecimal(field.getPolygon().calculateArea()));
+                attribute2 = new Text(gsehenInstance.formatDoubleOneDecimal(
+                    field.getPolygon().calculateArea(field.getPolygon().getGeoPoints())));
                 attribute2.setFont(Font.font("Arial", FontWeight.BOLD, 12));
 
                 attributeLabel3 = new Text(mainBundle.getString("fieldview.soilprofile"));
@@ -349,8 +349,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 Plot plot = (Plot) selectedItem.getValue();
 
                 attributeLabel1 = new Text(mainBundle.getString("fieldview.area"));
-                attribute1 = new Text(
-                    gsehenInstance.formatDoubleOneDecimal(plot.getPolygon().calculateArea()));
+                attribute1 = new Text(gsehenInstance.formatDoubleOneDecimal(
+                    plot.getPolygon().calculateArea(plot.getPolygon().getGeoPoints())));
 
                 attributeLabel2 = new Text(mainBundle.getString("plotview.rootingzone"));
 
@@ -503,7 +503,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private void showActiveDrawables() {
     gsehenInstance.sendDrawableFilterChanged(drawable -> {
       if (drawable instanceof Plot) {
-        return ((Plot)drawable).getIsActive();
+        return ((Plot) drawable).getIsActive();
       } else {
         return true;
       }

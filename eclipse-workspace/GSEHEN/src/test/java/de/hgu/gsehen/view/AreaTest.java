@@ -15,17 +15,17 @@ public class AreaTest {
     /*
      * #1
      */
-    double lon1 = 7.962164212303151;
-    double lat1 = 49.98440351548787;
+    double lon1 = 6.957051577840502;
+    double lat1 = 50.94173179228392;
 
-    double lon2 = 7.960372496681202;
-    double lat2 = 49.98376884011384;
+    double lon2 = 6.95910614994591;
+    double lat2 = 50.9417351724594;
 
-    double lon3 = 7.960855294303883;
-    double lat3 = 49.98322384044712;
+    double lon3 = 6.959138336454089;
+    double lat3 = 50.940964486091886;
 
-    double lon4 = 7.962872315483082;
-    double lat4 = 49.98385852301169;
+    double lon4 = 6.957062306676562;
+    double lat4 = 50.940957725628614;
 
     double oneTwo = measure(lat1, lon1, lat2, lon2);
     double twoThree = measure(lat2, lon2, lat3, lon3);
@@ -35,8 +35,9 @@ public class AreaTest {
     System.out.println("m²: " + oneTwo + " * " + twoThree + " * " + threeFour + " * " + fourOne
         + " = " + oneTwo * twoThree * threeFour * fourOne);
 
-    System.out.println("m²: " + ((oneTwo + threeFour) / 2) + " * " + ((twoThree + fourOne) / 2)
-        + " = " + ((oneTwo + threeFour) / 2) * ((twoThree + fourOne) / 2));
+    System.out.println(
+        "m² (Durchschnitt): " + ((oneTwo + threeFour) / 2) + " * " + ((twoThree + fourOne) / 2)
+            + " = " + ((oneTwo + threeFour) / 2) * ((twoThree + fourOne) / 2));
 
     System.out.println("");
 
@@ -80,6 +81,21 @@ public class AreaTest {
     System.out.println(calculatePolygonArea(geoPolygon.getGeoPoints()));
 
     System.out.println("");
+
+    /*
+     * #5
+     */
+    double area5 = Math.toRadians(lon2 - lon1)
+        * (2 + Math.sin(Math.toRadians(lat1)) + Math.sin(Math.toRadians(lat2)))
+        + Math.toRadians(lon3 - lon2)
+            * (2 + Math.sin(Math.toRadians(lat2)) + Math.sin(Math.toRadians(lat3)))
+        + Math.toRadians(lon4 - lon3)
+            * (2 + Math.sin(Math.toRadians(lat3)) + Math.sin(Math.toRadians(lat4)))
+        + Math.toRadians(lon1 - lon4)
+            * (2 + Math.sin(Math.toRadians(lat4)) + Math.sin(Math.toRadians(lat1)));
+
+    area5 = Math.abs(area5 * 6378137.0 * 6378137.0 / 2.0);
+    System.out.println(area5);
   }
 
   // generally used geo measurement function
@@ -103,7 +119,7 @@ public class AreaTest {
       System.out.println(sum);
     }
     double area = 0.5 * Math.abs(sum);
-    return area;
+    return Math.abs(area);
   }
 
   private static double calculatePolygonArea(List<GeoPoint> coordinates) {
@@ -117,17 +133,13 @@ public class AreaTest {
         } else {
           p2 = coordinates.get(i + 1);
         }
-        area += convertToRadian(p2.getLng() - p1.getLng())
-            * (2 + Math.sin(convertToRadian(p1.getLat())) + Math.sin(convertToRadian(p2.getLat())));
-        System.out.println(i + ": " + area);
+        area += Math.toRadians(p2.getLng() - p1.getLng())
+            * (2 + Math.sin(Math.toRadians(p1.getLat())) + Math.sin(Math.toRadians(p2.getLat())));
       }
-      area = area * 6378137 * 6378137 / 2;
+
+      area = area * 6378137.0 * 6378137.0 / 2.0;
     }
     return Math.abs(area);
-  }
-
-  private static double convertToRadian(double input) {
-    return input * Math.PI / 180;
   }
 
 }
