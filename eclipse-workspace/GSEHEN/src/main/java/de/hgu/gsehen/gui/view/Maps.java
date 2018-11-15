@@ -21,6 +21,8 @@ import javafx.scene.web.WebView;
 @SuppressWarnings({"checkstyle:commentsindentation"})
 public class Maps extends FarmDataController {
   private static final Logger LOGGER = Logger.getLogger(Maps.class.getName());
+  private static final String MAPS_HTML_URL = "https://gemuesebau.github.io/GSEHEN/"
+      + "eclipse-workspace/GSEHEN/src/main/resources/de/hgu/gsehen/gui/view/maps.html";
 
   @Override
   protected Logger getLogger() {
@@ -34,6 +36,12 @@ public class Maps extends FarmDataController {
    */
   public Maps(Gsehen application, WebView webView) {
     super(application, webView);
+  }
+
+  @Override
+  public void reload() {
+    loadWorkerSucceededScript = getCompanionFileContents(".js");
+    engine.load(MAPS_HTML_URL);
   }
 
   private java.util.Map<String, Class<?>> typesMap =

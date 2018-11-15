@@ -12,20 +12,24 @@ import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.util.Pair;
-
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.logging.Level;
-
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.SplitPane;
 import javafx.scene.web.WebView;
 
 public abstract class FarmDataController extends WebController {
+  private static final String GOOGLE_MAPS_API_KEY_PROPKEY = "google.maps.api.key";
   private Gsehen gsehenInstance;
   private Map<Class<? extends GsehenEvent>, Class<? extends 
       GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
@@ -229,6 +233,34 @@ public abstract class FarmDataController extends WebController {
 
   public boolean passesFilter(Drawable drawable) {
     return currentFilter.test(drawable);
+  }
+
+  /**
+   * Determines the Google Maps API Key.
+   *
+   * @return the API key
+   */
+  public String getGoogleMapsApiKey() {
+    Reader reader = null;
+    try {
+      reader = new StringReader(getFileContents("../../build.properties"));
+    } catch (Exception e1) {
+      try {
+        reader = new InputStreamReader(
+            new FileInputStream(
+                System.getProperty("user.home") + "/.GSEHEN.build.properties"), "ISO-8859-1");
+      } catch (Exception e2) {
+        throw new RuntimeException(
+            "External properties not found (after " + e1.getMessage() + ")", e2);
+      }
+    }
+    Properties properties = new Properties();
+    try {
+      properties.load(reader);
+    } catch (Exception e3) {
+      throw new RuntimeException("Properties not readable", e3);
+    }
+    return properties.getProperty(GOOGLE_MAPS_API_KEY_PROPKEY);
   }
 
   /**

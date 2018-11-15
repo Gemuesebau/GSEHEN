@@ -3,9 +3,14 @@ alert("Maps (re)loaded, now running custom JavaScript");
 #include("typeControl.js")
 #include("searchControl.js")
 #include("objectArray.js")
-
-// eventsDebouncer ...
 #include("../../js/commons.js")
+
+var drawingManager = null;
+var viewportBounds = null;
+var map = null;
+var selectedType = null;
+var drawables = null;
+var polygons = {};
 
 function addPolygonOptions(obj, style) {
   obj.editable = true;
@@ -14,8 +19,6 @@ function addPolygonOptions(obj, style) {
   obj.fillColor = style;
   return obj;
 }
-
-var selectedType = null;
 
 function setSelectedType(type) {
   alert("Setting type for new objects to: " + type);
@@ -68,8 +71,6 @@ function addEventListeners() {
   );
 }
 
-var viewportBounds = new google.maps.LatLngBounds();
-
 /**
  * Extends viewportBounds by the green part of Geisenheim Campus.
  */
@@ -102,15 +103,6 @@ function clearAndSetViewportByController() {
   map.fitBounds(viewportBounds);
 }
 
-initialize(objectArray(
-  webController.getLocalizedTypes(),
-  function objectConverter(pair) {
-    return { key: pair.getLeft(), title: pair.getRight() };
-  }
-));
-
-var polygons = {};
-
 function forAllPolygons(handler) {
   for (var uuid in polygons) {
     if (polygons.hasOwnProperty(uuid)) {
@@ -118,8 +110,6 @@ function forAllPolygons(handler) {
     }
   }
 }
-
-var drawables = null;
 
 function redraw() {
   forAllPolygons(function (uuid, polygon) {
@@ -155,7 +145,23 @@ function redraw() {
   map.fitBounds(viewportBounds);
 }
 
-redraw();
-initAutocomplete();
-drawingManager.setMap(map);
-addEventListeners();
+var mapsScriptElement = document.createElement("script");
+mapsScriptElement.src = "https://maps.googleapis.com/maps/api/js?key=" +
+  webController.getGoogleMapsApiKey() + "&v=3.exp&sensor=false&libraries=drawing,places";
+mapsScriptElement.onload = function () {
+	drawingManager = new google.maps.drawing.DrawingManager();
+	viewportBounds = new google.maps.LatLngBounds();
+
+	initialize(objectArray(
+	  webController.getLocalizedTypes(),
+	  function objectConverter(pair) {
+	    return { key: pair.getLeft(), title: pair.getRight() };
+	  }
+	));
+
+	redraw();
+	initAutocomplete();
+	drawingManager.setMap(map);
+	addEventListeners();
+};
+document.getElementById("scripts-parent").appendChild(mapsScriptElement);

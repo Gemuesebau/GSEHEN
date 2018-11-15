@@ -18,20 +18,20 @@ public abstract class WebController {
 
   protected Gsehen application;
   protected WebEngine engine;
+  protected String loadWorkerSucceededScript;
 
-  private String loadWorkerSucceededScript;
   private boolean loaded = false;
 
   public boolean isLoaded() {
     return loaded;
   }
 
-  private String getCompanionFileContents(String dotExtension) {
+  protected String getCompanionFileContents(String dotExtension) {
     return getFileContents(getClass().getSimpleName().toLowerCase() + dotExtension);
   }
 
   @SuppressWarnings("checkstyle:rightcurly")
-  private String getFileContents(String fileName) {
+  protected String getFileContents(String fileName) {
     int totalRead = 0;
     try {
       InputStream inputStream = getClass().getResourceAsStream(fileName);
@@ -66,7 +66,7 @@ public abstract class WebController {
   }
 
   /**
-   * Reload map view HTML, and re-initialize JavaScript.
+   * Reload HTML, and re-initialize JavaScript.
    */
   public void reload() {
     loadWorkerSucceededScript = getCompanionFileContents(".js");
