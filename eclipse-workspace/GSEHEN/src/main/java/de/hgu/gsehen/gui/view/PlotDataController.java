@@ -101,6 +101,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private List<CropPhase> cropPhases;
   private Date todayDate;
   private JFXComboBox<String> startType;
+  private ManualData md;
 
   private Text nameLabel;
   private Text areaLabel;
@@ -197,7 +198,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
-    // TODO
     startType = new JFXComboBox<String>();
     startType.getItems().addAll(mainBundle.getString("plotview.directstart"),
         mainBundle.getString("plotview.delayedstart"));
@@ -689,6 +689,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   }
 
   private void wateringView() {
+    md = new ManualData();
+
+    if (plot.getManualData() != null) {
+      md = plot.getManualData();
+    }
+
     JFXDialogLayout content = new JFXDialogLayout();
     content.setHeading(new Text(mainBundle.getString("plotview.manual")));
     StackPane stackPane = new StackPane();
@@ -707,7 +713,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     DatePicker date = gsehenGuiElements.datepicker();
     date.setValue(LocalDate.now());
 
-    // Bewässerung (in mm)
+    // mm/Liter
+    JFXComboBox<String> unit = new JFXComboBox<>();
+    unit.getItems().addAll("mm", "Liter");
+    unit.getSelectionModel().select(0);
+
+    // Bewässerung
     JFXTextField irrigation = new JFXTextField();
     irrigation.textProperty().addListener(new ChangeListener<String>() {
       @Override
@@ -720,9 +731,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         }
       }
     });
-    irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(0.0));
 
-    // Niederschlag (in mm)
+    // Niederschlag
     JFXTextField precipitation = new JFXTextField();
     precipitation.textProperty().addListener(new ChangeListener<String>() {
       @Override
@@ -735,15 +745,22 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         }
       }
     });
-    precipitation.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
+
+    // Books the irrigation/precipitation for the right day
+    for (ManualWaterSupply mws : md.getManualWaterSupply()) {
+      Date wateringDate = Date
+          .from(date.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+      if ((wateringDate.compareTo(mws.getDate()) == 0)) {
+        irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(mws.getIrrigation()));
+        precipitation.setText(gsehenInstance.formatDoubleOneDecimal(mws.getPrecipitation()));
+      } else {
+        irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(0.0));
+        precipitation.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
+      }
+    }
 
     date.valueProperty().addListener((ov, oldValue, newValue) -> {
-      ManualData md = new ManualData();
       boolean newData = true;
-
-      if (plot.getManualData() != null) {
-        md = plot.getManualData();
-      }
 
       // Books the irrigation/precipitation for the right day
       for (ManualWaterSupply mws : md.getManualWaterSupply()) {
@@ -760,6 +777,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     });
 
     Text dateLabel = gsehenGuiElements.text(mainBundle.getString("plotview.date"));
+    Text unitLabel = gsehenGuiElements.text(mainBundle.getString("plotview.unit"));
     Text irrigationLabel = gsehenGuiElements.text(mainBundle.getString("plotview.irrigation"));
     Text precipitationLabel = gsehenGuiElements
         .text(mainBundle.getString("plotview.precipitation"));
@@ -767,16 +785,18 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(dateLabel, 0, 0);
     GridPane.setConstraints(date, 1, 0);
-    GridPane.setConstraints(irrigationLabel, 0, 1);
-    GridPane.setConstraints(irrigation, 1, 1);
-    GridPane.setConstraints(precipitationLabel, 0, 2);
-    GridPane.setConstraints(precipitation, 1, 2);
+    GridPane.setConstraints(unitLabel, 0, 1);
+    GridPane.setConstraints(unit, 1, 1);
+    GridPane.setConstraints(irrigationLabel, 0, 2);
+    GridPane.setConstraints(irrigation, 1, 2);
+    GridPane.setConstraints(precipitationLabel, 0, 3);
+    GridPane.setConstraints(precipitation, 1, 3);
 
     // GridPane - Center Section
     GridPane center = gsehenGuiElements.gridPane(pane);
 
-    center.getChildren().addAll(dateLabel, date, irrigationLabel, irrigation, precipitationLabel,
-        precipitation);
+    center.getChildren().addAll(dateLabel, date, unitLabel, unit, irrigationLabel, irrigation,
+        precipitationLabel, precipitation);
 
     JFXButton back = gsehenGuiElements.jfxButton(mainBundle.getString("fieldview.back"));
     back.setOnAction(new EventHandler<ActionEvent>() {
@@ -797,8 +817,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     book.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent arg0) {
-        if (date.getValue() != null && !irrigation.getText().isEmpty()
-            && !precipitation.getText().isEmpty()) {
+        if (date.getValue() != null && !unit.getSelectionModel().isEmpty()
+            && !irrigation.getText().isEmpty() && !precipitation.getText().isEmpty()) {
           LocalDate localDate = date.getValue();
           Date wateringDate = DateUtil
               .truncToDay(Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
@@ -806,7 +826,14 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           if (plot.getManualData() == null) {
             ManualData manualData = new ManualData();
             List<ManualWaterSupply> mwsList = new ArrayList<ManualWaterSupply>();
-            mwsList.add(parseSupply(wateringDate, irrigation, precipitation));
+            if (unit.getSelectionModel().getSelectedItem().equals("Liter")) {
+              double irri = parseDouble(irrigation) / plot.getArea();
+              double prec = parseDouble(precipitation) / plot.getArea();
+              ManualWaterSupply mws = new ManualWaterSupply(wateringDate, irri, prec);
+              mwsList.add(mws);
+            } else {
+              mwsList.add(parseSupply(wateringDate, irrigation, precipitation));
+            }
             manualData.setManualWaterSupply(mwsList);
             plot.setManualData(manualData);
           } else {
@@ -815,8 +842,13 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             for (ManualWaterSupply mws : manualData.getManualWaterSupply()) {
               if (wateringDate.equals(mws.getDate())) {
                 newDate = false;
-                mws.setIrrigation(parseDouble(irrigation));
-                mws.setPrecipitation(parseDouble(precipitation));
+                if (unit.getSelectionModel().getSelectedItem().equals("Liter")) {
+                  mws.setIrrigation(parseDouble(irrigation) / plot.getArea());
+                  mws.setPrecipitation(parseDouble(precipitation) / plot.getArea());
+                } else {
+                  mws.setIrrigation(parseDouble(irrigation));
+                  mws.setPrecipitation(parseDouble(precipitation));
+                }
                 break;
               }
             }
@@ -837,7 +869,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         } else {
           Text wateringError = gsehenGuiElements.text(mainBundle.getString("fieldview.error"));
           wateringError.setFill(Color.RED);
-          GridPane.setConstraints(wateringError, 0, 4);
+          GridPane.setConstraints(wateringError, 0, 5);
           center.getChildren().add(wateringError);
         }
       }
@@ -853,8 +885,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
-    GridPane.setConstraints(back, 0, 3);
-    GridPane.setConstraints(book, 1, 3);
+    GridPane.setConstraints(back, 0, 4);
+    GridPane.setConstraints(book, 1, 4);
     center.getChildren().addAll(back, book);
     content.setBody(center);
   }

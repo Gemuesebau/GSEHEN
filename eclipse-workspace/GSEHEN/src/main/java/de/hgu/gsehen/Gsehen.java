@@ -126,8 +126,8 @@ public class Gsehen extends Application {
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<Class<? extends GsehenEvent>, 
-      List<GsehenEventListener<?>>> eventListeners = new HashMap<>();
+  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> 
+      eventListeners = new HashMap<>();
 
   private boolean dataChanged;
   private List<SoilProfile> soilProfilesList;
@@ -514,11 +514,15 @@ public class Gsehen extends Application {
       farmsList.add((Farm) object);
       LOGGER.info("Added farm " + object.getName());
     } else if (object instanceof Field) {
-      getNewFieldsFarm().getFields().add((Field) object);
+      Field fieldObj = (Field) object;
+      getNewFieldsFarm().getFields().add(fieldObj);
+      fieldObj.setArea(fieldObj.getPolygon().calculateArea(fieldObj.getPolygon().getGeoPoints()));
       LOGGER.info("Added field " + object.getName());
     } else if (object instanceof Plot) {
-      ((Plot) object).setIsActive(true);
-      getNewPlotsField(getNewFieldsFarm()).getPlots().add((Plot) object);
+      Plot plotObjc = (Plot) object;
+      plotObjc.setIsActive(true);
+      plotObjc.setArea(plotObjc.getPolygon().calculateArea(plotObjc.getPolygon().getGeoPoints()));
+      getNewPlotsField(getNewFieldsFarm()).getPlots().add(plotObjc);
       LOGGER.info("Added plot " + object.getName());
     }
     sendFarmDataChanged(object, skipClass);

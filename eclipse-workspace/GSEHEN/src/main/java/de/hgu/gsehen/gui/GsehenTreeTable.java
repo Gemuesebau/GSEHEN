@@ -574,6 +574,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     noField.setFont(Font.font("Arial", FontWeight.BOLD, 12));
     Text noPlot = new Text(mainBundle.getString("treetableview.noplot"));
     noPlot.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+    String fieldHasNoPlot = "";
+    Text hasNoPlot = new Text(mainBundle.getString("treetableview.hasnoplot"));
+    hasNoPlot.setFont(Font.font("Arial", FontWeight.BOLD, 12));
     Text noSoilProfile = new Text(mainBundle.getString("treetableview.nosoilprofile"));
     noSoilProfile.setFont(Font.font("Arial", FontWeight.BOLD, 12));
     Text noWeatherDataSource = new Text(mainBundle.getString("treetableview.noweatherdatasource"));
@@ -602,7 +605,9 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                 mainBundle.getString("gui.view.Map.drawableType.Field") + " \"" + field.getName()
                     + "\" " + mainBundle.getString("treetableview.needsoilprofile"));
             needSoilProfile.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-            bottomBox.getChildren().add(general);
+            if (!bottomBox.getChildren().contains(general)) {
+              bottomBox.getChildren().add(general);
+            }
             bottomBox.getChildren().add(needSoilProfile);
           }
           if (field.getWeatherDataSourceUuid() == null) {
@@ -644,7 +649,11 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
             if (!bottomBox.getChildren().contains(general)) {
               bottomBox.getChildren().add(general);
             }
-            bottomBox.getChildren().add(noPlot);
+            fieldHasNoPlot += "\"" + field.getName() + "\" " + hasNoPlot.getText() + "\n \n";
+          }
+          if (farm.getFields().indexOf(field) == farm.getFields().size() - 1) {
+            hasNoPlot.setText(fieldHasNoPlot);
+            bottomBox.getChildren().add(hasNoPlot);
           }
         }
       } else {
@@ -948,10 +957,12 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
       farmItem = createItem(rootItem, farm);
       if (farm.getFields() != null) {
         for (Field field : farm.getFields()) {
+          field.setArea(field.getPolygon().calculateArea(field.getPolygon().getGeoPoints()));
           fieldItem = createItem(farmItem, field);
           if (field.getPlots() != null) {
             for (Plot plot : field.getPlots()) {
               if (plot.getIsActive()) {
+                plot.setArea(plot.getPolygon().calculateArea(plot.getPolygon().getGeoPoints()));
                 plotItem = createItem(fieldItem, plot);
               }
             }
