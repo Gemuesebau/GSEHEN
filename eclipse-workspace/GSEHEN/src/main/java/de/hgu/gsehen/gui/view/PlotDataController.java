@@ -756,15 +756,21 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     for (ManualWaterSupply mws : md.getManualWaterSupply()) {
       Date wateringDate = Date
           .from(date.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-      if ((wateringDate.compareTo(mws.getDate()) == 0)) {
+      String waterUnit = mws.getUnit();
+      if ((wateringDate.compareTo(mws.getDate()) == 0) && waterUnit.equals("mm")) {
         irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(mws.getIrrigation()));
         precipitation.setText(gsehenInstance.formatDoubleOneDecimal(mws.getPrecipitation()));
+        break;
+      } else if ((wateringDate.compareTo(mws.getDate()) == 0) && waterUnit.equals("Liter")) {
+        irrigation
+            .setText(gsehenInstance.formatDoubleTwoDecimal(mws.getIrrigation() / plot.getArea()));
+        precipitation.setText(
+            gsehenInstance.formatDoubleOneDecimal(mws.getPrecipitation() / plot.getArea()));
         break;
       } else {
         irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(0.0));
         precipitation.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
       }
-      System.out.println(irrigation.getText());
     }
 
     unit.valueProperty().addListener((ov, oldValue, newValue) -> {
@@ -859,6 +865,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           LocalDate localDate = date.getValue();
           Date wateringDate = DateUtil
               .truncToDay(Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+          String waterUnit = unit.getSelectionModel().getSelectedItem();
 
           if (plot.getManualData() == null) {
             ManualData manualData = new ManualData();
@@ -866,10 +873,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             if (unit.getSelectionModel().getSelectedItem().equals("Liter")) {
               double irri = parseDouble(irrigation) / plot.getArea();
               double prec = parseDouble(precipitation) / plot.getArea();
-              ManualWaterSupply mws = new ManualWaterSupply(wateringDate, irri, prec);
+              ManualWaterSupply mws = new ManualWaterSupply(wateringDate, irri, prec, waterUnit);
               mwsList.add(mws);
             } else {
-              mwsList.add(parseSupply(wateringDate, irrigation, precipitation));
+              mwsList.add(parseSupply(wateringDate, irrigation, precipitation, waterUnit));
             }
             manualData.setManualWaterSupply(mwsList);
             plot.setManualData(manualData);
@@ -891,7 +898,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             }
             if (newDate) {
               manualData.getManualWaterSupply()
-                  .add(parseSupply(wateringDate, irrigation, precipitation));
+                  .add(parseSupply(wateringDate, irrigation, precipitation, waterUnit));
             }
           }
 
@@ -912,9 +919,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
 
       private ManualWaterSupply parseSupply(Date wateringDate, JFXTextField irrigation,
-          JFXTextField precipitation) {
+          JFXTextField precipitation, String waterUnit) {
         return new ManualWaterSupply(wateringDate, parseDouble(irrigation),
-            parseDouble(precipitation));
+            parseDouble(precipitation), waterUnit);
       }
 
       private Double parseDouble(JFXTextField textField) {
