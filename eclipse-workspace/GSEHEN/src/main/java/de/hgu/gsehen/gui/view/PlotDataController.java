@@ -756,6 +756,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     if (plot.getManualData() != null) {
       manualData = plot.getManualData();
+      irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(0.0));
+      precipitation.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
       Date wateringDate = Date
           .from(date.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
       for (ManualWaterSupply mws : manualData.getManualWaterSupply()) {
