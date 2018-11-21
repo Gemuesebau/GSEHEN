@@ -205,6 +205,18 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     addColumn(mainBundle.getString("treetableview.name"), "name");
     addColumn(mainBundle.getString("treetableview.type"), "type");
     addColumn(mainBundle.getString("treetableview.soilCrop"), "soilCrop");
+    
+    MenuItem export = new MenuItem("Export");
+    menu.getItems().add(export);
+    export.setOnAction(new EventHandler<ActionEvent>() {
+      @SuppressWarnings("static-access")
+      @Override
+      public void handle(ActionEvent e) {
+        //TODO
+        tabPane.getSelectionModel().select(4);
+        gsehenInstance.getExports().createExport();
+      }
+    });
 
     deleteItem = new MenuItem(mainBundle.getString("treeview.remove"));
     menu.getItems().add(deleteItem);
