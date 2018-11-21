@@ -15,21 +15,29 @@ public class ManualWaterSupply {
   private Date date;
   private Double irrigation;
   private Double precipitation;
+  private String unit;
 
-  public ManualWaterSupply() {}
+  public ManualWaterSupply() {
+  }
 
   /**
    * Constructor for ManualWaterSupply.
    * 
-   * @param date Date of Manual action
-   * @param irrigation applied amount of water in mm
-   * @param precipitation amount of rainfall in mm
+   * @param date
+   *          Date of Manual action
+   * @param irrigation
+   *          applied amount of water in mm/Liter
+   * @param precipitation
+   *          amount of rainfall in mm/Liter
+   * @param unit
+   *          mm/Liter
    */
-  public ManualWaterSupply(Date date, Double irrigation, Double precipitation) {
+  public ManualWaterSupply(Date date, Double irrigation, Double precipitation, String unit) {
     super();
     this.date = date;
     this.irrigation = irrigation;
     this.precipitation = precipitation;
+    this.unit = unit;
   }
 
   public Date getDate() {
@@ -54,5 +62,13 @@ public class ManualWaterSupply {
 
   public void setPrecipitation(Double precipitation) {
     this.precipitation = precipitation;
+  }
+
+  public String getUnit() {
+    return unit;
+  }
+
+  public void setUnit(String unit) {
+    this.unit = unit;
   }
 }
