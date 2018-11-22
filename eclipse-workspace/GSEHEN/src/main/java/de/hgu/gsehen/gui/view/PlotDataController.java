@@ -569,43 +569,46 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private void setChartData() {
-    if (plot.getRecommendedAction().getProjectedDaysToIrrigation() != null) {
-      waterLevel = plot.getRecommendedAction().getAvailableWater();
-      int daysToIrrigation = plot.getRecommendedAction().getProjectedDaysToIrrigation();
+    if (plot.getRecommendedAction() != null) {
+      if (plot.getRecommendedAction().getProjectedDaysToIrrigation() != null) {
+        waterLevel = plot.getRecommendedAction().getAvailableWater();
+        int daysToIrrigation = plot.getRecommendedAction().getProjectedDaysToIrrigation();
 
-      if (!plot.getWaterBalance().equals(null)) {
-        final List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();
-        if (!dailyBalances.isEmpty()) {
-          int waterBalance = dailyBalances.size() - 1;
-          availableSoilWater = dailyBalances.get(waterBalance).getCurrentAvailableSoilWater() * 1.1;
-          axisY.setUpperBound(availableSoilWater);
-        }
-      }
-
-      Legend legend = (Legend) chart.lookup(".chart-legend");
-      Legend.LegendItem li = null;
-      DecimalFormat df = new DecimalFormat("#.##");
-
-      if (waterLevel != null) {
-        XYChart.Data data = new XYChart.Data("waterLevel", waterLevel);
-        series.getData().add(data);
-        Node node = data.getNode();
-
-        if (daysToIrrigation == 0) {
-          node.setStyle("-fx-bar-fill: #ff0000;");
-          li = new Legend.LegendItem(df.format(waterLevel) + " mm",
-              new Rectangle(10, 4, Color.RED));
-        } else if (daysToIrrigation == 1) {
-          node.setStyle("-fx-bar-fill: #800080;");
-          li = new Legend.LegendItem(df.format(waterLevel) + " mm",
-              new Rectangle(10, 4, Color.PURPLE));
-        } else {
-          node.setStyle("-fx-bar-fill: #0000ff;");
-          li = new Legend.LegendItem(df.format(waterLevel) + " mm",
-              new Rectangle(10, 4, Color.BLUE));
+        if (!plot.getWaterBalance().equals(null)) {
+          final List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();
+          if (!dailyBalances.isEmpty()) {
+            int waterBalance = dailyBalances.size() - 1;
+            availableSoilWater = dailyBalances.get(waterBalance).getCurrentAvailableSoilWater()
+                * 1.1;
+            axisY.setUpperBound(availableSoilWater);
+          }
         }
 
-        legend.getItems().setAll(li);
+        Legend legend = (Legend) chart.lookup(".chart-legend");
+        Legend.LegendItem li = null;
+        DecimalFormat df = new DecimalFormat("#.##");
+
+        if (waterLevel != null) {
+          XYChart.Data data = new XYChart.Data("waterLevel", waterLevel);
+          series.getData().add(data);
+          Node node = data.getNode();
+
+          if (daysToIrrigation == 0) {
+            node.setStyle("-fx-bar-fill: #ff0000;");
+            li = new Legend.LegendItem(df.format(waterLevel) + " mm",
+                new Rectangle(10, 4, Color.RED));
+          } else if (daysToIrrigation == 1) {
+            node.setStyle("-fx-bar-fill: #800080;");
+            li = new Legend.LegendItem(df.format(waterLevel) + " mm",
+                new Rectangle(10, 4, Color.PURPLE));
+          } else {
+            node.setStyle("-fx-bar-fill: #0000ff;");
+            li = new Legend.LegendItem(df.format(waterLevel) + " mm",
+                new Rectangle(10, 4, Color.BLUE));
+          }
+
+          legend.getItems().setAll(li);
+        }
       }
     }
   }
@@ -698,6 +701,16 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   private void wateringView() {
     md = new ManualData();
+    
+    for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
+      if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
+        selectedItem = treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
+        if (selectedItem != null
+            && selectedItem.getValue().getClass().getSimpleName().equals("Plot")) {
+          plot = (Plot) selectedItem.getValue();
+        }
+      }
+    }
 
     if (plot.getManualData() != null) {
       md = plot.getManualData();
