@@ -1,10 +1,5 @@
 package de.hgu.gsehen.gsbalance;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
@@ -14,6 +9,11 @@ import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilManualData;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
 
 public class TotalBalance {
 
@@ -255,7 +255,8 @@ public class TotalBalance {
       recommendedAction
           .setAvailableWaterPercent((availableWater / (currentAvailableSoilWater * 0.3)) * 100);
       recommendedAction.setAvailableWater(availableWater);
-      final int projectedDaysToIrrigation = (int) Math.floor(availableWater / currentDay.getEtc());
+      final int projectedDaysToIrrigation =
+          Math.abs((int) Math.floor(availableWater / currentDay.getEtc()));
       recommendedAction.setProjectedDaysToIrrigation(projectedDaysToIrrigation);
       recommendedAction.setWaterContentToAim(waterContentToAim);
 

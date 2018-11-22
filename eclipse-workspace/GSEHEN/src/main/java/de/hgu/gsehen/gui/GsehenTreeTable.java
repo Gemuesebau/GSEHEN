@@ -10,6 +10,7 @@ import de.hgu.gsehen.event.GsehenEvent;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.GsehenViewEvent;
 import de.hgu.gsehen.event.RecommendedActionChanged;
+import de.hgu.gsehen.gui.view.PlotDataController;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
@@ -67,6 +68,7 @@ import javafx.util.Duration;
 
 public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
   private Gsehen gsehenInstance;
+  private PlotDataController plotInstance;
   private Farm autoFarm;
   private Field autoField;
   protected final ResourceBundle mainBundle;
@@ -87,6 +89,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
   {
     gsehenInstance = Gsehen.getInstance();
+    plotInstance = PlotDataController.getInstance();
 
     mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
 
@@ -205,6 +208,18 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     addColumn(mainBundle.getString("treetableview.name"), "name");
     addColumn(mainBundle.getString("treetableview.type"), "type");
     addColumn(mainBundle.getString("treetableview.soilCrop"), "soilCrop");
+    
+    MenuItem export = new MenuItem("Export");
+    menu.getItems().add(export);
+    export.setOnAction(new EventHandler<ActionEvent>() {
+      @SuppressWarnings("static-access")
+      @Override
+      public void handle(ActionEvent e) {
+        //TODO
+        tabPane.getSelectionModel().select(4);
+        gsehenInstance.getExports().createExport();
+      }
+    });
 
     deleteItem = new MenuItem(mainBundle.getString("treeview.remove"));
     menu.getItems().add(deleteItem);
@@ -345,6 +360,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                   .equals(mainBundle.getString("gui.view.Map.drawableType.Plot"))) {
                 if (!tabPane.getSelectionModel().isSelected(0)) {
                   tabPane.getSelectionModel().select(2);
+                  plotInstance.getPane().setTop(null);
                 }
                 Plot plot = (Plot) selectedItem.getValue();
 

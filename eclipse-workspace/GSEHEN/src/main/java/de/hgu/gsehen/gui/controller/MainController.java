@@ -49,6 +49,8 @@ public class MainController {
   @FXML
   private Tab logViewTab;
   @FXML
+  private Tab exportViewTab;
+  @FXML
   private Tab contactViewTab;
   @FXML
   private Tab aboutViewTab;
@@ -186,6 +188,14 @@ public class MainController {
 
   public void setLogViewTab(Tab logViewTab) {
     this.logViewTab = logViewTab;
+  }
+  
+  public Tab getExportViewTab() {
+    return exportViewTab;
+  }
+
+  public void setExportViewTab(Tab exportViewTab) {
+    this.exportViewTab = exportViewTab;
   }
 
   @FXML

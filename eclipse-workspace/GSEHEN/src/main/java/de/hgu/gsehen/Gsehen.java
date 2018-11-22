@@ -19,6 +19,7 @@ import de.hgu.gsehen.gsbalance.Recommender;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
+import de.hgu.gsehen.gui.view.DataExport;
 import de.hgu.gsehen.gui.view.FarmDataController;
 import de.hgu.gsehen.gui.view.Fields;
 import de.hgu.gsehen.gui.view.Logs;
@@ -61,7 +62,6 @@ import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -93,7 +93,7 @@ import org.hibernate.query.Query;
  *
  * @author MO, AT, CW
  */
-@SuppressWarnings({ "checkstyle:commentsindentation" })
+@SuppressWarnings({"checkstyle:commentsindentation"})
 public class Gsehen extends Application {
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   protected final ResourceBundle mainBundle;
@@ -107,12 +107,14 @@ public class Gsehen extends Application {
   private static final String FIELDS_VIEW_ID = "#fieldsBorderPane";
   private static final String PLOTS_VIEW_ID = "#plotsBorderPane";
   private static final String LOGS_VIEW_ID = "#logsBorderPane";
+  private static final String EXPORTS_VIEW_ID = "#exportsBorderPane";
   private static final String IMAGE_VIEW_ID = "#imageView";
 
   private static Maps maps;
   private static Fields fields;
   private static Plots plots;
   private static Logs logs;
+  private static DataExport exports;
 
   private GsehenTreeTable treeTable;
 
@@ -126,8 +128,8 @@ public class Gsehen extends Application {
   private Scene scene;
   private MainController mainController;
 
-  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> 
-      eventListeners = new HashMap<>();
+  private java.util.Map<Class<? extends GsehenEvent>, List<GsehenEventListener<?>>> eventListeners =
+      new HashMap<>();
 
   private boolean dataChanged;
   private List<SoilProfile> soilProfilesList;
@@ -166,10 +168,9 @@ public class Gsehen extends Application {
   /**
    * Main method.
    *
-   * @param args
-   *          the command line arguments
+   * @param args the command line arguments
    */
-  @SuppressWarnings({ "checkstyle:rightcurly" })
+  @SuppressWarnings({"checkstyle:rightcurly"})
   public static void main(String[] args) {
     System.setProperty("java.util.logging.config.class", "de.hgu.gsehen.logging.Configurator");
     try {
@@ -190,7 +191,7 @@ public class Gsehen extends Application {
    * 
    * @see javafx.application.Application#start(javafx.stage.Stage)
    */
-  @SuppressWarnings({ "checkstyle:rightcurly" })
+  @SuppressWarnings({"checkstyle:rightcurly"})
   @Override
   public void start(Stage stage) {
     Parent root;
@@ -217,12 +218,13 @@ public class Gsehen extends Application {
     fields = new Fields(this, (BorderPane) scene.lookup(FIELDS_VIEW_ID));
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
     logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
+    exports = new DataExport(this, (BorderPane) scene.lookup(EXPORTS_VIEW_ID));
 
     // dayDataCalculation = new DayDataCalculation();
     new Recommender();
 
-    InputStream input = this.getClass()
-        .getResourceAsStream("/de/hgu/gsehen/images/Logo_UniGeisenheim.png");
+    InputStream input =
+        this.getClass().getResourceAsStream("/de/hgu/gsehen/images/Logo_UniGeisenheim.png");
     Image image = new Image(input);
     ImageView imageView = (ImageView) scene.lookup(IMAGE_VIEW_ID);
     imageView.setImage(image);
@@ -242,8 +244,7 @@ public class Gsehen extends Application {
 
     treeTable = new GsehenTreeTable() {
       @Override
-      public void handle(GsehenViewEvent event) {
-      }
+      public void handle(GsehenViewEvent event) {}
     };
     treeTable.addFarmTreeView(GsehenTreeTable.class);
     treeTable.checkCalculation();
@@ -252,12 +253,11 @@ public class Gsehen extends Application {
   /**
    * PostgreSQL DB connection and storing in Persistence.
    *
-   * @throws SQLException
-   *           if SELECTing from PostgreSQL, our saving into local DB, fails
+   * @throws SQLException if SELECTing from PostgreSQL, our saving into local DB, fails
    */
   public static void importCropData() throws SQLException {
-    final String url = "jdbc:postgresql:"
-        + "//hs-geisenheim.cwliowbz3tsc.eu-west-1.rds.amazonaws.com/standard";
+    final String url =
+        "jdbc:postgresql:" + "//hs-geisenheim.cwliowbz3tsc.eu-west-1.rds.amazonaws.com/standard";
     final String user = "GSEHEN_user";
     final String password = "Yp4NiYiHYfmcHs7Fe2CEmTpLv";
 
@@ -272,10 +272,10 @@ public class Gsehen extends Application {
     }
     try {
       em.getTransaction().begin();
-      transfer(em, builder, connection, "SELECT * FROM crop;", new String[] { "cName" }, Crop.class,
-          new String[] { "name" }, Gsehen::transferPropertiesFromPgToCrop);
+      transfer(em, builder, connection, "SELECT * FROM crop;", new String[] {"cName"}, Crop.class,
+          new String[] {"name"}, Gsehen::transferPropertiesFromPgToCrop);
       transfer(em, builder, connection, "SELECT * FROM messages;",
-          new String[] { "key", "locale_id" }, Messages.class, new String[] { "key", "localeId" },
+          new String[] {"key", "locale_id"}, Messages.class, new String[] {"key", "localeId"},
           Gsehen::transferPropertiesFromPgToMessages);
       em.getTransaction().commit();
     } catch (Exception e) {
@@ -295,8 +295,8 @@ public class Gsehen extends Application {
     }
     CriteriaQuery<T> cq = cb.createQuery(targetClass);
     Root<T> cropRoot = cq.from(targetClass);
-    List<ParameterExpression<String>> cropNameParameters = CollectionUtil.fillList(sourceKey.length,
-        () -> cb.parameter(String.class));
+    List<ParameterExpression<String>> cropNameParameters =
+        CollectionUtil.fillList(sourceKey.length, () -> cb.parameter(String.class));
     buildSelect(cb, cq, targetKey, cropRoot, cropNameParameters);
 
     TypedQuery<T> targetQuery = em.createQuery(cq);
@@ -369,12 +369,9 @@ public class Gsehen extends Application {
   /**
    * Fill Crop with Data.
    * 
-   * @param rs
-   *          ResultSet from PostgreSQL.
-   * @param crop
-   *          New Crop
-   * @throws SQLException
-   *           if SELECTing from PostgreSQL, or saving into local DB, fails
+   * @param rs ResultSet from PostgreSQL.
+   * @param crop New Crop
+   * @throws SQLException if SELECTing from PostgreSQL, or saving into local DB, fails
    */
   private static void transferPropertiesFromPgToCrop(ResultSet rs, Crop crop) {
     try {
@@ -405,12 +402,9 @@ public class Gsehen extends Application {
   /**
    * Fills Messages with data.
    * 
-   * @param rs
-   *          ResultSet from PostgreSQL.
-   * @param messages
-   *          New Messages
-   * @throws SQLException
-   *           if SELECTing from PostgreSQL, or saving into local DB, fails
+   * @param rs ResultSet from PostgreSQL.
+   * @param messages New Messages
+   * @throws SQLException if SELECTing from PostgreSQL, or saving into local DB, fails
    */
   private static void transferPropertiesFromPgToMessages(ResultSet rs, Messages messages) {
     try {
@@ -502,11 +496,9 @@ public class Gsehen extends Application {
   /**
    * Notifies the application about a newly added object (farm, field, ..).
    *
-   * @param object
-   *          the newly added object
-   * @param skipClass
-   *          a listener class to skip when notifying; typically the class that originally created
-   *          the new object
+   * @param object the newly added object
+   * @param skipClass a listener class to skip when notifying; typically the class that originally
+   *        created the new object
    */
   public void drawableAdded(Drawable object,
       Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
@@ -572,10 +564,8 @@ public class Gsehen extends Application {
    * Sends a "FarmDataChanged" event to all listeners registered for that kind of event, except the
    * listeners that belong to the given "skipClass".
    *
-   * @param object
-   *          the object that initially caused the event to be sent, or null
-   * @param skipClass
-   *          the event listener class to skip when iterating the listeners, or null
+   * @param object the object that initially caused the event to be sent, or null
+   * @param skipClass the event listener class to skip when iterating the listeners, or null
    */
   public void sendFarmDataChanged(Drawable object,
       Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
@@ -589,10 +579,8 @@ public class Gsehen extends Application {
    * Sends a "DrawableSelected" event to all listeners registered for that kind of event, except the
    * listeners that belong to the given "skipClass".
    *
-   * @param subject
-   *          the "Drawable" that initially caused the event to be sent
-   * @param skipClass
-   *          the event listener class to skip when iterating the listeners, or null
+   * @param subject the "Drawable" that initially caused the event to be sent
+   * @param skipClass the event listener class to skip when iterating the listeners, or null
    */
   public void sendDrawableSelected(Drawable subject,
       Class<? extends GsehenEventListener<DrawableSelected>> skipClass) {
@@ -604,12 +592,9 @@ public class Gsehen extends Application {
   /**
    * Delegate method for sending prepared "view" events.
    *
-   * @param drawable
-   *          the "Drawable" that is subject of the event, or null
-   * @param skipClass
-   *          the event listener class to skip when iterating the listeners, or null
-   * @param event
-   *          the prepared event, lacking viewport data, which is determined here
+   * @param drawable the "Drawable" that is subject of the event, or null
+   * @param skipClass the event listener class to skip when iterating the listeners, or null
+   * @param event the prepared event, lacking viewport data, which is determined here
    */
   public void sendViewEvent(Drawable drawable,
       Class<? extends GsehenEventListener<? extends GsehenViewEvent>> skipClass,
@@ -628,10 +613,8 @@ public class Gsehen extends Application {
    * Sends a "DayDataChanged" event to all listeners registered for that kind of event, except the
    * listeners that belong to the given "skipClass".
    *
-   * @param dayData
-   *          the current "DayData"
-   * @param skipClass
-   *          the event listener class to skip when iterating the listeners, or null
+   * @param dayData the current "DayData"
+   * @param skipClass the event listener class to skip when iterating the listeners, or null
    */
   public void sendDayDataChanged(DayData dayData, WeatherDataSource weatherDataSource,
       Class<? extends GsehenEventListener<DayDataChanged>> skipClass) {
@@ -653,14 +636,10 @@ public class Gsehen extends Application {
    * Sends a "ManualDataChanged" event to all listeners registered for that kind of event, except
    * the listeners that belong to the given "skipClass".
    *
-   * @param field
-   *          the field that is the parent of the given plot
-   * @param plot
-   *          the plot where the manual data has changed
-   * @param skipClass
-   *          the event listener class to skip when iterating the listeners, or null
-   * @param date
-   *          the date (day only) to which the manual data change applies
+   * @param field the field that is the parent of the given plot
+   * @param plot the plot where the manual data has changed
+   * @param skipClass the event listener class to skip when iterating the listeners, or null
+   * @param date the date (day only) to which the manual data change applies
    */
   public void sendManualDataChanged(Field field, Plot plot, Date date,
       Class<? extends GsehenEventListener<DayDataChanged>> skipClass) {
@@ -675,10 +654,8 @@ public class Gsehen extends Application {
    * Sends a "RecommendedActionChanged" event to all listeners registered for that kind of event,
    * except the listeners that belong to the given "skipClass".
    *
-   * @param plot
-   *          the plot for which the recommended action has changed
-   * @param skipClass
-   *          the event listener class to skip when iterating the listeners, or null
+   * @param plot the plot for which the recommended action has changed
+   * @param skipClass the event listener class to skip when iterating the listeners, or null
    */
   public void sendRecommendedActionChanged(Plot plot,
       Class<? extends GsehenEventListener<RecommendedActionChanged>> skipClass) {
@@ -690,12 +667,10 @@ public class Gsehen extends Application {
   /**
    * Notifies listeners registered for the (type of) event supplied by the given supplier.
    *
-   * @param event
-   *          the actual event to be sent to the registered listeners
-   * @param skipClass
-   *          a listener class that shall be skipped when iterating the listeners, or null
+   * @param event the actual event to be sent to the registered listeners
+   * @param skipClass a listener class that shall be skipped when iterating the listeners, or null
    */
-  @SuppressWarnings({ "unchecked" })
+  @SuppressWarnings({"unchecked"})
   private <T extends GsehenEvent> void notifyEventListeners(T event,
       Class<? extends GsehenEventListener<? extends T>> skipClass) {
     List<GsehenEventListener<?>> farmDataChgListeners = eventListeners.get(event.getClass());
@@ -710,12 +685,12 @@ public class Gsehen extends Application {
     }
   }
 
-  @SuppressWarnings({ "checkstyle:abbreviationaswordinname" })
+  @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
   public String readUTF8FileAsOneString(String dataFileName) throws IOException {
     return new String(Files.readAllBytes(Paths.get(dataFileName)), "utf-8");
   }
 
-  @SuppressWarnings({ "checkstyle:abbreviationaswordinname" })
+  @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
   public void writeStringAsUTF8File(String data, String dataFileName) throws IOException {
     Files.write(Paths.get(dataFileName), data.getBytes("utf-8"));
   }
@@ -763,6 +738,14 @@ public class Gsehen extends Application {
   public static Logs getLogs() {
     return logs;
   }
+  
+  public static DataExport getExports() {
+    return exports;
+  }
+
+  public static void setExports(DataExport exports) {
+    Gsehen.exports = exports;
+  }
 
   public MainController getMainController() {
     return mainController;
@@ -771,12 +754,11 @@ public class Gsehen extends Application {
   /**
    * Prompts for JavaScript to be run in a WebView.
    *
-   * @param controller
-   *          the controller that belongs to the target web view
+   * @param controller the controller that belongs to the target web view
    */
   public static void jsPrompt(FarmDataController controller) {
-    final String contentTextKey = "gui.dialog.developer.js.prompt."
-        + controller.getClass().getSimpleName().toLowerCase();
+    final String contentTextKey =
+        "gui.dialog.developer.js.prompt." + controller.getClass().getSimpleName().toLowerCase();
     String javaScript = textInputDialog(contentTextKey,
         instance.getBundle().getString("gui.dialog.developer.js.prompt.header"));
     Object result;
@@ -794,13 +776,13 @@ public class Gsehen extends Application {
     return dialog.getResult();
   }
 
-  @SuppressWarnings({ "checkstyle:javadocmethod" })
+  @SuppressWarnings({"checkstyle:javadocmethod"})
   public static void updateDayData() {
     // dayDataCalculation.recalculateDayData();
     new PluginUtil().recalculateDayData();
   }
 
-  @SuppressWarnings({ "checkstyle:javadocmethod" })
+  @SuppressWarnings({"checkstyle:javadocmethod"})
   public static <T> List<T> loadAll(final Class<T> queryRootClass) {
     EntityManager em = Persistence.createEntityManagerFactory("GSEHEN").createEntityManager();
     try {
@@ -825,8 +807,7 @@ public class Gsehen extends Application {
   /**
    * Lookup method for a SoilProfile, using its UUID.
    *
-   * @param soilProfileUuid
-   *          the UUID of the SoilProfile to lookup
+   * @param soilProfileUuid the UUID of the SoilProfile to lookup
    * @return the SoilProfile with the given UUID, or null if no such SoilProfile exists
    */
   public SoilProfile getSoilProfileForUuid(String soilProfileUuid) {
@@ -841,8 +822,7 @@ public class Gsehen extends Application {
   /**
    * Lookup method for a WeatherDataSource, using its UUID.
    *
-   * @param weatherDataSourceUuid
-   *          the UUID of the WeatherDataSource to lookup
+   * @param weatherDataSourceUuid the UUID of the WeatherDataSource to lookup
    * @return the WeatherDataSource with the given UUID, or null if no such WeatherDataSource exists
    */
   public WeatherDataSource getWeatherDataSourceForUuid(String weatherDataSourceUuid) {
