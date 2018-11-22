@@ -108,6 +108,7 @@ public class FieldDataController extends Application
   private JFXTextField soilManualRain;
   private JFXTextField soilManualPause;
   private Text dateError = new Text();
+  private int fixedNodesCount;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -496,8 +497,9 @@ public class FieldDataController extends Application
     top.getChildren().addAll(weatherDataLabel, weatherDataSourceName);
     pane.setTop(top);
 
-    List<ConfigDialogElement<Node, Object>> weatherDataSourceConfigItems = createNodes();
-    configureNodes(weatherDataSourceConfigItems);
+    List<ConfigDialogElement<Node, Object>> weatherDataSourceConfigItems = createFixedNodes();
+    fixedNodesCount = weatherDataSourceConfigItems.size();
+    configureNodes(weatherDataSourceConfigItems, 0);
     GridPane center = createGridPaneWithNodes(weatherDataSourceConfigItems);
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setContent(center);
@@ -538,7 +540,7 @@ public class FieldDataController extends Application
             tabPane.getSelectionModel().select(1);
             treeTableView.getSelectionModel().clearSelection();
             treeTableView.getSelectionModel().select(currentItem);
-          } catch (IllegalArgumentException iae) {
+          } catch (IllegalArgumentException iae) { // TODO sollen Plugins komplett selbst regeln!
             if (center.getChildren().contains(dateError)) {
               center.getChildren().remove(dateError);
             }
@@ -571,7 +573,7 @@ public class FieldDataController extends Application
     pane.setBottom(bottomBox);
   }
 
-  private List<ConfigDialogElement<Node, Object>> createNodes() {
+  private List<ConfigDialogElement<Node, Object>> createFixedNodes() {
     List<ConfigDialogElement<Node, Object>> weatherDataSourceConfigItems = new ArrayList<>();
     pluginJsFileName = new ConfigDialogComboBox(
         gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatapluginjsfilenamelabel")),
@@ -607,15 +609,17 @@ public class FieldDataController extends Application
     return " " + gsehenInstance.formatDoubleOneDecimal(gsehenInstance.parseDouble(string));
   }
 
-  private void configureNodes(List<ConfigDialogElement<Node, Object>> nodes) {
+  private void configureNodes(List<ConfigDialogElement<Node, Object>> nodes, int startIndex) {
     int nodeIndex = 0;
     for (ConfigDialogElement<Node, Object> node : nodes) {
-      GridPane.setConstraints(node.getLabel(), 0, nodeIndex);
-      GridPane.setConstraints(node.getNode(), 1, nodeIndex);
-      final Text example = node.getExample();
-      if (example != null) {
-        example.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
-        GridPane.setConstraints(example, 2, nodeIndex);
+      if (nodeIndex >= startIndex) {
+        GridPane.setConstraints(node.getLabel(), 0, nodeIndex);
+        GridPane.setConstraints(node.getNode(), 1, nodeIndex);
+        final Text example = node.getExample();
+        if (example != null) {
+          example.setFont(Font.font("Arial", FontPosture.ITALIC, 12));
+          GridPane.setConstraints(example, 2, nodeIndex);
+        }
       }
       nodeIndex++;
     }
