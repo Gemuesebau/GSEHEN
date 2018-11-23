@@ -131,164 +131,12 @@ public class DataExport {
             @Override
             public void handle(ActionEvent e) {
               // TODO
-              // Creating PDF document object
-              exportDocument = new PDDocument();
-
-              // Creating a blank page
-              page = new PDPage(PDRectangle.A4);
-              rect = page.getMediaBox();
-
-              // Creating the PDDocumentInformation object
-              PDDocumentInformation docInfo = exportDocument.getDocumentInformation();
-              docInfo.setAuthor("GSEHEN");
-              docInfo.setTitle(
-                  mainBundle.getString("dataexport.head") + " \"" + farm.getName() + "\"");
-
-              Calendar today = Calendar.getInstance();
-              today.set(Calendar.HOUR_OF_DAY, 0);
-              docInfo.setCreationDate(today);
-
-              line = 1;
+              createDocument();
 
               try {
-                // Adding the blank page to the document
-                exportDocument.addPage(page);
-                contentStream = new PDPageContentStream(exportDocument, page);
+                writeText();
 
-                // Begin the Content stream
-                contentStream.beginText();
-                // Setting the font to the Content stream
-                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
-                // Setting the position for the line
-                contentStream.newLineAtOffset(50, rect.getHeight() - 50 * (line));
-                String head = mainBundle.getString("dataexport.head") + " \"" + farm.getName()
-                    + "\"";
-                // Adding text in the form of string
-                contentStream.showText(head);
-                // Ending the content stream
-                contentStream.endText();
-                line += 1;
-
-                contentStream.beginText();
-                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
-                contentStream.newLineAtOffset(50, rect.getHeight() - 50 * (line));
-                String farmString = farm.getName();
-                contentStream.showText(farmString);
-                contentStream.endText();
-
-                // Setting the leading
-                contentStream.setLeading(14.5f);
-
-                for (Field field : farm.getFields()) {
-                  DecimalFormat df2 = new DecimalFormat("#.##");
-                  line += 1;
-                  checkForNewPage();
-
-                  contentStream.beginText();
-                  contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-                  contentStream.newLineAtOffset(100, rect.getHeight() - 50 * (line));
-                  String fieldString = field.getName();
-                  contentStream.showText(fieldString);
-                  contentStream.newLine();
-                  contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 9);
-                  String fieldAreaString = mainBundle.getString("fieldview.area") + " "
-                      + df2.format(field.getArea());
-                  contentStream.showText(fieldAreaString);
-                  // contentStream.newLine();
-                  // String fieldLocationString = mainBundle.getString("dataexport.latlng") + ": "
-                  // + field.getLocation().getLat() + " / " + field.getLocation().getLng();
-                  // contentStream.showText(fieldLocationString);
-                  contentStream.endText();
-                  for (Plot plot : field.getPlots()) {
-                    line += 1;
-                    checkForNewPage();
-
-                    contentStream.beginText();
-                    contentStream.setFont(PDType1Font.HELVETICA, 12);
-                    contentStream.newLineAtOffset(150, rect.getHeight() - 50 * (line));
-                    String plotString = plot.getName();
-                    contentStream.showText(plotString);
-                    contentStream.newLine();
-                    contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 9);
-                    String plotAreaString = mainBundle.getString("fieldview.area") + " "
-                        + df2.format(plot.getArea());
-                    contentStream.showText(plotAreaString);
-                    contentStream.newLine();
-                    String plotLocationString = mainBundle.getString("dataexport.latlng") + ": "
-                        + plot.getLocation().getLat() + " / " + plot.getLocation().getLng();
-                    contentStream.showText(plotLocationString);
-                    contentStream.endText();
-
-                    int count = 1;
-                    String mwsMM = "mm";
-
-                    for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
-                      line += 1;
-                      checkForNewPage();
-
-                      contentStream.beginText();
-                      contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 12);
-                      contentStream.newLineAtOffset(200, rect.getHeight() - 50 * (line));
-
-                      String mwsHead = mainBundle.getString("dataexport.mwshead") + count;
-                      contentStream.showText(mwsHead);
-                      contentStream.newLine();
-
-                      String mwsDate = mainBundle.getString("plotview.date") + " " + mws.getDate();
-                      contentStream.showText(mwsDate);
-                      contentStream.newLine();
-
-                      String mwsIrrigation1 = mainBundle.getString("plotview.irrigation") + " ";
-                      contentStream.showText(mwsIrrigation1);
-                      if (mws.getIrrigation() > 0.0) {
-                        contentStream.setNonStrokingColor(Color.BLUE);
-                      } else {
-                        contentStream.setNonStrokingColor(Color.RED);
-                      }
-                      String mwsIrrigation2 = df2.format(mws.getIrrigation());
-                      contentStream.showText(mwsIrrigation2);
-                      contentStream.setNonStrokingColor(Color.BLACK);
-                      contentStream.showText(mwsMM);
-                      contentStream.newLine();
-
-                      String mwsPrecipitation1 = mainBundle.getString("plotview.precipitation")
-                          + " ";
-                      contentStream.showText(mwsPrecipitation1);
-                      if (mws.getPrecipitation() > 0.0) {
-                        contentStream.setNonStrokingColor(Color.BLUE);
-                      } else {
-                        contentStream.setNonStrokingColor(Color.RED);
-                      }
-                      String mwsPrecipitation2 = df2.format(mws.getPrecipitation());
-                      contentStream.showText(mwsPrecipitation2);
-                      contentStream.setNonStrokingColor(Color.BLACK);
-                      contentStream.showText(mwsMM);
-                      contentStream.newLine();
-
-                      contentStream.endText();
-                      line += 1;
-                      count++;
-                    }
-                  }
-                }
-
-                // Closing the content stream
-                contentStream.close();
-
-                FileChooser fileChooser = new FileChooser();
-                LocalDate localDate = LocalDate.now();
-                fileChooser.setInitialFileName(mainBundle.getString("dataexport.head") + " "
-                    + farm.getName() + "_(" + localDate + ")");
-                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                    "PDF files (*.pdf)", "*.pdf");
-                fileChooser.getExtensionFilters().add(extFilter);
-                File file = fileChooser.showSaveDialog(gsehenInstance.getScene().getWindow());
-
-                // Saving the document
-                exportDocument.save(file);
-
-                // Closing the document
-                exportDocument.close();
+                save();
               } catch (IOException e1) {
                 // Auto-generated catch block
                 e1.printStackTrace();
@@ -312,6 +160,26 @@ public class DataExport {
     }
   }
 
+  private void createDocument() {
+    // Creating PDF document object
+    exportDocument = new PDDocument();
+
+    // Creating a blank page
+    page = new PDPage(PDRectangle.A4);
+    rect = page.getMediaBox();
+
+    // Creating the PDDocumentInformation object
+    PDDocumentInformation docInfo = exportDocument.getDocumentInformation();
+    docInfo.setAuthor("GSEHEN");
+    docInfo.setTitle(mainBundle.getString("dataexport.head") + " \"" + farm.getName() + "\"");
+
+    Calendar today = Calendar.getInstance();
+    today.set(Calendar.HOUR_OF_DAY, 0);
+    docInfo.setCreationDate(today);
+
+    line = 1;
+  }
+
   private void checkForNewPage() {
     if (rect.getHeight() - 50 * (line) < 50.0) {
       try {
@@ -327,6 +195,152 @@ public class DataExport {
         e1.printStackTrace();
       }
     }
+  }
+
+  private void writeText() throws IOException {
+    // Adding the blank page to the document
+    exportDocument.addPage(page);
+    contentStream = new PDPageContentStream(exportDocument, page);
+
+    // Begin the Content stream
+    contentStream.beginText();
+    // Setting the font to the Content stream
+    contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
+    // Setting the position for the line
+    contentStream.newLineAtOffset(50, rect.getHeight() - 50 * (line));
+    String head = mainBundle.getString("dataexport.head") + " \"" + farm.getName() + "\"";
+    // Adding text in the form of string
+    contentStream.showText(head);
+    // Ending the content stream
+    contentStream.endText();
+    line += 1;
+
+    contentStream.beginText();
+    contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
+    contentStream.newLineAtOffset(50, rect.getHeight() - 50 * (line));
+    String farmString = farm.getName();
+    contentStream.showText(farmString);
+    contentStream.endText();
+
+    // Setting the leading
+    contentStream.setLeading(14.5f);
+
+    for (Field field : farm.getFields()) {
+      line += 1;
+      checkForNewPage();
+
+      contentStream.beginText();
+      contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+      contentStream.newLineAtOffset(100, rect.getHeight() - 50 * (line));
+      String fieldString = field.getName();
+      contentStream.showText(fieldString);
+      contentStream.newLine();
+      contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 9);
+
+      DecimalFormat df2 = new DecimalFormat("#.##");
+
+      String fieldAreaString = mainBundle.getString("fieldview.area") + " "
+          + df2.format(field.getArea());
+      contentStream.showText(fieldAreaString);
+      // TODO - Location vom Feld an geeigneter Stelle setzen und speichern!
+      // contentStream.newLine();
+      // String fieldLocationString = mainBundle.getString("dataexport.latlng") + ": "
+      // + field.getLocation().getLat() + " / " + field.getLocation().getLng();
+      // contentStream.showText(fieldLocationString);
+      contentStream.endText();
+      for (Plot plot : field.getPlots()) {
+        line += 1;
+        checkForNewPage();
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA, 12);
+        contentStream.newLineAtOffset(150, rect.getHeight() - 50 * (line));
+        String plotString = plot.getName();
+        contentStream.showText(plotString);
+        contentStream.newLine();
+        contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 9);
+        String plotAreaString = mainBundle.getString("fieldview.area") + " "
+            + df2.format(plot.getArea());
+        contentStream.showText(plotAreaString);
+        contentStream.newLine();
+        String plotLocationString = mainBundle.getString("dataexport.latlng") + ": "
+            + plot.getLocation().getLat() + " / " + plot.getLocation().getLng();
+        contentStream.showText(plotLocationString);
+        contentStream.endText();
+
+        int count = 1;
+
+        for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
+          line += 1;
+          checkForNewPage();
+
+          contentStream.beginText();
+          contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 12);
+          contentStream.newLineAtOffset(200, rect.getHeight() - 50 * (line));
+
+          String mwsHead = mainBundle.getString("dataexport.mwshead") + count;
+          contentStream.showText(mwsHead);
+          contentStream.newLine();
+
+          String mwsDate = mainBundle.getString("plotview.date") + " " + mws.getDate();
+          contentStream.showText(mwsDate);
+          contentStream.newLine();
+
+          String mwsIrrigation1 = mainBundle.getString("plotview.irrigation") + " ";
+          contentStream.showText(mwsIrrigation1);
+          if (mws.getIrrigation() > 0.0) {
+            contentStream.setNonStrokingColor(Color.BLUE);
+          } else {
+            contentStream.setNonStrokingColor(Color.RED);
+          }
+
+          String mwsMm = "mm";
+
+          String mwsIrrigation2 = df2.format(mws.getIrrigation());
+          contentStream.showText(mwsIrrigation2);
+          contentStream.setNonStrokingColor(Color.BLACK);
+          contentStream.showText(mwsMm);
+          contentStream.newLine();
+
+          String mwsPrecipitation1 = mainBundle.getString("plotview.precipitation") + " ";
+          contentStream.showText(mwsPrecipitation1);
+          if (mws.getPrecipitation() > 0.0) {
+            contentStream.setNonStrokingColor(Color.BLUE);
+          } else {
+            contentStream.setNonStrokingColor(Color.RED);
+          }
+          String mwsPrecipitation2 = df2.format(mws.getPrecipitation());
+          contentStream.showText(mwsPrecipitation2);
+          contentStream.setNonStrokingColor(Color.BLACK);
+          contentStream.showText(mwsMm);
+          contentStream.newLine();
+
+          contentStream.endText();
+          line += 1;
+          count++;
+        }
+      }
+    }
+
+    // Closing the content stream
+    contentStream.close();
+  }
+
+  private void save() throws IOException {
+    FileChooser fileChooser = new FileChooser();
+    LocalDate localDate = LocalDate.now();
+    fileChooser.setInitialFileName(
+        mainBundle.getString("dataexport.head") + " " + farm.getName() + "_(" + localDate + ")");
+    FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("PDF files (*.pdf)",
+        "*.pdf");
+    fileChooser.getExtensionFilters().add(extFilter);
+    File file = fileChooser.showSaveDialog(gsehenInstance.getScene().getWindow());
+
+    // Saving the document
+    exportDocument.save(file);
+
+    // Closing the document
+    exportDocument.close();
   }
 
 }
