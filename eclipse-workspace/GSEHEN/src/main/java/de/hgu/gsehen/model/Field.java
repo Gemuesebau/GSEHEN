@@ -102,8 +102,7 @@ public class Field extends Drawable implements DrawableParent {
     return location;
   }
 
-  // ??? FIXME setLocation ???
-  public void setGeoPoint(GeoPoint location) {
+  public void setLocation(GeoPoint location) {
     this.location = location;
   }
 

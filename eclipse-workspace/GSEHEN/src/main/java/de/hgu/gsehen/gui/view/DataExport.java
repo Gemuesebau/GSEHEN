@@ -11,8 +11,10 @@ import de.hgu.gsehen.model.ManualWaterSupply;
 import de.hgu.gsehen.model.Plot;
 
 import java.awt.Color;
+import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.ResourceBundle;
 
@@ -27,6 +29,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
@@ -95,7 +98,8 @@ public class DataExport {
           // GridPane - Center Section
           centerGrid = gsehenGuiElements.gridPane(pane);
 
-          headline = gsehenGuiElements.text("Datenexport des Betriebs \"" + farm.getName() + "\"",
+          headline = gsehenGuiElements.text(
+              mainBundle.getString("dataexport.head") + " \"" + farm.getName() + "\"",
               FontWeight.BOLD);
 
           int fieldCounter = 3;
@@ -122,7 +126,7 @@ public class DataExport {
           }
 
           Button exportButton = gsehenGuiElements.button(150);
-          exportButton.setText("Export");
+          exportButton.setText(mainBundle.getString("dataexport.export"));
           exportButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
@@ -137,7 +141,8 @@ public class DataExport {
               // Creating the PDDocumentInformation object
               PDDocumentInformation docInfo = exportDocument.getDocumentInformation();
               docInfo.setAuthor("GSEHEN");
-              docInfo.setTitle("Datenexport des Betriebs \"" + farm.getName() + "\"");
+              docInfo.setTitle(
+                  mainBundle.getString("dataexport.head") + " \"" + farm.getName() + "\"");
 
               Calendar today = Calendar.getInstance();
               today.set(Calendar.HOUR_OF_DAY, 0);
@@ -156,7 +161,8 @@ public class DataExport {
                 contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
                 // Setting the position for the line
                 contentStream.newLineAtOffset(50, rect.getHeight() - 50 * (line));
-                String head = "Datenexport des Betriebs \"" + farm.getName() + "\"";
+                String head = mainBundle.getString("dataexport.head") + " \"" + farm.getName()
+                    + "\"";
                 // Adding text in the form of string
                 contentStream.showText(head);
                 // Ending the content stream
@@ -174,6 +180,7 @@ public class DataExport {
                 contentStream.setLeading(14.5f);
 
                 for (Field field : farm.getFields()) {
+                  DecimalFormat df2 = new DecimalFormat("#.##");
                   line += 1;
                   checkForNewPage();
 
@@ -184,11 +191,12 @@ public class DataExport {
                   contentStream.showText(fieldString);
                   contentStream.newLine();
                   contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 9);
-                  String fieldAreaString = "m²: " + field.getArea();
+                  String fieldAreaString = mainBundle.getString("fieldview.area") + " " + df2.format(field.getArea());
                   contentStream.showText(fieldAreaString);
-                  contentStream.newLine();
-                  String fieldLocationString = "Ort: " + field.getLocation();
-                  contentStream.showText(fieldLocationString);
+                  // contentStream.newLine();
+                  // String fieldLocationString = mainBundle.getString("dataexport.latlng") + ": "
+                  // + field.getLocation().getLat() + " / " + field.getLocation().getLng();
+                  // contentStream.showText(fieldLocationString);
                   contentStream.endText();
                   for (Plot plot : field.getPlots()) {
                     line += 1;
@@ -201,15 +209,16 @@ public class DataExport {
                     contentStream.showText(plotString);
                     contentStream.newLine();
                     contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 9);
-                    String plotAreaString = "m²: " + plot.getArea();
+                    String plotAreaString = mainBundle.getString("fieldview.area") + " "
+                        + df2.format(plot.getArea());
                     contentStream.showText(plotAreaString);
                     contentStream.newLine();
-                    String plotLocationString = "Ort: " + plot.getLocation();
+                    String plotLocationString = mainBundle.getString("dataexport.latlng") + ": "
+                        + plot.getLocation().getLat() + " / " + plot.getLocation().getLng();
                     contentStream.showText(plotLocationString);
                     contentStream.endText();
 
                     int count = 1;
-                    DecimalFormat df2 = new DecimalFormat("#.##");
                     String mwsMM = "mm";
 
                     for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
@@ -220,15 +229,15 @@ public class DataExport {
                       contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 12);
                       contentStream.newLineAtOffset(200, rect.getHeight() - 50 * (line));
 
-                      String mwsHead = "Bewässerung #" + count;
+                      String mwsHead = mainBundle.getString("dataexport.mwshead") + count;
                       contentStream.showText(mwsHead);
                       contentStream.newLine();
 
-                      String mwsDate = "Datum: " + mws.getDate();
+                      String mwsDate = mainBundle.getString("plotview.date") + " " + mws.getDate();
                       contentStream.showText(mwsDate);
                       contentStream.newLine();
 
-                      String mwsIrrigation1 = "Bewässerung: ";
+                      String mwsIrrigation1 = mainBundle.getString("plotview.irrigation") + " ";
                       contentStream.showText(mwsIrrigation1);
                       if (mws.getIrrigation() > 0.0) {
                         contentStream.setNonStrokingColor(Color.BLUE);
@@ -241,7 +250,8 @@ public class DataExport {
                       contentStream.showText(mwsMM);
                       contentStream.newLine();
 
-                      String mwsPrecipitation1 = "Niederschlag: ";
+                      String mwsPrecipitation1 = mainBundle.getString("plotview.precipitation")
+                          + " ";
                       contentStream.showText(mwsPrecipitation1);
                       if (mws.getPrecipitation() > 0.0) {
                         contentStream.setNonStrokingColor(Color.BLUE);
@@ -264,8 +274,21 @@ public class DataExport {
                 // Closing the content stream
                 contentStream.close();
 
-                // Saving the document
-                exportDocument.save("C:/Users/cwitzke/Desktop/Gsehen_Datenexport.pdf");
+                try {
+                  FileChooser fileChooser = new FileChooser();
+                  LocalDate localDate = LocalDate.now();
+                  fileChooser.setInitialFileName(mainBundle.getString("dataexport.head") + " "
+                      + farm.getName() + "_(" + localDate + ")");
+                  FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                      "PDF files (*.pdf)", "*.pdf");
+                  fileChooser.getExtensionFilters().add(extFilter);
+                  File file = fileChooser.showSaveDialog(gsehenInstance.getScene().getWindow());
+
+                  // Saving the document
+                  exportDocument.save(file);
+                } catch (Exception io) {
+                  System.out.println(io);
+                }
 
                 // Closing the document
                 exportDocument.close();
@@ -293,7 +316,6 @@ public class DataExport {
   }
 
   private void checkForNewPage() {
-    // System.out.println(rect.getHeight() - 50 * (++line));
     if (rect.getHeight() - 50 * (line) < 50.0) {
       try {
         contentStream.close();
@@ -301,6 +323,7 @@ public class DataExport {
         rect = page.getMediaBox();
         exportDocument.addPage(page);
         contentStream = new PDPageContentStream(exportDocument, page);
+        contentStream.setLeading(14.5f);
         line = 1;
       } catch (IOException e1) {
         // Auto-generated catch block
