@@ -191,7 +191,8 @@ public class DataExport {
                   contentStream.showText(fieldString);
                   contentStream.newLine();
                   contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 9);
-                  String fieldAreaString = mainBundle.getString("fieldview.area") + " " + df2.format(field.getArea());
+                  String fieldAreaString = mainBundle.getString("fieldview.area") + " "
+                      + df2.format(field.getArea());
                   contentStream.showText(fieldAreaString);
                   // contentStream.newLine();
                   // String fieldLocationString = mainBundle.getString("dataexport.latlng") + ": "
@@ -274,21 +275,17 @@ public class DataExport {
                 // Closing the content stream
                 contentStream.close();
 
-                try {
-                  FileChooser fileChooser = new FileChooser();
-                  LocalDate localDate = LocalDate.now();
-                  fileChooser.setInitialFileName(mainBundle.getString("dataexport.head") + " "
-                      + farm.getName() + "_(" + localDate + ")");
-                  FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
-                      "PDF files (*.pdf)", "*.pdf");
-                  fileChooser.getExtensionFilters().add(extFilter);
-                  File file = fileChooser.showSaveDialog(gsehenInstance.getScene().getWindow());
+                FileChooser fileChooser = new FileChooser();
+                LocalDate localDate = LocalDate.now();
+                fileChooser.setInitialFileName(mainBundle.getString("dataexport.head") + " "
+                    + farm.getName() + "_(" + localDate + ")");
+                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+                    "PDF files (*.pdf)", "*.pdf");
+                fileChooser.getExtensionFilters().add(extFilter);
+                File file = fileChooser.showSaveDialog(gsehenInstance.getScene().getWindow());
 
-                  // Saving the document
-                  exportDocument.save(file);
-                } catch (Exception io) {
-                  System.out.println(io);
-                }
+                // Saving the document
+                exportDocument.save(file);
 
                 // Closing the document
                 exportDocument.close();
