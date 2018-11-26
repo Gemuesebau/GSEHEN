@@ -569,7 +569,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private void setChartData() {
-    if (plot.getRecommendedAction() != null) {
+    if (plot != null && plot.getRecommendedAction() != null) {
       if (plot.getRecommendedAction().getProjectedDaysToIrrigation() != null) {
         waterLevel = plot.getRecommendedAction().getAvailableWater();
         int daysToIrrigation = plot.getRecommendedAction().getProjectedDaysToIrrigation();
@@ -701,7 +701,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   private void wateringView() {
     md = new ManualData();
-    
+
     for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
       if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
         selectedItem = treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();

@@ -57,6 +57,7 @@ public class DataExport {
   private GridPane centerGrid;
   private TreeTableView<Drawable> treeTableView;
   private Farm farm;
+  private Plot plot;
   private Text headline;
   private int fieldCounter;
   private int plotCounter;
@@ -192,7 +193,6 @@ public class DataExport {
 
           @Override
           public void handle(ActionEvent e) {
-            // TODO
             if (mwsCheck == true) {
               if (centerGrid.getChildren().contains(mwsWarning)) {
                 centerGrid.getChildren().remove(mwsWarning);
@@ -208,6 +208,7 @@ public class DataExport {
             } else {
               mwsWarning = gsehenGuiElements.text(mainBundle.getString("dataexport.mwswarning"),
                   FontWeight.BOLD);
+              mwsWarning.setFill(javafx.scene.paint.Color.RED);
               GridPane.setConstraints(mwsWarning, 0, plotCounter + 4);
               centerGrid.getChildren().add(mwsWarning);
             }
@@ -311,7 +312,6 @@ public class DataExport {
       String fieldAreaString = mainBundle.getString("fieldview.area") + " "
           + df2.format(field.getArea());
       contentStream.showText(fieldAreaString);
-      // TODO - Location vom Feld an geeigneter Stelle setzen und speichern!
       contentStream.newLine();
       String fieldLocationString = mainBundle.getString("dataexport.latlng") + ": "
           + field.getLocation().getLat() + " / " + field.getLocation().getLng();
@@ -320,6 +320,7 @@ public class DataExport {
       for (Plot plot : plotList) {
         for (Plot fieldPlot : field.getPlots()) {
           if (plot == fieldPlot) {
+            this.plot = plot;
             line += 1;
             checkForNewPage();
 
@@ -337,6 +338,13 @@ public class DataExport {
             String plotLocationString = mainBundle.getString("dataexport.latlng") + ": "
                 + plot.getLocation().getLat() + " / " + plot.getLocation().getLng();
             contentStream.showText(plotLocationString);
+
+            if (plot.getRecommendedAction() != null) {
+              contentStream.newLine();
+              setActionText();
+              contentStream.newLine();
+            }
+
             contentStream.endText();
 
             int count = 1;
@@ -346,6 +354,7 @@ public class DataExport {
                 checkForNewPage();
 
                 contentStream.beginText();
+                contentStream.newLine();
                 contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 12);
                 contentStream.newLineAtOffset(200, rect.getHeight() - 50 * (line));
 
@@ -398,6 +407,46 @@ public class DataExport {
 
     // Closing the content stream
     contentStream.close();
+  }
+
+  private void setActionText() {
+    try {
+      if (plot.getRecommendedAction().getRecommendation().toString().equals("EXCESS")) {
+        String recommendedAction1 = mainBundle.getString("treetableview.watering") + " "
+            + mainBundle.getString("dataexport.excess1");
+        contentStream.showText(recommendedAction1);
+        contentStream.newLine();
+        String recommendedAction2 = mainBundle.getString("dataexport.excess2");
+        contentStream.showText(recommendedAction2);
+        line += 1;
+      } else if (plot.getRecommendedAction().getRecommendation().toString().equals("PAUSE")
+          || plot.getRecommendedAction().getRecommendation().toString().equals("IRRIGATION")
+          || plot.getRecommendedAction().getRecommendation().toString().equals("NO_DATA")
+          || plot.getRecommendedAction().getRecommendation().toString().equals("TOMORROW")) {
+        String recommendedAction = mainBundle.getString("treetableview.watering") + " " + mainBundle
+            .getString(plot.getRecommendedAction().getRecommendation().getMessagePropertyKey());
+        contentStream.showText(recommendedAction);
+      } else if (plot.getRecommendedAction().getRecommendation().toString().equals("SOON")) {
+        String recommendedAction1 = mainBundle.getString("treetableview.watering") + " "
+            + mainBundle.getString("dataexport.soon1");
+        contentStream.showText(recommendedAction1);
+        contentStream.newLine();
+        String recommendedAction2 = mainBundle.getString("dataexport.soon2");
+        contentStream.showText(recommendedAction2);
+        line += 1;
+      } else if (plot.getRecommendedAction().getRecommendation().toString().equals("NOW")) {
+        String recommendedAction1 = mainBundle.getString("treetableview.watering") + " "
+            + mainBundle.getString("dataexport.now1");
+        contentStream.showText(recommendedAction1);
+        contentStream.newLine();
+        String recommendedAction2 = mainBundle.getString("dataexport.now2");
+        contentStream.showText(recommendedAction2);
+        line += 1;
+      }
+    } catch (IOException e) {
+      // Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 
   private void save() throws IOException {
