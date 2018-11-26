@@ -96,112 +96,135 @@ public class DataExport {
   @SuppressWarnings({ "checkstyle:all" })
   public void createExport() {
     for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
+      List<Farm> farmsList = gsehenInstance.getFarmsList();
       if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
         TreeItem<Drawable> selectedItem = treeTableView.getSelectionModel().getSelectedCells()
             .get(i).getTreeItem();
         if (selectedItem != null
-            && selectedItem.getValue().getClass().getSimpleName().equals("Farm")) {
-          pane.setVisible(true);
-          farm = (Farm) selectedItem.getValue();
-
-          // GridPane - Center Section
-          centerGrid = gsehenGuiElements.gridPane(pane);
-
-          headline = gsehenGuiElements.text(
-              mainBundle.getString("dataexport.head") + " \"" + farm.getName() + "\"",
-              FontWeight.BOLD);
-
-          fieldCounter = 3;
-          plotCounter = 0;
-          plotList = new ArrayList<Plot>();
-          mwsCheck = false;
-
-          for (Field field : farm.getFields()) {
-            JFXCheckBox allCheckBox = new JFXCheckBox(mainBundle.getString("dataexport.all"));
-            allCheckBox.setStyle("-fx-font-weight: bold");
-            Text fieldText = gsehenGuiElements.text(field.getName());
-
-            GridPane.setConstraints(fieldText, 0, fieldCounter);
-            GridPane.setConstraints(allCheckBox, 1, fieldCounter);
-            centerGrid.getChildren().addAll(fieldText, allCheckBox);
-
-            for (Plot plot : field.getPlots()) {
-              plotCounter = fieldCounter + 1;
-              JFXCheckBox plotCheckBox = new JFXCheckBox(plot.getName());
-              if (plot.getManualData() != null) {
-                mwsCheck = true;
+            && selectedItem.getValue().getClass().getSimpleName().equals("Plot")) {
+          Plot plot = (Plot) selectedItem.getValue();
+          for (Farm farm : farmsList) {
+            for (Field field : farm.getFields()) {
+              if (field.getPlots().contains(plot)) {
+                this.farm = farm;
               }
-
-              allCheckBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
-                @Override
-                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
-                    Boolean newValue) {
-                  plotCheckBox.setSelected(newValue);
-                }
-              });
-
-              plotCheckBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
-                @Override
-                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
-                    Boolean newValue) {
-                  if (newValue == true && !plotList.contains(plot)) {
-                    plotList.add(plot);
-                  } else {
-                    plotList.remove(plot);
-                  }
-                }
-              });
-
-              GridPane.setConstraints(plotCheckBox, 1, plotCounter);
-              centerGrid.getChildren().add(plotCheckBox);
-              fieldCounter += 1;
             }
-            Separator separator = new Separator();
-            GridPane.setConstraints(separator, 0, plotCounter + 1, 2, 1);
-            centerGrid.getChildren().add(separator);
-
-            fieldCounter = plotCounter + 2;
           }
-
-          Button exportButton = gsehenGuiElements.button(150);
-          exportButton.setText(mainBundle.getString("dataexport.export"));
-          exportButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent e) {
-              // TODO
-              if (mwsCheck == true) {
-                if (centerGrid.getChildren().contains(mwsWarning)) {
-                  centerGrid.getChildren().remove(mwsWarning);
-                }
-                createDocument();
-                try {
-                  writeText();
-                  save();
-                } catch (IOException e1) {
-                  // Auto-generated catch block
-                  e1.printStackTrace();
-                }
-              } else {
-                mwsWarning = gsehenGuiElements.text(mainBundle.getString("dataexport.mwswarning"),
-                    FontWeight.BOLD);
-                GridPane.setConstraints(mwsWarning, 0, plotCounter + 4);
-                centerGrid.getChildren().add(mwsWarning);
-              }
-            }
-          });
-
-          // Set Row & Column Index for Nodes
-          GridPane.setConstraints(headline, 0, 0);
-          GridPane.setConstraints(exportButton, 0, plotCounter + 3);
-
-          centerGrid.getChildren().addAll(headline, exportButton);
-
-          ScrollPane scrollPane = new ScrollPane();
-          scrollPane.setContent(centerGrid);
-          scrollPane.setPannable(true);
-
-          pane.setCenter(scrollPane);
         }
+        if (selectedItem != null
+            && selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
+          Field field = (Field) selectedItem.getValue();
+          for (Farm farm : farmsList) {
+            if (farm.getFields().contains(field)) {
+              this.farm = farm;
+            }
+          }
+        }
+        if (selectedItem != null
+            && selectedItem.getValue().getClass().getSimpleName().equals("Farm")) {
+          farm = (Farm) selectedItem.getValue();
+        }
+
+        pane.setVisible(true);
+
+        // GridPane - Center Section
+        centerGrid = gsehenGuiElements.gridPane(pane);
+
+        headline = gsehenGuiElements.text(
+            mainBundle.getString("dataexport.head") + " \"" + farm.getName() + "\"",
+            FontWeight.BOLD);
+
+        fieldCounter = 3;
+        plotCounter = 0;
+        plotList = new ArrayList<Plot>();
+        mwsCheck = false;
+
+        for (Field field : farm.getFields()) {
+          JFXCheckBox allCheckBox = new JFXCheckBox(mainBundle.getString("dataexport.all"));
+          allCheckBox.setStyle("-fx-font-weight: bold");
+          Text fieldText = gsehenGuiElements.text(field.getName());
+
+          GridPane.setConstraints(fieldText, 0, fieldCounter);
+          GridPane.setConstraints(allCheckBox, 1, fieldCounter);
+          centerGrid.getChildren().addAll(fieldText, allCheckBox);
+
+          for (Plot plot : field.getPlots()) {
+            plotCounter = fieldCounter + 1;
+            JFXCheckBox plotCheckBox = new JFXCheckBox(plot.getName());
+            if (plot.getManualData() != null) {
+              mwsCheck = true;
+            }
+
+            allCheckBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+              @Override
+              public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
+                  Boolean newValue) {
+                plotCheckBox.setSelected(newValue);
+              }
+            });
+
+            plotCheckBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+              @Override
+              public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
+                  Boolean newValue) {
+                if (newValue == true && !plotList.contains(plot)) {
+                  plotList.add(plot);
+                } else {
+                  plotList.remove(plot);
+                }
+              }
+            });
+
+            GridPane.setConstraints(plotCheckBox, 1, plotCounter);
+            centerGrid.getChildren().add(plotCheckBox);
+            fieldCounter += 1;
+          }
+          Separator separator = new Separator();
+          GridPane.setConstraints(separator, 0, plotCounter + 1, 2, 1);
+          centerGrid.getChildren().add(separator);
+
+          fieldCounter = plotCounter + 2;
+        }
+
+        Button exportButton = gsehenGuiElements.button(150);
+        exportButton.setText(mainBundle.getString("dataexport.export"));
+        exportButton.setOnAction(new EventHandler<ActionEvent>() {
+
+          @Override
+          public void handle(ActionEvent e) {
+            // TODO
+            if (mwsCheck == true) {
+              if (centerGrid.getChildren().contains(mwsWarning)) {
+                centerGrid.getChildren().remove(mwsWarning);
+              }
+              createDocument();
+              try {
+                writeText();
+                save();
+              } catch (IOException e1) {
+                // Auto-generated catch block
+                e1.printStackTrace();
+              }
+            } else {
+              mwsWarning = gsehenGuiElements.text(mainBundle.getString("dataexport.mwswarning"),
+                  FontWeight.BOLD);
+              GridPane.setConstraints(mwsWarning, 0, plotCounter + 4);
+              centerGrid.getChildren().add(mwsWarning);
+            }
+          }
+        });
+
+        // Set Row & Column Index for Nodes
+        GridPane.setConstraints(headline, 0, 0);
+        GridPane.setConstraints(exportButton, 0, plotCounter + 3);
+
+        centerGrid.getChildren().addAll(headline, exportButton);
+
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(centerGrid);
+        scrollPane.setPannable(true);
+
+        pane.setCenter(scrollPane);
       }
     }
   }
