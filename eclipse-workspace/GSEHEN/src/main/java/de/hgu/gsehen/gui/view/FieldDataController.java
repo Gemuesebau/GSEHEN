@@ -8,7 +8,6 @@ import com.jfoenix.controls.JFXTextField;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
-import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenGuiElements;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Field;
@@ -20,7 +19,6 @@ import de.hgu.gsehen.model.WeatherDataSource;
 import de.hgu.gsehen.util.DBUtil;
 import de.hgu.gsehen.util.PluginUtil;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -82,8 +80,6 @@ public class FieldDataController extends Application
 
   private JFXTextField name;
   private Text area;
-  private Double lat = 0.0;
-  private Double lng = 0.0;
 
   private JFXComboBox<SoilProfile> currentSoilBox;
   private JFXComboBox<WeatherDataSource> weatherData;
@@ -339,25 +335,6 @@ public class FieldDataController extends Application
                   area.setText(gsehenInstance.formatDoubleOneDecimal(
                       field.getPolygon().calculateArea(field.getPolygon().getGeoPoints())));
                   
-                  if (field.getLocation() == null) {
-                    DecimalFormat df = new DecimalFormat("#.######");
-                    for (int y = 0; y < field.getPolygon().getGeoPoints().size(); y++) {
-                      lat += field.getPolygon().getGeoPoints().get(y).getLat();
-                      if (y == field.getPolygon().getGeoPoints().size() - 1) {
-                        lat = lat / field.getPolygon().getGeoPoints().size();
-                      }
-                    }
-                    for (int z = 0; z < field.getPolygon().getGeoPoints().size(); z++) {
-                      lng += field.getPolygon().getGeoPoints().get(z).getLng();
-                      if (z == field.getPolygon().getGeoPoints().size() - 1) {
-                        lng = lng / field.getPolygon().getGeoPoints().size();
-                      }
-                    }
-                    GeoPoint location = new GeoPoint(gsehenInstance.parseDouble(df.format(lat)),
-                        gsehenInstance.parseDouble(df.format(lng)));
-                    field.setLocation(location);
-                  }
-
                   for (WeatherDataSource wds : weatherDataSourceList) {
                     final WeatherDataSource weatherDataSource = gsehenInstance
                         .getWeatherDataSourceForUuid(field.getWeatherDataSourceUuid());

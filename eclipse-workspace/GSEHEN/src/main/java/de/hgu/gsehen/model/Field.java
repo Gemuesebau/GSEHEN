@@ -24,7 +24,7 @@ public class Field extends Drawable implements DrawableParent {
   private String weatherDataSourceUuid;
   private String soilProfileUuid;
   private Double rootingZone;
-  @OneToOne
+  @OneToOne(cascade = {CascadeType.ALL})
   private GeoPoint location;
   @OneToOne(cascade = {CascadeType.ALL})
   private GeoPolygon polygon;

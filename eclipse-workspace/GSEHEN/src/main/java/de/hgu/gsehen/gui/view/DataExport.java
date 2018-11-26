@@ -15,9 +15,13 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
@@ -48,11 +52,16 @@ public class DataExport {
   protected final ResourceBundle mainBundle;
   private GsehenGuiElements gsehenGuiElements;
   private Gsehen gsehenInstance;
+  private List<Plot> plotList;
   private BorderPane pane;
   private GridPane centerGrid;
   private TreeTableView<Drawable> treeTableView;
   private Farm farm;
   private Text headline;
+  private int fieldCounter;
+  private int plotCounter;
+  private Boolean mwsCheck;
+  private Text mwsWarning;
 
   private PDDocument exportDocument;
   private PDPage page;
@@ -102,17 +111,46 @@ public class DataExport {
               mainBundle.getString("dataexport.head") + " \"" + farm.getName() + "\"",
               FontWeight.BOLD);
 
-          int fieldCounter = 3;
-          int plotCounter = 0;
+          fieldCounter = 3;
+          plotCounter = 0;
+          plotList = new ArrayList<Plot>();
+          mwsCheck = false;
 
           for (Field field : farm.getFields()) {
-            JFXCheckBox fieldCheckBox = new JFXCheckBox(field.getName());
+            JFXCheckBox allCheckBox = new JFXCheckBox(mainBundle.getString("dataexport.all"));
+            allCheckBox.setStyle("-fx-font-weight: bold");
+            Text fieldText = gsehenGuiElements.text(field.getName());
 
-            GridPane.setConstraints(fieldCheckBox, 0, fieldCounter);
-            centerGrid.getChildren().add(fieldCheckBox);
+            GridPane.setConstraints(fieldText, 0, fieldCounter);
+            GridPane.setConstraints(allCheckBox, 1, fieldCounter);
+            centerGrid.getChildren().addAll(fieldText, allCheckBox);
+
             for (Plot plot : field.getPlots()) {
               plotCounter = fieldCounter + 1;
               JFXCheckBox plotCheckBox = new JFXCheckBox(plot.getName());
+              if (plot.getManualData() != null) {
+                mwsCheck = true;
+              }
+
+              allCheckBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+                @Override
+                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
+                    Boolean newValue) {
+                  plotCheckBox.setSelected(newValue);
+                }
+              });
+
+              plotCheckBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+                @Override
+                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
+                    Boolean newValue) {
+                  if (newValue == true && !plotList.contains(plot)) {
+                    plotList.add(plot);
+                  } else {
+                    plotList.remove(plot);
+                  }
+                }
+              });
 
               GridPane.setConstraints(plotCheckBox, 1, plotCounter);
               centerGrid.getChildren().add(plotCheckBox);
@@ -131,15 +169,23 @@ public class DataExport {
             @Override
             public void handle(ActionEvent e) {
               // TODO
-              createDocument();
-
-              try {
-                writeText();
-
-                save();
-              } catch (IOException e1) {
-                // Auto-generated catch block
-                e1.printStackTrace();
+              if (mwsCheck == true) {
+                if (centerGrid.getChildren().contains(mwsWarning)) {
+                  centerGrid.getChildren().remove(mwsWarning);
+                }
+                createDocument();
+                try {
+                  writeText();
+                  save();
+                } catch (IOException e1) {
+                  // Auto-generated catch block
+                  e1.printStackTrace();
+                }
+              } else {
+                mwsWarning = gsehenGuiElements.text(mainBundle.getString("dataexport.mwswarning"),
+                    FontWeight.BOLD);
+                GridPane.setConstraints(mwsWarning, 0, plotCounter + 4);
+                centerGrid.getChildren().add(mwsWarning);
               }
             }
           });
@@ -243,81 +289,86 @@ public class DataExport {
           + df2.format(field.getArea());
       contentStream.showText(fieldAreaString);
       // TODO - Location vom Feld an geeigneter Stelle setzen und speichern!
-      // contentStream.newLine();
-      // String fieldLocationString = mainBundle.getString("dataexport.latlng") + ": "
-      // + field.getLocation().getLat() + " / " + field.getLocation().getLng();
-      // contentStream.showText(fieldLocationString);
+      contentStream.newLine();
+      String fieldLocationString = mainBundle.getString("dataexport.latlng") + ": "
+          + field.getLocation().getLat() + " / " + field.getLocation().getLng();
+      contentStream.showText(fieldLocationString);
       contentStream.endText();
-      for (Plot plot : field.getPlots()) {
-        line += 1;
-        checkForNewPage();
+      for (Plot plot : plotList) {
+        for (Plot fieldPlot : field.getPlots()) {
+          if (plot == fieldPlot) {
+            line += 1;
+            checkForNewPage();
 
-        contentStream.beginText();
-        contentStream.setFont(PDType1Font.HELVETICA, 12);
-        contentStream.newLineAtOffset(150, rect.getHeight() - 50 * (line));
-        String plotString = plot.getName();
-        contentStream.showText(plotString);
-        contentStream.newLine();
-        contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 9);
-        String plotAreaString = mainBundle.getString("fieldview.area") + " "
-            + df2.format(plot.getArea());
-        contentStream.showText(plotAreaString);
-        contentStream.newLine();
-        String plotLocationString = mainBundle.getString("dataexport.latlng") + ": "
-            + plot.getLocation().getLat() + " / " + plot.getLocation().getLng();
-        contentStream.showText(plotLocationString);
-        contentStream.endText();
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA, 12);
+            contentStream.newLineAtOffset(150, rect.getHeight() - 50 * (line));
+            String plotString = plot.getName();
+            contentStream.showText(plotString);
+            contentStream.newLine();
+            contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 9);
+            String plotAreaString = mainBundle.getString("fieldview.area") + " "
+                + df2.format(plot.getArea());
+            contentStream.showText(plotAreaString);
+            contentStream.newLine();
+            String plotLocationString = mainBundle.getString("dataexport.latlng") + ": "
+                + plot.getLocation().getLat() + " / " + plot.getLocation().getLng();
+            contentStream.showText(plotLocationString);
+            contentStream.endText();
 
-        int count = 1;
+            int count = 1;
+            if (plot.getManualData() != null) {
+              for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
+                line += 1;
+                checkForNewPage();
 
-        for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
-          line += 1;
-          checkForNewPage();
+                contentStream.beginText();
+                contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 12);
+                contentStream.newLineAtOffset(200, rect.getHeight() - 50 * (line));
 
-          contentStream.beginText();
-          contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 12);
-          contentStream.newLineAtOffset(200, rect.getHeight() - 50 * (line));
+                String mwsHead = mainBundle.getString("dataexport.mwshead") + count;
+                contentStream.showText(mwsHead);
+                contentStream.newLine();
 
-          String mwsHead = mainBundle.getString("dataexport.mwshead") + count;
-          contentStream.showText(mwsHead);
-          contentStream.newLine();
+                String mwsDate = mainBundle.getString("plotview.date") + " " + mws.getDate();
+                contentStream.showText(mwsDate);
+                contentStream.newLine();
 
-          String mwsDate = mainBundle.getString("plotview.date") + " " + mws.getDate();
-          contentStream.showText(mwsDate);
-          contentStream.newLine();
+                String mwsIrrigation1 = mainBundle.getString("plotview.irrigation") + " ";
+                contentStream.showText(mwsIrrigation1);
+                if (mws.getIrrigation() > 0.0) {
+                  contentStream.setNonStrokingColor(Color.BLUE);
+                } else {
+                  contentStream.setNonStrokingColor(Color.RED);
+                }
 
-          String mwsIrrigation1 = mainBundle.getString("plotview.irrigation") + " ";
-          contentStream.showText(mwsIrrigation1);
-          if (mws.getIrrigation() > 0.0) {
-            contentStream.setNonStrokingColor(Color.BLUE);
-          } else {
-            contentStream.setNonStrokingColor(Color.RED);
+                String mwsMm = "mm";
+
+                String mwsIrrigation2 = df2.format(mws.getIrrigation());
+                contentStream.showText(mwsIrrigation2);
+                contentStream.setNonStrokingColor(Color.BLACK);
+                contentStream.showText(mwsMm);
+                contentStream.newLine();
+
+                String mwsPrecipitation1 = mainBundle.getString("plotview.precipitation") + " ";
+                contentStream.showText(mwsPrecipitation1);
+                if (mws.getPrecipitation() > 0.0) {
+                  contentStream.setNonStrokingColor(Color.BLUE);
+                } else {
+                  contentStream.setNonStrokingColor(Color.RED);
+                }
+                String mwsPrecipitation2 = df2.format(mws.getPrecipitation());
+                contentStream.showText(mwsPrecipitation2);
+                contentStream.setNonStrokingColor(Color.BLACK);
+                contentStream.showText(mwsMm);
+                contentStream.newLine();
+
+                contentStream.endText();
+                line += 1;
+                count++;
+              }
+            }
           }
-
-          String mwsMm = "mm";
-
-          String mwsIrrigation2 = df2.format(mws.getIrrigation());
-          contentStream.showText(mwsIrrigation2);
-          contentStream.setNonStrokingColor(Color.BLACK);
-          contentStream.showText(mwsMm);
-          contentStream.newLine();
-
-          String mwsPrecipitation1 = mainBundle.getString("plotview.precipitation") + " ";
-          contentStream.showText(mwsPrecipitation1);
-          if (mws.getPrecipitation() > 0.0) {
-            contentStream.setNonStrokingColor(Color.BLUE);
-          } else {
-            contentStream.setNonStrokingColor(Color.RED);
-          }
-          String mwsPrecipitation2 = df2.format(mws.getPrecipitation());
-          contentStream.showText(mwsPrecipitation2);
-          contentStream.setNonStrokingColor(Color.BLACK);
-          contentStream.showText(mwsMm);
-          contentStream.newLine();
-
-          contentStream.endText();
-          line += 1;
-          count++;
         }
       }
     }
