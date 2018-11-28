@@ -1,5 +1,10 @@
 package de.hgu.gsehen.gsbalance;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
@@ -9,11 +14,6 @@ import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilManualData;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
 
 public class TotalBalance {
 
@@ -55,7 +55,8 @@ public class TotalBalance {
     }
     SoilManualData soilManualData = soilProfile.getSoilManualData();
     Integer soilZone;
-    if (soilManualData != null && soilManualData.getSoilZone() != null) {
+    if (soilManualData != null && soilManualData.getSoilZone() != null) { // TODO: FIX? && in
+                                                                          // zweites if
       soilZone = soilManualData.getSoilZone();
     } else {
       soilZone = 10;
@@ -175,13 +176,21 @@ public class TotalBalance {
     SoilManualData soilManualData = soilProfile.getSoilManualData();
     Double rainMax;
     Integer daysPause;
-    if (soilManualData != null && soilManualData.getRainMax() != null) {
-      rainMax = soilManualData.getRainMax();
+    if (soilManualData != null) {
+      if (soilManualData.getRainMax() != null) {
+        rainMax = soilManualData.getRainMax();
+      } else {
+        rainMax = 30.0;
+      }
     } else {
       rainMax = 30.0;
     }
-    if (soilManualData != null && soilManualData.getDaysPause() != null) {
-      daysPause = soilManualData.getDaysPause();
+    if (soilManualData != null) {
+      if (soilManualData.getDaysPause() != null) {
+        daysPause = soilManualData.getDaysPause();
+      } else {
+        daysPause = 2;
+      }
     } else {
       daysPause = 2;
     }
