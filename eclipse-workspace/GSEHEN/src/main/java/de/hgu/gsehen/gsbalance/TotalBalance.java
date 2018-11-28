@@ -55,9 +55,12 @@ public class TotalBalance {
     }
     SoilManualData soilManualData = soilProfile.getSoilManualData();
     Integer soilZone;
-    if (soilManualData != null && soilManualData.getSoilZone() != null) { // TODO: FIX? && in
-                                                                          // zweites if
-      soilZone = soilManualData.getSoilZone();
+    if (soilManualData != null) {
+      if (soilManualData.getSoilZone() != null) {
+        soilZone = soilManualData.getSoilZone();
+      } else {
+        soilZone = 10;
+      }
     } else {
       soilZone = 10;
     }
