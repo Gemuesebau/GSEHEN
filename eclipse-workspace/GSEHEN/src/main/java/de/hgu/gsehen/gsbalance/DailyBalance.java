@@ -32,8 +32,12 @@ public class DailyBalance {
     Double kc3 = crop.getKc3();
     Double kc4 = crop.getKc4();
     Double soilKc;
-    if (soilProfile != null && soilProfile.getSoilManualData().getSoilKc() != null) {
-      soilKc = soilProfile.getSoilManualData().getSoilKc();
+    if (soilProfile != null) {
+      if (soilProfile.getSoilManualData().getSoilKc() != null) {
+        soilKc = soilProfile.getSoilManualData().getSoilKc();
+      } else {
+        soilKc = 0.3;
+      }
     } else {
       soilKc = 0.3;
     }
