@@ -63,6 +63,7 @@ public class DataExport {
   private int plotCounter;
   private Boolean mwsCheck;
   private Text mwsWarning;
+  private DecimalFormat df2;
 
   private PDDocument exportDocument;
   private PDPage page;
@@ -307,7 +308,7 @@ public class DataExport {
       contentStream.newLine();
       contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 9);
 
-      DecimalFormat df2 = new DecimalFormat("#.##");
+      df2 = new DecimalFormat("#.##");
 
       String fieldAreaString = mainBundle.getString("fieldview.area") + " "
           + df2.format(field.getArea());
@@ -428,15 +429,21 @@ public class DataExport {
         contentStream.showText(recommendedAction);
       } else if (plot.getRecommendedAction().getRecommendation().toString().equals("SOON")) {
         String recommendedAction1 = mainBundle.getString("treetableview.watering") + " "
-            + mainBundle.getString("dataexport.soon1");
+            + mainBundle.getString("dataexport.soon1") + " "
+            + df2.format(plot.getRecommendedAction().getAvailableWater())
+            + mainBundle.getString("dataexport.soon2");
         contentStream.showText(recommendedAction1);
         contentStream.newLine();
-        String recommendedAction2 = mainBundle.getString("dataexport.soon2");
+        String recommendedAction2 = mainBundle.getString("dataexport.soon3") + " "
+            + plot.getRecommendedAction().getProjectedDaysToIrrigation() + " "
+            + mainBundle.getString("dataexport.soon4");
         contentStream.showText(recommendedAction2);
         line += 1;
       } else if (plot.getRecommendedAction().getRecommendation().toString().equals("NOW")) {
         String recommendedAction1 = mainBundle.getString("treetableview.watering") + " "
-            + mainBundle.getString("dataexport.now1");
+            + mainBundle.getString("dataexport.now1") + " "
+            + df2.format(plot.getRecommendedAction().getAvailableWater())
+            + mainBundle.getString("dataexport.soon2");
         contentStream.showText(recommendedAction1);
         contentStream.newLine();
         String recommendedAction2 = mainBundle.getString("dataexport.now2");
