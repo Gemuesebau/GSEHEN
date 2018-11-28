@@ -1047,7 +1047,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     Platform.runLater(new Runnable() {
       @Override
       public void run() {
-        action.setText(getRecommendedActionText(plot));
+        action = new Text(getRecommendedActionText(plot));
       }
     });
   }
