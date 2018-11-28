@@ -128,7 +128,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private static final String FILTER_LABEL_ID = "#filterLabel";
   private static final String FILTER_FIELD_ID = "#filterField";
   private static final String DETAIL_BORDER_PANE_ID = "#detailBorderPane";
-  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(GsehenTreeTable.class.getName());
   // private static final String PLOT_RECOMMENDED_ACTION_TEXT_ID = "#plotRecommendedActionText";
 
   private Farm farm;
