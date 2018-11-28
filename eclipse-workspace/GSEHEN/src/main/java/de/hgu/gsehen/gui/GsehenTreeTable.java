@@ -201,6 +201,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     farmTreeView.setRoot(rootItem);
     farmTreeView.setShowRoot(false);
     farmTreeView.setEditable(true);
+    
+    action = new Text();
 
     tabPane = gsehenInstance.getMainController().getJfxTabPane();
 
@@ -428,7 +430,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                     attributeLabel3, attribute3, startLabel, startDate, soilValueLabel, soilValue);
 
                 if (plot.getSoilStartValue() != null && plot.getRecommendedAction() != null) {
-                  action = new Text(getRecommendedActionText(
+                  action.setText(getRecommendedActionText(
                       plot)/*
                             * + " : " + new
                             * java.text.SimpleDateFormat("EE., dd.MM.yyyy, HH:mm:ss.SSS",
@@ -1047,7 +1049,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     Platform.runLater(new Runnable() {
       @Override
       public void run() {
-        action = new Text(getRecommendedActionText(plot));
+        action.setText(getRecommendedActionText(plot));
       }
     });
   }
