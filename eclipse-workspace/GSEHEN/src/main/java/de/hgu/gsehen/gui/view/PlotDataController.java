@@ -50,6 +50,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
@@ -68,6 +69,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -135,6 +137,11 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private String pattern;
   private Double lat = 0.0;
   private Double lng = 0.0;
+  private XYChart.Series<String, Number> series1;
+  private XYChart.Series<String, Number> series2;
+  private XYChart.Series<String, Number> series3;
+  private BarChart<String, Number> wateringBarChart;
+  private XYChart.Data<String, Number> wateringData;
 
   {
     instance = this;
@@ -409,6 +416,44 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     series = new XYChart.Series();
     chart.getData().addAll(series);
 
+    /*
+     * TODO: Layout anpassen, Balken nach Datum sortieren, Balken stacken?, Liniendiagramm einfügen
+     * (siehe https://stackoverflow.com/questions/28788117/stacking-charts-in-javafx)
+     */
+
+    // Bewässerungsgrafik (Accordion)
+    TitledPane wateringGraphicPane = new TitledPane();
+    wateringGraphicPane.setText("Grafik");
+
+    // x-axis and y-axis for both charts:
+    final CategoryAxis xAxis = new CategoryAxis();
+    xAxis.setLabel("Datum");
+    final NumberAxis yAxis = new NumberAxis();
+    yAxis.setLabel("Wasserbilanz (mm)");
+
+    // first chart:
+    wateringBarChart = new BarChart<>(xAxis, yAxis);
+    wateringBarChart.setLegendVisible(false);
+    wateringBarChart.setAnimated(false);
+    series1 = new XYChart.Series<>();
+    series1.setName("irriAndPrec");
+    series2 = new XYChart.Series<>();
+    series2.setName("irri");
+    series3 = new XYChart.Series<>();
+    series3.setName("prec");
+
+    ScrollPane wateringScrollPane = new ScrollPane();
+    wateringScrollPane.setContent(wateringBarChart);
+    wateringScrollPane.setPannable(true);
+
+    wateringGraphicPane.setContent(wateringScrollPane);
+
+    Accordion wateringGraphicAccordion = new Accordion();
+    wateringGraphicAccordion.getPanes().add(wateringGraphicPane);
+
+    StackPane wateringStackPane = new StackPane();
+    wateringStackPane.getChildren().add(wateringGraphicAccordion);
+
     // Bewässerungsfaktor
     scalingFactor = new JFXSlider();
     scalingFactor.setMin(-100.0);
@@ -452,22 +497,23 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane.setConstraints(startTypeLabel, 0, 4);
     GridPane.setConstraints(startType, 1, 4);
 
-    GridPane.setConstraints(cropLabel, 0, 7);
-    GridPane.setConstraints(cropChoiceBox, 1, 7);
-    GridPane.setConstraints(descriptionAccordion, 2, 7);
-    GridPane.setConstraints(tablePane, 0, 8, 3, 1);
-    GridPane.setConstraints(nextPhase, 0, 9);
-    GridPane.setConstraints(chart, 0, 10, 3, 1);
-    GridPane.setConstraints(scalingFactorLabel, 0, 11);
-    GridPane.setConstraints(scalingFactor, 1, 11, 2, 1);
-    GridPane.setConstraints(scalingValue, 3, 11);
+    GridPane.setConstraints(cropLabel, 0, 8);
+    GridPane.setConstraints(cropChoiceBox, 1, 8);
+    GridPane.setConstraints(descriptionAccordion, 2, 8);
+    GridPane.setConstraints(tablePane, 0, 9, 3, 1);
+    GridPane.setConstraints(nextPhase, 0, 10);
+    GridPane.setConstraints(chart, 0, 11, 3, 1);
+    GridPane.setConstraints(wateringStackPane, 0, 12, 3, 1);
+    GridPane.setConstraints(scalingFactorLabel, 0, 13);
+    GridPane.setConstraints(scalingFactor, 1, 13, 2, 1);
+    GridPane.setConstraints(scalingValue, 3, 13);
 
     // GridPane - Center Section
     GridPane centerGrid = gsehenGuiElements.gridPane(pane);
     centerGrid.getChildren().addAll(nameLabel, name, areaLabel, area, locationLabel, location,
         rootingZoneLabel, rootingZone, startTypeLabel, startType, cropLabel, cropChoiceBox,
-        descriptionAccordion, tablePane, nextPhase, chart, scalingFactorLabel, scalingFactor,
-        scalingValue);
+        descriptionAccordion, tablePane, nextPhase, chart, wateringStackPane, scalingFactorLabel,
+        scalingFactor, scalingValue);
 
     startType.valueProperty().addListener(new ChangeListener<String>() {
       @Override
@@ -482,14 +528,16 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           centerGrid.getChildren().addAll(cropStartLabel, cropStart, soilStartValueLabel,
               soilStartValue);
         } else {
-          GridPane.setConstraints(soilStartLabel, 0, 5);
-          GridPane.setConstraints(soilStart, 1, 5);
-          GridPane.setConstraints(soilStartValueLabel, 0, 6);
-          GridPane.setConstraints(soilStartValue, 1, 6);
+          GridPane.setConstraints(cropStartLabel, 0, 5);
+          GridPane.setConstraints(cropStart, 1, 5);
+          GridPane.setConstraints(soilStartLabel, 0, 6);
+          GridPane.setConstraints(soilStart, 1, 6);
+          GridPane.setConstraints(soilStartValueLabel, 0, 7);
+          GridPane.setConstraints(soilStartValue, 1, 7);
           centerGrid.getChildren().removeAll(cropStartLabel, cropStart, soilStartLabel, soilStart,
               soilStartValueLabel, soilStartValue);
-          centerGrid.getChildren().addAll(soilStartLabel, soilStart, soilStartValueLabel,
-              soilStartValue);
+          centerGrid.getChildren().addAll(cropStartLabel, cropStart, soilStartLabel, soilStart,
+              soilStartValueLabel, soilStartValue);
         }
       }
     });
@@ -922,6 +970,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             }
           }
 
+          setWateringChartData();
+
           gsehenInstance.sendFarmDataChanged(plot, null);
           gsehenInstance.sendManualDataChanged(field, plot, wateringDate, null);
           // dialog.close();
@@ -1086,6 +1136,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             });
           }
 
+          if (plot.getManualData() != null) {
+            setWateringChartData();
+          }
+
           if (plot.getScalingFactor() != null) {
             scalingFactor.setValue((plot.getScalingFactor() * 100) - 100);
           }
@@ -1143,6 +1197,41 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
         } else {
           pane.setVisible(false);
+        }
+      }
+    }
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  private void setWateringChartData() {
+    for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
+      wateringData = new XYChart.Data<String, Number>();
+      if (mws.getPrecipitation() != 0.0 && mws.getIrrigation() != 0.0) {
+        wateringData = new XYChart.Data(mws.getDate().toString(),
+            mws.getPrecipitation() + mws.getIrrigation());
+        series1.getData().add(wateringData);
+      } else if (mws.getPrecipitation() != 0.0 && mws.getIrrigation() == 0.0) {
+        wateringData = new XYChart.Data(mws.getDate().toString(), mws.getPrecipitation());
+        series2.getData().add(wateringData);
+      } else if (mws.getIrrigation() != 0.0 && mws.getPrecipitation() == 0.0) {
+        wateringData = new XYChart.Data(mws.getDate().toString(), mws.getIrrigation());
+        series3.getData().add(wateringData);
+      }
+    }
+    wateringBarChart.getData().addAll(series1, series2, series3);
+
+    for (XYChart.Series<String, Number> series : wateringBarChart.getData()) {
+      if (series.getName().equals("irriAndPrec")) {
+        for (Data data : series.getData()) {
+          data.getNode().setStyle("-fx-bar-fill: green;");
+        }
+      } else if (series.getName().equals("irri")) {
+        for (Data data : series.getData()) {
+          data.getNode().setStyle("-fx-bar-fill: yellow;");
+        }
+      } else if (series.getName().equals("prec")) {
+        for (Data data : series.getData()) {
+          data.getNode().setStyle("-fx-bar-fill: blue;");
         }
       }
     }

@@ -101,3 +101,7 @@
   -fx-font-weight: bold;
   -fx-effect: dropshadow( gaussian , rgba(255.0,255.0,255.0,0.5) , 0.0,0.0,0.0,1.0 );  
 }
+
+.default-color0.chart-bar { -fx-bar-fill: green; }
+.default-color1.chart-bar { -fx-bar-fill: yellow; }
+.default-color2.chart-bar { -fx-bar-fill: blue; }
