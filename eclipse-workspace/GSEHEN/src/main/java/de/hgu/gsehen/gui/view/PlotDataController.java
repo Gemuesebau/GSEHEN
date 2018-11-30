@@ -25,6 +25,7 @@ import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.util.DateUtil;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.Format;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -39,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -48,7 +50,6 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
@@ -135,11 +136,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private String pattern;
   private Double lat = 0.0;
   private Double lng = 0.0;
-  private XYChart.Series<String, Number> series1;
-  private XYChart.Series<String, Number> series2;
-  private XYChart.Series<String, Number> series3;
+  private ObservableList<XYChart.Series<String, Number>> series1;
   private BarChart<String, Number> wateringBarChart;
-  private XYChart.Data<String, Number> wateringData;
+  private ObservableList<XYChart.Data<String, Number>> wateringDataList;
 
   {
     instance = this;
@@ -429,15 +428,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     yAxis.setLabel("Wasserbilanz (mm)");
 
     // first chart:
-    wateringBarChart = new BarChart<>(xAxis, yAxis);
+    wateringBarChart = new BarChart(xAxis, yAxis);
     wateringBarChart.setLegendVisible(false);
     wateringBarChart.setAnimated(false);
-    series1 = new XYChart.Series<>();
-    series1.setName("irriAndPrec");
-    series2 = new XYChart.Series<>();
-    series2.setName("irri");
-    series3 = new XYChart.Series<>();
-    series3.setName("prec");
+    series1 = FXCollections.observableArrayList();
 
     ScrollPane wateringScrollPane = new ScrollPane();
     wateringScrollPane.setContent(wateringBarChart);
@@ -1088,7 +1082,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private void treeViewUpdate() {
     bottomBox.getChildren().clear();
     bottomBox.getChildren().addAll(harvest, watering, save);
-    plot = null;
     cropStart.setValue(null);
     soilStart.setValue(null);
     for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
@@ -1140,10 +1133,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             });
           }
 
-          if (plot.getManualData() != null) {
-            setWateringChartData();
-          }
-
           if (plot.getScalingFactor() != null) {
             scalingFactor.setValue((plot.getScalingFactor() * 100) - 100);
           }
@@ -1189,7 +1178,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
           setTableData();
 
-          // setChartData();
+          if (plot.getManualData() != null && wateringBarChart.getData().isEmpty()) {
+            setWateringChartData();
+          }
+
           if (plot.getRecommendedAction() != null
               && plot.getRecommendedAction().getAvailableWater() != null) {
             setChartData();
@@ -1205,36 +1197,47 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   @SuppressWarnings({"unchecked", "rawtypes"})
   private void setWateringChartData() {
     for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
-      wateringData = new XYChart.Data<String, Number>();
+      wateringDataList = FXCollections.observableArrayList();
+      XYChart.Data<String, Number> wateringData = new XYChart.Data();
+      Format formatter = new SimpleDateFormat("dd.MM.yy");
+      String dateString = formatter.format(mws.getDate());
       if (mws.getPrecipitation() != 0.0 && mws.getIrrigation() != 0.0) {
-        wateringData = new XYChart.Data(mws.getDate().toString(),
-            mws.getPrecipitation() + mws.getIrrigation());
-        series1.getData().add(wateringData);
+        wateringData = new XYChart.Data(dateString, mws.getPrecipitation() + mws.getIrrigation());
+        wateringDataList.add(wateringData);
+        wateringData.nodeProperty().addListener(new ChangeListener<Node>() {
+          @Override
+          public void changed(ObservableValue<? extends Node> ov, Node oldNode, Node newNode) {
+            if (newNode != null) {
+              newNode.setStyle("-fx-bar-fill: green;");
+            }
+          }
+        });
       } else if (mws.getPrecipitation() != 0.0 && mws.getIrrigation() == 0.0) {
-        wateringData = new XYChart.Data(mws.getDate().toString(), mws.getPrecipitation());
-        series2.getData().add(wateringData);
+        wateringData = new XYChart.Data(dateString, mws.getPrecipitation());
+        wateringDataList.add(wateringData);
+        wateringData.nodeProperty().addListener(new ChangeListener<Node>() {
+          @Override
+          public void changed(ObservableValue<? extends Node> ov, Node oldNode, Node newNode) {
+            if (newNode != null) {
+              newNode.setStyle("-fx-bar-fill: blue;");
+            }
+          }
+        });
       } else if (mws.getIrrigation() != 0.0 && mws.getPrecipitation() == 0.0) {
-        wateringData = new XYChart.Data(mws.getDate().toString(), mws.getIrrigation());
-        series3.getData().add(wateringData);
+        wateringData = new XYChart.Data(dateString, mws.getIrrigation());
+        wateringDataList.add(wateringData);
+        wateringData.nodeProperty().addListener(new ChangeListener<Node>() {
+          @Override
+          public void changed(ObservableValue<? extends Node> ov, Node oldNode, Node newNode) {
+            if (newNode != null) {
+              newNode.setStyle("-fx-bar-fill: yellow;");
+            }
+          }
+        });
       }
+      series1.add(new XYChart.Series<>(wateringDataList));
     }
-    wateringBarChart.getData().addAll(series1, series2, series3);
-
-    for (XYChart.Series<String, Number> series : wateringBarChart.getData()) {
-      if (series.getName().equals("irriAndPrec")) {
-        for (Data data : series.getData()) {
-          data.getNode().setStyle("-fx-bar-fill: green;");
-        }
-      } else if (series.getName().equals("irri")) {
-        for (Data data : series.getData()) {
-          data.getNode().setStyle("-fx-bar-fill: yellow;");
-        }
-      } else if (series.getName().equals("prec")) {
-        for (Data data : series.getData()) {
-          data.getNode().setStyle("-fx-bar-fill: blue;");
-        }
-      }
-    }
+    wateringBarChart.getData().addAll(series1);
   }
 
   public BorderPane getPane() {
