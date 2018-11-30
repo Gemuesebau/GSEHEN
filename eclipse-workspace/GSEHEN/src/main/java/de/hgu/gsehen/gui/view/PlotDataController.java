@@ -6,7 +6,6 @@ import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXTextField;
 import com.sun.javafx.charts.Legend;
-
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.event.FarmDataChanged;
@@ -37,7 +36,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
-
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -150,8 +148,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     cropList = gsehenInstance.getCrops();
     gsehenGuiElements = new GsehenGuiElements();
 
-    DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,
-        gsehenInstance.getSelectedLocale());
+    DateFormat dateFormat =
+        DateFormat.getDateInstance(DateFormat.SHORT, gsehenInstance.getSelectedLocale());
     pattern = ((SimpleDateFormat) dateFormat).toPattern();
 
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
@@ -164,15 +162,14 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   /**
    * Constructs a new plot data controller associated with the given BorderPane.
    *
-   * @param pane
-   *          - the associated BorderPane.
+   * @param pane - the associated BorderPane.
    */
   public PlotDataController(Gsehen application, BorderPane pane) {
     this.gsehenInstance = application;
     this.pane = pane;
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public void handle(FarmDataChanged event) {
     pane.setVisible(false);
@@ -481,8 +478,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     });
 
     Text cropLabel = gsehenGuiElements.text(mainBundle.getString("plotview.crop"));
-    Text scalingFactorLabel = gsehenGuiElements
-        .text(mainBundle.getString("plotview.scalingfactor"));
+    Text scalingFactorLabel =
+        gsehenGuiElements.text(mainBundle.getString("plotview.scalingfactor"));
     Text startTypeLabel = gsehenGuiElements.text(mainBundle.getString("plotview.starttype"));
 
     // Set Row & Column Index for Nodes
@@ -604,8 +601,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     tabPane = gsehenInstance.getMainController().getJfxTabPane();
 
     // Actions that will happen, if you click a 'plot' in the TreeTableView
-    treeTableView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
-        .lookup(FARM_TREE_VIEW_ID);
+    treeTableView =
+        (TreeTableView<Drawable>) Gsehen.getInstance().getScene().lookup(FARM_TREE_VIEW_ID);
     treeTableView.getSelectionModel().selectedItemProperty()
         .addListener(new ChangeListener<Object>() {
           @Override
@@ -616,7 +613,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     currentItem = treeTableView.getSelectionModel().getSelectedIndex();
   }
 
-  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @SuppressWarnings({"rawtypes", "unchecked"})
   private void setChartData() {
     if (plot != null && plot.getRecommendedAction() != null) {
       if (plot.getRecommendedAction().getProjectedDaysToIrrigation() != null) {
@@ -627,8 +624,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           final List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();
           if (!dailyBalances.isEmpty()) {
             int waterBalance = dailyBalances.size() - 1;
-            availableSoilWater = dailyBalances.get(waterBalance).getCurrentAvailableSoilWater()
-                * 1.1;
+            availableSoilWater =
+                dailyBalances.get(waterBalance).getCurrentAvailableSoilWater() * 1.1;
             axisY.setUpperBound(availableSoilWater);
           }
         }
@@ -706,14 +703,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     Date soildate = plot.getSoilStartDate();
 
     if (cropdate != null || soildate != null && plot.getCropDevelopmentStatus() != null) {
-      todayDate = Date
-          .from(java.time.LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+      todayDate =
+          Date.from(java.time.LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
       Date startDate = null;
       if (cropdate != null) {
         startDate = cropdate;
-      } else if (soildate != null) {
-        startDate = soildate;
       }
       Calendar calendar = Calendar.getInstance();
       calendar.setTime(startDate);
@@ -820,8 +815,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       manualData = plot.getManualData();
       irrigation.setText(gsehenInstance.formatDoubleTwoDecimal(0.0));
       precipitation.setText(gsehenInstance.formatDoubleOneDecimal(0.0));
-      Date wateringDate = Date
-          .from(date.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+      Date wateringDate =
+          Date.from(date.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
       for (ManualWaterSupply mws : manualData.getManualWaterSupply()) {
         if (wateringDate.equals(mws.getDate())) {
           irrigation
@@ -837,8 +832,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     unit.valueProperty().addListener((ov, oldValue, newValue) -> {
       for (ManualWaterSupply mws : md.getManualWaterSupply()) {
-        Date wateringDate = Date
-            .from(date.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date wateringDate =
+            Date.from(date.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
         if ((wateringDate.compareTo(mws.getDate()) == 0)
             && unit.getSelectionModel().getSelectedItem().equals("Liter")) {
           irrigation
@@ -878,13 +873,13 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
-    Text watering = gsehenGuiElements.text(mainBundle.getString("plotview.manual"),
-        FontWeight.BOLD);
+    Text watering =
+        gsehenGuiElements.text(mainBundle.getString("plotview.manual"), FontWeight.BOLD);
     Text dateLabel = gsehenGuiElements.text(mainBundle.getString("plotview.date"));
     Text unitLabel = gsehenGuiElements.text(mainBundle.getString("plotview.unit"));
     Text irrigationLabel = gsehenGuiElements.text(mainBundle.getString("plotview.irrigation"));
-    Text precipitationLabel = gsehenGuiElements
-        .text(mainBundle.getString("plotview.precipitation"));
+    Text precipitationLabel =
+        gsehenGuiElements.text(mainBundle.getString("plotview.precipitation"));
 
     // Set Row & Column Index for Nodes
     GridPane.setConstraints(watering, 0, 0);
@@ -1011,24 +1006,30 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   }
 
   private void savePlot() {
-    if (cropStart.getValue() != null || soilStart.getValue() != null) {
+    if (soilStart.getValue() != null && cropStart.getValue() != null
+        || cropStart.getValue() != null) {
       if (!name.getText().isEmpty() && cropChoiceBox.getValue() != null) {
         try {
           plot.setName(name.getText());
           plot.setCrop(cropChoiceBox.getValue());
 
-          if (cropStart.getValue() != null) {
+          if (soilStart.getValue() != null && cropStart.getValue() != null) {
+            LocalDate localDateSoil = soilStart.getValue();
+            Date soilDate =
+                Date.from(localDateSoil.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            plot.setSoilStartDate(soilDate);
+
             LocalDate localDateCrop = cropStart.getValue();
-            Date cropDate = Date
-                .from(localDateCrop.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date cropDate =
+                Date.from(localDateCrop.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            plot.setCropStart(cropDate);
+          } else if (soilStart.getValue() == null && cropStart.getValue() != null) {
+            LocalDate localDateCrop = cropStart.getValue();
+            Date cropDate =
+                Date.from(localDateCrop.atStartOfDay(ZoneId.systemDefault()).toInstant());
             plot.setCropStart(cropDate);
           }
-          if (soilStart.getValue() != null) {
-            LocalDate localDateSoil = soilStart.getValue();
-            Date soilDate = Date
-                .from(localDateSoil.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            plot.setSoilStartDate(soilDate);
-          }
+
           if (!rootingZone.getText().equals("0") && !rootingZone.getText().isEmpty()) {
             plot.setRootingZone(Integer.valueOf(rootingZone.getText()));
           } else {
@@ -1087,6 +1088,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private void treeViewUpdate() {
     bottomBox.getChildren().clear();
     bottomBox.getChildren().addAll(harvest, watering, save);
+    plot = null;
+    cropStart.setValue(null);
+    soilStart.setValue(null);
     for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
       if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
         selectedItem = treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
@@ -1151,20 +1155,16 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           Date date = plot.getSoilStartDate();
           Date cropdate = plot.getCropStart();
 
-          if (date != null) {
+          if (date != null && cropdate != null) {
             LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             soilStart.setValue(localDate);
+            LocalDate cropDate = cropdate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            cropStart.setValue(cropDate);
             startType.getSelectionModel().select(mainBundle.getString("plotview.delayedstart"));
-          } else {
-            soilStart.setValue(null);
-          }
-
-          if (cropdate != null) {
+          } else if (date == null && cropdate != null) {
             LocalDate cropDate = cropdate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             cropStart.setValue(cropDate);
             startType.getSelectionModel().select(mainBundle.getString("plotview.directstart"));
-          } else {
-            cropStart.setValue(null);
           }
 
           if (plot.getRootingZone() != null) {
@@ -1202,7 +1202,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     }
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private void setWateringChartData() {
     for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
       wateringData = new XYChart.Data<String, Number>();
