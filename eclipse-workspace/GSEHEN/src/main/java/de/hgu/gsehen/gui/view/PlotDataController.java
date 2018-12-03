@@ -41,6 +41,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -51,6 +52,8 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.StackedBarChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
@@ -137,11 +140,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private String pattern;
   private Double lat = 0.0;
   private Double lng = 0.0;
-  private ObservableList<XYChart.Series<String, Number>> irriSeries;
-  private ObservableList<XYChart.Series<String, Number>> precSeries;
+  private ObservableList<Data<String, Number>> irriData;
+  private ObservableList<Data<String, Number>> precData;
   private StackedBarChart<String, Number> wateringBarChart;
-  private ObservableList<XYChart.Data<String, Number>> irriDataList;
-  private ObservableList<XYChart.Data<String, Number>> precDataList;
+  boolean isPrec = false;
 
   {
     instance = this;
@@ -417,8 +419,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     chart.getData().addAll(series);
 
     /*
-     * TODO: Layout anpassen, Balken nach Datum sortieren, Legende, Liniendiagramm einfügen
-     * (siehe https://stackoverflow.com/questions/28788117/stacking-charts-in-javafx)
+     * TODO: Layout anpassen, Liniendiagramm einfügen (siehe
+     * https://stackoverflow.com/questions/28788117/stacking-charts-in-javafx)
      */
 
     // Bewässerungsgrafik (Accordion)
@@ -433,10 +435,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     // first chart:
     wateringBarChart = new StackedBarChart(xAxis, yAxis);
-    wateringBarChart.setLegendVisible(false);
-    wateringBarChart.setAnimated(false);
-    irriSeries = FXCollections.observableArrayList();
-    precSeries = FXCollections.observableArrayList();
+    wateringBarChart.setLegendSide(Side.RIGHT);
+    irriData = FXCollections.observableArrayList();
+    precData = FXCollections.observableArrayList();
 
     ScrollPane wateringScrollPane = new ScrollPane();
     wateringScrollPane.setContent(wateringBarChart);
@@ -1202,43 +1203,71 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   private void setWateringChartData() {
     for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
-      irriDataList = FXCollections.observableArrayList();
-      precDataList = FXCollections.observableArrayList();
-      XYChart.Data<String, Number> wateringData = new XYChart.Data();
-      Format formatter = new SimpleDateFormat("dd.MM.yy");
+      Data<String, Number> wateringData = new XYChart.Data();
+      Format formatter = new SimpleDateFormat("yyyy-MM-dd");
       String dateString = formatter.format(mws.getDate());
 
       if (mws.getPrecipitation() != 0.0) {
         wateringData = new XYChart.Data(dateString, mws.getPrecipitation());
-        precDataList.add(wateringData);
-        wateringData.nodeProperty().addListener(new ChangeListener<Node>() {
-          @Override
-          public void changed(ObservableValue<? extends Node> ov, Node oldNode, Node newNode) {
-            if (newNode != null) {
-              newNode.setStyle("-fx-bar-fill: blue;");
-            }
-          }
-        });
+        isPrec = true;
+        addData(precData, wateringData);
       }
-      
-      if (mws.getPrecipitation() != 0.0) {
+
+      if (mws.getIrrigation() != 0.0) {
         wateringData = new XYChart.Data(dateString, mws.getIrrigation());
-        irriDataList.add(wateringData);
-        wateringData.nodeProperty().addListener(new ChangeListener<Node>() {
-          @Override
-          public void changed(ObservableValue<? extends Node> ov, Node oldNode, Node newNode) {
-            if (newNode != null) {
-              newNode.setStyle("-fx-bar-fill: yellow;");
-            }
-          }
-        });
-        
+        isPrec = false;
+        addData(irriData, wateringData);
       }
-      irriSeries.add(new XYChart.Series<>(irriDataList));
-      precSeries.add(new XYChart.Series<>(precDataList));
     }
-    wateringBarChart.getData().addAll(precSeries);
-    wateringBarChart.getData().addAll(irriSeries);
+    ObservableList<Data<String, Number>> data = FXCollections.observableArrayList();
+    for (Data precData : precData) {
+      data.add(precData);
+    }
+    for (Data irriData : irriData) {
+      data.add(irriData);
+    }
+    SortedList dataList = new SortedList<>(data,
+        (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
+    wateringBarChart.getData().addAll(new Series<>(dataList));
+    Legend legend = (Legend) wateringBarChart.lookup(".chart-legend");
+    legend.getItems().clear();
+    Legend.LegendItem li1 = new Legend.LegendItem(mainBundle.getString("dataexport.precipitation"),
+        new Rectangle(10, 4, Color.BLUE));
+    Legend.LegendItem li2 = new Legend.LegendItem(mainBundle.getString("dataexport.irrigation"),
+        new Rectangle(10, 4, Color.YELLOW));
+    legend.getItems().setAll(li1, li2);
+  }
+
+  private void addData(ObservableList<Data<String, Number>> dataList,
+      Data<String, Number> wateringData) {
+    System.out.println(wateringData.getXValue());
+    Data<String, Number> dataAtDate = dataList.stream()
+        .filter(d -> d.getXValue().equals(wateringData.getXValue())).findAny().orElseGet(() -> {
+          Data<String, Number> newData = new Data<String, Number>(
+              wateringData.getXValue().toString(), 0.0);
+          dataList.add(newData);
+          return newData;
+        });
+    dataAtDate.setYValue(dataAtDate.getYValue().doubleValue() + (Double) wateringData.getYValue());
+    if (isPrec) {
+      dataAtDate.nodeProperty().addListener(new ChangeListener<Node>() {
+        @Override
+        public void changed(ObservableValue<? extends Node> ov, Node oldNode, Node newNode) {
+          if (newNode != null) {
+            newNode.setStyle("-fx-bar-fill: blue;");
+          }
+        }
+      });
+    } else {
+      dataAtDate.nodeProperty().addListener(new ChangeListener<Node>() {
+        @Override
+        public void changed(ObservableValue<? extends Node> ov, Node oldNode, Node newNode) {
+          if (newNode != null) {
+            newNode.setStyle("-fx-bar-fill: yellow;");
+          }
+        }
+      });
+    }
   }
 
   public BorderPane getPane() {
