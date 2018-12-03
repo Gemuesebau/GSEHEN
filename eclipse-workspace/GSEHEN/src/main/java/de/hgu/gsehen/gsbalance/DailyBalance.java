@@ -3,7 +3,10 @@ package de.hgu.gsehen.gsbalance;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
@@ -13,6 +16,7 @@ import de.hgu.gsehen.model.SoilProfile;
 
 public class DailyBalance {
 
+  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
   /**
    * Method to determine the current kc-value for the day and actual crop on the plot.
@@ -37,9 +41,11 @@ public class DailyBalance {
         soilKc = soilProfile.getSoilManualData().getSoilKc();
       } else {
         soilKc = 0.3;
+        LOGGER.log(Level.INFO, "No soil kc: set to standard 0.3");
       }
     } else {
       soilKc = 0.3;
+      LOGGER.log(Level.INFO, "No soil kc: set to standard 0.3");
     }
     Double currentKc = null;
     int phase1;
