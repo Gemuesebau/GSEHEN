@@ -49,6 +49,7 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.StackedBarChart;
 import javafx.scene.chart.XYChart;
@@ -143,6 +144,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private ObservableList<Data<String, Number>> irriData;
   private ObservableList<Data<String, Number>> precData;
   private StackedBarChart<String, Number> wateringBarChart;
+  private LineChart<String, Number> lineChart;
   boolean isPrec = false;
 
   {
@@ -435,12 +437,28 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     // first chart:
     wateringBarChart = new StackedBarChart(xAxis, yAxis);
-    wateringBarChart.setLegendSide(Side.RIGHT);
+    wateringBarChart.setLegendSide(Side.TOP);
     irriData = FXCollections.observableArrayList();
     precData = FXCollections.observableArrayList();
 
+    // overlay chart
+    lineChart = new LineChart<String, Number>(xAxis, yAxis);
+    lineChart.setLegendVisible(false);
+    lineChart.setAnimated(false);
+    lineChart.setCreateSymbols(true);
+    lineChart.setAlternativeRowFillVisible(false);
+    lineChart.setAlternativeColumnFillVisible(false);
+    lineChart.setHorizontalGridLinesVisible(false);
+    lineChart.setVerticalGridLinesVisible(false);
+    lineChart.getXAxis().setVisible(false);
+    lineChart.getYAxis().setVisible(false);
+    lineChart.getStylesheets()
+        .addAll(getClass().getResource("/de/hgu/gsehen/style/chart.css").toExternalForm());
+
+    StackPane root = new StackPane();
+    root.getChildren().addAll(wateringBarChart, lineChart);
     ScrollPane wateringScrollPane = new ScrollPane();
-    wateringScrollPane.setContent(wateringBarChart);
+    wateringScrollPane.setContent(root);
     wateringScrollPane.setPannable(true);
 
     wateringGraphicPane.setContent(wateringScrollPane);
@@ -1202,6 +1220,20 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   private void setWateringChartData() {
+    XYChart.Series<String, Number> caswSeries = new XYChart.Series<String, Number>();
+    // if (plot.getRecommendedAction() != null) {
+    // testSeries.getData().add(new XYChart.Data<String, Number>("availableWater",
+    // plot.getRecommendedAction().getAvailableWater()));
+    // testSeries.getData().add(new XYChart.Data<String, Number>("aimWater",
+    // plot.getRecommendedAction().getWaterContentToAim()));
+    // }
+    if (plot.getWaterBalance() != null && plot.getWaterBalance().getDailyBalances() != null) {
+      for (DayData dayData : plot.getWaterBalance().getDailyBalances()) {
+        caswSeries.getData().add(new XYChart.Data<String, Number>(dayData.getDate().toString(),
+            dayData.getCurrentAvailableSoilWater()));
+      }
+    }
+    lineChart.getData().add(caswSeries);
     for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
       Data<String, Number> wateringData = new XYChart.Data();
       Format formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -1235,12 +1267,13 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         new Rectangle(10, 4, Color.BLUE));
     Legend.LegendItem li2 = new Legend.LegendItem(mainBundle.getString("dataexport.irrigation"),
         new Rectangle(10, 4, Color.YELLOW));
-    legend.getItems().setAll(li1, li2);
+    Legend.LegendItem li3 = new Legend.LegendItem("availableSoilWater",
+        new Rectangle(10, 4, Color.GREEN));
+    legend.getItems().setAll(li1, li2, li3);
   }
 
   private void addData(ObservableList<Data<String, Number>> dataList,
       Data<String, Number> wateringData) {
-    System.out.println(wateringData.getXValue());
     Data<String, Number> dataAtDate = dataList.stream()
         .filter(d -> d.getXValue().equals(wateringData.getXValue())).findAny().orElseGet(() -> {
           Data<String, Number> newData = new Data<String, Number>(
