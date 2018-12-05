@@ -151,6 +151,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private ObservableList<Data<String, Number>> data;
   private Legend legend;
   private XYChart.Series<String, Number> caswSeries;
+  private XYChart.Series<String, Number> ctswSeries;
 
   {
     instance = this;
@@ -461,9 +462,11 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     lineChart.getYAxis().setVisible(false);
     lineChart.getStylesheets()
         .addAll(getClass().getResource("/de/hgu/gsehen/style/chart.css").toExternalForm());
-    
+
     caswSeries = new XYChart.Series<String, Number>();
     lineChart.getData().add(caswSeries);
+    ctswSeries = new XYChart.Series<String, Number>();
+    lineChart.getData().add(ctswSeries);
 
     StackPane root = new StackPane();
     root.getChildren().addAll(wateringBarChart, lineChart);
@@ -1237,17 +1240,16 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     if (!caswSeries.getData().isEmpty()) {
       caswSeries.getData().clear();
     }
+    if (!ctswSeries.getData().isEmpty()) {
+      ctswSeries.getData().clear();
+    }
 
-    // if (plot.getRecommendedAction() != null) {
-    // testSeries.getData().add(new XYChart.Data<String, Number>("availableWater",
-    // plot.getRecommendedAction().getAvailableWater()));
-    // testSeries.getData().add(new XYChart.Data<String, Number>("aimWater",
-    // plot.getRecommendedAction().getWaterContentToAim()));
-    // }
     if (plot.getWaterBalance() != null && plot.getWaterBalance().getDailyBalances() != null) {
       for (DayData dayData : plot.getWaterBalance().getDailyBalances()) {
         caswSeries.getData().add(new XYChart.Data<String, Number>(dayData.getDate().toString(),
             dayData.getCurrentAvailableSoilWater()));
+        ctswSeries.getData().add(new XYChart.Data<String, Number>(dayData.getDate().toString(),
+            dayData.getCurrentTotalWaterBalance() * (-1)));
       }
     }
 
