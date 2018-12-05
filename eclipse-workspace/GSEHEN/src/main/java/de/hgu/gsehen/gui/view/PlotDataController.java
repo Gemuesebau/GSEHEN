@@ -152,6 +152,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private Legend legend;
   private XYChart.Series<String, Number> caswSeries;
   private XYChart.Series<String, Number> ctswSeries;
+  private NumberAxis yaxis;
 
   {
     instance = this;
@@ -436,32 +437,36 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     wateringGraphicPane.setText("Grafik");
 
     // x-axis and y-axis for both charts:
-    final CategoryAxis xAxis = new CategoryAxis();
-    xAxis.setLabel("Datum");
-    final NumberAxis yAxis = new NumberAxis();
-    yAxis.setLabel("Wasserbilanz (mm)");
+    CategoryAxis xaxis = new CategoryAxis();
+    xaxis.setLabel("Datum");
+    yaxis = new NumberAxis(0, 20, 2);
+    yaxis.setLabel("Wasserbilanz (mm)");
 
     // first chart:
-    wateringBarChart = new StackedBarChart(xAxis, yAxis);
-    wateringBarChart.setLegendSide(Side.TOP);
+    wateringBarChart = new StackedBarChart(xaxis, yaxis);
+    wateringBarChart.setLegendVisible(false);
     wateringBarChart.setAnimated(false);
+    wateringBarChart.setHorizontalGridLinesVisible(false);
+    wateringBarChart.setVerticalGridLinesVisible(false);
     irriData = FXCollections.observableArrayList();
     precData = FXCollections.observableArrayList();
-    legend = (Legend) wateringBarChart.lookup(".chart-legend");
 
     // overlay chart
-    lineChart = new LineChart<String, Number>(xAxis, yAxis);
-    lineChart.setLegendVisible(false);
+    lineChart = new LineChart<String, Number>(wateringBarChart.getXAxis(),
+        wateringBarChart.getYAxis());
     lineChart.setAnimated(false);
-    lineChart.setCreateSymbols(true);
-    lineChart.setAlternativeRowFillVisible(false);
-    lineChart.setAlternativeColumnFillVisible(false);
+    // lineChart.setCreateSymbols(true);
+    // lineChart.setAlternativeRowFillVisible(false);
+    // lineChart.setAlternativeColumnFillVisible(false);
     lineChart.setHorizontalGridLinesVisible(false);
     lineChart.setVerticalGridLinesVisible(false);
     lineChart.getXAxis().setVisible(false);
     lineChart.getYAxis().setVisible(false);
     lineChart.getStylesheets()
         .addAll(getClass().getResource("/de/hgu/gsehen/style/chart.css").toExternalForm());
+
+    lineChart.setLegendSide(Side.TOP);
+    legend = (Legend) lineChart.lookup(".chart-legend");
 
     caswSeries = new XYChart.Series<String, Number>();
     lineChart.getData().add(caswSeries);
@@ -1219,13 +1224,13 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
           setTableData();
 
-          if (plot.getManualData() != null) {
-            setWateringChartData();
-          }
-
           if (plot.getRecommendedAction() != null
               && plot.getRecommendedAction().getAvailableWater() != null) {
             setChartData();
+          }
+
+          if (plot.getManualData() != null) {
+            setWateringChartData();
           }
 
         } else {
@@ -1237,6 +1242,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   private void setWateringChartData() {
+    yaxis.setUpperBound(availableSoilWater * 1.05);
     if (!caswSeries.getData().isEmpty()) {
       caswSeries.getData().clear();
     }
@@ -1300,9 +1306,11 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         new Rectangle(10, 4, Color.BLUE));
     Legend.LegendItem li2 = new Legend.LegendItem(mainBundle.getString("dataexport.irrigation"),
         new Rectangle(10, 4, Color.YELLOW));
-    Legend.LegendItem li3 = new Legend.LegendItem("availableSoilWater",
+    Legend.LegendItem li3 = new Legend.LegendItem(mainBundle.getString("dataexport.soilwater"),
         new Rectangle(10, 4, Color.GREEN));
-    legend.getItems().setAll(li1, li2, li3);
+    Legend.LegendItem li4 = new Legend.LegendItem(mainBundle.getString("dataexport.totalwater"),
+        new Rectangle(10, 4, Color.ORANGE));
+    legend.getItems().setAll(li1, li2, li3, li4);
   }
 
   private void addData(ObservableList<Data<String, Number>> dataList,
