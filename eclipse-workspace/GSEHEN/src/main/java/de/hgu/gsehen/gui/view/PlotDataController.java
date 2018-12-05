@@ -37,6 +37,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
+
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -152,6 +154,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private Legend legend;
   private XYChart.Series<String, Number> caswSeries;
   private XYChart.Series<String, Number> ctswSeries;
+  private CategoryAxis xaxis;
   private NumberAxis yaxis;
 
   {
@@ -437,7 +440,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     wateringGraphicPane.setText("Grafik");
 
     // x-axis and y-axis for both charts:
-    CategoryAxis xaxis = new CategoryAxis();
+    xaxis = new CategoryAxis();
     xaxis.setLabel("Datum");
     yaxis = new NumberAxis(0, 20, 2);
     yaxis.setLabel("Wasserbilanz (mm)");
@@ -450,6 +453,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     wateringBarChart.setVerticalGridLinesVisible(false);
     irriData = FXCollections.observableArrayList();
     precData = FXCollections.observableArrayList();
+    setMaxCategoryWidth(70, 30);
+    wateringBarChart.widthProperty().addListener((obs, b, b1) -> {
+      Platform.runLater(() -> setMaxCategoryWidth(70, 30));
+    });
 
     // overlay chart
     lineChart = new LineChart<String, Number>(wateringBarChart.getXAxis(),
@@ -1238,6 +1245,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         }
       }
     }
+  }
+
+  private void setMaxCategoryWidth(double maxCategoryWidth, double minCategoryGap) {
+    double catSpace = xaxis.getCategorySpacing();
+    wateringBarChart
+        .setCategoryGap(catSpace - Math.min(maxCategoryWidth, catSpace - minCategoryGap));
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
