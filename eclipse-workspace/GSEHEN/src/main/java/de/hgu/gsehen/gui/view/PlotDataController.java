@@ -145,7 +145,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private ObservableList<Data<String, Number>> precData;
   private StackedBarChart<String, Number> wateringBarChart;
   private LineChart<String, Number> lineChart;
-  boolean isPrec = false;
+  private boolean isPrec = false;
+  @SuppressWarnings("rawtypes")
+  private SortedList dataList;
+  private ObservableList<Data<String, Number>> data;
+  private Legend legend;
+  private XYChart.Series<String, Number> caswSeries;
 
   {
     instance = this;
@@ -438,8 +443,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // first chart:
     wateringBarChart = new StackedBarChart(xAxis, yAxis);
     wateringBarChart.setLegendSide(Side.TOP);
+    wateringBarChart.setAnimated(false);
     irriData = FXCollections.observableArrayList();
     precData = FXCollections.observableArrayList();
+    legend = (Legend) wateringBarChart.lookup(".chart-legend");
 
     // overlay chart
     lineChart = new LineChart<String, Number>(xAxis, yAxis);
@@ -454,6 +461,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     lineChart.getYAxis().setVisible(false);
     lineChart.getStylesheets()
         .addAll(getClass().getResource("/de/hgu/gsehen/style/chart.css").toExternalForm());
+    
+    caswSeries = new XYChart.Series<String, Number>();
+    lineChart.getData().add(caswSeries);
 
     StackPane root = new StackPane();
     root.getChildren().addAll(wateringBarChart, lineChart);
@@ -468,6 +478,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     StackPane wateringStackPane = new StackPane();
     wateringStackPane.getChildren().add(wateringGraphicAccordion);
+
+    data = FXCollections.observableArrayList();
+    dataList = new SortedList<>(data,
+        (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
 
     // Bewässerungsfaktor
     scalingFactor = new JFXSlider();
@@ -543,15 +557,15 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           centerGrid.getChildren().addAll(cropStartLabel, cropStart, soilStartValueLabel,
               soilStartValue);
         } else {
-          GridPane.setConstraints(cropStartLabel, 0, 5);
-          GridPane.setConstraints(cropStart, 1, 5);
-          GridPane.setConstraints(soilStartLabel, 0, 6);
-          GridPane.setConstraints(soilStart, 1, 6);
+          GridPane.setConstraints(soilStartLabel, 0, 5);
+          GridPane.setConstraints(soilStart, 1, 5);
+          GridPane.setConstraints(cropStartLabel, 0, 6);
+          GridPane.setConstraints(cropStart, 1, 6);
           GridPane.setConstraints(soilStartValueLabel, 0, 7);
           GridPane.setConstraints(soilStartValue, 1, 7);
           centerGrid.getChildren().removeAll(cropStartLabel, cropStart, soilStartLabel, soilStart,
               soilStartValueLabel, soilStartValue);
-          centerGrid.getChildren().addAll(cropStartLabel, cropStart, soilStartLabel, soilStart,
+          centerGrid.getChildren().addAll(soilStartLabel, soilStart, cropStartLabel, cropStart,
               soilStartValueLabel, soilStartValue);
         }
       }
@@ -1202,7 +1216,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
           setTableData();
 
-          if (plot.getManualData() != null && wateringBarChart.getData().isEmpty()) {
+          if (plot.getManualData() != null) {
             setWateringChartData();
           }
 
@@ -1220,7 +1234,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   private void setWateringChartData() {
-    XYChart.Series<String, Number> caswSeries = new XYChart.Series<String, Number>();
+    if (!caswSeries.getData().isEmpty()) {
+      caswSeries.getData().clear();
+    }
+
     // if (plot.getRecommendedAction() != null) {
     // testSeries.getData().add(new XYChart.Data<String, Number>("availableWater",
     // plot.getRecommendedAction().getAvailableWater()));
@@ -1233,7 +1250,20 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             dayData.getCurrentAvailableSoilWater()));
       }
     }
-    lineChart.getData().add(caswSeries);
+
+    if (!precData.isEmpty()) {
+      precData.clear();
+    }
+    if (!irriData.isEmpty()) {
+      irriData.clear();
+    }
+    if (!data.isEmpty()) {
+      data.clear();
+    }
+    if (!wateringBarChart.getData().isEmpty()) {
+      wateringBarChart.getData().clear();
+    }
+
     for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
       Data<String, Number> wateringData = new XYChart.Data();
       Format formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -1251,18 +1281,19 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         addData(irriData, wateringData);
       }
     }
-    ObservableList<Data<String, Number>> data = FXCollections.observableArrayList();
+
     for (Data precData : precData) {
       data.add(precData);
     }
     for (Data irriData : irriData) {
       data.add(irriData);
     }
-    SortedList dataList = new SortedList<>(data,
-        (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
+
     wateringBarChart.getData().addAll(new Series<>(dataList));
-    Legend legend = (Legend) wateringBarChart.lookup(".chart-legend");
-    legend.getItems().clear();
+
+    if (!legend.getItems().isEmpty()) {
+      legend.getItems().clear();
+    }
     Legend.LegendItem li1 = new Legend.LegendItem(mainBundle.getString("dataexport.precipitation"),
         new Rectangle(10, 4, Color.BLUE));
     Legend.LegendItem li2 = new Legend.LegendItem(mainBundle.getString("dataexport.irrigation"),
