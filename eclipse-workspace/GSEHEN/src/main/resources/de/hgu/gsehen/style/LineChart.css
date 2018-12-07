@@ -1,6 +1,3 @@
-.chart-plot-background {
-    -fx-background-color: transparent;
-}
 .default-color0.chart-series-line {
     -fx-stroke: blue;
 } 
@@ -8,4 +5,5 @@
     -fx-background-color: blue, white;
 }
 
-.default-color0.chart-series-line { -fx-stroke: green; } 
+.default-color0.chart-series-line { -fx-stroke: green; }
+.default-color1.chart-series-line { -fx-stroke: orange; }

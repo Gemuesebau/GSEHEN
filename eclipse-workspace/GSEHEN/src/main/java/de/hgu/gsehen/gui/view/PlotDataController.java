@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -47,6 +46,7 @@ import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
@@ -61,6 +61,7 @@ import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
@@ -75,6 +76,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -151,7 +154,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   @SuppressWarnings("rawtypes")
   private SortedList dataList;
   private ObservableList<Data<String, Number>> data;
-  private Legend legend;
+  private HBox legend;
   private XYChart.Series<String, Number> caswSeries;
   private XYChart.Series<String, Number> ctswSeries;
   private CategoryAxis xaxis;
@@ -431,7 +434,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     chart.getData().addAll(series);
 
     /*
-     * TODO: Layout anpassen, Liniendiagramm einfügen (siehe
+     * TODO: Bugs beseitigen; Layout; Koordination Linien-/Balkendiagramm (siehe
      * https://stackoverflow.com/questions/28788117/stacking-charts-in-javafx)
      */
 
@@ -442,46 +445,74 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // x-axis and y-axis for both charts:
     xaxis = new CategoryAxis();
     xaxis.setLabel("Datum");
-    yaxis = new NumberAxis(0, 20, 2);
+    yaxis = new NumberAxis(-25, 25, 2);
     yaxis.setLabel("Wasserbilanz (mm)");
 
-    // first chart:
+    // stacked bar chart:
     wateringBarChart = new StackedBarChart(xaxis, yaxis);
-    wateringBarChart.setLegendVisible(false);
     wateringBarChart.setAnimated(false);
+    wateringBarChart.setLegendVisible(false);
+    wateringBarChart.setAlternativeRowFillVisible(false);
+    wateringBarChart.setAlternativeColumnFillVisible(false);
     wateringBarChart.setHorizontalGridLinesVisible(false);
     wateringBarChart.setVerticalGridLinesVisible(false);
+    wateringBarChart.getXAxis().setVisible(false);
+    wateringBarChart.getYAxis().setVisible(false);
+    wateringBarChart.getStylesheets()
+        .addAll(getClass().getResource("/de/hgu/gsehen/style/BarChart.css").toExternalForm());
+    wateringBarChart.setLegendSide(Side.RIGHT);
+
     irriData = FXCollections.observableArrayList();
     precData = FXCollections.observableArrayList();
-    setMaxCategoryWidth(70, 30);
-    wateringBarChart.widthProperty().addListener((obs, b, b1) -> {
-      Platform.runLater(() -> setMaxCategoryWidth(70, 30));
-    });
 
-    // overlay chart
-    lineChart = new LineChart<String, Number>(wateringBarChart.getXAxis(),
-        wateringBarChart.getYAxis());
+    // line chart
+    lineChart = new LineChart<String, Number>(xaxis, yaxis);
     lineChart.setAnimated(false);
-    // lineChart.setCreateSymbols(true);
-    // lineChart.setAlternativeRowFillVisible(false);
-    // lineChart.setAlternativeColumnFillVisible(false);
-    lineChart.setHorizontalGridLinesVisible(false);
-    lineChart.setVerticalGridLinesVisible(false);
-    lineChart.getXAxis().setVisible(false);
-    lineChart.getYAxis().setVisible(false);
+    lineChart.setLegendVisible(false);
     lineChart.getStylesheets()
-        .addAll(getClass().getResource("/de/hgu/gsehen/style/chart.css").toExternalForm());
-
-    lineChart.setLegendSide(Side.TOP);
-    legend = (Legend) lineChart.lookup(".chart-legend");
+        .addAll(getClass().getResource("/de/hgu/gsehen/style/LineChart.css").toExternalForm());
 
     caswSeries = new XYChart.Series<String, Number>();
     lineChart.getData().add(caswSeries);
     ctswSeries = new XYChart.Series<String, Number>();
     lineChart.getData().add(ctswSeries);
 
+    wateringBarChart.setPadding(new Insets(50, 0, 0, 0));
+    lineChart.setPadding(new Insets(50, 0, 0, 0));
+
+    legend = new HBox();
+    legend.setSpacing(25);
+
+    Label precLegend = new Label(mainBundle.getString("dataexport.precipitation"));
+    precLegend.setStyle("-fx-background-color: blue; -fx-text-fill: white; -fx-font-weight: bold");
+    Label irriLegend = new Label(mainBundle.getString("dataexport.irrigation"));
+    irriLegend
+        .setStyle("-fx-background-color: yellow; -fx-text-fill: black; -fx-font-weight: bold");
+    Label soilwaterLegend = new Label(mainBundle.getString("dataexport.soilwater"));
+    soilwaterLegend
+        .setStyle("-fx-background-color: green; -fx-text-fill: white; -fx-font-weight: bold");
+    Label totalwaterLegend = new Label(mainBundle.getString("dataexport.totalwater"));
+    totalwaterLegend
+        .setStyle("-fx-background-color: orange; -fx-text-fill: black; -fx-font-weight: bold");
+
+    Region region1 = new Region();
+    HBox.setHgrow(region1, Priority.ALWAYS);
+    Region region2 = new Region();
+    HBox.setHgrow(region2, Priority.ALWAYS);
+    Region region3 = new Region();
+    HBox.setHgrow(region3, Priority.ALWAYS);
+
+    legend.getChildren().addAll(precLegend, region1, irriLegend, region2, soilwaterLegend, region3,
+        totalwaterLegend);
+
     StackPane root = new StackPane();
-    root.getChildren().addAll(wateringBarChart, lineChart);
+    root.getChildren().addAll(lineChart, wateringBarChart, legend);
+    root.setPrefSize(800, 600);
+    root.setPadding(new Insets(20, 20, 20, 20));
+    wateringBarChart.setPrefSize(root.getWidth(), root.getHeight());
+    lineChart.setPrefSize(root.getWidth(), root.getHeight());
+    StackPane.setAlignment(legend, Pos.TOP_CENTER);
+
     ScrollPane wateringScrollPane = new ScrollPane();
     wateringScrollPane.setContent(root);
     wateringScrollPane.setPannable(true);
@@ -1012,13 +1043,9 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             }
           }
 
-          setWateringChartData();
-
           gsehenInstance.sendFarmDataChanged(plot, null);
           gsehenInstance.sendManualDataChanged(field, plot, wateringDate, null);
-          // dialog.close();
-          // stackPane.setVisible(false);
-          // stage.setScene(gsehenInstance.getScene());
+
           pane.setTop(null);
           tabPane.getSelectionModel().select(2);
           treeTableView.getSelectionModel().clearSelection();
@@ -1247,15 +1274,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     }
   }
 
-  private void setMaxCategoryWidth(double maxCategoryWidth, double minCategoryGap) {
-    double catSpace = xaxis.getCategorySpacing();
-    wateringBarChart
-        .setCategoryGap(catSpace - Math.min(maxCategoryWidth, catSpace - minCategoryGap));
-  }
-
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({ "unchecked", "rawtypes" }) // TODO
   private void setWateringChartData() {
-    yaxis.setUpperBound(availableSoilWater * 1.05);
+    yaxis.setUpperBound(availableSoilWater);
+    yaxis.setLowerBound(availableSoilWater * (-1));
     if (!caswSeries.getData().isEmpty()) {
       caswSeries.getData().clear();
     }
@@ -1266,7 +1288,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     if (plot.getWaterBalance() != null && plot.getWaterBalance().getDailyBalances() != null) {
       for (DayData dayData : plot.getWaterBalance().getDailyBalances()) {
         caswSeries.getData().add(new XYChart.Data<String, Number>(dayData.getDate().toString(),
-            dayData.getCurrentAvailableSoilWater()));
+            dayData.getCurrentAvailableSoilWater() * (-1)));
         ctswSeries.getData().add(new XYChart.Data<String, Number>(dayData.getDate().toString(),
             dayData.getCurrentTotalWaterBalance() * (-1)));
       }
@@ -1311,19 +1333,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     }
 
     wateringBarChart.getData().addAll(new Series<>(dataList));
-
-    if (!legend.getItems().isEmpty()) {
-      legend.getItems().clear();
-    }
-    Legend.LegendItem li1 = new Legend.LegendItem(mainBundle.getString("dataexport.precipitation"),
-        new Rectangle(10, 4, Color.BLUE));
-    Legend.LegendItem li2 = new Legend.LegendItem(mainBundle.getString("dataexport.irrigation"),
-        new Rectangle(10, 4, Color.YELLOW));
-    Legend.LegendItem li3 = new Legend.LegendItem(mainBundle.getString("dataexport.soilwater"),
-        new Rectangle(10, 4, Color.GREEN));
-    Legend.LegendItem li4 = new Legend.LegendItem(mainBundle.getString("dataexport.totalwater"),
-        new Rectangle(10, 4, Color.ORANGE));
-    legend.getItems().setAll(li1, li2, li3, li4);
   }
 
   private void addData(ObservableList<Data<String, Number>> dataList,
