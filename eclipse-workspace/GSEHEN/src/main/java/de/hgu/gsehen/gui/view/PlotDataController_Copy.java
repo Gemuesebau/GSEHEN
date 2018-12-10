@@ -11,7 +11,6 @@ import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.RecommendedActionChanged;
-import de.hgu.gsehen.gui.CombinedBarAndLineChart;
 import de.hgu.gsehen.gui.CropPhase;
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GsehenGuiElements;
@@ -24,7 +23,6 @@ import de.hgu.gsehen.model.ManualData;
 import de.hgu.gsehen.model.ManualWaterSupply;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.util.DateUtil;
-
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.Format;
@@ -45,7 +43,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
-import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -54,9 +51,12 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.StackedBarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
@@ -87,8 +87,8 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
-public class PlotDataController implements GsehenEventListener<FarmDataChanged> {
-  private static PlotDataController instance;
+public class PlotDataController_Copy implements GsehenEventListener<FarmDataChanged> {
+  private static PlotDataController_Copy instance;
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   protected final ResourceBundle mainBundle;
   private GsehenGuiElements gsehenGuiElements;
@@ -146,14 +146,22 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private String pattern;
   private Double lat = 0.0;
   private Double lng = 0.0;
+  private ObservableList<Data<String, Number>> irriData;
+  private ObservableList<Data<String, Number>> precData;
+  private StackedBarChart<String, Number> wateringBarChart;
+  private LineChart<String, Number> lineChart;
+  private boolean isPrec;
+  @SuppressWarnings("rawtypes")
+  private SortedList barDataList;
+  @SuppressWarnings("rawtypes")
+  private SortedList lineDataList;
+  private ObservableList<Data<String, Number>> barData;
+  private ObservableList<Data<String, Number>> lineData;
   private HBox legend;
-
-  private SortedList<Data<Date, Number>> barDataList;
-  private SortedList<Data<Date, Number>> lineDataList;
-  private ObservableList<Data<Date, Number>> barData;
-  private ObservableList<Data<Date, Number>> lineData;
-  private CombinedBarAndLineChart barLineChart;
-  private SwingNode chartPanel;
+  private ObservableList<Data<String, Number>> caswData;
+  private ObservableList<Data<String, Number>> ctswData;
+  private CategoryAxis xaxis;
+  private NumberAxis yaxis;
 
   {
     instance = this;
@@ -179,7 +187,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
    * @param pane
    *          - the associated BorderPane.
    */
-  public PlotDataController(Gsehen application, BorderPane pane) {
+  public PlotDataController_Copy(Gsehen application, BorderPane pane) {
     this.gsehenInstance = application;
     this.pane = pane;
   }
@@ -437,8 +445,41 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     TitledPane wateringGraphicPane = new TitledPane();
     wateringGraphicPane.setText("Grafik");
 
-    barData = FXCollections.observableArrayList();
-    lineData = FXCollections.observableArrayList();
+    // x-axis and y-axis for both charts:
+    xaxis = new CategoryAxis();
+    xaxis.setLabel("Datum");
+    yaxis = new NumberAxis(-25, 25, 2);
+    yaxis.setLabel("Wasserbilanz (mm)");
+
+    // stacked bar chart:
+    wateringBarChart = new StackedBarChart(xaxis, yaxis);
+    wateringBarChart.setAnimated(false);
+    wateringBarChart.setLegendVisible(false);
+    wateringBarChart.setAlternativeRowFillVisible(false);
+    wateringBarChart.setAlternativeColumnFillVisible(false);
+    wateringBarChart.setHorizontalGridLinesVisible(false);
+    wateringBarChart.setVerticalGridLinesVisible(false);
+    wateringBarChart.getXAxis().setVisible(false);
+    wateringBarChart.getYAxis().setVisible(false);
+    wateringBarChart.getStylesheets()
+        .addAll(getClass().getResource("/de/hgu/gsehen/style/BarChart.css").toExternalForm());
+    wateringBarChart.setLegendSide(Side.RIGHT);
+
+    irriData = FXCollections.observableArrayList();
+    precData = FXCollections.observableArrayList();
+
+    // line chart
+    lineChart = new LineChart<String, Number>(xaxis, yaxis);
+    lineChart.setAnimated(false);
+    lineChart.setLegendVisible(false);
+    lineChart.getStylesheets()
+        .addAll(getClass().getResource("/de/hgu/gsehen/style/LineChart.css").toExternalForm());
+
+    caswData = FXCollections.observableArrayList();
+    ctswData = FXCollections.observableArrayList();
+
+    wateringBarChart.setPadding(new Insets(50, 0, 0, 0));
+    lineChart.setPadding(new Insets(50, 0, 0, 0));
 
     legend = new HBox();
     legend.setSpacing(25);
@@ -465,12 +506,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     legend.getChildren().addAll(precLegend, region1, irriLegend, region2, soilwaterLegend, region3,
         totalwaterLegend);
 
-    barLineChart = new CombinedBarAndLineChart();
     StackPane root = new StackPane();
-    chartPanel = new SwingNode();
-    root.getChildren().addAll(chartPanel, legend);
+    root.getChildren().addAll(lineChart, wateringBarChart, legend);
     root.setPrefSize(800, 600);
     root.setPadding(new Insets(20, 20, 20, 20));
+    wateringBarChart.setPrefSize(root.getWidth(), root.getHeight());
+    lineChart.setPrefSize(root.getWidth(), root.getHeight());
     StackPane.setAlignment(legend, Pos.TOP_CENTER);
 
     ScrollPane wateringScrollPane = new ScrollPane();
@@ -484,6 +525,11 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     StackPane wateringStackPane = new StackPane();
     wateringStackPane.getChildren().add(wateringGraphicAccordion);
+
+    barData = FXCollections.observableArrayList();
+    lineData = FXCollections.observableArrayList();
+    // dataList = new SortedList<>(data,
+    // (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
 
     // Bewässerungsfaktor
     scalingFactor = new JFXSlider();
@@ -724,52 +770,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         e.printStackTrace();
       }
     }
-  }
-
-  @SuppressWarnings({ "unchecked", "rawtypes" }) // TODO
-  private SortedList<Data<Date, Number>> setBarChartData() {
-    barDataList = new SortedList<Data<Date, Number>>(barData,
-        (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
-
-    for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
-      Data<Date, Number> wateringData = new XYChart.Data();
-      Format formatter = new SimpleDateFormat("dd-MM");
-      String dateString = formatter.format(mws.getDate());
-
-      if (mws.getPrecipitation() != 0.0) {
-        wateringData = new XYChart.Data(mws.getDate(), mws.getPrecipitation());
-      }
-
-      if (mws.getIrrigation() != 0.0) {
-        wateringData = new XYChart.Data(mws.getDate(), mws.getIrrigation());
-      }
-
-      barData.add(wateringData);
-    }
-    return barDataList;
-  }
-
-  @SuppressWarnings({ "unchecked", "rawtypes" }) // TODO
-  private SortedList<Data<Date, Number>> setLineChartData() {
-    lineDataList = new SortedList<Data<Date, Number>>(lineData,
-        (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
-
-    if (plot.getWaterBalance() != null && plot.getWaterBalance().getDailyBalances() != null) {
-      for (DayData dayData : plot.getWaterBalance().getDailyBalances()) {
-        Format formatter = new SimpleDateFormat("dd-MM");
-        String swDateString = formatter.format(dayData.getDate());
-        // String twDateString = formatter.format(dayData.getDate());
-
-        Data<Date, Number> soilWaterData = new XYChart.Data(dayData.getDate(),
-            dayData.getCurrentAvailableSoilWater() * (-1));
-        // Data<String, Number> totalWaterData = new XYChart.Data(twDateString,
-        // dayData.getCurrentTotalWaterBalance() * (-1));
-
-        lineData.add(soilWaterData);
-      }
-    }
-    chartPanel.setContent(barLineChart.chartPanel(barDataList, lineDataList));
-    return lineDataList;
   }
 
   @SuppressWarnings("checkstyle:all")
@@ -1264,14 +1264,148 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
               && plot.getRecommendedAction().getAvailableWater() != null) {
             setChartData();
           }
+
           if (plot.getManualData() != null) {
-            setBarChartData();
             setLineChartData();
+            setBarChartData();
           }
+
         } else {
           pane.setVisible(false);
         }
       }
+    }
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" }) // TODO
+  private void setBarChartData() {
+    barDataList = new SortedList<>(barData,
+        (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
+
+    for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
+      Data<String, Number> wateringData = new XYChart.Data();
+      Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+      String dateString = formatter.format(mws.getDate());
+
+      if (mws.getPrecipitation() != 0.0) {
+        wateringData = new XYChart.Data(dateString, mws.getPrecipitation());
+        isPrec = true;
+        addData(precData, wateringData);
+      }
+
+      if (mws.getIrrigation() != 0.0) {
+        wateringData = new XYChart.Data(dateString, mws.getIrrigation());
+        isPrec = false;
+        addData(irriData, wateringData);
+      }
+    }
+
+    for (Data casw : caswData) {
+      barData.add(new Data<String, Number>(casw.getXValue().toString(), 0));
+    }
+    for (Data ctsw : ctswData) {
+      barData.add(new Data<String, Number>(ctsw.getXValue().toString(), 0));
+    }
+    for (Data precData : precData) {
+      barData.add(precData);
+    }
+    for (Data irriData : irriData) {
+      barData.add(irriData);
+    }
+
+    lineChart.getData().addAll(new Series<>(lineDataList));
+    wateringBarChart.getData().addAll(new Series<>(barDataList));
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" }) // TODO
+  private void setLineChartData() {
+    clearAll();
+    lineDataList = new SortedList<>(lineData,
+        (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
+
+    yaxis.setUpperBound(availableSoilWater);
+    yaxis.setLowerBound(availableSoilWater * (-1));
+
+    if (plot.getWaterBalance() != null && plot.getWaterBalance().getDailyBalances() != null) {
+      for (DayData dayData : plot.getWaterBalance().getDailyBalances()) {
+        Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String swDateString = formatter.format(dayData.getDate());
+        String twDateString = formatter.format(dayData.getDate());
+
+        Data<String, Number> soilWaterData = new XYChart.Data(swDateString,
+            dayData.getCurrentAvailableSoilWater() * (-1));
+        Data<String, Number> totalWaterData = new XYChart.Data(twDateString,
+            dayData.getCurrentTotalWaterBalance() * (-1));
+
+        addData(caswData, soilWaterData);
+        // addData(ctswData, totalWaterData);
+      }
+    }
+
+    for (Data casw : caswData) {
+      lineData.add(casw);
+    }
+    for (Data ctsw : ctswData) {
+      lineData.add(ctsw);
+    }
+  }
+
+  private void clearAll() {
+    if (!caswData.isEmpty()) {
+      caswData.clear();
+    }
+    if (!ctswData.isEmpty()) {
+      ctswData.clear();
+    }
+    if (!precData.isEmpty()) {
+      precData.clear();
+    }
+    if (!irriData.isEmpty()) {
+      irriData.clear();
+    }
+    if (!barData.isEmpty()) {
+      barData.clear();
+    }
+    if (!lineData.isEmpty()) {
+      lineData.clear();
+    }
+    if (!wateringBarChart.getData().isEmpty()) {
+      wateringBarChart.getData().clear();
+    }
+    if (!lineChart.getData().isEmpty()) {
+      lineChart.getData().clear();
+    }
+  }
+
+  private void addData(ObservableList<Data<String, Number>> dataList,
+      Data<String, Number> wateringData) {
+    Data<String, Number> dataAtDate = dataList.stream()
+        .filter(d -> d.getXValue().equals(wateringData.getXValue())).findAny().orElseGet(() -> {
+          Data<String, Number> newData = new Data<String, Number>(
+              wateringData.getXValue().toString(), 0.0);
+          dataList.add(newData);
+          return newData;
+        });
+    dataAtDate.setYValue(dataAtDate.getYValue().doubleValue() + (Double) wateringData.getYValue());
+
+    if (isPrec) {
+      dataAtDate.nodeProperty().addListener(new ChangeListener<Node>() {
+        @Override
+        public void changed(ObservableValue<? extends Node> ov, Node oldNode, Node newNode) {
+          if (newNode != null) {
+            newNode.setStyle("-fx-bar-fill: blue;");
+          }
+        }
+      });
+    } else if (!isPrec) {
+      dataAtDate.nodeProperty().addListener(new ChangeListener<Node>() {
+        @Override
+        public void changed(ObservableValue<? extends Node> ov, Node oldNode, Node newNode) {
+          if (newNode != null) {
+            newNode.setStyle("-fx-bar-fill: yellow;");
+          }
+        }
+      });
     }
   }
 
@@ -1283,12 +1417,12 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     this.pane = pane;
   }
 
-  public static PlotDataController getInstance() {
+  public static PlotDataController_Copy getInstance() {
     return instance;
   }
 
-  public static void setInstance(PlotDataController instance) {
-    PlotDataController.instance = instance;
+  public static void setInstance(PlotDataController_Copy instance) {
+    PlotDataController_Copy.instance = instance;
   }
 
 }
