@@ -1,18 +1,16 @@
 package de.hgu.gsehen.gsbalance;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.model.SoilProfile;
-
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DailyBalance {
 
