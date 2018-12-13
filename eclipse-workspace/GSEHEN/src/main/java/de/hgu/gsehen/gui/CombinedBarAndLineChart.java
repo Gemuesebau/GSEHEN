@@ -10,6 +10,7 @@ import java.util.ResourceBundle;
 
 import javafx.collections.transformation.SortedList;
 import javafx.scene.chart.XYChart.Data;
+import javax.swing.JScrollPane;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -61,7 +62,7 @@ public class CombinedBarAndLineChart {
    * @param twbList
    *          - list with total water balance.
    */
-  public ChartPanel chartPanel(SortedList<Data<Date, Number>> precBarList,
+  public JScrollPane scrollPane(SortedList<Data<Date, Number>> precBarList,
       SortedList<Data<Date, Number>> irriBarList, SortedList<Data<Date, Number>> caswList,
       SortedList<Data<Date, Number>> twbList) {
 
@@ -116,7 +117,9 @@ public class CombinedBarAndLineChart {
     dataSet = plot.getDataset();
 
     ChartPanel panel = new ChartPanel(chart);
-    return panel;
+    JScrollPane scrollPane = new JScrollPane(panel);
+
+    return scrollPane;
   }
 
   private XYDataset createCaswDataset() {
@@ -130,7 +133,7 @@ public class CombinedBarAndLineChart {
       int year = localDate.getYear();
       int month = localDate.getMonthValue();
       int day = localDate.getDayOfMonth();
-      
+
       caswSeries.add(new Day(day, month, year), data.getYValue());
     }
 

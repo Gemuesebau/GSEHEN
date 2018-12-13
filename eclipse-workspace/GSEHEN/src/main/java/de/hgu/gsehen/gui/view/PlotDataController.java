@@ -757,7 +757,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     }
     chartPanel.setContent(
-        barLineChart.chartPanel(precBarDataList, irriBarDataList, caswDataList, twbDataList));
+        barLineChart.scrollPane(precBarDataList, irriBarDataList, caswDataList, twbDataList));
     return twbDataList;
   }
 
