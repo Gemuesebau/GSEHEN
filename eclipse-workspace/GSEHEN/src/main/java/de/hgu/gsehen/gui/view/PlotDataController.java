@@ -248,8 +248,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
         cropChoiceBox.getItems().add(c);
       }
     } else {
-      cropChoiceBox.getItems().addAll(new Crop("Liste leer!", true, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0,
-          "", "", "", "", 0, 0, 0, 0, ""));
+      cropChoiceBox.getItems().addAll(new Crop(mainBundle.getString("plotview.empty"), true, 0.0,
+          0.0, 0.0, 0.0, 0, 0, 0, 0, "", "", "", "", 0, 0, 0, 0, ""));
     }
     cropChoiceBox.setConverter(new StringConverter<Crop>() {
       @Override
@@ -426,7 +426,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     // Bewässerungsgrafik (Accordion)
     TitledPane wateringGraphicPane = new TitledPane();
-    wateringGraphicPane.setText("Grafik");
+    wateringGraphicPane.setText(mainBundle.getString("plotview.graphic"));
 
     precBarData = FXCollections.observableArrayList();
     irriBarData = FXCollections.observableArrayList();
@@ -829,20 +829,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       md = plot.getManualData();
     }
 
-    // JFXDialogLayout content = new JFXDialogLayout();
-    // content.setHeading(new Text(mainBundle.getString("plotview.manual")));
-    // StackPane stackPane = new StackPane();
-    // Scene scene = new Scene(stackPane, 300, 250);
-    // Stage stage = (Stage) gsehenInstance.getScene().getWindow();
-    // JFXDialog dialog = new JFXDialog(stackPane, content, JFXDialog.DialogTransition.CENTER);
-    // stage.setScene(scene);
-    // dialog.show();
-    //
-    // // Name of the plot
-    // Text nameLabel = gsehenGuiElements.text(plot.getName(), FontWeight.BOLD);
-    //
-    // pane.setTop(nameLabel);
-
     // Datum (when the irrigation/precipitation should be booked)
     DatePicker date = gsehenGuiElements.datepicker();
     date.setValue(LocalDate.now());
@@ -973,9 +959,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       @Override
       public void handle(ActionEvent arg0) {
         gsehenInstance.sendFarmDataChanged(plot, null);
-        // dialog.close();
-        // stackPane.setVisible(false);
-        // stage.setScene(gsehenInstance.getScene());
         pane.setTop(null);
         tabPane.getSelectionModel().select(2);
         treeTableView.getSelectionModel().clearSelection();
@@ -1066,7 +1049,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     VBox wateringVbox = new VBox();
     wateringVbox.getChildren().add(center);
-    // content.setBody(center);
     pane.setTop(wateringVbox);
   }
 

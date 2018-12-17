@@ -201,7 +201,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     farmTreeView.setRoot(rootItem);
     farmTreeView.setShowRoot(false);
     farmTreeView.setEditable(true);
-    
+
     action = new Text();
 
     tabPane = gsehenInstance.getMainController().getJfxTabPane();
@@ -725,10 +725,12 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         if (itemType.equals("Plot") && destinationType.equals("Field")
             || itemType.equals("Field") && destinationType.equals("Farm")) {
 
-          if (item.getParent().getValue().getName().equals("Neue Plots")) {
+          if (item.getParent().getValue().getName()
+              .equals(mainBundle.getString("gui.control.objectTree.newPlotsFieldName"))) {
             autoFarm = (Farm) item.getParent().getParent().getValue();
             autoField = (Field) item.getParent().getValue();
-          } else if (item.getParent().getValue().getName().equals("Neue Felder")) {
+          } else if (item.getParent().getValue().getName()
+              .equals(mainBundle.getString("gui.control.objectTree.newFieldsFarmName"))) {
             autoFarm = (Farm) item.getParent().getValue();
             autoField = (Field) item.getValue();
           }
@@ -775,7 +777,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
               }
             }
           }
-          if (autoFarm != null || autoField.getName().equals("Neue Plots")) {
+          if (autoFarm != null || autoField.getName()
+              .equals((mainBundle.getString("gui.control.objectTree.newPlotsFieldName")))) {
             autoFarm.getFields().remove(autoField);
             if (autoFarm.getFields().isEmpty()) {
               farmsList.remove(autoFarm);

@@ -316,7 +316,7 @@ public class Gsehen extends Application {
         em.persist(targetObject);
       }
     } catch (SQLException e) {
-      System.out.println("no connection" + e.getLocalizedMessage());
+      LOGGER.log(Level.WARNING, "no connection" + e.getLocalizedMessage());
     }
   }
 
@@ -468,7 +468,7 @@ public class Gsehen extends Application {
       processFarmsEtc(em);
       em.getTransaction().commit();
     } catch (Exception e) {
-      System.out.println("Problem: " + e.getMessage());
+      LOGGER.log(Level.WARNING, "Problem: " + e.getMessage());
       em.getTransaction().rollback();
     } finally {
       em.close();

@@ -241,7 +241,7 @@ public class DataExport {
 
     // Creating the PDDocumentInformation object
     PDDocumentInformation docInfo = exportDocument.getDocumentInformation();
-    docInfo.setAuthor("GSEHEN");
+    docInfo.setAuthor((mainBundle.getString("gsehen.name")));
     docInfo.setTitle(mainBundle.getString("dataexport.head") + " \"" + farm.getName() + "\"");
 
     Calendar today = Calendar.getInstance();
