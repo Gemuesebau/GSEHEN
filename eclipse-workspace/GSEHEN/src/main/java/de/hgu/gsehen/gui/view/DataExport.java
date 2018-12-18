@@ -1,5 +1,10 @@
 package de.hgu.gsehen.gui.view;
 
+import be.quodlibet.boxable.BaseTable;
+import be.quodlibet.boxable.Cell;
+import be.quodlibet.boxable.HorizontalAlignment;
+import be.quodlibet.boxable.Row;
+
 import com.jfoenix.controls.JFXCheckBox;
 
 import de.hgu.gsehen.Gsehen;
@@ -47,7 +52,6 @@ public class DataExport {
   /*
    * PDFBox: http://www.apache.org/licenses/LICENSE-2.0.txt & https://pdfbox.apache.org/download.cgi
    */
-
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   protected final ResourceBundle mainBundle;
   private GsehenGuiElements gsehenGuiElements;
@@ -57,7 +61,6 @@ public class DataExport {
   private GridPane centerGrid;
   private TreeTableView<Drawable> treeTableView;
   private Farm farm;
-  private Plot plot;
   private Text headline;
   private int fieldCounter;
   private int plotCounter;
@@ -70,6 +73,9 @@ public class DataExport {
   private PDRectangle rect;
   private int line;
   private PDPageContentStream contentStream;
+  private Cell<PDPage> cell;
+  private Row<PDPage> headerRow;
+  private Row<PDPage> row;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -203,7 +209,6 @@ public class DataExport {
                 writeText();
                 save();
               } catch (IOException e1) {
-                // Auto-generated catch block
                 e1.printStackTrace();
               }
             } else {
@@ -251,32 +256,30 @@ public class DataExport {
     line = 1;
   }
 
-  private void checkForNewPage() {
-    if (rect.getHeight() - 50 * (line) < 50.0) {
-      try {
-        contentStream.close();
-        page = new PDPage(PDRectangle.A4);
-        rect = page.getMediaBox();
-        exportDocument.addPage(page);
-        contentStream = new PDPageContentStream(exportDocument, page);
-        contentStream.setLeading(14.5f);
-        line = 1;
-      } catch (IOException e1) {
-        // Auto-generated catch block
-        e1.printStackTrace();
-      }
-    }
-  }
-
   private void writeText() throws IOException {
     // Adding the blank page to the document
     exportDocument.addPage(page);
     contentStream = new PDPageContentStream(exportDocument, page);
 
+    // create the table
+    float margin = 50;
+    // starting y position is whole page height subtracted by top and bottom margin
+    float startNewPageY = page.getMediaBox().getHeight() - (2 * margin);
+    // we want table across whole page width (subtracted by left and right margin ofcourse)
+    float tableWidth = page.getMediaBox().getWidth() - (2 * margin);
+
+    boolean drawContent = true;
+    float bottomMargin = 70;
+    // y position is your coordinate of top left corner of the table
+    float positionY = 750;
+
+    BaseTable table = new BaseTable(positionY, startNewPageY, bottomMargin, tableWidth, margin,
+        exportDocument, page, true, drawContent);
+
     // Begin the Content stream
     contentStream.beginText();
     // Setting the font to the Content stream
-    contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
+    contentStream.setFont(PDType1Font.HELVETICA_BOLD, 20);
     // Setting the position for the line
     contentStream.newLineAtOffset(50, rect.getHeight() - 50 * (line));
     String head = mainBundle.getString("dataexport.head") + " \"" + farm.getName() + "\"";
@@ -286,118 +289,45 @@ public class DataExport {
     contentStream.endText();
     line += 1;
 
-    contentStream.beginText();
-    contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
-    contentStream.newLineAtOffset(50, rect.getHeight() - 50 * (line));
-    String farmString = farm.getName();
-    contentStream.showText(farmString);
-    contentStream.endText();
-
-    // Setting the leading
+    // // Setting the leading
     contentStream.setLeading(14.5f);
 
+    df2 = new DecimalFormat("#.##");
+
     for (Field field : farm.getFields()) {
-      line += 1;
-      checkForNewPage();
-
-      contentStream.beginText();
-      contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-      contentStream.newLineAtOffset(100, rect.getHeight() - 50 * (line));
-      String fieldString = field.getName();
-      contentStream.showText(fieldString);
-      contentStream.newLine();
-      contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 9);
-
-      df2 = new DecimalFormat("#.##");
-
-      String fieldAreaString = mainBundle.getString("fieldview.area") + " "
-          + df2.format(field.getArea());
-      contentStream.showText(fieldAreaString);
-      contentStream.newLine();
-      String fieldLocationString = mainBundle.getString("dataexport.latlng") + ": "
-          + field.getLocation().getLat() + " / " + field.getLocation().getLng();
-      contentStream.showText(fieldLocationString);
-      contentStream.endText();
       for (Plot plot : plotList) {
         for (Plot fieldPlot : field.getPlots()) {
           if (plot == fieldPlot) {
-            this.plot = plot;
-            line += 1;
-            checkForNewPage();
+            headerRow = table.createRow(14.5f);
+            cell = headerRow.createCell(100, field.getName() + " - " + plot.getName());
+            cell.setFillColor(Color.LIGHT_GRAY);
+            cell.setFont(PDType1Font.HELVETICA_BOLD);
+            cell.setFontSize(12);
+            cell.setAlign(HorizontalAlignment.CENTER);
+            table.addHeaderRow(headerRow);
 
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA, 12);
-            contentStream.newLineAtOffset(150, rect.getHeight() - 50 * (line));
-            String plotString = plot.getName();
-            contentStream.showText(plotString);
-            contentStream.newLine();
-            contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 9);
-            String plotAreaString = mainBundle.getString("fieldview.area") + " "
-                + df2.format(plot.getArea());
-            contentStream.showText(plotAreaString);
-            contentStream.newLine();
-            String plotLocationString = mainBundle.getString("dataexport.latlng") + ": "
-                + plot.getLocation().getLat() + " / " + plot.getLocation().getLng();
-            contentStream.showText(plotLocationString);
-
-            if (plot.getRecommendedAction() != null) {
-              contentStream.newLine();
-              setActionText();
-              contentStream.newLine();
-            }
-
-            contentStream.endText();
+            headerRow = table.createRow(14.5f);
+            cell = headerRow.createCell(25, "");
+            cell.setFillColor(Color.BLACK);
+            cell = headerRow.createCell(25, mainBundle.getString("plotview.date"));
+            cell.setFont(PDType1Font.HELVETICA_BOLD);
+            cell = headerRow.createCell(25, mainBundle.getString("plotview.irrigation"));
+            cell.setFont(PDType1Font.HELVETICA_BOLD);
+            cell = headerRow.createCell(25, mainBundle.getString("plotview.precipitation"));
+            cell.setFont(PDType1Font.HELVETICA_BOLD);
+            table.addHeaderRow(headerRow);
 
             int count = 1;
             if (plot.getManualData() != null) {
               for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
-                line += 1;
-                checkForNewPage();
-
-                contentStream.beginText();
-                contentStream.newLine();
-                contentStream.setFont(PDType1Font.HELVETICA_OBLIQUE, 12);
-                contentStream.newLineAtOffset(200, rect.getHeight() - 50 * (line));
-
                 String mwsHead = mainBundle.getString("dataexport.mwshead") + count;
-                contentStream.showText(mwsHead);
-                contentStream.newLine();
 
-                String mwsDate = mainBundle.getString("plotview.date") + " " + mws.getDate();
-                contentStream.showText(mwsDate);
-                contentStream.newLine();
+                row = table.createRow(12);
+                cell = row.createCell(25, mwsHead);
+                cell = row.createCell(25, mws.getDate().toString());
+                cell = row.createCell(25, df2.format(mws.getIrrigation()) + "mm");
+                cell = row.createCell(25, df2.format(mws.getPrecipitation()) + "mm");
 
-                String mwsIrrigation1 = mainBundle.getString("plotview.irrigation") + " ";
-                contentStream.showText(mwsIrrigation1);
-                if (mws.getIrrigation() > 0.0) {
-                  contentStream.setNonStrokingColor(Color.BLUE);
-                } else {
-                  contentStream.setNonStrokingColor(Color.RED);
-                }
-
-                String mwsMm = "mm";
-
-                String mwsIrrigation2 = df2.format(mws.getIrrigation());
-                contentStream.showText(mwsIrrigation2);
-                contentStream.setNonStrokingColor(Color.BLACK);
-                contentStream.showText(mwsMm);
-                contentStream.newLine();
-
-                String mwsPrecipitation1 = mainBundle.getString("plotview.precipitation") + " ";
-                contentStream.showText(mwsPrecipitation1);
-                if (mws.getPrecipitation() > 0.0) {
-                  contentStream.setNonStrokingColor(Color.BLUE);
-                } else {
-                  contentStream.setNonStrokingColor(Color.RED);
-                }
-                String mwsPrecipitation2 = df2.format(mws.getPrecipitation());
-                contentStream.showText(mwsPrecipitation2);
-                contentStream.setNonStrokingColor(Color.BLACK);
-                contentStream.showText(mwsMm);
-                contentStream.newLine();
-
-                contentStream.endText();
-                line += 1;
                 count++;
               }
             }
@@ -408,52 +338,7 @@ public class DataExport {
 
     // Closing the content stream
     contentStream.close();
-  }
-
-  private void setActionText() {
-    try {
-      if (plot.getRecommendedAction().getRecommendation().toString().equals("EXCESS")) {
-        String recommendedAction1 = mainBundle.getString("treetableview.watering") + " "
-            + mainBundle.getString("dataexport.excess1");
-        contentStream.showText(recommendedAction1);
-        contentStream.newLine();
-        String recommendedAction2 = mainBundle.getString("dataexport.excess2");
-        contentStream.showText(recommendedAction2);
-        line += 1;
-      } else if (plot.getRecommendedAction().getRecommendation().toString().equals("PAUSE")
-          || plot.getRecommendedAction().getRecommendation().toString().equals("IRRIGATION")
-          || plot.getRecommendedAction().getRecommendation().toString().equals("NO_DATA")
-          || plot.getRecommendedAction().getRecommendation().toString().equals("TOMORROW")) {
-        String recommendedAction = mainBundle.getString("treetableview.watering") + " " + mainBundle
-            .getString(plot.getRecommendedAction().getRecommendation().getMessagePropertyKey());
-        contentStream.showText(recommendedAction);
-      } else if (plot.getRecommendedAction().getRecommendation().toString().equals("SOON")) {
-        String recommendedAction1 = mainBundle.getString("treetableview.watering") + " "
-            + mainBundle.getString("dataexport.soon1") + " "
-            + df2.format(plot.getRecommendedAction().getAvailableWater())
-            + mainBundle.getString("dataexport.soon2");
-        contentStream.showText(recommendedAction1);
-        contentStream.newLine();
-        String recommendedAction2 = mainBundle.getString("dataexport.soon3") + " "
-            + plot.getRecommendedAction().getProjectedDaysToIrrigation() + " "
-            + mainBundle.getString("dataexport.soon4");
-        contentStream.showText(recommendedAction2);
-        line += 1;
-      } else if (plot.getRecommendedAction().getRecommendation().toString().equals("NOW")) {
-        String recommendedAction1 = mainBundle.getString("treetableview.watering") + " "
-            + mainBundle.getString("dataexport.now1") + " "
-            + df2.format(plot.getRecommendedAction().getAvailableWater())
-            + mainBundle.getString("dataexport.soon2");
-        contentStream.showText(recommendedAction1);
-        contentStream.newLine();
-        String recommendedAction2 = mainBundle.getString("dataexport.now2");
-        contentStream.showText(recommendedAction2);
-        line += 1;
-      }
-    } catch (IOException e) {
-      // Auto-generated catch block
-      e.printStackTrace();
-    }
+    table.draw();
   }
 
   private void save() throws IOException {
