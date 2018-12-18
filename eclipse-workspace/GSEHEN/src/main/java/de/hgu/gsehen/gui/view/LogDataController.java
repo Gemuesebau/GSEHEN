@@ -331,7 +331,7 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
     Text slevel = new Text(mainBundle.getString("logview.from") + ":");
     slevel.setFont(Font.font("Arial", 14));
     ChoiceBox stratcb = new ChoiceBox();
-    stratcb.getItems().addAll("SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINEST");
+    stratcb.getItems().addAll("SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINER", "FINEST");
     stratcb.getSelectionModel().selectFirst();
 
     HBox slev = new HBox();
@@ -340,7 +340,7 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
     Text elevel = new Text(mainBundle.getString("logview.to") + ":");
     elevel.setFont(Font.font("Arial", 14));
     ChoiceBox endcb = new ChoiceBox();
-    endcb.getItems().addAll("SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINEST");
+    endcb.getItems().addAll("SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINER", "FINEST");
     endcb.getSelectionModel().selectFirst();
 
     Label levlabel = new Label(mainBundle.getString("logview.level") + ":");
