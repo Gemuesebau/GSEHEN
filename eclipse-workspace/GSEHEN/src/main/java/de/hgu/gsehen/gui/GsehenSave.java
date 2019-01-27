@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialogLayout;
 
 import de.hgu.gsehen.Gsehen;
+
 import java.util.ResourceBundle;
 
 import javafx.application.Platform;

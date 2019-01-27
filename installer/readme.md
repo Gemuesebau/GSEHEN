@@ -23,8 +23,8 @@ Es sollte ein neuer Launcher erstellt werden. Nach ausführen der Option „New 
 
  
 Dies kann so beibehalten werden, da der Pfad bereits hinterlegt wurde (Wichtig!!! „.“ Bei Directory).
-Im nächsten Dialog kann ein Icon für die Executable hinterlegt werden (im vorhandenen Profil nicht enthalten). Bei der Cunfigure Java invocation sollten nun folgende Class paths angegeben werden: 
-Ein Directory muss hinzugefügt werden. Das „Directory bin“ muss so ausgewählt werden damit der Class path die Klasse automatisch findet und nur ausgewählt werden muss. Es müssen Scan directory (nur für Jar) hinzugefügt werden, welche die benötigten libs angibt. Ebenso muss das Argument -cp angegeben werden. Alle anderen Dialoge können so beibehalten werden und der Launcher somit abgeschlossen werden.
+Im nächsten Dialog kann ein Icon für die Executable hinterlegt werden (im vorhandenen Profil nicht enthalten). Bei der Configure Java invocation sollten nun folgende Class paths angegeben werden: 
+Ein Directory muss hinzugefügt werden. Das „Directory bin“ muss vorhanden sein und so ausgewählt werden damit der Class path die Klasse automatisch findet und nur ausgewählt werden muss(Alternativ: wird ein JDK benötigt um das Projekt zu kompilieren). Es müssen Scan directory (nur für Jar) hinzugefügt werden, welche die benötigten libs angibt. Ebenso muss das Argument -cp angegeben werden. Alle anderen Dialoge können so beibehalten werden und der Launcher somit abgeschlossen werden.
 Im Menü Installer kann das aussehen des Installer Wizards verändert werden und Optionen angegeben werden wie: Desktop Icon erstellen usw. Dieser menüpunkt kann aber auch so standardmäßig bleiben.
 Das Menü Media sorgt für das jeweilige Betriebssystem und es müssen somit jeweils eins für jedes Betriebssystem erstellt werden. 
 

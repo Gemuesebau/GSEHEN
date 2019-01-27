@@ -122,11 +122,11 @@ public class WeatherDataSource implements Named {
     //return pluginConfigurationJSON; FIXME Plugin muss das JSON liefern, wenn man "Save" klickt.
     pluginConfigurationJSON = "" + pluginConfigurationJSON; // dummy
     return "{"
-        + "  \"measIntervalSeconds\": 600,"
+        + "  \"measIntervalSeconds\": 100,"
         + "  \"windspeedMeasHeightMeters\": 2,"
-        + "  \"dataFilePath\": \"C:\\\\Users\\\\atappe\\\\Downloads\\\\10MinDaten.csv\","
+        + "  \"dataFilePath\": \"C:\\\\Users\\\\cwitzke\\\\Desktop\\\\10MinDaten.csv\","
         + "  \"dateFormatString\": \"y-M-d\","
-        + "  \"numberLocaleId\": \"GERMAN\""
+        + "  \"numberFormat\": \"GERMAN\""
         + "}";
   }
 

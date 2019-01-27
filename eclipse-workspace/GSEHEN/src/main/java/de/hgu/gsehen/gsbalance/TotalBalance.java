@@ -1,5 +1,6 @@
 package de.hgu.gsehen.gsbalance;
 
+import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
@@ -9,13 +10,16 @@ import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilManualData;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
-
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TotalBalance {
+
+  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
   @SuppressWarnings("checkstyle:javadocmethod")
   public static void determineCurrentRootingZone(DayData dayData, Plot plot,
@@ -55,10 +59,16 @@ public class TotalBalance {
     }
     SoilManualData soilManualData = soilProfile.getSoilManualData();
     Integer soilZone;
-    if (soilManualData != null && soilManualData.getSoilZone() != null) {
-      soilZone = soilManualData.getSoilZone();
+    if (soilManualData != null) {
+      if (soilManualData.getSoilZone() != null) {
+        soilZone = soilManualData.getSoilZone();
+      } else {
+        soilZone = 10;
+        LOGGER.log(Level.INFO, "No soil zone: set to standard 10cm");
+      }
     } else {
       soilZone = 10;
+      LOGGER.log(Level.INFO, "No soil zone: set to standard 10cm");
     }
     CropDevelopmentStatus cropDevelopmentStatus = plot.getCropDevelopmentStatus();
     Integer currentRootingZone = null;
@@ -136,6 +146,7 @@ public class TotalBalance {
     if (maxRootingZone != null) {
       if (currentRootingZone > maxRootingZone) {
         currentRootingZone = maxRootingZone;
+        LOGGER.log(Level.INFO, "currentRootingZone set to maxRootingZone");
       }
     }
     dayData.setCurrentRootingZone(currentRootingZone);
@@ -175,15 +186,27 @@ public class TotalBalance {
     SoilManualData soilManualData = soilProfile.getSoilManualData();
     Double rainMax;
     Integer daysPause;
-    if (soilManualData != null && soilManualData.getRainMax() != null) {
-      rainMax = soilManualData.getRainMax();
+    if (soilManualData != null) {
+      if (soilManualData.getRainMax() != null) {
+        rainMax = soilManualData.getRainMax();
+      } else {
+        rainMax = 30.0;
+        LOGGER.log(Level.INFO, "MaxRain event set to 30mm");
+      }
     } else {
       rainMax = 30.0;
+      LOGGER.log(Level.INFO, "MaxRain event set to 30mm");
     }
-    if (soilManualData != null && soilManualData.getDaysPause() != null) {
-      daysPause = soilManualData.getDaysPause();
+    if (soilManualData != null) {
+      if (soilManualData.getDaysPause() != null) {
+        daysPause = soilManualData.getDaysPause();
+      } else {
+        daysPause = 2;
+        LOGGER.log(Level.INFO, "Days Pause set to 2");
+      }
     } else {
       daysPause = 2;
+      LOGGER.log(Level.INFO, "Days Pause set to 2");
     }
     Double startValue;
     List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();

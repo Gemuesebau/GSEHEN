@@ -128,7 +128,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private static final String FILTER_LABEL_ID = "#filterLabel";
   private static final String FILTER_FIELD_ID = "#filterField";
   private static final String DETAIL_BORDER_PANE_ID = "#detailBorderPane";
-  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(GsehenTreeTable.class.getName());
   // private static final String PLOT_RECOMMENDED_ACTION_TEXT_ID = "#plotRecommendedActionText";
 
   private Farm farm;
@@ -202,20 +202,22 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     farmTreeView.setShowRoot(false);
     farmTreeView.setEditable(true);
 
+    action = new Text();
+
     tabPane = gsehenInstance.getMainController().getJfxTabPane();
 
     farmTreeView.setRowFactory(this::rowFactory);
     addColumn(mainBundle.getString("treetableview.name"), "name");
     addColumn(mainBundle.getString("treetableview.type"), "type");
     addColumn(mainBundle.getString("treetableview.soilCrop"), "soilCrop");
-    
+
     MenuItem export = new MenuItem("Export");
     menu.getItems().add(export);
     export.setOnAction(new EventHandler<ActionEvent>() {
       @SuppressWarnings("static-access")
       @Override
       public void handle(ActionEvent e) {
-        //TODO
+        // TODO
         tabPane.getSelectionModel().select(4);
         gsehenInstance.getExports().createExport();
       }
@@ -428,7 +430,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
                     attributeLabel3, attribute3, startLabel, startDate, soilValueLabel, soilValue);
 
                 if (plot.getSoilStartValue() != null && plot.getRecommendedAction() != null) {
-                  action = new Text(getRecommendedActionText(
+                  action.setText(getRecommendedActionText(
                       plot)/*
                             * + " : " + new
                             * java.text.SimpleDateFormat("EE., dd.MM.yyyy, HH:mm:ss.SSS",
@@ -723,10 +725,12 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         if (itemType.equals("Plot") && destinationType.equals("Field")
             || itemType.equals("Field") && destinationType.equals("Farm")) {
 
-          if (item.getParent().getValue().getName().equals("Neue Plots")) {
+          if (item.getParent().getValue().getName()
+              .equals(mainBundle.getString("gui.control.objectTree.newPlotsFieldName"))) {
             autoFarm = (Farm) item.getParent().getParent().getValue();
             autoField = (Field) item.getParent().getValue();
-          } else if (item.getParent().getValue().getName().equals("Neue Felder")) {
+          } else if (item.getParent().getValue().getName()
+              .equals(mainBundle.getString("gui.control.objectTree.newFieldsFarmName"))) {
             autoFarm = (Farm) item.getParent().getValue();
             autoField = (Field) item.getValue();
           }
@@ -773,7 +777,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
               }
             }
           }
-          if (autoFarm != null || autoField.getName().equals("Neue Plots")) {
+          if (autoFarm != null || autoField.getName()
+              .equals((mainBundle.getString("gui.control.objectTree.newPlotsFieldName")))) {
             autoFarm.getFields().remove(autoField);
             if (autoFarm.getFields().isEmpty()) {
               farmsList.remove(autoFarm);

@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXDatePicker;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
+import de.hgu.gsehen.gui.GsehenGuiElements;
 import de.hgu.gsehen.logging.Configurator;
 import de.hgu.gsehen.logging.LogDataHandler;
 import de.hgu.gsehen.model.LogEntry;
@@ -17,6 +18,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
@@ -49,18 +52,24 @@ import javafx.util.StringConverter;
 public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private Gsehen gsehenInstance;
+  private GsehenGuiElements gsehenGuiElements;
+  protected final ResourceBundle mainBundle;
   private BorderPane pane;
   private ObservableList<LogEntry> data;
   public static LocalDate arr;
   private static LocalDate startDate;
   private static LocalDate endDate;
-  
+
   JFXDatePicker startpicker = new JFXDatePicker();
   JFXDatePicker endpicker = new JFXDatePicker();
-  
+
   {
     gsehenInstance = Gsehen.getInstance();
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
+
+    gsehenGuiElements = new GsehenGuiElements();
+
+    mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
   }
 
   /**
@@ -148,19 +157,19 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
    */
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public Parent createContent() {
-    TableColumn dateCol = new TableColumn("Datum");
+    TableColumn dateCol = new TableColumn(mainBundle.getString("logview.date"));
     dateCol.setSortable(false);
     dateCol.setCellValueFactory(new PropertyValueFactory<LogEntry, String>("date"));
 
-    TableColumn timeCol = new TableColumn("Zeit");
+    TableColumn timeCol = new TableColumn(mainBundle.getString("logview.time"));
     timeCol.setSortable(false);
     timeCol.setCellValueFactory(new PropertyValueFactory<LogEntry, String>("time"));
 
-    TableColumn levelCol = new TableColumn("Level");
+    TableColumn levelCol = new TableColumn(mainBundle.getString("logview.level"));
     levelCol.setSortable(false);
     levelCol.setCellValueFactory(new PropertyValueFactory<LogEntry, String>("level"));
 
-    TableColumn massageCol = new TableColumn("Nachricht");
+    TableColumn massageCol = new TableColumn(mainBundle.getString("logview.text"));
     massageCol.setSortable(false);
     massageCol.setCellValueFactory(new PropertyValueFactory<LogEntry, String>("massage"));
 
@@ -197,18 +206,18 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   public void popupfilteroptions() {
 
     Stage stage = new Stage();
-    stage.setTitle("Filteroptionen");
-    Label titleTime = new Label("Zeit : ");
+    stage.setTitle(mainBundle.getString("logview.filter"));
+    Label titleTime = new Label(mainBundle.getString("logview.time") + ":");
     titleTime.setFont(Font.font("Arial", 14));
 
     // JFXDatePicker and Label for Filter Date
-    Label startLabel = new Label("Von: ");
+    Label startLabel = new Label(mainBundle.getString("logview.from") + ":");
     startLabel.setFont(Font.font("Arial", 14));
 
-    Label endLabel = new Label("Bis:  ");
+    Label endLabel = new Label(mainBundle.getString("logview.to") + ":");
     endLabel.setFont(Font.font("Arial", 14));
 
-    Label titledate = new Label("Datum :  ");
+    Label titledate = new Label(mainBundle.getString("logview.date") + ":");
     titledate.setFont(Font.font("Arial", 14));
 
     // Converter
@@ -319,22 +328,22 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
 
     upBox.getChildren().addAll(startSpinnerBox, endSpinnerBox);
 
-    Text slevel = new Text("Von: ");
+    Text slevel = new Text(mainBundle.getString("logview.from") + ":");
     slevel.setFont(Font.font("Arial", 14));
     ChoiceBox stratcb = new ChoiceBox();
-    stratcb.getItems().addAll("SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINEST");
+    stratcb.getItems().addAll("SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINER", "FINEST");
     stratcb.getSelectionModel().selectFirst();
 
     HBox slev = new HBox();
     slev.getChildren().addAll(slevel, stratcb);
 
-    Text elevel = new Text("Bis:  ");
+    Text elevel = new Text(mainBundle.getString("logview.to") + ":");
     elevel.setFont(Font.font("Arial", 14));
     ChoiceBox endcb = new ChoiceBox();
-    endcb.getItems().addAll("SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINEST");
+    endcb.getItems().addAll("SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINER", "FINEST");
     endcb.getSelectionModel().selectFirst();
 
-    Label levlabel = new Label("Level : ");
+    Label levlabel = new Label(mainBundle.getString("logview.level") + ":");
     levlabel.setFont(Font.font("Arial", 14));
 
     HBox levelBox = new HBox();
@@ -345,8 +354,8 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
 
     upBox.getChildren().addAll(levelBox, slev, elev);
 
-    Button save = new Button("Speichern");
-    save.setPrefSize(76, 45);
+    Button save = gsehenGuiElements.button(100);
+    save.setText(mainBundle.getString("menu.file.save"));
 
     save.setOnAction(new EventHandler<ActionEvent>() {
       @Override
@@ -354,23 +363,18 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
 
         startDate = startpicker.getValue();
         endDate = endpicker.getValue();
-        
+
         try {
           while (!startDate.isAfter(endDate)) {
-            System.out.println(startDate);
             arr = startDate;
             startDate = startDate.plusDays(1);
           }
         } catch (Exception ex) {
-          System.out.println("Exception found in :" + ex);
+          LOGGER.log(Level.INFO, "Exception found in :" + ex);
         }
 
       }
-      });
-    
-
-    System.out.println(arr);
-
+    });
 
     HBox button = new HBox();
     button.getChildren().addAll(save);
@@ -378,11 +382,7 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
     upBox.getChildren().add(button);
 
   }
-  
-  
 
-  
-  
   /**
    * Reload Log.
    */

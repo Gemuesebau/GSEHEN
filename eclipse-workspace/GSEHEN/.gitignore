@@ -1,3 +1,4 @@
 /bin/
 /gsehen-h2-local.db*
 /.checkstyle
+/.classpath

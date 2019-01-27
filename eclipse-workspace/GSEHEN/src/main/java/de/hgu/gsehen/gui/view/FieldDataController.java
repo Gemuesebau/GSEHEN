@@ -279,43 +279,45 @@ public class FieldDataController extends Application
       for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
         if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
           selectedItem = treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
-          if (selectedItem != null
-              && selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
-            pane.setVisible(true);
-            field = (Field) selectedItem.getValue();
-            name.setText(field.getName());
-            area.setText(gsehenInstance.formatDoubleOneDecimal(
-                field.getPolygon().calculateArea(field.getPolygon().getGeoPoints())));
+                if (selectedItem != null
+                    && selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
+                  pane.setVisible(true);
+                  field = (Field) selectedItem.getValue();
 
-            for (WeatherDataSource wds : weatherDataSourceList) {
-              final WeatherDataSource weatherDataSource = gsehenInstance
-                  .getWeatherDataSourceForUuid(field.getWeatherDataSourceUuid());
-              if (weatherDataSource != null
-                  && wds.getName().equals(weatherDataSource.getName())) {
-                weatherData.getSelectionModel().select(wds);
-              }
-            }
+                  name.setText(field.getName());
 
-            SoilProfile fieldSoilProfile = gsehenInstance
-                .getSoilProfileForUuid(field.getSoilProfileUuid());
-            for (SoilProfile soPr : soilProfileList) {
-              if (fieldSoilProfile != null
-                  && soPr.getName().equals(fieldSoilProfile.getName())) {
-                currentSoilBox.getSelectionModel().select(soPr);
-              }
-            }
-            if (fieldSoilProfile != null) {
-              getCurrentSoilProfile();
-            } else {
-              currentSoilBox.getSelectionModel().clearSelection();
-              pane.setBottom(null);
-            }
-            if (grid.getChildren().contains(nameError)) {
-              grid.getChildren().remove(nameError);
-            }
-          } else {
-            pane.setVisible(false);
-          }
+                  area.setText(gsehenInstance.formatDoubleOneDecimal(
+                      field.getPolygon().calculateArea(field.getPolygon().getGeoPoints())));
+                  
+                  for (WeatherDataSource wds : weatherDataSourceList) {
+                    final WeatherDataSource weatherDataSource = gsehenInstance
+                        .getWeatherDataSourceForUuid(field.getWeatherDataSourceUuid());
+                    if (weatherDataSource != null
+                        && wds.getName().equals(weatherDataSource.getName())) {
+                      weatherData.getSelectionModel().select(wds);
+                    }
+                  }
+
+                  SoilProfile fieldSoilProfile = gsehenInstance
+                      .getSoilProfileForUuid(field.getSoilProfileUuid());
+                  for (SoilProfile soPr : soilProfileList) {
+                    if (fieldSoilProfile != null
+                        && soPr.getName().equals(fieldSoilProfile.getName())) {
+                      currentSoilBox.getSelectionModel().select(soPr);
+                    }
+                  }
+                  if (fieldSoilProfile != null) {
+                    getCurrentSoilProfile();
+                  } else {
+                    currentSoilBox.getSelectionModel().clearSelection();
+                    pane.setBottom(null);
+                  }
+                  if (grid.getChildren().contains(nameError)) {
+                    grid.getChildren().remove(nameError);
+                  }
+                } else {
+                  pane.setVisible(false);
+                }
         }
       }
     });

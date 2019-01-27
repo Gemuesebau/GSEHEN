@@ -1,12 +1,12 @@
 package de.hgu.gsehen.gui.view;
 
-import de.hgu.gsehen.Gsehen;
-
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import de.hgu.gsehen.Gsehen;
 import javafx.concurrent.Worker.State;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
