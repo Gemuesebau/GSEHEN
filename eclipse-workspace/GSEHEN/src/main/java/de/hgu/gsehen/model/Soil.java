@@ -15,7 +15,7 @@ import javax.persistence.Id;
  * @author AT
  */
 @Entity
-public class Soil {
+public class Soil implements Named {
 
   public Soil() {}
 
@@ -44,6 +44,7 @@ public class Soil {
     this.name = name;
   }
 
+  @Override
   public String getName() {
     return name;
   }

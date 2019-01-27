@@ -244,21 +244,21 @@ public abstract class FarmDataController extends WebController {
     Reader reader = null;
     try {
       reader = new StringReader(getFileContents("../../build.properties"));
-    } catch (Exception e1) {
+    } catch (Exception e) {
       try {
         reader = new InputStreamReader(
             new FileInputStream(
                 System.getProperty("user.home") + "/.GSEHEN.build.properties"), "ISO-8859-1");
       } catch (Exception e2) {
         throw new RuntimeException(
-            "External properties not found (after " + e1.getMessage() + ")", e2);
+            "External properties not found (after " + e.getMessage() + ")", e2);
       }
     }
     Properties properties = new Properties();
     try {
       properties.load(reader);
-    } catch (Exception e3) {
-      throw new RuntimeException("Properties not readable", e3);
+    } catch (Exception e) {
+      throw new RuntimeException("Properties not readable", e);
     }
     return properties.getProperty(GOOGLE_MAPS_API_KEY_PROPKEY);
   }

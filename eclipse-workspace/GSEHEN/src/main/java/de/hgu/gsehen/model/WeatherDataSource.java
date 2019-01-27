@@ -7,7 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
-public class WeatherDataSource {
+public class WeatherDataSource implements Named {
   @Id
   @GeneratedValue
   private long id;
@@ -76,6 +76,7 @@ public class WeatherDataSource {
     this.uuid = uuid;
   }
 
+  @Override
   public String getName() {
     return name;
   }
@@ -118,7 +119,7 @@ public class WeatherDataSource {
 
   @SuppressWarnings("checkstyle:all")
   public String getPluginConfigurationJSON() {
-    //return pluginConfigurationJSON;
+    //return pluginConfigurationJSON; FIXME Plugin muss das JSON liefern, wenn man "Save" klickt.
     pluginConfigurationJSON = "" + pluginConfigurationJSON; // dummy
     return "{"
         + "  \"measIntervalSeconds\": 600,"

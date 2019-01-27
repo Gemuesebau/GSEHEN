@@ -9,13 +9,16 @@ import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.GsehenGuiElements;
+import de.hgu.gsehen.gui.util.ItemStringConverter;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilManualData;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
+import de.hgu.gsehen.model.WeatherDataPlugin;
 import de.hgu.gsehen.model.WeatherDataSource;
+import de.hgu.gsehen.util.CollectionUtil;
 import de.hgu.gsehen.util.DBUtil;
 import de.hgu.gsehen.util.PluginUtil;
 
@@ -23,12 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -49,10 +52,10 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 
 public class FieldDataController extends Application
     implements GsehenEventListener<FarmDataChanged> {
+  private static final Logger LOGGER = Logger.getLogger(FieldDataController.class.getName());
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   protected final ResourceBundle mainBundle;
   private WeatherDataSource selectedWeatherDataSource;
@@ -107,8 +110,9 @@ public class FieldDataController extends Application
   private JFXTextField soilManualZone;
   private JFXTextField soilManualRain;
   private JFXTextField soilManualPause;
-  private Text dateError = new Text();
-  private int fixedNodesCount;
+  private int fixedNodesCount = -1;
+  private GridPane configElementsParent;
+  private WeatherDataPlugin weatherDataPlugin;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -164,39 +168,16 @@ public class FieldDataController extends Application
       for (SoilProfile s : soilProfileList) {
         currentSoilBox.getItems().add(s);
       }
-      currentSoilBox.setConverter(new StringConverter<SoilProfile>() {
-
-        @Override
-        public String toString(SoilProfile object) {
-          return object.getName();
-        }
-
-        @Override
-        public SoilProfile fromString(String string) {
-          return currentSoilBox.getItems().stream().filter(ap -> ap.getName().equals(string))
-              .findFirst().orElse(null);
-        }
-      });
+      currentSoilBox.setConverter(new ItemStringConverter<SoilProfile>(currentSoilBox));
     }
 
     Button editProfile = gsehenGuiElements.button(200);
     editProfile.setText(mainBundle.getString("fieldview.editprofile"));
-    editProfile.setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent e) {
-        editSoilProfile();
-      }
-    });
+    editProfile.setOnAction(e -> editSoilProfile());
 
     createSoil = gsehenGuiElements.button(200);
     createSoil.setText(mainBundle.getString("fieldview.createprofile"));
-    createSoil.setOnAction(new EventHandler<ActionEvent>() {
-
-      @Override
-      public void handle(ActionEvent e) {
-        createSoilProfile();
-      }
-    });
+    createSoil.setOnAction(e -> createSoilProfile());
 
     VBox soilBox = new VBox();
     soilBox.setSpacing(10);
@@ -213,42 +194,22 @@ public class FieldDataController extends Application
       for (WeatherDataSource s : weatherDataSourceList) {
         weatherData.getItems().add(s);
       }
-      weatherData.setConverter(new StringConverter<WeatherDataSource>() {
-
-        @Override
-        public String toString(WeatherDataSource object) {
-          return object.getName();
-        }
-
-        @Override
-        public WeatherDataSource fromString(String string) {
-          return weatherData.getItems().stream().filter(ap -> ap.getName().equals(string))
-              .findFirst().orElse(null);
-        }
-      });
+      weatherData.setConverter(new ItemStringConverter<WeatherDataSource>(weatherData));
     }
 
     Button editWds = gsehenGuiElements.button(200);
     editWds.setText(mainBundle.getString("fieldview.editwds"));
-    editWds.setOnAction(new EventHandler<ActionEvent>() {
-
-      @Override
-      public void handle(ActionEvent e) {
-        if (weatherData.getValue() != null) {
-          createWeatherDataSource();
-          setWeatherDataTexts();
-        }
+    editWds.setOnAction(e -> {
+      if (weatherData.getValue() != null) {
+        createWeatherDataSource();
+        fillWeatherDataControls();
       }
     });
 
     Button createWds = gsehenGuiElements.button(200);
     createWds.setText(mainBundle.getString("fieldview.createwds"));
-    createWds.setOnAction(new EventHandler<ActionEvent>() {
-
-      @Override
-      public void handle(ActionEvent e) {
-        createWeatherDataSource();
-      }
+    createWds.setOnAction(e -> {
+      createWeatherDataSource();
     });
 
     VBox weatherBox = new VBox();
@@ -263,31 +224,27 @@ public class FieldDataController extends Application
     nameError.setFill(Color.RED);
 
     GridPane grid = gsehenGuiElements.gridPane(pane);
-    saveField.setOnAction(new EventHandler<ActionEvent>() {
-
-      @Override
-      public void handle(ActionEvent e) {
-        if (name.getText().isEmpty()) {
-          GridPane.setConstraints(nameError, 2, 0);
-          grid.getChildren().add(nameError);
-        } else {
-          field.setName(name.getText());
-          field.setArea(gsehenInstance.parseDouble(area.getText()));
-          for (SoilProfile sp : soilProfileList) {
-            if (sp == currentSoilBox.getValue()) {
-              field.setSoilProfileUuid(sp.getUuid());
-            }
+    saveField.setOnAction(e -> {
+      if (name.getText().isEmpty()) {
+        GridPane.setConstraints(nameError, 2, 0);
+        grid.getChildren().add(nameError);
+      } else {
+        field.setName(name.getText());
+        field.setArea(gsehenInstance.parseDouble(area.getText()));
+        for (SoilProfile sp : soilProfileList) {
+          if (sp == currentSoilBox.getValue()) {
+            field.setSoilProfileUuid(sp.getUuid());
           }
-          for (WeatherDataSource wds : weatherDataSourceList) {
-            if (wds == weatherData.getValue()) {
-              field.setWeatherDataSourceUuid(wds.getUuid());
-            }
-          }
-          gsehenInstance.sendFarmDataChanged(field, null);
-          tabPane.getSelectionModel().select(1);
-          treeTableView.getSelectionModel().clearSelection();
-          treeTableView.getSelectionModel().select(currentItem);
         }
+        for (WeatherDataSource wds : weatherDataSourceList) {
+          if (wds == weatherData.getValue()) {
+            field.setWeatherDataSourceUuid(wds.getUuid());
+          }
+        }
+        gsehenInstance.sendFarmDataChanged(field, null);
+        tabPane.getSelectionModel().select(1);
+        treeTableView.getSelectionModel().clearSelection();
+        treeTableView.getSelectionModel().select(currentItem);
       }
     });
 
@@ -318,57 +275,50 @@ public class FieldDataController extends Application
     // Actions that will happen, if you click a 'field' in the TreeTableView
     treeTableView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
         .lookup(FARM_TREE_VIEW_ID);
-    treeTableView.getSelectionModel().selectedItemProperty()
-        .addListener(new ChangeListener<Object>() {
-          @Override
-          public void changed(ObservableValue<?> observable, Object oldVal, Object newVal) {
-            for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
-              if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
-                selectedItem = treeTableView.getSelectionModel().getSelectedCells().get(i)
-                    .getTreeItem();
-                if (selectedItem != null
-                    && selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
-                  pane.setVisible(true);
-                  field = (Field) selectedItem.getValue();
+    treeTableView.getSelectionModel().selectedItemProperty().addListener((o, oldVal, newVal) -> {
+      for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
+        if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
+          selectedItem = treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
+          if (selectedItem != null
+              && selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
+            pane.setVisible(true);
+            field = (Field) selectedItem.getValue();
+            name.setText(field.getName());
+            area.setText(gsehenInstance.formatDoubleOneDecimal(
+                field.getPolygon().calculateArea(field.getPolygon().getGeoPoints())));
 
-                  name.setText(field.getName());
-
-                  area.setText(gsehenInstance.formatDoubleOneDecimal(
-                      field.getPolygon().calculateArea(field.getPolygon().getGeoPoints())));
-
-                  for (WeatherDataSource wds : weatherDataSourceList) {
-                    final WeatherDataSource weatherDataSource = gsehenInstance
-                        .getWeatherDataSourceForUuid(field.getWeatherDataSourceUuid());
-                    if (weatherDataSource != null
-                        && wds.getName().equals(weatherDataSource.getName())) {
-                      weatherData.getSelectionModel().select(wds);
-                    }
-                  }
-
-                  SoilProfile fieldSoilProfile = gsehenInstance
-                      .getSoilProfileForUuid(field.getSoilProfileUuid());
-                  for (SoilProfile soPr : soilProfileList) {
-                    if (fieldSoilProfile != null
-                        && soPr.getName().equals(fieldSoilProfile.getName())) {
-                      currentSoilBox.getSelectionModel().select(soPr);
-                    }
-                  }
-                  if (fieldSoilProfile != null) {
-                    getCurrentSoilProfile();
-                  } else {
-                    currentSoilBox.getSelectionModel().clearSelection();
-                    pane.setBottom(null);
-                  }
-                  if (grid.getChildren().contains(nameError)) {
-                    grid.getChildren().remove(nameError);
-                  }
-                } else {
-                  pane.setVisible(false);
-                }
+            for (WeatherDataSource wds : weatherDataSourceList) {
+              final WeatherDataSource weatherDataSource = gsehenInstance
+                  .getWeatherDataSourceForUuid(field.getWeatherDataSourceUuid());
+              if (weatherDataSource != null
+                  && wds.getName().equals(weatherDataSource.getName())) {
+                weatherData.getSelectionModel().select(wds);
               }
             }
+
+            SoilProfile fieldSoilProfile = gsehenInstance
+                .getSoilProfileForUuid(field.getSoilProfileUuid());
+            for (SoilProfile soPr : soilProfileList) {
+              if (fieldSoilProfile != null
+                  && soPr.getName().equals(fieldSoilProfile.getName())) {
+                currentSoilBox.getSelectionModel().select(soPr);
+              }
+            }
+            if (fieldSoilProfile != null) {
+              getCurrentSoilProfile();
+            } else {
+              currentSoilBox.getSelectionModel().clearSelection();
+              pane.setBottom(null);
+            }
+            if (grid.getChildren().contains(nameError)) {
+              grid.getChildren().remove(nameError);
+            }
+          } else {
+            pane.setVisible(false);
           }
-        });
+        }
+      }
+    });
     currentItem = treeTableView.getSelectionModel().getSelectedIndex();
   }
 
@@ -476,92 +426,44 @@ public class FieldDataController extends Application
   }
 
   /**
-   * Creates a WeatherDataSource.
+   * Creates the GUI for working with the details of a WeatherDataSource.
+   *
+   * <p>This method is usually called when a WDS is:
+   * <ul>
+   * <li>newly created</li>
+   * <li>edited</li>
+   * </ul>
+   * </p>
    */
   private void createWeatherDataSource() {
+    setWeatherDataPlugin(null);
     pane.getChildren().clear();
     treeTableView.setVisible(false);
     tabPane.getTabs().removeAll(mapViewTab, plotViewTab, logViewTab);
-
-    // Name
-    Text weatherDataLabel = gsehenGuiElements
-        .text(mainBundle.getString("fieldview.weatherdatalabel"));
-
-    weatherDataSourceName = new JFXTextField();
-
-    GridPane.setConstraints(weatherDataLabel, 0, 0);
-    GridPane.setConstraints(weatherDataSourceName, 1, 0);
-
-    // GridPane - Top Section
-    GridPane top = gsehenGuiElements.gridPane(pane);
-    top.getChildren().addAll(weatherDataLabel, weatherDataSourceName);
-    pane.setTop(top);
+    createWeatherDataSourceNameSection();
 
     List<ConfigDialogElement<Node, Object>> weatherDataSourceConfigItems = createFixedNodes();
-    fixedNodesCount = weatherDataSourceConfigItems.size();
+    fixedNodesCount = countNodes(weatherDataSourceConfigItems);
+    
     configureNodes(weatherDataSourceConfigItems, 0);
-    GridPane center = createGridPaneWithNodes(weatherDataSourceConfigItems);
+    configElementsParent = createGridPaneWithNodes(weatherDataSourceConfigItems);
     ScrollPane scrollPane = new ScrollPane();
-    scrollPane.setContent(center);
+    scrollPane.setContent(configElementsParent);
     scrollPane.setPannable(true);
     pane.setCenter(scrollPane);
 
     back = gsehenGuiElements.button(150);
     back.setText(mainBundle.getString("fieldview.back"));
-    back.setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent arg0) {
-        pane.getChildren().clear();
-        treeTableView.setVisible(true);
-        tabPane.getTabs().clear();
-        tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
-        gsehenInstance.sendFarmDataChanged(field, null);
-        tabPane.getSelectionModel().select(1);
-        treeTableView.getSelectionModel().clearSelection();
-        treeTableView.getSelectionModel().select(currentItem);
-      }
-    });
+    back.setOnAction(e -> recreateNormalGUI());
 
     save = gsehenGuiElements.button(150);
     save.setText(mainBundle.getString("button.accept"));
-    save.setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent arg0) {
-        if (noneIsEmpty(
-            new TextField[] { weatherDataSourceName, automaticImportIntervalSeconds.getNode() })) {
-          try {
-            setWeatherDataAndValues();
-
-            pane.getChildren().clear();
-            treeTableView.setVisible(true);
-            tabPane.getTabs().clear();
-            tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
-            gsehenInstance.sendFarmDataChanged(field, null);
-            tabPane.getSelectionModel().select(1);
-            treeTableView.getSelectionModel().clearSelection();
-            treeTableView.getSelectionModel().select(currentItem);
-          } catch (IllegalArgumentException iae) { // TODO sollen Plugins komplett selbst regeln!
-            if (center.getChildren().contains(dateError)) {
-              center.getChildren().remove(dateError);
-            }
-            dateError.setText(
-                mainBundle.getString("fieldview.dateerror") + "\"" + iae.getMessage() + "\"");
-            dateError.setFont(Font.font("Verdana", 14));
-            dateError.setFill(Color.RED);
-            GridPane.setHalignment(dateError, HPos.LEFT);
-            GridPane.setConstraints(dateError, 3, 2);
-            center.getChildren().add(dateError);
-          }
-        } else {
-          Text error = new Text(mainBundle.getString("fieldview.error"));
-          error.setFont(Font.font("Verdana", 14));
-          error.setFill(Color.RED);
-          buttonBox.getChildren().clear();
-          buttonBox.getChildren().addAll(back, save, error);
-        }
-      }
-    });
-
+    save.setOnAction(
+        arg -> CollectionUtil.testAndRun(
+            () -> checkMandatoryBaseFields() && setAndPopulateWeatherDataSource(),
+            () -> recreateNormalGUI()
+        )
+    );
     buttonBox = new HBox();
     buttonBox.setSpacing(10);
     buttonBox.getChildren().addAll(back, save);
@@ -573,12 +475,65 @@ public class FieldDataController extends Application
     pane.setBottom(bottomBox);
   }
 
+  private int countNodes(List<ConfigDialogElement<Node, Object>> weatherDataSourceConfigItems) {
+    int count = 0;
+    for (ConfigDialogElement<Node, Object> configDialogElement : weatherDataSourceConfigItems) {
+      if (configDialogElement.getLabel() != null) {
+        count++;
+      }
+      if (configDialogElement.getNode() != null) {
+        count++;
+      }
+      if (configDialogElement.getExample() != null) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  private void createWeatherDataSourceNameSection() {
+    Text weatherDataLabel = gsehenGuiElements
+        .text(mainBundle.getString("fieldview.weatherdatalabel"));
+    weatherDataSourceName = new JFXTextField();
+    GridPane.setConstraints(weatherDataLabel, 0, 0);
+    GridPane.setConstraints(weatherDataSourceName, 1, 0);
+    GridPane top = gsehenGuiElements.gridPane(pane);
+    top.getChildren().addAll(weatherDataLabel, weatherDataSourceName);
+    pane.setTop(top);
+  }
+
+  private boolean checkMandatoryBaseFields() {
+    final boolean bothSet = noneIsEmpty(
+        new TextField[] { weatherDataSourceName, automaticImportIntervalSeconds.getNode() });
+    if (!bothSet) {
+      Text error = new Text(mainBundle.getString("fieldview.error"));
+      error.setFont(Font.font("Verdana", 14));
+      error.setFill(Color.RED);
+      buttonBox.getChildren().clear();
+      buttonBox.getChildren().addAll(back, save, error);
+    }
+    return bothSet;
+  }
+
+  @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
+  private void recreateNormalGUI() {
+    fixedNodesCount = -1;
+    pane.getChildren().clear();
+    treeTableView.setVisible(true);
+    tabPane.getTabs().clear();
+    tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
+    gsehenInstance.sendFarmDataChanged(field, null);
+    tabPane.getSelectionModel().select(1);
+    treeTableView.getSelectionModel().clearSelection();
+    treeTableView.getSelectionModel().select(currentItem);
+  }
+
   private List<ConfigDialogElement<Node, Object>> createFixedNodes() {
     List<ConfigDialogElement<Node, Object>> weatherDataSourceConfigItems = new ArrayList<>();
     pluginJsFileName = new ConfigDialogComboBox(
         gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatapluginjsfilenamelabel")),
         gsehenGuiElements.comboBox(PluginUtil.getPluginJsFileNames()), null,
-        weatherDataSourceConfigItems);
+        weatherDataSourceConfigItems, event -> setWeatherDataPlugin(getComboBoxValue(event)));
     manualImport = new ConfigDialogCheckBox(
         gsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatamanualimportlabel")),
         null, weatherDataSourceConfigItems);
@@ -603,6 +558,11 @@ public class FieldDataController extends Application
         gsehenGuiElements.text(mainBundle.getString("fieldview.metersabove")), null,
         weatherDataSourceConfigItems, gsehenInstance);
     return weatherDataSourceConfigItems;
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T> T getComboBoxValue(ActionEvent actionEvent) {
+    return ((JFXComboBox<T>)actionEvent.getSource()).getValue();
   }
 
   private String numberExample(final String string) {
@@ -639,31 +599,42 @@ public class FieldDataController extends Application
     return gridPane;
   }
 
-  private void setWeatherDataAndValues() {
-    if (selectedWeatherDataSource != null) {
-      wds = selectedWeatherDataSource;
-    } else {
-      wds = new WeatherDataSource(DBUtil.generateUuid());
-      weatherDataSourceList.add(wds);
+  /**
+   * Sets the current weather data source and populates it from the GUI controls.
+   *
+   * @see checkMandatoryBaseFields
+   * @return true if all values were applied successfully, false otherwise
+   */
+  private boolean setAndPopulateWeatherDataSource() {
+    try {
+      if (selectedWeatherDataSource != null) {
+        wds = selectedWeatherDataSource;
+      } else {
+        wds = new WeatherDataSource(DBUtil.generateUuid());
+        weatherDataSourceList.add(wds);
+      }
+      wds.setName(weatherDataSourceName.getText());
+      wds.setPluginJsFileName(pluginJsFileName.getNodeValue());
+      wds.setManualImportActive(manualImport.getNodeValue());
+      wds.setAutomaticImportActive(automaticImport.getNodeValue());
+      wds.setAutomaticImportFrequencySeconds(automaticImportIntervalSeconds.getNodeValue());
+      wds.setLocationLat(locationLat.getNodeValue());
+      wds.setLocationLng(locationLng.getNodeValue());
+      wds.setLocationMetersAboveSeaLevel(metersAbove.getNodeValue());
+      processPluginSpecificConfiguration();
+    } catch (Exception e) {
+      LOGGER.log(Level.FINE, "Parsing or setting weather data source parameters failed", e);
+      return false;
     }
-    wds.setName(weatherDataSourceName.getText());
-    wds.setPluginJsFileName(pluginJsFileName.getNodeValue());
-    wds.setManualImportActive(manualImport.getNodeValue());
-    wds.setAutomaticImportActive(automaticImport.getNodeValue());
-    wds.setAutomaticImportFrequencySeconds(automaticImportIntervalSeconds.getNodeValue());
-    wds.setLocationLat(locationLat.getNodeValue());
-    wds.setLocationLng(locationLng.getNodeValue());
-    wds.setLocationMetersAboveSeaLevel(metersAbove.getNodeValue());
+    return true;
   }
 
-  /**
-   * Fills JFXTextFields with correct values ("Wetterdatenquelle bearbeiten").
-   */
-  private void setWeatherDataTexts() {
+  private void fillWeatherDataControls() {
     selectedWeatherDataSource = weatherData.getSelectionModel().getSelectedItem();
     if (selectedWeatherDataSource != null) {
       weatherDataSourceName.setText(selectedWeatherDataSource.getName());
-      pluginJsFileName.setNodeValue(selectedWeatherDataSource.getPluginJsFileName());
+      final String selectedPluginJsFileName = selectedWeatherDataSource.getPluginJsFileName();
+      pluginJsFileName.setNodeValue(selectedPluginJsFileName);
       manualImport.setNodeValue(selectedWeatherDataSource.isManualImportActive());
       automaticImport.setNodeValue(selectedWeatherDataSource.isAutomaticImportActive());
       automaticImportIntervalSeconds
@@ -671,7 +642,44 @@ public class FieldDataController extends Application
       locationLat.setNodeValue(selectedWeatherDataSource.getLocationLat());
       locationLng.setNodeValue(selectedWeatherDataSource.getLocationLng());
       metersAbove.setNodeValue(selectedWeatherDataSource.getLocationMetersAboveSeaLevel());
+      setWeatherDataPlugin(selectedPluginJsFileName);
     }
+  }
+
+  private void processPluginSpecificConfiguration() {
+    if (weatherDataPlugin == null) {
+      return;
+    }
+    wds.setPluginConfigurationJSON(weatherDataPlugin.getSpecificConfigurationJSON());
+  }
+
+  private void setWeatherDataPlugin(String pluginJsFileName) {
+    if (fixedNodesCount == -1) {
+      return;
+    }
+
+    for (StackTraceElement element : new Exception().getStackTrace()) {
+      System.out.println(element);
+    } // DEBUG - wird es aus der ComboBoxAction auch einmal ganz am Anfang aufgerufen?
+
+    final ObservableList<Node> configNodes = configElementsParent.getChildren();
+    for (int i = configNodes.size() - 1; i >= fixedNodesCount; i--) {
+      configNodes.remove(i);
+      System.out.println("# removed node " + configNodes);
+    }
+    if (pluginJsFileName == null) {
+      weatherDataPlugin = null;
+    } else {
+      weatherDataPlugin = PluginUtil.getPlugin(pluginJsFileName, WeatherDataPlugin.class);
+    }
+    if (weatherDataPlugin == null) {
+      return;
+    }
+    // FIXME implementieren!
+    weatherDataPlugin.createAndFillSpecificControls(
+        selectedWeatherDataSource != null ? selectedWeatherDataSource.getPluginConfigurationJSON()
+            : "{}",
+        configElementsParent, fixedNodesCount);
   }
 
   /**
@@ -736,46 +744,26 @@ public class FieldDataController extends Application
 
     JFXComboBox<Soil> soilChoiceBox = new JFXComboBox<Soil>();
     soilChoiceBox.getItems().addAll(soils);
-    soilChoiceBox.setConverter(new StringConverter<Soil>() {
-
-      @Override
-      public String toString(Soil object) {
-        return object.getName();
-      }
-
-      @Override
-      public Soil fromString(String string) {
-        return soilChoiceBox.getItems().stream().filter(ap -> ap.getName().equals(string))
-            .findFirst().orElse(null);
-      }
-    });
+    soilChoiceBox.setConverter(new ItemStringConverter<Soil>(soilChoiceBox));
 
     // Wasserhaltekapazität
     JFXTextField soilAwc = new JFXTextField();
 
     // Sets the 'soilAwc', if the ChoiceBox-Value changed
-    ChangeListener<Soil> changeListener = new ChangeListener<Soil>() {
-      @Override
-      public void changed(ObservableValue<? extends Soil> observable, //
-          Soil oldValue, Soil newValue) {
-        if (newValue != null) {
-          soilAwc.setText(gsehenInstance
-              .formatDoubleOneDecimal(soilChoiceBox.getValue().getAvailableWaterCapacity()));
-        }
+    ChangeListener<Soil> changeListener = (o, oldValue, newValue) -> {
+      if (newValue != null) {
+        soilAwc.setText(gsehenInstance
+            .formatDoubleOneDecimal(soilChoiceBox.getValue().getAvailableWaterCapacity()));
       }
     };
     soilChoiceBox.getSelectionModel().selectedItemProperty().addListener(changeListener);
 
     // Tiefe
     JFXTextField depth = new JFXTextField("25");
-    depth.textProperty().addListener(new ChangeListener<String>() {
-      @Override
-      public void changed(ObservableValue<? extends String> observable, String oldValue,
-          String newValue) {
-        if (newValue != null) {
-          if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
-            depth.setText(oldValue);
-          }
+    depth.textProperty().addListener((o, oldValue, newValue) -> {
+      if (newValue != null) {
+        if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
+          depth.setText(oldValue);
         }
       }
     });
@@ -789,67 +777,61 @@ public class FieldDataController extends Application
     // Schicht abschließen
     Button setSoil = gsehenGuiElements.button(200);
     setSoil.setText(mainBundle.getString("fieldview.setsoil"));
-    setSoil.setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent arg0) {
-        if (soilChoiceBox.getValue() != null && !depth.getText().isEmpty()
-            && !soilAwc.getText().isEmpty() && !soilChoiceBox.getValue().getName().isEmpty()) {
-          Soil soil = new Soil();
-          soil.setName(soilChoiceBox.getValue().getName());
-          soil.setAvailableWaterCapacity(gsehenInstance.parseDouble(soilAwc.getText()));
+    setSoil.setOnAction(e -> {
+      if (soilChoiceBox.getValue() != null && !depth.getText().isEmpty()
+          && !soilAwc.getText().isEmpty() && !soilChoiceBox.getValue().getName().isEmpty()) {
+        Soil soil = new Soil();
+        soil.setName(soilChoiceBox.getValue().getName());
+        soil.setAvailableWaterCapacity(gsehenInstance.parseDouble(soilAwc.getText()));
 
-          SoilProfileDepth spd = new SoilProfileDepth();
-          spd.setDepth(gsehenInstance.parseDouble(depth.getText()));
+        SoilProfileDepth spd = new SoilProfileDepth();
+        spd.setDepth(gsehenInstance.parseDouble(depth.getText()));
 
-          soilList.add(soil);
-          soilDepthList.add(spd);
+        soilList.add(soil);
+        soilDepthList.add(spd);
 
-          soilChoiceBox.setValue(null);
-          soilAwc.setText(null);
-          depth.setText(gsehenInstance.formatDoubleOneDecimal(spd.getDepth()));
+        soilChoiceBox.setValue(null);
+        soilAwc.setText(null);
+        depth.setText(gsehenInstance.formatDoubleOneDecimal(spd.getDepth()));
 
-          Text createdSoil = new Text(
-              mainBundle.getString("fieldview.layer") + (layerList.size() + 1) + ": \n"
-                  + mainBundle.getString("fieldview.soiltype") + soil.getName() + ";\n"
-                  + mainBundle.getString("fieldview.awc") + soil.getAvailableWaterCapacity() + ";\n"
-                  + mainBundle.getString("fieldview.depth") + spd.getDepth() + "\n\n");
-          createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
-          GridPane.setHalignment(createdSoil, HPos.LEFT);
-          GridPane.setConstraints(createdSoil, 0, 4 + layerList.size() + 1);
-          layerList.add(createdSoil);
+        Text createdSoil = new Text(
+            mainBundle.getString("fieldview.layer") + (layerList.size() + 1) + ": \n"
+                + mainBundle.getString("fieldview.soiltype") + soil.getName() + ";\n"
+                + mainBundle.getString("fieldview.awc") + soil.getAvailableWaterCapacity() + ";\n"
+                + mainBundle.getString("fieldview.depth") + spd.getDepth() + "\n\n");
+        createdSoil.setFont(Font.font("Arial", FontPosture.ITALIC, 14));
+        GridPane.setHalignment(createdSoil, HPos.LEFT);
+        GridPane.setConstraints(createdSoil, 0, 4 + layerList.size() + 1);
+        layerList.add(createdSoil);
 
+        layerText.setText(mainBundle.getString("fieldview.layer") + (layerList.size() + 1));
+
+        // Deletes a soil layer.
+        Button delSoil = gsehenGuiElements.button(150);
+        delSoil.setText(mainBundle.getString("fieldview.delsoil"));
+        delSoil.setOnAction(ae -> {
+          soilList.remove(soil);
+          soilDepthList.remove(spd);
+          layerList.remove(createdSoil);
+          center.getChildren().removeAll(createdSoil, delSoil);
+          depth.setText(mainBundle.getString("fieldview.layer") + (layerList.size() - 1));
           layerText.setText(mainBundle.getString("fieldview.layer") + (layerList.size() + 1));
 
-          // Deletes a soil layer.
-          Button delSoil = gsehenGuiElements.button(150);
-          delSoil.setText(mainBundle.getString("fieldview.delsoil"));
-          delSoil.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent arg0) {
-              soilList.remove(soil);
-              soilDepthList.remove(spd);
-              layerList.remove(createdSoil);
-              center.getChildren().removeAll(createdSoil, delSoil);
-              depth.setText(mainBundle.getString("fieldview.layer") + (layerList.size() - 1));
-              layerText.setText(mainBundle.getString("fieldview.layer") + (layerList.size() + 1));
+          for (Text t : layerList) {
+            t.setText(t.getText().substring(0, 9) + index + t.getText().substring(10));
+            index += 1;
+          }
+        });
+        GridPane.setHalignment(delSoil, HPos.LEFT);
+        GridPane.setConstraints(delSoil, 1, 4 + layerList.size());
 
-              for (Text t : layerList) {
-                t.setText(t.getText().substring(0, 9) + index + t.getText().substring(10));
-                index += 1;
-              }
-            }
-          });
-          GridPane.setHalignment(delSoil, HPos.LEFT);
-          GridPane.setConstraints(delSoil, 1, 4 + layerList.size());
-
-          center.getChildren().addAll(createdSoil, delSoil);
-          depth.setText(mainBundle.getString("fieldview.layer") + (layerList.size() + 1));
-        } else {
-          Text error = gsehenGuiElements.text(mainBundle.getString("fieldview.error"));
-          error.setFill(Color.RED);
-          buttonBox.getChildren().clear();
-          buttonBox.getChildren().addAll(back, save, error);
-        }
+        center.getChildren().addAll(createdSoil, delSoil);
+        depth.setText(mainBundle.getString("fieldview.layer") + (layerList.size() + 1));
+      } else {
+        Text error = gsehenGuiElements.text(mainBundle.getString("fieldview.error"));
+        error.setFill(Color.RED);
+        buttonBox.getChildren().clear();
+        buttonBox.getChildren().addAll(back, save, error);
       }
     });
 
@@ -877,61 +859,55 @@ public class FieldDataController extends Application
 
     back = gsehenGuiElements.button(150);
     back.setText(mainBundle.getString("fieldview.back"));
-    back.setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent arg0) {
-        pane.getChildren().clear();
-        treeTableView.setVisible(true);
-        tabPane.getTabs().clear();
-        tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
-        gsehenInstance.sendFarmDataChanged(field, null);
-        tabPane.getSelectionModel().select(1);
-        treeTableView.getSelectionModel().clearSelection();
-        treeTableView.getSelectionModel().select(currentItem);
-      }
+    back.setOnAction(e -> {
+      pane.getChildren().clear();
+      treeTableView.setVisible(true);
+      tabPane.getTabs().clear();
+      tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
+      gsehenInstance.sendFarmDataChanged(field, null);
+      tabPane.getSelectionModel().select(1);
+      treeTableView.getSelectionModel().clearSelection();
+      treeTableView.getSelectionModel().select(currentItem);
     });
 
     save = gsehenGuiElements.button(150);
     save.setText(mainBundle.getString("button.accept"));
-    save.setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent arg0) {
-        if (!soilProfileName.getText().isEmpty() && !soilList.isEmpty()) {
-          pane.getChildren().clear();
-          treeTableView.setVisible(true);
-          tabPane.getTabs().clear();
-          tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
+    save.setOnAction(e -> {
+      if (!soilProfileName.getText().isEmpty() && !soilList.isEmpty()) {
+        pane.getChildren().clear();
+        treeTableView.setVisible(true);
+        tabPane.getTabs().clear();
+        tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
 
-          SoilProfile soilProfileItem = new SoilProfile(DBUtil.generateUuid());
+        SoilProfile soilProfileItem = new SoilProfile(DBUtil.generateUuid());
 
-          soilProfileItem.setSoilType(soilList);
-          soilProfileItem.setProfileDepth(soilDepthList);
+        soilProfileItem.setSoilType(soilList);
+        soilProfileItem.setProfileDepth(soilDepthList);
 
-          if (!soilManualKc.getText().isEmpty() && !soilManualZone.getText().isEmpty()
-              && !soilManualRain.getText().isEmpty() && !soilManualPause.getText().isEmpty()) {
-            soilManualData = new SoilManualData(gsehenInstance.parseDouble(soilManualKc.getText()),
-                Integer.valueOf(soilManualZone.getText()),
-                gsehenInstance.parseDouble(soilManualRain.getText()),
-                Integer.valueOf(soilManualPause.getText()));
-          } else {
-            soilManualData = new SoilManualData(null, null, null, null);
-          }
-          soilProfileItem.setSoilManualData(soilManualData);
-
-          soilProfileItem.setName(soilProfileName.getText());
-          soilProfileList.add(soilProfileItem);
-          pane.getChildren().clear();
-          gsehenInstance.sendFarmDataChanged(field, null);
-          tabPane.getSelectionModel().select(1);
-          treeTableView.getSelectionModel().clearSelection();
-          treeTableView.getSelectionModel().select(currentItem);
+        if (!soilManualKc.getText().isEmpty() && !soilManualZone.getText().isEmpty()
+            && !soilManualRain.getText().isEmpty() && !soilManualPause.getText().isEmpty()) {
+          soilManualData = new SoilManualData(gsehenInstance.parseDouble(soilManualKc.getText()),
+              Integer.valueOf(soilManualZone.getText()),
+              gsehenInstance.parseDouble(soilManualRain.getText()),
+              Integer.valueOf(soilManualPause.getText()));
         } else {
-          Text noNameOrSoil = gsehenGuiElements
-              .text(mainBundle.getString("fieldview.nonameorsoil"));
-          noNameOrSoil.setFill(Color.RED);
-          buttonBox.getChildren().clear();
-          buttonBox.getChildren().addAll(back, save, noNameOrSoil);
+          soilManualData = new SoilManualData(null, null, null, null);
         }
+        soilProfileItem.setSoilManualData(soilManualData);
+
+        soilProfileItem.setName(soilProfileName.getText());
+        soilProfileList.add(soilProfileItem);
+        pane.getChildren().clear();
+        gsehenInstance.sendFarmDataChanged(field, null);
+        tabPane.getSelectionModel().select(1);
+        treeTableView.getSelectionModel().clearSelection();
+        treeTableView.getSelectionModel().select(currentItem);
+      } else {
+        Text noNameOrSoil = gsehenGuiElements
+            .text(mainBundle.getString("fieldview.nonameorsoil"));
+        noNameOrSoil.setFill(Color.RED);
+        buttonBox.getChildren().clear();
+        buttonBox.getChildren().addAll(back, save, noNameOrSoil);
       }
     });
 
@@ -959,13 +935,9 @@ public class FieldDataController extends Application
 
       // Name
       JFXTextField soilProfileName = new JFXTextField(currentSoilProfile.getName());
-      soilProfileName.textProperty().addListener(new ChangeListener<String>() {
-        @Override
-        public void changed(ObservableValue<? extends String> observable, String oldValue,
-            String newValue) {
-          if (!newValue.isEmpty()) {
-            currentSoilProfile.setName(soilProfileName.getText());
-          }
+      soilProfileName.textProperty().addListener((o, oldValue, newValue) -> {
+        if (!newValue.isEmpty()) {
+          currentSoilProfile.setName(soilProfileName.getText());
         }
       });
 
@@ -976,17 +948,13 @@ public class FieldDataController extends Application
       } else {
         soilManualKc = new JFXTextField();
       }
-      soilManualKc.textProperty().addListener(new ChangeListener<String>() {
-        @Override
-        public void changed(ObservableValue<? extends String> observable, String oldValue,
-            String newValue) {
-          if (!newValue.isEmpty()) {
-            if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
-              soilManualKc.setText(oldValue);
-            } else {
-              currentSoilProfile.getSoilManualData()
-                  .setSoilKc(gsehenInstance.parseDouble(newValue));
-            }
+      soilManualKc.textProperty().addListener((o, oldValue, newValue) -> {
+        if (!newValue.isEmpty()) {
+          if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
+            soilManualKc.setText(oldValue);
+          } else {
+            currentSoilProfile.getSoilManualData()
+                .setSoilKc(gsehenInstance.parseDouble(newValue));
           }
         }
       });
@@ -998,16 +966,12 @@ public class FieldDataController extends Application
       } else {
         soilManualZone = new JFXTextField();
       }
-      soilManualZone.textProperty().addListener(new ChangeListener<String>() {
-        @Override
-        public void changed(ObservableValue<? extends String> observable, String oldValue,
-            String newValue) {
-          if (!newValue.isEmpty()) {
-            if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
-              soilManualZone.setText(oldValue);
-            } else {
-              currentSoilProfile.getSoilManualData().setSoilZone(Integer.valueOf(newValue));
-            }
+      soilManualZone.textProperty().addListener((o, oldValue, newValue) -> {
+        if (!newValue.isEmpty()) {
+          if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
+            soilManualZone.setText(oldValue);
+          } else {
+            currentSoilProfile.getSoilManualData().setSoilZone(Integer.valueOf(newValue));
           }
         }
       });
@@ -1019,17 +983,13 @@ public class FieldDataController extends Application
       } else {
         soilManualRain = new JFXTextField();
       }
-      soilManualRain.textProperty().addListener(new ChangeListener<String>() {
-        @Override
-        public void changed(ObservableValue<? extends String> observable, String oldValue,
-            String newValue) {
-          if (!newValue.isEmpty()) {
-            if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
-              soilManualRain.setText(oldValue);
-            } else {
-              currentSoilProfile.getSoilManualData()
-                  .setRainMax(gsehenInstance.parseDouble(newValue));
-            }
+      soilManualRain.textProperty().addListener((o, oldValue, newValue) -> {
+        if (!newValue.isEmpty()) {
+          if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
+            soilManualRain.setText(oldValue);
+          } else {
+            currentSoilProfile.getSoilManualData()
+                .setRainMax(gsehenInstance.parseDouble(newValue));
           }
         }
       });
@@ -1041,16 +1001,12 @@ public class FieldDataController extends Application
       } else {
         soilManualPause = new JFXTextField();
       }
-      soilManualPause.textProperty().addListener(new ChangeListener<String>() {
-        @Override
-        public void changed(ObservableValue<? extends String> observable, String oldValue,
-            String newValue) {
-          if (!newValue.isEmpty()) {
-            if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
-              soilManualPause.setText(oldValue);
-            } else {
-              currentSoilProfile.getSoilManualData().setDaysPause(Integer.valueOf(newValue));
-            }
+      soilManualPause.textProperty().addListener((o, oldValue, newValue) -> {
+        if (!newValue.isEmpty()) {
+          if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
+            soilManualPause.setText(oldValue);
+          } else {
+            currentSoilProfile.getSoilManualData().setDaysPause(Integer.valueOf(newValue));
           }
         }
       });
@@ -1097,19 +1053,7 @@ public class FieldDataController extends Application
 
         JFXComboBox<Soil> soilChoiceBox = new JFXComboBox<Soil>();
         soilChoiceBox.getItems().addAll(soils);
-        soilChoiceBox.setConverter(new StringConverter<Soil>() {
-
-          @Override
-          public String toString(Soil object) {
-            return object.getName();
-          }
-
-          @Override
-          public Soil fromString(String string) {
-            return soilChoiceBox.getItems().stream().filter(ap -> ap.getName().equals(string))
-                .findFirst().orElse(null);
-          }
-        });
+        soilChoiceBox.setConverter(new ItemStringConverter<Soil>(soilChoiceBox));
 
         Soil curSoil = currentSoilProfile.getSoilType().get(i);
         Text soilAwc = new Text();
@@ -1123,17 +1067,13 @@ public class FieldDataController extends Application
 
         // Wasserhaltekapazität
         int in = i;
-        ChangeListener<Soil> changeListener = new ChangeListener<Soil>() {
-          @Override
-          public void changed(ObservableValue<? extends Soil> observable, //
-              Soil oldValue, Soil newValue) {
-            if (newValue != null) {
-              soilAwc.setText(gsehenInstance
-                  .formatDoubleOneDecimal(soilChoiceBox.getValue().getAvailableWaterCapacity()));
-              currentSoilProfile.getSoilType().get(in).setName(soilChoiceBox.getValue().getName());
-              currentSoilProfile.getSoilType().get(in)
-                  .setAvailableWaterCapacity(soilChoiceBox.getValue().getAvailableWaterCapacity());
-            }
+        ChangeListener<Soil> changeListener = (o, oldValue, newValue) -> {
+          if (newValue != null) {
+            soilAwc.setText(gsehenInstance
+                .formatDoubleOneDecimal(soilChoiceBox.getValue().getAvailableWaterCapacity()));
+            currentSoilProfile.getSoilType().get(in).setName(soilChoiceBox.getValue().getName());
+            currentSoilProfile.getSoilType().get(in)
+                .setAvailableWaterCapacity(soilChoiceBox.getValue().getAvailableWaterCapacity());
           }
         };
         soilChoiceBox.getSelectionModel().selectedItemProperty().addListener(changeListener);
@@ -1142,17 +1082,13 @@ public class FieldDataController extends Application
         soilDepth = new JFXTextField(gsehenInstance
             .formatDoubleOneDecimal(currentSoilProfile.getProfileDepth().get(i).getDepth()));
 
-        soilDepth.textProperty().addListener(new ChangeListener<String>() {
-          @Override
-          public void changed(ObservableValue<? extends String> observable, String oldValue,
-              String newValue) {
-            if (!newValue.isEmpty()) {
-              if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
-                soilDepth.setText(oldValue);
-              } else {
-                currentSoilProfile.getProfileDepth().get(in)
-                    .setDepth(gsehenInstance.parseDouble(newValue));
-              }
+        soilDepth.textProperty().addListener((o, oldValue, newValue) -> {
+          if (!newValue.isEmpty()) {
+            if (!newValue.trim().isEmpty() && !gsehenInstance.isParseable(newValue)) {
+              soilDepth.setText(oldValue);
+            } else {
+              currentSoilProfile.getProfileDepth().get(in)
+                  .setDepth(gsehenInstance.parseDouble(newValue));
             }
           }
         });
@@ -1188,30 +1124,27 @@ public class FieldDataController extends Application
       // Bearbeitung abschließen
       back = gsehenGuiElements.button(200);
       back.setText(mainBundle.getString("fieldview.editend"));
-      back.setOnAction(new EventHandler<ActionEvent>() {
-        @Override
-        public void handle(ActionEvent arg0) {
-          if ((!soilProfileName.getText().isEmpty() && soilDepth != null
-              && !soilDepth.getText().isEmpty())
-              || (!soilManualKc.getText().isEmpty() && !soilManualZone.getText().isEmpty()
-                  && !soilManualRain.getText().isEmpty() && !soilManualPause.getText().isEmpty())) {
-            pane.getChildren().clear();
-            treeTableView.setVisible(true);
-            tabPane.getTabs().clear();
-            tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
-            gsehenInstance.sendFarmDataChanged(field, null);
-            tabPane.getSelectionModel().select(1);
-            treeTableView.getSelectionModel().clearSelection();
-            treeTableView.getSelectionModel().select(currentItem);
-          } else {
-            Text profileChangeError = gsehenGuiElements
-                .text(mainBundle.getString("fieldview.error"));
-            profileChangeError.setFill(Color.RED);
-            HBox bottom = new HBox();
-            bottom.setSpacing(10);
-            bottom.getChildren().addAll(back, profileChangeError);
-            pane.setBottom(bottom);
-          }
+      back.setOnAction(e -> {
+        if ((!soilProfileName.getText().isEmpty() && soilDepth != null
+            && !soilDepth.getText().isEmpty())
+            || (!soilManualKc.getText().isEmpty() && !soilManualZone.getText().isEmpty()
+                && !soilManualRain.getText().isEmpty() && !soilManualPause.getText().isEmpty())) {
+          pane.getChildren().clear();
+          treeTableView.setVisible(true);
+          tabPane.getTabs().clear();
+          tabPane.getTabs().addAll(mapViewTab, fieldViewTab, plotViewTab, logViewTab);
+          gsehenInstance.sendFarmDataChanged(field, null);
+          tabPane.getSelectionModel().select(1);
+          treeTableView.getSelectionModel().clearSelection();
+          treeTableView.getSelectionModel().select(currentItem);
+        } else {
+          Text profileChangeError = gsehenGuiElements
+              .text(mainBundle.getString("fieldview.error"));
+          profileChangeError.setFill(Color.RED);
+          HBox bottom = new HBox();
+          bottom.setSpacing(10);
+          bottom.getChildren().addAll(back, profileChangeError);
+          pane.setBottom(bottom);
         }
       });
       pane.setBottom(back);
@@ -1221,5 +1154,4 @@ public class FieldDataController extends Application
   @Override
   public void start(Stage primaryStage) throws Exception {
   }
-
 }

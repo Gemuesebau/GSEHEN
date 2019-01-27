@@ -5,6 +5,7 @@ import static de.hgu.gsehen.util.TextResourceUtil.evaluateJsResource;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.gsbalance.DayDataCalculation;
+import de.hgu.gsehen.model.WeatherDataPlugin;
 //import de.hgu.gsehen.model.WeatherDataPlugin;
 import de.hgu.gsehen.model.WeatherDataSource;
 import java.io.File;
@@ -55,6 +56,18 @@ public class PluginUtil {
       LOGGER.log(Level.INFO, "Weather data import from '" + weatherDataSource.getName() + "' was "
           + (dayData == null ? "NOT " : "") + "successful");
       gsehenInstance.sendDayDataChanged(dayData, weatherDataSource, null);
+    }
+  }
+
+  @SuppressWarnings({"unchecked", "checkstyle:javadocmethod"})
+  public static <T> T getPlugin(String pluginJsFileName, Class<T> pluginClass) {
+    final ScriptEngine engine = evaluateJsResource(PLUGINS_FOLDER + "/" + pluginJsFileName);
+    try {
+      return (T) ((Invocable) engine).invokeFunction("getPlugin");
+    } catch (Exception e) {
+      final String errorMessage = "Error when getting plugin '" + pluginJsFileName + "'";
+      LOGGER.log(Level.SEVERE, errorMessage, e);
+      throw new RuntimeException(errorMessage, e);
     }
   }
 

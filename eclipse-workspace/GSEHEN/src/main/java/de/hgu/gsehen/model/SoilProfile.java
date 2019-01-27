@@ -10,7 +10,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 @Entity
-public class SoilProfile {
+public class SoilProfile implements Named {
 
   @Id
   @GeneratedValue
@@ -57,6 +57,7 @@ public class SoilProfile {
     this.uuid = uuid;
   }
 
+  @Override
   public String getName() {
     return name;
   }

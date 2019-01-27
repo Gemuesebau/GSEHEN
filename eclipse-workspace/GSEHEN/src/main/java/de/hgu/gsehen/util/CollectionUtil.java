@@ -116,6 +116,7 @@ public class CollectionUtil {
     return result;
   }
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public static <T, K, V> List<T> mapToList(Map<K, V> map,
       Function<Entry<K, V>, T> listItemGenerator) {
     List<T> result = new ArrayList<>();
@@ -138,5 +139,21 @@ public class CollectionUtil {
       targetArray[index++] = mapper.apply(sourceItem);
     }
     return targetArray;
+  }
+
+  @SuppressWarnings("checkstyle:javadocmethod")
+  public static void testAndRun(Supplier<Boolean> check, Runnable ifTrue, Runnable ifFalse) {
+    if (check.get()) {
+      ifTrue.run();
+    } else {
+      ifFalse.run();
+    }
+  }
+
+  @SuppressWarnings("checkstyle:javadocmethod")
+  public static void testAndRun(Supplier<Boolean> check, Runnable ifTrue) {
+    if (check.get()) {
+      ifTrue.run();
+    }
   }
 }
