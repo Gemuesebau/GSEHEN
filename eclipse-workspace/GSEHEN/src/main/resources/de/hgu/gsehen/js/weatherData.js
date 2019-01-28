@@ -4,15 +4,7 @@ loadGsehenJs("commons.js");
 
 de.hgu.gsehen.evapotranspiration.UtilityFunctions.convertWindSpeed2m
 
-fieldview.interval                       = Messintervall in Sekunden:
-fieldview.windspeed                      = Höhe der\nWindgeschwindigkeitsmessung\nin Meter:
-fieldview.dateformat                     = Datumsformat:
-fieldview.dateformatexample              = Beispiel: d.M.y
-fieldview.localeid                       = Zahlenformat gemäß:
-fieldview.filepath                       = Dateipfad der\nWetterdaten-CSV-Datei:
-fieldview.filechooserbutton              = Datei auswählen
-fieldview.filechooser                    = Dateipfad zur Wetterdatenquelle
-fieldview.dateerror                      = Falsches Format!
+
 
 private TreeMap<String, String> javaLocaleMap;
 

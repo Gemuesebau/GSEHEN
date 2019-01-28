@@ -1,6 +1,10 @@
 package de.hgu.gsehen.model;
 
-import javafx.scene.Parent;
+import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.gui.GsehenGuiElements;
+import java.util.Locale;
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
 
 public interface WeatherDataPlugin {
 
@@ -13,10 +17,17 @@ public interface WeatherDataPlugin {
    * <p>This method may save any GUI control references for later! (e.g., for error messages)</p>
    *
    * @param json a JSON data string containing the values for the specific controls
-   * @param configElementsParent a GUI node where new controls are to be added as children
+   * @param configNodes a GUI node list where new controls are to be added
+   * @param gsehenInstance the application instance
+   * @param gsehenGuiElements the GUI elements helper
+   * @param fixedItemsCount the number of leading configuration items to be left untouched
    * @param fixedNodesCount the number of the given parent's children to be left untouched
+   * @param classLoader the class loader to be used for resource bundle lookup
+   * @param locale the currently selected UI locale
    */
-  void createAndFillSpecificControls(String json, Parent configElementsParent, int fixedNodesCount);
+  void createAndFillSpecificControls(String json, ObservableList<Node> configNodes,
+      Gsehen gsehenInstance, GsehenGuiElements gsehenGuiElements, int fixedItemsCount,
+      int fixedNodesCount, ClassLoader classLoader, Locale locale);
 
   /**
    * Returns the values currently contained in this plugin's own controls.

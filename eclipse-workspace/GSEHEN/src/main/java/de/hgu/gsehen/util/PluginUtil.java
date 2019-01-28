@@ -5,8 +5,6 @@ import static de.hgu.gsehen.util.TextResourceUtil.evaluateJsResource;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.gsbalance.DayDataCalculation;
-import de.hgu.gsehen.model.WeatherDataPlugin;
-//import de.hgu.gsehen.model.WeatherDataPlugin;
 import de.hgu.gsehen.model.WeatherDataSource;
 import java.io.File;
 import java.util.Date;
@@ -32,7 +30,9 @@ public class PluginUtil {
   @SuppressWarnings("checkstyle:javadocmethod")
   public static String[] getPluginJsFileNames() {
     return CollectionUtil.mapArrayValues(
-        new File(Gsehen.class.getResource(PLUGINS_FOLDER).getPath()).listFiles(),
+        new File(Gsehen.class.getResource(PLUGINS_FOLDER).getPath()).listFiles(
+            (a, b) -> b.endsWith(".js")
+            ),
         String.class, file -> file.getName()
     );
   }

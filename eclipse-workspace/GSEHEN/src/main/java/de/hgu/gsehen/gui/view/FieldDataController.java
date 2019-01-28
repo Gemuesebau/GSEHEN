@@ -24,7 +24,6 @@ import de.hgu.gsehen.util.PluginUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -113,6 +112,7 @@ public class FieldDataController extends Application
   private int fixedNodesCount = -1;
   private GridPane configElementsParent;
   private WeatherDataPlugin weatherDataPlugin;
+  private int fixedItemsCount;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -120,8 +120,7 @@ public class FieldDataController extends Application
     weatherDataSourceList = gsehenInstance.getWeatherDataSources();
     gsehenGuiElements = new GsehenGuiElements();
 
-    final Locale selLocale = gsehenInstance.getSelectedLocale();
-    mainBundle = ResourceBundle.getBundle("i18n.main", selLocale);
+    mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
 
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
   }
@@ -279,45 +278,45 @@ public class FieldDataController extends Application
       for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
         if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
           selectedItem = treeTableView.getSelectionModel().getSelectedCells().get(i).getTreeItem();
-                if (selectedItem != null
-                    && selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
-                  pane.setVisible(true);
-                  field = (Field) selectedItem.getValue();
+          if (selectedItem != null
+              && selectedItem.getValue().getClass().getSimpleName().equals("Field")) {
+            pane.setVisible(true);
+            field = (Field) selectedItem.getValue();
 
-                  name.setText(field.getName());
+            name.setText(field.getName());
 
-                  area.setText(gsehenInstance.formatDoubleOneDecimal(
-                      field.getPolygon().calculateArea(field.getPolygon().getGeoPoints())));
-                  
-                  for (WeatherDataSource wds : weatherDataSourceList) {
-                    final WeatherDataSource weatherDataSource = gsehenInstance
-                        .getWeatherDataSourceForUuid(field.getWeatherDataSourceUuid());
-                    if (weatherDataSource != null
-                        && wds.getName().equals(weatherDataSource.getName())) {
-                      weatherData.getSelectionModel().select(wds);
-                    }
-                  }
+            area.setText(gsehenInstance.formatDoubleOneDecimal(
+                field.getPolygon().calculateArea(field.getPolygon().getGeoPoints())));
+            
+            for (WeatherDataSource wds : weatherDataSourceList) {
+              final WeatherDataSource weatherDataSource = gsehenInstance
+                  .getWeatherDataSourceForUuid(field.getWeatherDataSourceUuid());
+              if (weatherDataSource != null
+                  && wds.getName().equals(weatherDataSource.getName())) {
+                weatherData.getSelectionModel().select(wds);
+              }
+            }
 
-                  SoilProfile fieldSoilProfile = gsehenInstance
-                      .getSoilProfileForUuid(field.getSoilProfileUuid());
-                  for (SoilProfile soPr : soilProfileList) {
-                    if (fieldSoilProfile != null
-                        && soPr.getName().equals(fieldSoilProfile.getName())) {
-                      currentSoilBox.getSelectionModel().select(soPr);
-                    }
-                  }
-                  if (fieldSoilProfile != null) {
-                    getCurrentSoilProfile();
-                  } else {
-                    currentSoilBox.getSelectionModel().clearSelection();
-                    pane.setBottom(null);
-                  }
-                  if (grid.getChildren().contains(nameError)) {
-                    grid.getChildren().remove(nameError);
-                  }
-                } else {
-                  pane.setVisible(false);
-                }
+            SoilProfile fieldSoilProfile = gsehenInstance
+                .getSoilProfileForUuid(field.getSoilProfileUuid());
+            for (SoilProfile soPr : soilProfileList) {
+              if (fieldSoilProfile != null
+                  && soPr.getName().equals(fieldSoilProfile.getName())) {
+                currentSoilBox.getSelectionModel().select(soPr);
+              }
+            }
+            if (fieldSoilProfile != null) {
+              getCurrentSoilProfile();
+            } else {
+              currentSoilBox.getSelectionModel().clearSelection();
+              pane.setBottom(null);
+            }
+            if (grid.getChildren().contains(nameError)) {
+              grid.getChildren().remove(nameError);
+            }
+          } else {
+            pane.setVisible(false);
+          }
         }
       }
     });
@@ -445,6 +444,7 @@ public class FieldDataController extends Application
     createWeatherDataSourceNameSection();
 
     List<ConfigDialogElement<Node, Object>> weatherDataSourceConfigItems = createFixedNodes();
+    fixedItemsCount = weatherDataSourceConfigItems.size();
     fixedNodesCount = countNodes(weatherDataSourceConfigItems);
     
     configureNodes(weatherDataSourceConfigItems, 0);
@@ -660,14 +660,13 @@ public class FieldDataController extends Application
       return;
     }
 
-    for (StackTraceElement element : new Exception().getStackTrace()) {
-      System.out.println(element);
-    } // DEBUG - wird es aus der ComboBoxAction auch einmal ganz am Anfang aufgerufen?
+//    for (StackTraceElement element : new Exception().getStackTrace()) {
+//      System.out.println(element);
+//    } // DEBUG - wird es aus der ComboBoxAction auch einmal ganz am Anfang aufgerufen?
 
     final ObservableList<Node> configNodes = configElementsParent.getChildren();
     for (int i = configNodes.size() - 1; i >= fixedNodesCount; i--) {
       configNodes.remove(i);
-      System.out.println("# removed node " + configNodes);
     }
     if (pluginJsFileName == null) {
       weatherDataPlugin = null;
@@ -677,11 +676,12 @@ public class FieldDataController extends Application
     if (weatherDataPlugin == null) {
       return;
     }
-    // FIXME implementieren!
     weatherDataPlugin.createAndFillSpecificControls(
-        selectedWeatherDataSource != null ? selectedWeatherDataSource.getPluginConfigurationJSON()
-            : "{}",
-        configElementsParent, fixedNodesCount);
+        selectedWeatherDataSource != null
+          ? selectedWeatherDataSource.getPluginConfigurationJSON()
+          : "{}",
+        configNodes, gsehenInstance, gsehenGuiElements, fixedItemsCount, fixedNodesCount,
+        this.getClass().getClassLoader(), gsehenInstance.getSelectedLocale());
   }
 
   /**
