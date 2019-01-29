@@ -119,15 +119,7 @@ public class WeatherDataSource implements Named {
 
   @SuppressWarnings("checkstyle:all")
   public String getPluginConfigurationJSON() {
-    //return pluginConfigurationJSON; FIXME Plugin muss das JSON liefern, wenn man "Save" klickt.
-    pluginConfigurationJSON = "" + pluginConfigurationJSON; // dummy
-    return "{"
-        + "  \"measIntervalSeconds\": 100,"
-        + "  \"windspeedMeasHeightMeters\": 2,"
-        + "  \"dataFilePath\": \"C:\\\\Users\\\\cwitzke\\\\Desktop\\\\10MinDaten.csv\","
-        + "  \"dateFormatString\": \"y-M-d\","
-        + "  \"numberFormat\": \"GERMAN\""
-        + "}";
+    return pluginConfigurationJSON;
   }
 
   @SuppressWarnings("checkstyle:all")

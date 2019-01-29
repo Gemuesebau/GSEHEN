@@ -3,6 +3,7 @@ package de.hgu.gsehen.model;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.gui.GsehenGuiElements;
 import java.util.Locale;
+import java.util.TreeMap;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 
@@ -24,10 +25,12 @@ public interface WeatherDataPlugin {
    * @param fixedNodesCount the number of the given parent's children to be left untouched
    * @param classLoader the class loader to be used for resource bundle lookup
    * @param locale the currently selected UI locale
+   * @param javaLocaleMap a dictionary for available Java locale values, described in current locale 
    */
   void createAndFillSpecificControls(String json, ObservableList<Node> configNodes,
       Gsehen gsehenInstance, GsehenGuiElements gsehenGuiElements, int fixedItemsCount,
-      int fixedNodesCount, ClassLoader classLoader, Locale locale);
+      int fixedNodesCount, ClassLoader classLoader, Locale locale,
+      TreeMap<String, String> javaLocaleMap);
 
   /**
    * Returns the values currently contained in this plugin's own controls.

@@ -24,7 +24,9 @@ import de.hgu.gsehen.util.PluginUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -57,6 +59,7 @@ public class FieldDataController extends Application
   private static final Logger LOGGER = Logger.getLogger(FieldDataController.class.getName());
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   protected final ResourceBundle mainBundle;
+  private TreeMap<String, String> javaLocaleMap;
   private WeatherDataSource selectedWeatherDataSource;
   private SoilManualData soilManualData;
   private GsehenGuiElements gsehenGuiElements;
@@ -116,11 +119,14 @@ public class FieldDataController extends Application
 
   {
     gsehenInstance = Gsehen.getInstance();
+
+    Locale selectedLocale = gsehenInstance.getSelectedLocale();
+    fillJavaLocaleMap(selectedLocale);
+    mainBundle = ResourceBundle.getBundle("i18n.main", selectedLocale);
+
     soilProfileList = gsehenInstance.getSoilProfiles();
     weatherDataSourceList = gsehenInstance.getWeatherDataSources();
     gsehenGuiElements = new GsehenGuiElements();
-
-    mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
 
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
   }
@@ -426,6 +432,25 @@ public class FieldDataController extends Application
     pane.setCenter(scrollPane);
   }
 
+  private void fillJavaLocaleMap(final Locale selectedLocale) {
+    javaLocaleMap = new TreeMap<String, String>();
+    java.lang.reflect.Field[] fieldArray = Locale.class.getFields();
+    for (int i = 0; i < fieldArray.length; i++) {
+      if (fieldArray[i].getType().equals(Locale.class)) {
+        String language;
+        try {
+          language = ((Locale) fieldArray[i].get(null)).getDisplayLanguage(selectedLocale);
+        } catch (Exception e) {
+          language = null;
+        }
+        if (language != null && language.length() > 0) {
+          final String fieldName = fieldArray[i].getName();
+          javaLocaleMap.put(language + " (" + fieldName + ")", fieldName);
+        }
+      }
+    }
+  }
+
   /**
    * Creates the GUI for working with the details of a WeatherDataSource.
    *
@@ -659,11 +684,6 @@ public class FieldDataController extends Application
     if (fixedNodesCount == -1) {
       return;
     }
-
-//    for (StackTraceElement element : new Exception().getStackTrace()) {
-//      System.out.println(element);
-//    } // DEBUG - wird es aus der ComboBoxAction auch einmal ganz am Anfang aufgerufen?
-
     final ObservableList<Node> configNodes = configElementsParent.getChildren();
     for (int i = configNodes.size() - 1; i >= fixedNodesCount; i--) {
       configNodes.remove(i);
@@ -677,11 +697,25 @@ public class FieldDataController extends Application
       return;
     }
     weatherDataPlugin.createAndFillSpecificControls(
-        selectedWeatherDataSource != null
+        selectedWeatherDataSource != null && samePluginJsFileName(pluginJsFileName)
           ? selectedWeatherDataSource.getPluginConfigurationJSON()
           : "{}",
         configNodes, gsehenInstance, gsehenGuiElements, fixedItemsCount, fixedNodesCount,
-        this.getClass().getClassLoader(), gsehenInstance.getSelectedLocale());
+        this.getClass().getClassLoader(), gsehenInstance.getSelectedLocale(), javaLocaleMap);
+  }
+
+  private boolean samePluginJsFileName(String newPluginJsFileName) {
+    String oldPluginJsFileName = selectedWeatherDataSource.getPluginJsFileName();
+    if (newPluginJsFileName == null) {
+      if (oldPluginJsFileName == null) {
+        return true;
+      }
+    } else {
+      if (newPluginJsFileName.equals(oldPluginJsFileName)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

@@ -2,37 +2,16 @@ loadGsehenJs("commons.js");
 
 /* plugineigene Konfiguration und Hilfsmethoden
 
+// schon berücksichtigt?! (s.u.)
 de.hgu.gsehen.evapotranspiration.UtilityFunctions.convertWindSpeed2m
 
-
-
-private TreeMap<String, String> javaLocaleMap;
-
-private void fillJavaLocaleMap(final Locale selectedLocale) {
-  javaLocaleMap = new TreeMap<String, String>();
-  java.lang.reflect.Field[] fieldArray = Locale.class.getFields();
-  for (int i = 0; i < fieldArray.length; i++) {
-    if (fieldArray[i].getType().equals(Locale.class)) {
-      String language;
-      try {
-        language = ((Locale) fieldArray[i].get(null)).getDisplayLanguage(selectedLocale);
-      } catch (Exception e) {
-        language = null;
-      }
-      if (language != null && language.length() > 0) {
-        final String fieldName = fieldArray[i].getName();
-        javaLocaleMap.put(language + " (" + fieldName + ")", fieldName);
-      }
-    }
-  }
-}
 */
 function calculateWindspeed2m(windspeed, windspeedMeasHeightMeters) {
 	if (windspeedMeasHeightMeters == 2) {
 		return windspeed;
 	}
 	else {
-		// FIXME calculate wind speed! siehe Chat
+		// FIXME calculate wind speed!
 	}
 }
 
