@@ -9,6 +9,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -107,14 +109,26 @@ public class GsehenGuiElements {
   
   /**
    * Creates a JFXButton.
-   * 
+   *
    * @return - the JFXButton.
    */
   public JFXButton jfxButton(String label) {
+    return jfxButton(label, null);
+  }
+
+  /**
+   * Creates a JFXButton with an action handler.
+   *
+   * @param handler the action handler to attach
+   * @return - the JFXButton.
+   */
+  public JFXButton jfxButton(String label, EventHandler<ActionEvent> handler) {
     final JFXButton jfxButton = new JFXButton(label);
     jfxButton.setButtonType(com.jfoenix.controls.JFXButton.ButtonType.RAISED);
     jfxButton.setStyle("-fx-background-color: #e8e8e8; -fx-text-fill: black;");
-
+    if (handler != null) {
+      jfxButton.setOnAction(handler);
+    }
     return jfxButton;
   }
 

@@ -317,7 +317,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     // TableView where you can set the duration of each crop phase and the rooting-zone of each crop
     cropTable = new TableView();
-    cropTable.setEditable(true);
 
     // Each TableCollumn
     TableColumn phase = new TableColumn(mainBundle.getString("tableview.phase"));

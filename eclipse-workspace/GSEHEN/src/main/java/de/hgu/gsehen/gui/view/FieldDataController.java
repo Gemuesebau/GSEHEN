@@ -46,6 +46,7 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -113,9 +114,10 @@ public class FieldDataController extends Application
   private JFXTextField soilManualRain;
   private JFXTextField soilManualPause;
   private int fixedNodesCount = -1;
+  private int fixedItemsCount;
+  private StackPane configStackPane;
   private GridPane configElementsParent;
   private WeatherDataPlugin weatherDataPlugin;
-  private int fixedItemsCount;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -477,7 +479,8 @@ public class FieldDataController extends Application
     ScrollPane scrollPane = new ScrollPane();
     scrollPane.setContent(configElementsParent);
     scrollPane.setPannable(true);
-    pane.setCenter(scrollPane);
+    configStackPane = new StackPane(scrollPane);
+    pane.setCenter(configStackPane);
 
     back = gsehenGuiElements.button(150);
     back.setText(mainBundle.getString("fieldview.back"));
@@ -700,8 +703,10 @@ public class FieldDataController extends Application
         selectedWeatherDataSource != null && samePluginJsFileName(pluginJsFileName)
           ? selectedWeatherDataSource.getPluginConfigurationJSON()
           : "{}",
-        configNodes, gsehenInstance, gsehenGuiElements, fixedItemsCount, fixedNodesCount,
-        this.getClass().getClassLoader(), gsehenInstance.getSelectedLocale(), javaLocaleMap);
+        configNodes, fixedNodesCount, fixedItemsCount, gsehenInstance, gsehenGuiElements,
+        this.getClass().getClassLoader(), gsehenInstance.getSelectedLocale(), javaLocaleMap,
+        configStackPane
+    );
   }
 
   private boolean samePluginJsFileName(String newPluginJsFileName) {

@@ -5,6 +5,7 @@ import static de.hgu.gsehen.util.TextResourceUtil.evaluateJsResource;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.gsbalance.DayDataCalculation;
+import de.hgu.gsehen.model.WeatherDataPlugin;
 import de.hgu.gsehen.model.WeatherDataSource;
 import java.io.File;
 import java.util.Date;
@@ -25,8 +26,6 @@ public class PluginUtil {
   public static final String JS_RESOURCE_FOLDER = "/de/hgu/gsehen/js";
   public static final String PLUGINS_FOLDER = JS_RESOURCE_FOLDER + "/plugins";
 
-  private static final String WEATHER_DATA_JS = JS_RESOURCE_FOLDER + "/weatherData.js";
-
   @SuppressWarnings("checkstyle:javadocmethod")
   public static String[] getPluginJsFileNames() {
     return CollectionUtil.mapArrayValues(
@@ -38,20 +37,21 @@ public class PluginUtil {
   }
 
   /**
-   * Recalculates today's day data.
+   * Recalculates today's day data, for all registered weather data sources.
    */
   @SuppressWarnings({"checkstyle:rightcurly"})
   public void recalculateDayData() {
-    final ScriptEngine engine = evaluateJsResource(WEATHER_DATA_JS);
     final Date today = DateUtil.truncToDay(new Date());
-
     for (WeatherDataSource weatherDataSource : gsehenInstance.getWeatherDataSources()) {
       DayData dayData = null;
+      final String pluginJsFileName = weatherDataSource.getPluginJsFileName();
       try {
-        dayData = (DayData) ((Invocable) engine).invokeFunction("determineDayData",
-            weatherDataSource, today);
+        dayData = PluginUtil.getPlugin(
+            pluginJsFileName,
+            WeatherDataPlugin.class
+        ).determineDayData(weatherDataSource, today);
       } catch (Exception e) {
-        LOGGER.log(Level.SEVERE, "Error when running 'determineDayData' in " + WEATHER_DATA_JS, e);
+        LOGGER.log(Level.SEVERE, "Error when running 'determineDayData' in " + pluginJsFileName, e);
       }
       LOGGER.log(Level.INFO, "Weather data import from '" + weatherDataSource.getName() + "' was "
           + (dayData == null ? "NOT " : "") + "successful");
@@ -70,18 +70,4 @@ public class PluginUtil {
       throw new RuntimeException(errorMessage, e);
     }
   }
-
-  //public static WeatherDataPlugin getPlugin(String pluginJsFileName) {
-  //  final ScriptEngine engine = evaluateJsResource(WEATHER_DATA_JS);
-  //  final Date today = DateUtil.truncToDay(new Date());
-  //  DayData dayData = null;
-  //  try {
-  //    dayData = (DayData) ((Invocable) engine).invokeFunction("determineDayData",
-  //        weatherDataSource, today);
-  //  } catch (Exception e) {
-  //    LOGGER.log(Level.SEVERE, "Error when running 'determineDayData' in " + WEATHER_DATA_JS, e);
-  //  }
-  //  LOGGER.log(Level.INFO, "Weather data import from '" + weatherDataSource.getName() + "' was "
-  //      + (dayData == null ? "NOT " : "") + "successful");
-  //}
 }

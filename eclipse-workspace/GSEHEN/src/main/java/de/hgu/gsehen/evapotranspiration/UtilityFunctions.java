@@ -10,7 +10,7 @@ public class UtilityFunctions {
    * @param hw Height of the anemometer in m
    * @return windspeed converted to 2 m above grund level
    */
-  private static double convertWindSpeed2m(Double v, Double hw) {
+  public static double convertWindSpeed2m(Double v, Double hw) {
     if (hw.equals(2.0)) {
       return (v);
     } else {
