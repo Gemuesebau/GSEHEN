@@ -29,7 +29,7 @@ function getPlugin() {
 			locale = java.util.Locale.class.getField(numberLocaleId).get(null);
 		}
 		catch (e) {
-			// do nothing
+			print(e.getClass().getName());
 		}
 		return java.text.NumberFormat.getNumberInstance(locale);
 	};
@@ -47,7 +47,7 @@ function getPlugin() {
 		var line;
 		var lineNumber = 0;
 		var dateFormat = newDateFormat(pluginConfig.dateFormatString);
-		var numberFormat = newNumberFormat(pluginConfig.numberLocaleId);
+		var numberFormat = newNumberFormat(pluginConfig.numberFormat);
 		while ((line = lineNumberReader.readLine()) != null) {
 			lineNumber++;
 			try {
@@ -259,7 +259,6 @@ function getPlugin() {
 							arrayList,
 							true
 						);
-					    //print("preview button handler: arrayList.size() = " + arrayList.size());
 						showImportPreview(gsehenInstance, gsehenGui, parentStackPane, msgBundle,
 							arrayList);
 					}
