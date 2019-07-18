@@ -248,7 +248,8 @@ public abstract class FarmDataController extends WebController {
       try {
         reader = new InputStreamReader(
             new FileInputStream(
-                System.getProperty("user.home") + "/.GSEHEN.build.properties"), "ISO-8859-1");
+                System.getProperty("user.home")
+                + "/.gsehenIrrigationManager/properties/.GSEHEN.build.properties"), "ISO-8859-1");
       } catch (Exception e2) {
         throw new RuntimeException(
             "External properties not found (after " + e.getMessage() + ")", e2);
