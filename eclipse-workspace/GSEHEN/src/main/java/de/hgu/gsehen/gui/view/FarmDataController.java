@@ -12,6 +12,7 @@ import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.util.Pair;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -240,15 +241,19 @@ public abstract class FarmDataController extends WebController {
    * @return the API key
    */
   public String getGoogleMapsApiKey() {
+    final String propertiesFileName = System.getProperty("user.home")
+        + File.separator + ".gsehenIrrigationManager" + File.separator + "properties"
+        + File.separator + ".GSEHEN.build.properties";
     Reader reader = null;
     try {
       reader = new InputStreamReader(
           new FileInputStream(
-              System.getProperty("user.home")
-              + "/.gsehenIrrigationManager/properties/.GSEHEN.build.properties"), "ISO-8859-1");
+              propertiesFileName), "ISO-8859-1");
     } catch (Exception e2) {
       throw new RuntimeException(
-          "External properties not found", e2); // TODO show apikey.html (and import user's key)
+          "External properties not found; propertiesFileName =\n" + propertiesFileName
+          + "\n# with contents:\ngoogle.maps.api.key=<put Google Maps API key here>", e2);
+      // TODO show apikey.html (and import user's key) ---> GSEH-15
     }
     Properties properties = new Properties();
     try {

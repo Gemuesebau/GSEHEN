@@ -25,6 +25,7 @@ import de.hgu.gsehen.gui.view.Fields;
 import de.hgu.gsehen.gui.view.Logs;
 import de.hgu.gsehen.gui.view.Maps;
 import de.hgu.gsehen.gui.view.Plots;
+import de.hgu.gsehen.gui.view.WebController;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
@@ -67,6 +68,8 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
@@ -817,6 +820,27 @@ public class Gsehen extends Application {
     while (javaScript != null && (result = controller.runJavaScript(javaScript)) != null) {
       javaScript = textInputDialog(contentTextKey, String.valueOf(result));
     }
+  }
+
+  /**
+   * Prompts with an exception.
+   *
+   * @param controller
+   *          the controller that belongs to the target web view
+   */
+  public static void jsException(WebController controller, Exception ex) {
+    final String contentTextKey = "gui.dialog.js.exception."
+        + controller.getClass().getSimpleName().toLowerCase();
+    errorDialog(contentTextKey,
+        ex.getMessage());
+  }
+
+  private static void errorDialog(String contentTextKey, String headerText) {
+    Alert dialog = new Alert(AlertType.ERROR);
+    dialog.setTitle("GSEHEN");
+    dialog.setContentText(headerText);
+    dialog.setHeaderText(instance.getBundle().getString(contentTextKey));
+    dialog.showAndWait();
   }
 
   private static String textInputDialog(String contentTextKey, String headerText) {

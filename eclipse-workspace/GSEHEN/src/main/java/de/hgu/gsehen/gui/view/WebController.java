@@ -1,12 +1,13 @@
 package de.hgu.gsehen.gui.view;
 
+import de.hgu.gsehen.Gsehen;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.hgu.gsehen.Gsehen;
 import javafx.concurrent.Worker.State;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -89,7 +90,13 @@ public abstract class WebController {
       if (newState == State.SUCCEEDED) {
         JSObject win = (JSObject)engine.executeScript("window");
         win.setMember("webController", this);
-        engine.executeScript(loadWorkerSucceededScript);
+        try {
+          engine.executeScript(loadWorkerSucceededScript);
+          // ein allgemeiner JavaFX-Anwendungs-Exceptionhandler ergibt aktuell wenig Sinn,
+          //  da derzeit noch zu viele Exceptions hochkommen (insbes. DB)
+        } catch (Exception e) {
+          Gsehen.jsException(this, e);
+        }
         loaded = true;
       }
     });
