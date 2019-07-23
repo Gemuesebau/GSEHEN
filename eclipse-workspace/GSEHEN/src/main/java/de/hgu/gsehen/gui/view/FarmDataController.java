@@ -15,7 +15,6 @@ import de.hgu.gsehen.util.Pair;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -243,23 +242,19 @@ public abstract class FarmDataController extends WebController {
   public String getGoogleMapsApiKey() {
     Reader reader = null;
     try {
-      reader = new StringReader(getFileContents("../../build.properties"));
-    } catch (Exception e) {
-      try {
-        reader = new InputStreamReader(
-            new FileInputStream(
-                System.getProperty("user.home")
-                + "/.gsehenIrrigationManager/properties/.GSEHEN.build.properties"), "ISO-8859-1");
-      } catch (Exception e2) {
-        throw new RuntimeException(
-            "External properties not found (after " + e.getMessage() + ")", e2);
-      }
+      reader = new InputStreamReader(
+          new FileInputStream(
+              System.getProperty("user.home")
+              + "/.gsehenIrrigationManager/properties/.GSEHEN.build.properties"), "ISO-8859-1");
+    } catch (Exception e2) {
+      throw new RuntimeException(
+          "External properties not found", e2); // TODO show apikey.html (and import user's key)
     }
     Properties properties = new Properties();
     try {
       properties.load(reader);
     } catch (Exception e) {
-      throw new RuntimeException("Properties not readable", e);
+      throw new RuntimeException("Properties not readable", e); // TODO really use properties?
     }
     return properties.getProperty(GOOGLE_MAPS_API_KEY_PROPKEY);
   }
