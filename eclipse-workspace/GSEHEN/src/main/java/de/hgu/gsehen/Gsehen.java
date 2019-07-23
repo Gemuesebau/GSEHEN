@@ -25,7 +25,6 @@ import de.hgu.gsehen.gui.view.Fields;
 import de.hgu.gsehen.gui.view.Logs;
 import de.hgu.gsehen.gui.view.Maps;
 import de.hgu.gsehen.gui.view.Plots;
-import de.hgu.gsehen.gui.view.WebController;
 import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
@@ -98,6 +97,8 @@ import org.hibernate.query.Query;
  */
 @SuppressWarnings({ "checkstyle:commentsindentation" })
 public class Gsehen extends Application {
+  private static final String SPLASH_WARNING_PROPNAME = "splashWarning";
+  private static final String SPLASH_WARNING_FALSE = "false";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   protected final ResourceBundle mainBundle;
 
@@ -193,6 +194,21 @@ public class Gsehen extends Application {
     Application.launch(args);
   }
 
+  private static void hideLaunch4JSplashScreen() {
+    if (SPLASH_WARNING_FALSE.equalsIgnoreCase(System.getProperty(SPLASH_WARNING_PROPNAME))) {
+      return;
+    }
+    try {
+      Class.forName("com.install4j.api.launcher.SplashScreen").getMethod("hide", new Class[0])
+        .invoke(null, new Object[0]);
+    } catch (Exception e) {
+      jsException(AlertType.WARNING, Gsehen.class, "Couldn't close splash screen:\n\n"
+          + e.getClass().getName() + "\n" + e.getMessage()
+          + "\n\n(start with -D" + SPLASH_WARNING_PROPNAME + "=" + SPLASH_WARNING_FALSE
+          + " to avoid this message)");
+    }
+  }
+
   /**
    * Generate the Mainframe.
    * 
@@ -256,6 +272,8 @@ public class Gsehen extends Application {
     };
     treeTable.addFarmTreeView(GsehenTreeTable.class);
     treeTable.checkCalculation();
+
+    hideLaunch4JSplashScreen();
   }
 
   /**
@@ -825,18 +843,17 @@ public class Gsehen extends Application {
   /**
    * Prompts with an exception.
    *
-   * @param controller
+   * @param controllerClass
    *          the controller that belongs to the target web view
    */
-  public static void jsException(WebController controller, Exception ex) {
+  public static void jsException(AlertType alertType, Class<?> controllerClass, String message) {
     final String contentTextKey = "gui.dialog.js.exception."
-        + controller.getClass().getSimpleName().toLowerCase();
-    errorDialog(contentTextKey,
-        ex.getMessage());
+        + controllerClass.getSimpleName().toLowerCase();
+    errorDialog(alertType, contentTextKey, message);
   }
 
-  private static void errorDialog(String contentTextKey, String headerText) {
-    Alert dialog = new Alert(AlertType.ERROR);
+  private static void errorDialog(AlertType alertType, String contentTextKey, String headerText) {
+    Alert dialog = new Alert(alertType);
     dialog.setTitle("GSEHEN");
     dialog.setContentText(headerText);
     dialog.setHeaderText(instance.getBundle().getString(contentTextKey));
