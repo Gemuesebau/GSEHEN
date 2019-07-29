@@ -29,16 +29,31 @@ function getPlugin() {
 			locale = java.util.Locale.class.getField(numberLocaleId).get(null);
 		}
 		catch (e) {
-			print(e.getClass().getName());
+			LOGGER.log(java.util.logging.Level.SEVERE, e.getClass().getName());
 		}
 		return java.text.NumberFormat.getNumberInstance(locale);
 	};
 	var newDateFormat = function(dateFormatString) {
 		return new java.text.SimpleDateFormat(dateFormatString);
 	};
-	var getWeatherDataAttributeNamesArray = function() {
-		return [ "dateTimeStr", "temp", "airHumidityRel", "timeDuration",
-					"windspeed", "globalRad", "battery", "precipitation" ];
+	var getWeatherDataAttributeNamesArray = function(arr) {
+		if (arr == null) {
+			arr = [];
+		}
+		arr.push("dateTimeStr");
+		arr.push("temp");
+		arr.push("airHumidityRel");
+		arr.push("timeDuration");
+		arr.push("windspeed");
+		arr.push("globalRad");
+		arr.push("battery");
+		arr.push("precipitation");
+		return arr;
+	};
+	var processNumberColumns = function(lineStringsArray, numberFormat) {
+		return arrayUtilities.transformArray(lineStringsArray, 1, function (str) {
+			return numberFormat.parse(str).doubleValue();
+		});
 	};
 	var importWeatherData = function(date, pluginConfig, stack, withExceptions) {
 		var timeStamp = date.getTime();
@@ -46,26 +61,34 @@ function getPlugin() {
 		var lineNumberReader = new java.io.LineNumberReader(new java.io.FileReader(pluginConfig.dataFilePath));
 		var line;
 		var lineNumber = 0;
-		var dateFormat = newDateFormat(pluginConfig.dateFormatString);
 		var numberFormat = newNumberFormat(pluginConfig.numberFormat);
+		var dateFormat = newDateFormat(pluginConfig.dateFormatString);
+		LOGGER.log(java.util.logging.Level.FINE, "dateFormat = " + dateFormat.toPattern());
 		while ((line = lineNumberReader.readLine()) != null) {
 			lineNumber++;
 			try {
 				// TODO make characters configurable?
-				if (dateFormat.parse(line.replace(/^"/, "").replace(/ .*/, "")).getTime() >= timeStamp) {
-					weatherDataArray.push(arrayUtilities.arrayToObject(
-						arrayUtilities.transformArray(line.split(/; */), 1, function (str) {
-							return numberFormat.parse(str).doubleValue();
-						}),
+				var lineDate = dateFormat.parse(line.replace(/^"/, "").replace(/ .*/, ""));
+				LOGGER.log(java.util.logging.Level.FINE, "date = " + date);
+				LOGGER.log(java.util.logging.Level.FINE, "lineDate = " + lineDate);
+				if (lineDate.getTime() >= timeStamp) {
+					var weatherDataMeasurementObject = arrayUtilities.arrayToObject(
+						processNumberColumns(line.split(/; */), numberFormat),
+						// TODO make columns/order in file configurable?
 						getWeatherDataAttributeNamesArray()
-					));
+					);
+					if (withExceptions) {
+						weatherDataMeasurementObject.lineNumber = lineNumber;
+					}
+					weatherDataArray.push(weatherDataMeasurementObject);
 				}
 			}
 			catch (e) {
-				if (withExceptions) {
+				LOGGER.log(java.util.logging.Level.CONFIG, "" + lineNumber + ": " + e);
+				if (!(lineNumber == 1 && e.getClass().getName() == "java.text.ParseException") && withExceptions) {
 					weatherDataArray.push({
 						"lineNumber": lineNumber,
-						"exceptionMsg": e.getMessage()
+						"exceptionMsg": typeof e.getMessage == "function" ? e.getMessage() : e.message
 					});
 				}
 			}
@@ -100,8 +123,9 @@ function getPlugin() {
 	    );
 	    dialog.show();
 
-	    var columnKeys = getWeatherDataAttributeNamesArray();
+	    var columnKeys = [];
 	    columnKeys.push("lineNumber");
+	    getWeatherDataAttributeNamesArray(columnKeys);
 	    columnKeys.push("exceptionMsg");
 	    var previewTable = createTableView(arrayList, columnKeys, msgBundle);
 	    setGridConstraints(previewTable, 0, 0);

@@ -187,7 +187,7 @@ public class Gsehen extends Application {
       e.printStackTrace();
     }
     try {
-      importCropData();
+      importCropData(); // TODO why here and not later (start, near loadUserData, ...)? GSEH-16
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -450,7 +450,7 @@ public class Gsehen extends Application {
   }
 
   /**
-   * Loads the user-created data (preferences, farms, fields, plots, ..)
+   * Loads the user-created data (preferences, farms (fields, plots (water balance (day data))) ).
    */
   public void loadUserData() {
     preferences = loadEntities(Preferences.class);
