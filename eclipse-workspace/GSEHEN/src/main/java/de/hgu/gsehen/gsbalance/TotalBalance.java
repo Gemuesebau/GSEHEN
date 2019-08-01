@@ -102,14 +102,22 @@ public class TotalBalance {
 
     if (soilStart == null && cropStart == null) {
       currentRootingZone = 0;
-    } else if (cropStart == null && today.compareTo(soilStart) >= 0) {
-      currentRootingZone = soilZone;
-    } else if (soilStart != null) {
+    } else if (cropStart == null && soilStart != null) {
+      if (today.compareTo(soilStart) >= 0) {
+        currentRootingZone = soilZone;
+      } else {
+        currentRootingZone = 0;
+      }
+    } else if (cropStart != null) {
       if (cropEnd == null) {
         cropEnd = today;
       }
-      if (today.compareTo(soilStart) >= 0 && today.compareTo(cropStart) < 0) {
-        currentRootingZone = soilZone;
+      if (soilStart != null) {
+        if (today.compareTo(soilStart) >= 0 && today.compareTo(cropStart) < 0) {
+          currentRootingZone = soilZone;
+        } else {
+          currentRootingZone = 0;
+        }
       }
       if (today.compareTo(cropStart) >= 0 && today.compareTo(cropEnd) <= 0) {
         LocalDate localToday = today.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();

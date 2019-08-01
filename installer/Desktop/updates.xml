@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<updateDescriptor baseUrl="">
+  <entry targetMediaFileId="60" updatableVersionMin="" updatableVersionMax="" fileName="Gsehen_windows_1_0.exe" newVersion="1.0" newMediaFileId="60" fileSize="91330048" md5Sum="9bc2aeee0eeae80d6da8a2699f199393" bundledJre="windows-x86-1.8.0_202" archive="false" singleBundle="false">
+    <comment language="en" />
+    <comment language="de" />
+  </entry>
+</updateDescriptor>

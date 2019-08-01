@@ -1,0 +1,3 @@
+# List of generated media files. The columns are tab-separated:
+# id | media file type | display name | media file path
+60	windows	Windows	/home/matthias/Dokumente/GSEHEN/Programmcode/GSEHEN/installer/Desktop/Gsehen_windows_1_0.exe
