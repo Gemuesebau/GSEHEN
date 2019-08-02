@@ -680,7 +680,7 @@ public class Gsehen extends Application {
    * @param skipClass
    *          the event listener class to skip when iterating the listeners, or null
    */
-  public void sendDayDataChanged(DayData dayData, WeatherDataSource weatherDataSource,
+  public void sendDayDataChanged(List<DayData> dayData, WeatherDataSource weatherDataSource,
       Class<? extends GsehenEventListener<DayDataChanged>> skipClass) {
     DayDataChanged event = new DayDataChanged();
     event.setDayData(dayData);

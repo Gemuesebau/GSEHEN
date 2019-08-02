@@ -31,14 +31,14 @@ public class Recommender {
             for (Farm farm : gsehenInstance.getFarmsList()) {
               for (Field field : farm.getFields()) {
                 for (Plot plot : field.getPlots()) {
-                  final DayData eventDayData = event.getDayData();
-                  final Date eventDayDataDate =
-                      eventDayData == null ? null : eventDayData.getDate();
-                  if (event.isFromWeatherDataSource(field.getWeatherDataSourceUuid())
-                      && DateUtil.between(eventDayDataDate,
-                          CollectionUtil.nvl(plot.getSoilStartDate(), plot.getCropStart()),
-                          plot.getCropEnd())) {
-                    copyWeatherData(eventDayData, getCurrentDayData(plot, eventDayDataDate));
+                  final List<DayData> eventDayDataList = event.getDayData();
+                  for (DayData eventDayData : eventDayDataList) {
+                    final Date eventDayDataDate =
+                        eventDayData == null ? null : eventDayData.getDate();
+                    if (event.isFromWeatherDataSource(field.getWeatherDataSourceUuid())
+                        && ) {
+                      copyWeatherData(eventDayData, getCurrentDayData(plot, eventDayDataDate));
+                    }
                   }
                   performCalculations(field, plot);
                 }

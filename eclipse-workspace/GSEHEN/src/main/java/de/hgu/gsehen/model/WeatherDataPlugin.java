@@ -4,6 +4,7 @@ import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.gui.GsehenGuiElements;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
 import javafx.collections.ObservableList;
@@ -12,13 +13,13 @@ import javafx.scene.layout.StackPane;
 
 public interface WeatherDataPlugin {
   /**
-   * Determines the (weather) day data for the given date.
+   * Determines the (weather) day data for the available measurement data.
    *
    * @param weatherDataSource the particular weather data source to use
-   * @param beginDate the earliest weather data date to consider
-   * @return a DayData object for the date "beginDate"
+   * @param todayDate today's date, for warnings concerning missing day measurement data etc.
+   * @return a list of DayData objects for all found measurement dates
    */
-  DayData determineDayData(WeatherDataSource weatherDataSource, Date beginDate);
+  List<DayData> determineDayData(WeatherDataSource weatherDataSource, Date todayDate);
 
   /**
    * Adds GUI controls to the given parent, after the fixed GUI nodes,

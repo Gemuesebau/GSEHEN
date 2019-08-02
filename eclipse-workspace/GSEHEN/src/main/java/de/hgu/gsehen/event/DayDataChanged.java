@@ -2,16 +2,17 @@ package de.hgu.gsehen.event;
 
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.WeatherDataSource;
+import java.util.List;
 
 public class DayDataChanged extends GsehenEvent {
-  private DayData dayData;
+  private List<DayData> dayData;
   private WeatherDataSource weatherDataSource;
 
-  public DayData getDayData() {
+  public List<DayData> getDayData() {
     return dayData;
   }
 
-  public void setDayData(DayData dayData) {
+  public void setDayData(List<DayData> dayData) {
     this.dayData = dayData;
   }
 
@@ -30,7 +31,7 @@ public class DayDataChanged extends GsehenEvent {
    * @return true if this event originates from the given source, false otherwise
    */
   public boolean isFromWeatherDataSource(String weatherDataSourceUuid) {
-    return weatherDataSourceUuid != null &&
-        weatherDataSourceUuid.equals(weatherDataSource.getUuid());
+    return weatherDataSourceUuid != null
+        && weatherDataSourceUuid.equals(weatherDataSource.getUuid());
   }
 }

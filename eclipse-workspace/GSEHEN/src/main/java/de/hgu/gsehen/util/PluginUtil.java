@@ -9,6 +9,7 @@ import de.hgu.gsehen.model.WeatherDataPlugin;
 import de.hgu.gsehen.model.WeatherDataSource;
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.Invocable;
@@ -43,7 +44,7 @@ public class PluginUtil {
   public void recalculateDayData() {
     final Date today = DateUtil.truncToDay(new Date());
     for (WeatherDataSource weatherDataSource : gsehenInstance.getWeatherDataSources()) {
-      DayData dayData = null;
+      List<DayData> dayData = null;
       final String pluginJsFileName = weatherDataSource.getPluginJsFileName();
       try {
         dayData = PluginUtil.getPlugin(

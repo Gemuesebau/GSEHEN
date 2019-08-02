@@ -1,4 +1,9 @@
 var arrayUtilities = {
+	iterateArray: function(arr, handlerFunc) {
+		for (var i = 0; i < arr.length; i++) {
+			handlerFunc(arr[i]);
+		}
+	},
 	transformArray: function(arr, startIndex, transformFunc) {
 		for (var i = startIndex; i < arr.length; i++) {
 			arr[i] = transformFunc(arr[i]);

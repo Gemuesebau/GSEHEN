@@ -7,7 +7,27 @@ function getPlugin() {
 			windspeedMeasHeightMeters
 		);
 	};
-	var calculateDayData = function(pluginConfig, date, weatherDataArray) {
+	var processWeatherDataForOneDay = function(currentWeatherDataForOneDay, completeDayData, pluginConfig) {
+		if (currentWeatherDataForOneDay.length > 0) {
+			completeDayData.add(calculateDayDataForOneDay(pluginConfig, currentWeatherDataForOneDay[0].lineDate, currentWeatherDataForOneDay));
+		}
+	};
+	var calculateDayData = function(pluginConfig, date /* currently unused */, weatherDataArray) {
+		var completeDayData = new java.util.ArrayList();
+		var lastDateTimeStr = "";
+		var currentWeatherDataForOneDay = [];
+		iterateArray(weatherDataArray, function (weatherDataLine) {
+			if (weatherDataLine.dateTimeStr != lastDateTimeStr) {
+				processWeatherDataForOneDay(currentWeatherDataForOneDay, completeDayData, pluginConfig);
+				lastDateTimeStr = weatherDataLine.dateTimeStr;
+				currentWeatherDataForOneDay = [];
+			}
+			currentWeatherDataForOneDay.push(weatherDataLine);
+		});
+		processWeatherDataForOneDay(currentWeatherDataForOneDay, completeDayData, pluginConfig);
+		return completeDayData;
+	};
+	var calculateDayDataForOneDay = function(pluginConfig, date, weatherDataArray) {
 		var dayData = new (Java.type("de.hgu.gsehen.evapotranspiration.DayData"))();
 		dayData.setDate(date);
 		dayData.setTempMax(arrayUtilities.objArrayMax(weatherDataArray, "temp"));
@@ -55,8 +75,8 @@ function getPlugin() {
 			return numberFormat.parse(str).doubleValue();
 		});
 	};
-	var importWeatherData = function(date, pluginConfig, stack, withExceptions) {
-		var timeStamp = date.getTime();
+	var importWeatherData = function(date /* currently unused */, pluginConfig, stack, withExceptions) {
+		//var timeStamp = date.getTime();
 		var weatherDataArray = stack == null ? [] : stack;
 		var lineNumberReader = new java.io.LineNumberReader(new java.io.FileReader(pluginConfig.dataFilePath));
 		var line;
@@ -69,9 +89,9 @@ function getPlugin() {
 			try {
 				// TODO make characters configurable?
 				var lineDate = dateFormat.parse(line.replace(/^"/, "").replace(/ .*/, ""));
-				LOGGER.log(java.util.logging.Level.FINE, "date = " + date);
+				//LOGGER.log(java.util.logging.Level.FINE, "date = " + date);
 				LOGGER.log(java.util.logging.Level.FINE, "lineDate = " + lineDate);
-				if (lineDate.getTime() >= timeStamp) {
+				//if (lineDate.getTime() >= timeStamp) {
 					var weatherDataMeasurementObject = arrayUtilities.arrayToObject(
 						processNumberColumns(line.split(/; */), numberFormat),
 						// TODO make columns/order in file configurable?
@@ -80,8 +100,9 @@ function getPlugin() {
 					if (withExceptions) {
 						weatherDataMeasurementObject.lineNumber = lineNumber;
 					}
+					weatherDataMeasurementObject.lineDate = lineDate;
 					weatherDataArray.push(weatherDataMeasurementObject);
-				}
+				//}
 			}
 			catch (e) {
 				LOGGER.log(java.util.logging.Level.CONFIG, "" + lineNumber + ": " + e);
@@ -204,9 +225,9 @@ function getPlugin() {
 	var WeatherDataPlugin = Java.extend(Java.type("de.hgu.gsehen.model.WeatherDataPlugin"), {
 		determineDayData: function(weatherDataSource, date) {
 			var pluginConfig = JSON.parse(weatherDataSource.getPluginConfigurationJSON());
-			var weatherDataArray = importWeatherData(date, pluginConfig);
+			var weatherDataArray = importWeatherData(date /* currently unused */, pluginConfig);
 			if (weatherDataArray.length == 0) {
-				return null;
+				return null; // TODO if no data in CSV for today ("date"), show warning!
 			}
 			return calculateDayData(pluginConfig, date, weatherDataArray);
 		},
