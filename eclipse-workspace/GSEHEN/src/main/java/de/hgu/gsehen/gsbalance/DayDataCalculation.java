@@ -6,7 +6,7 @@ package de.hgu.gsehen.gsbalance;
 
 public class DayDataCalculation {
   //  /**
-  //   * Recalculates today's day data.
+  //   * Recalculates today's day data. GSEH-8 - obsolete?
   //   */
   //  @SuppressWarnings({"checkstyle:rightcurly"})
   //  public void recalculateDayData() {

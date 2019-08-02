@@ -4,7 +4,6 @@ import static de.hgu.gsehen.util.TextResourceUtil.evaluateJsResource;
 
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
-import de.hgu.gsehen.gsbalance.DayDataCalculation;
 import de.hgu.gsehen.model.WeatherDataPlugin;
 import de.hgu.gsehen.model.WeatherDataSource;
 import java.io.File;
@@ -22,7 +21,7 @@ public class PluginUtil {
     gsehenInstance = Gsehen.getInstance();
   }
 
-  private static final Logger LOGGER = Logger.getLogger(DayDataCalculation.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(PluginUtil.class.getName());
 
   public static final String JS_RESOURCE_FOLDER = "/de/hgu/gsehen/js";
   public static final String PLUGINS_FOLDER = JS_RESOURCE_FOLDER + "/plugins";

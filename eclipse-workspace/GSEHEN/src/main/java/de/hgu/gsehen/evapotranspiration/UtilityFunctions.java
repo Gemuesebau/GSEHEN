@@ -2,12 +2,12 @@ package de.hgu.gsehen.evapotranspiration;
 
 import static java.lang.Math.log;
 
+import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.model.Plot;
+
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import de.hgu.gsehen.Gsehen;
-import de.hgu.gsehen.model.Plot;
 
 public class UtilityFunctions {
 
@@ -49,4 +49,3 @@ public class UtilityFunctions {
     }
   }
 }
-

@@ -16,7 +16,7 @@ function getPlugin() {
 		var completeDayData = new java.util.ArrayList();
 		var lastDateTimeStr = "";
 		var currentWeatherDataForOneDay = [];
-		iterateArray(weatherDataArray, function (weatherDataLine) {
+		arrayUtilities.iterateArray(weatherDataArray, function (weatherDataLine) {
 			if (weatherDataLine.dateTimeStr != lastDateTimeStr) {
 				processWeatherDataForOneDay(currentWeatherDataForOneDay, completeDayData, pluginConfig);
 				lastDateTimeStr = weatherDataLine.dateTimeStr;
