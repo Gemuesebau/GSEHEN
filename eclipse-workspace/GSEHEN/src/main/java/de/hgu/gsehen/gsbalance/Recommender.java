@@ -5,7 +5,6 @@ import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.evapotranspiration.EnvCalculator;
 import de.hgu.gsehen.evapotranspiration.UtilityFunctions;
 import de.hgu.gsehen.event.DayDataChanged;
-import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.event.ManualDataChanged;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
@@ -17,6 +16,7 @@ import de.hgu.gsehen.model.WaterBalance;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,33 +29,7 @@ public class Recommender {
   {
     gsehenInstance = Gsehen.getInstance();
     gsehenInstance.registerForEvent(DayDataChanged.class,
-        new GsehenEventListener<DayDataChanged>() {
-          @Override
-          public void handle(DayDataChanged event) {
-            for (Farm farm : gsehenInstance.getFarmsList()) {
-              for (Field field : farm.getFields()) {
-                for (Plot plot : field.getPlots()) {
-                  final List<DayData> eventDayDataList = event.getDayData();
-                  for (DayData eventDayData : eventDayDataList) {
-                    if (eventDayData == null) {
-                      continue;
-                    }
-                    Date date = eventDayData.getDate();
-                    if (event.isFromWeatherDataSource(field.getWeatherDataSourceUuid())
-                        && UtilityFunctions.determineDataStartDate(plot).compareTo(date) <= 0) {
-                      LOGGER.log(
-                          getLevelForName(COPY_WD_LOGLEVEL),
-                          "Replacing day data for plot " + plot.getName() + " at " + date
-                      );
-                      copyWeatherData(eventDayData, getCurrentDayData(plot, date));
-                    }
-                  }
-                  performCalculations(field, plot);
-                }
-              }
-            }
-          }
-        });
+        event -> forAllFieldsAndPlots((field, plot) -> copyWeatherData(event, field, plot)));
     gsehenInstance.registerForEvent(ManualDataChanged.class,
         event -> performCalculations(event.getField(), event.getPlot()));
   }
@@ -139,6 +113,25 @@ public class Recommender {
     gsehenInstance.sendRecommendedActionChanged(plot, null);
   }
 
+  private void copyWeatherData(DayDataChanged event, Field field, Plot plot) {
+    final List<DayData> eventDayDataList = event.getDayData();
+    for (DayData eventDayData : eventDayDataList) {
+      if (eventDayData == null) {
+        continue;
+      }
+      Date date = eventDayData.getDate();
+      if (event.isFromWeatherDataSource(field.getWeatherDataSourceUuid())
+          && UtilityFunctions.determineDataStartDate(plot).compareTo(date) <= 0) {
+        LOGGER.log(
+            getLevelForName(COPY_WD_LOGLEVEL),
+            "Replacing day data for plot " + plot.getName() + " at " + date
+        );
+        copyWeatherData(eventDayData, getCurrentDayData(plot, date));
+      }
+    }
+    performCalculations(field, plot);
+  }
+
   private void copyWeatherData(DayData eventDayData, DayData plotCurrentDayData) {
     plotCurrentDayData.setTempMax(eventDayData.getTempMax());
     plotCurrentDayData.setTempMin(eventDayData.getTempMin());
@@ -149,6 +142,29 @@ public class Recommender {
     plotCurrentDayData.setGlobalRad(eventDayData.getGlobalRad());
     plotCurrentDayData.setPrecipitation(eventDayData.getPrecipitation());
     plotCurrentDayData.setWindspeed2m(eventDayData.getWindspeed2m());
+  }
+
+  /**
+   * Clears all day data related to the weather data source identified by the given UUID.
+   *
+   * @param weatherDataSourceUuid the UUID of the WDS for which the day data is to be deleted
+   */
+  public static void clearDayData(String weatherDataSourceUuid) {
+    forAllFieldsAndPlots((field, plot) -> {
+      if (weatherDataSourceUuid.equals(field.getWeatherDataSourceUuid())) {
+        plot.getWaterBalance().getDailyBalances().clear();
+      }
+    });
+  }
+
+  private static void forAllFieldsAndPlots(BiConsumer<Field, Plot> handler) {
+    for (Farm farm : Gsehen.getInstance().getFarmsList()) {
+      for (Field field : farm.getFields()) {
+        for (Plot plot : field.getPlots()) {
+          handler.accept(field, plot);
+        }
+      }
+    }
   }
 
   private void guaranteeDailyBalances(Plot plot) {

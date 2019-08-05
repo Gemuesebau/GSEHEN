@@ -9,6 +9,7 @@ import de.hgu.gsehen.model.WeatherDataSource;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.script.Invocable;
@@ -38,9 +39,11 @@ public class PluginUtil {
 
   /**
    * Recalculates today's day data, for all registered weather data sources.
+   *
+   * @param beforeImport logic to execute before import - is called with the WDS UUID as parameter
    */
   @SuppressWarnings({"checkstyle:rightcurly"})
-  public void recalculateDayData() {
+  public void recalculateDayData(Consumer<String> beforeImport) {
     final Date today = DateUtil.truncToDay(new Date());
     for (WeatherDataSource weatherDataSource : gsehenInstance.getWeatherDataSources()) {
       List<DayData> dayData = null;
@@ -49,7 +52,7 @@ public class PluginUtil {
         dayData = PluginUtil.getPlugin(
             pluginJsFileName,
             WeatherDataPlugin.class
-        ).determineDayData(weatherDataSource, today);
+        ).determineDayData(weatherDataSource, today, wds -> beforeImport.accept(wds.getUuid()));
       } catch (Exception e) {
         LOGGER.log(Level.SEVERE, "Error when running 'determineDayData' in " + pluginJsFileName, e);
       }

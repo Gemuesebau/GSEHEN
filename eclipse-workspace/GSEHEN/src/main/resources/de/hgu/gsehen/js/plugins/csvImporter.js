@@ -223,8 +223,9 @@ function getPlugin() {
 		};
 	};
 	var WeatherDataPlugin = Java.extend(Java.type("de.hgu.gsehen.model.WeatherDataPlugin"), {
-		determineDayData: function(weatherDataSource, date) {
+		determineDayData: function(weatherDataSource, date, beforeImport) {
 			var pluginConfig = JSON.parse(weatherDataSource.getPluginConfigurationJSON());
+			beforeImport.accept(weatherDataSource);
 			var weatherDataArray = importWeatherData(date /* currently unused */, pluginConfig);
 			if (weatherDataArray.length == 0) {
 				return null; // TODO if no data in CSV for today ("date"), show warning!

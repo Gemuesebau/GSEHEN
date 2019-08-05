@@ -872,7 +872,9 @@ public class Gsehen extends Application {
   @SuppressWarnings({ "checkstyle:javadocmethod" })
   public static void updateDayData() {
     // dayDataCalculation.recalculateDayData();
-    new PluginUtil().recalculateDayData();
+    new PluginUtil().recalculateDayData(wdsUuid -> Recommender.clearDayData(wdsUuid));
+    // man könnte auch die in Zeile 247 gebaute Instanz des Recommenders (s.o.) speichern,
+    //   und alle Methoden dort non-static machen.
   }
 
   @SuppressWarnings({ "checkstyle:javadocmethod" })

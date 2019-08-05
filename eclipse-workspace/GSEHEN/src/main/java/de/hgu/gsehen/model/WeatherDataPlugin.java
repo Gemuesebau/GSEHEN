@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
@@ -17,9 +18,11 @@ public interface WeatherDataPlugin {
    *
    * @param weatherDataSource the particular weather data source to use
    * @param todayDate today's date, for warnings concerning missing day measurement data etc.
+   * @param beforeImport logic to execute before importing from the given weather data source
    * @return a list of DayData objects for all found measurement dates
    */
-  List<DayData> determineDayData(WeatherDataSource weatherDataSource, Date todayDate);
+  List<DayData> determineDayData(WeatherDataSource weatherDataSource, Date todayDate,
+      Consumer<WeatherDataSource> beforeImport);
 
   /**
    * Adds GUI controls to the given parent, after the fixed GUI nodes,
