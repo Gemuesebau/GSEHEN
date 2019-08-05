@@ -14,12 +14,13 @@ function getPlugin() {
 	};
 	var calculateDayData = function(pluginConfig, date /* currently unused */, weatherDataArray) {
 		var completeDayData = new java.util.ArrayList();
-		var lastDateTimeStr = "";
+		var lastLineDayStamp = -1;
 		var currentWeatherDataForOneDay = [];
 		arrayUtilities.iterateArray(weatherDataArray, function (weatherDataLine) {
-			if (weatherDataLine.dateTimeStr != lastDateTimeStr) {
+			var lineDayStamp = weatherDataLine.lineDate.getTime();
+			if (lineDayStamp != lastLineDayStamp) {
 				processWeatherDataForOneDay(currentWeatherDataForOneDay, completeDayData, pluginConfig);
-				lastDateTimeStr = weatherDataLine.dateTimeStr;
+				lastLineDayStamp = lineDayStamp;
 				currentWeatherDataForOneDay = [];
 			}
 			currentWeatherDataForOneDay.push(weatherDataLine);
