@@ -7,25 +7,47 @@ function getPlugin() {
 			windspeedMeasHeightMeters
 		);
 	};
-	var processWeatherDataForOneDay = function(currentWeatherDataForOneDay, completeDayData, pluginConfig) {
+	var incrementDaysCountForLinesCount = function(linesCount, statistics) {
+		var daysCount = statistics[linesCount];
+		statistics[linesCount] = daysCount == null ? 1 : daysCount + 1;
+	};
+	var logStatistics = function(statistics) {
+		for (var linesCount in statistics) {
+			LOGGER.log(java.util.logging.Level.CONFIG, "Found " + statistics[linesCount] + " days with " + linesCount + " data lines");
+		}
+		java.lang.Thread.sleep(3000);//DEBUG
+	};
+	var logObject = function(message, obj) {
+		var str = message + "{";
+		for (var attr in obj) {
+			str += ("\n  \"" + attr + "\": " + (typeof obj[attr] == "number" ? obj[attr] : "\"" + obj[attr] + "\""));
+		}
+		str += ("\n}");
+		LOGGER.log(java.util.logging.Level.CONFIG, str);
+	};
+	var processWeatherDataForOneDay = function(currentWeatherDataForOneDay, completeDayData, pluginConfig, statistics) {
 		if (currentWeatherDataForOneDay.length > 0) {
 			completeDayData.add(calculateDayDataForOneDay(pluginConfig, currentWeatherDataForOneDay[0].lineDate, currentWeatherDataForOneDay));
+			incrementDaysCountForLinesCount(currentWeatherDataForOneDay.length, statistics);
 		}
 	};
 	var calculateDayData = function(pluginConfig, date /* currently unused */, weatherDataArray) {
 		var completeDayData = new java.util.ArrayList();
 		var lastLineDayStamp = -1;
 		var currentWeatherDataForOneDay = [];
+		var statistics = {};
 		arrayUtilities.iterateArray(weatherDataArray, function (weatherDataLine) {
-			var lineDayStamp = weatherDataLine.lineDate.getTime();
+			//logObject("Processing measurement ", weatherDataLine);
+			var lineDayStamp = 0 + weatherDataLine.lineDate.getTime();
 			if (lineDayStamp != lastLineDayStamp) {
-				processWeatherDataForOneDay(currentWeatherDataForOneDay, completeDayData, pluginConfig);
+				processWeatherDataForOneDay(currentWeatherDataForOneDay, completeDayData, pluginConfig, statistics);
 				lastLineDayStamp = lineDayStamp;
 				currentWeatherDataForOneDay = [];
 			}
 			currentWeatherDataForOneDay.push(weatherDataLine);
 		});
-		processWeatherDataForOneDay(currentWeatherDataForOneDay, completeDayData, pluginConfig);
+		processWeatherDataForOneDay(currentWeatherDataForOneDay, completeDayData, pluginConfig, statistics);
+		logStatistics(statistics);
 		return completeDayData;
 	};
 	var calculateDayDataForOneDay = function(pluginConfig, date, weatherDataArray) {
@@ -91,7 +113,7 @@ function getPlugin() {
 				// TODO make characters configurable?
 				var lineDate = dateFormat.parse(line.replace(/^"/, "").replace(/ .*/, ""));
 				//LOGGER.log(java.util.logging.Level.FINE, "date = " + date);
-				LOGGER.log(java.util.logging.Level.FINE, "lineDate = " + lineDate);
+				//LOGGER.log(java.util.logging.Level.FINE, "lineDate = " + lineDate);
 				//if (lineDate.getTime() >= timeStamp) {
 					var weatherDataMeasurementObject = arrayUtilities.arrayToObject(
 						processNumberColumns(line.split(/; */), numberFormat),
@@ -103,6 +125,7 @@ function getPlugin() {
 					}
 					weatherDataMeasurementObject.lineDate = lineDate;
 					weatherDataArray.push(weatherDataMeasurementObject);
+					//logObject("Added measurement ", weatherDataMeasurementObject);
 				//}
 			}
 			catch (e) {
