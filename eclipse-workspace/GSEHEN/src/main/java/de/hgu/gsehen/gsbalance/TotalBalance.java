@@ -277,8 +277,15 @@ public class TotalBalance {
     if (plot.getWaterBalance().getDailyBalances().isEmpty()) {
       recommendedAction.setRecommendation(RecommendedActionEnum.NO_DATA);
     } else {
+      DayData beforeDay;
       DayData currentDay = plot.getWaterBalance().getDailyBalances()
           .get(plot.getWaterBalance().getDailyBalances().size() - 1);
+      if (plot.getWaterBalance().getDailyBalances().size() > 1) {
+        beforeDay = plot.getWaterBalance().getDailyBalances()
+            .get(plot.getWaterBalance().getDailyBalances().size() - 2);
+      } else {
+        beforeDay = currentDay;
+      }
       Double currentAvailableSoilWater = currentDay.getCurrentAvailableSoilWater();
       Double waterContentToAim =
           currentAvailableSoilWater * 0.9 - currentDay.getCurrentTotalWaterBalance();
@@ -288,7 +295,7 @@ public class TotalBalance {
           .setAvailableWaterPercent((availableWater / (currentAvailableSoilWater * 0.3)) * 100);
       recommendedAction.setAvailableWater(availableWater);
       final int projectedDaysToIrrigation =
-          Math.abs((int) Math.floor(availableWater / currentDay.getEtc()));
+          Math.abs((int) Math.floor(availableWater / beforeDay.getEtc()));
       recommendedAction.setProjectedDaysToIrrigation(projectedDaysToIrrigation);
       recommendedAction.setWaterContentToAim(waterContentToAim);
 

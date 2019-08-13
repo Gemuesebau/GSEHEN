@@ -1,5 +1,12 @@
 package de.hgu.gsehen.gsbalance;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.evapotranspiration.EnvCalculator;
@@ -12,13 +19,6 @@ import de.hgu.gsehen.model.ManualData;
 import de.hgu.gsehen.model.ManualWaterSupply;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.model.WaterBalance;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Recommender {
   private static final Logger LOGGER = Logger.getLogger(Recommender.class.getName());
@@ -36,7 +36,7 @@ public class Recommender {
 
   private Level getLevelForName(String copyWdLoglevel) {
     try {
-      return (Level)Level.class.getField(copyWdLoglevel).get(null);
+      return (Level) Level.class.getField(copyWdLoglevel).get(null);
     } catch (Exception e) {
       return Level.INFO;
     }
@@ -122,10 +122,8 @@ public class Recommender {
       Date date = eventDayData.getDate();
       if (event.isFromWeatherDataSource(field.getWeatherDataSourceUuid())
           && UtilityFunctions.determineDataStartDate(plot).compareTo(date) <= 0) {
-        LOGGER.log(
-            getLevelForName(COPY_WD_LOGLEVEL),
-            "Replacing day data for plot " + plot.getName() + " at " + date
-        );
+        LOGGER.log(getLevelForName(COPY_WD_LOGLEVEL),
+            "Replacing day data for plot " + plot.getName() + " at " + date);
         copyWeatherData(eventDayData, getCurrentDayData(plot, date));
       }
     }
@@ -152,7 +150,9 @@ public class Recommender {
   public static void clearDayData(String weatherDataSourceUuid) {
     forAllFieldsAndPlots((field, plot) -> {
       if (weatherDataSourceUuid.equals(field.getWeatherDataSourceUuid())) {
-        plot.getWaterBalance().getDailyBalances().clear();
+        if (plot.getWaterBalance() != null) {
+          plot.getWaterBalance().getDailyBalances().clear();
+        }
       }
     });
   }
