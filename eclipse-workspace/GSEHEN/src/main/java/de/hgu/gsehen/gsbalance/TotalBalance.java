@@ -239,8 +239,18 @@ public class TotalBalance {
       } else {
         currentTotalWaterBalance = dailyBalances.get(i - 1).getCurrentTotalWaterBalance()
             - dailyBalances.get(i).getDailyBalance();
+        // If rooting zone changes add additional amount of water to total Balance
+        if (dailyBalances.get(i).getCurrentRootingZone() != dailyBalances.get(i - 1)
+            .getCurrentRootingZone()) {
+          Double contentDifference;
+          contentDifference = dailyBalances.get(i).getCurrentAvailableSoilWater()
+              - dailyBalances.get(i - 1).getCurrentAvailableSoilWater();
+          LOGGER.log(Level.INFO, "contentDifferece =" + contentDifference);
+          currentTotalWaterBalance += contentDifference;
+        }
         dailyBalances.get(i).setCurrentTotalWaterBalance(currentTotalWaterBalance);
       }
+
       // Calculation Pause
       int k = 0;
       if (currentTotalWaterBalance > dailyBalances.get(i).getCurrentAvailableSoilWater()
@@ -260,7 +270,6 @@ public class TotalBalance {
       dailyBalances.get(i)
           .setCurrentTotalWaterBalance(Math.min(dailyBalances.get(i).getCurrentTotalWaterBalance(),
               dailyBalances.get(i).getCurrentAvailableSoilWater()));
-
       if (k != 0 && k > 0) {
         i += k - 1;
       }

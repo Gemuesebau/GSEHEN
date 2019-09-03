@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <updateDescriptor baseUrl="">
-  <entry targetMediaFileId="60" updatableVersionMin="" updatableVersionMax="" fileName="Gsehen_windows_1_0.exe" newVersion="1.0" newMediaFileId="60" fileSize="91330048" md5Sum="9bc2aeee0eeae80d6da8a2699f199393" bundledJre="windows-x86-1.8.0_202" archive="false" singleBundle="false">
-    <comment language="en" />
+  <entry targetMediaFileId="60" updatableVersionMin="" updatableVersionMax="" fileName="Gsehen_windows-x64_2_0.exe" newVersion="2.0" newMediaFileId="60" fileSize="97342976" md5Sum="6ffe030bdf47e67750e4a9367e6e4d02" sha256Sum="45087ea3d92b40879566cf34f5be7ff6db761dea88237639452b6f9fc6d52a51" bundledJre="windows-amd64-1.8.0_211.tar.gz" archive="false" singleBundle="false">
+    <comment language="de" />
+  </entry>
+  <entry targetMediaFileId="61" updatableVersionMin="" updatableVersionMax="" fileName="Gsehen_unix_2_0.tar.gz" newVersion="2.0" newMediaFileId="61" fileSize="1665427" md5Sum="0bd762546ab06be11efaf5a82cf63105" sha256Sum="cd192d699e29ca1c5507d590279f688fc9a472446394244e1e9aceede827c1b6" bundledJre="" archive="true" singleBundle="false">
+    <comment language="de" />
+  </entry>
+  <entry targetMediaFileId="62" updatableVersionMin="" updatableVersionMax="" fileName="Gsehen_macos_2_0.dmg" newVersion="2.0" newMediaFileId="62" fileSize="1715869" md5Sum="b3768f0a433561560d91d60bff43e20c" sha256Sum="439de4f04b40b6a8a80e5960534b8c99b069d6735eeec30a9056abf0b2a8a04c" bundledJre="" archive="true" singleBundle="true">
     <comment language="de" />
   </entry>
 </updateDescriptor>

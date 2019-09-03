@@ -1,3 +1,5 @@
 # List of generated media files. The columns are tab-separated:
 # id | media file type | display name | media file path
-60	windows	Windows	/home/matthias/Dokumente/GSEHEN/Programmcode/GSEHEN/installer/Desktop/Gsehen_windows_1_0.exe
+61	unix	Unix Archive	/home/matthias/Dokumente/GSEHEN/Programmcode/GSEHEN/installer/Desktop/Gsehen_unix_2_0.tar.gz
+62	macos	macOS Single Bundle Archive	/home/matthias/Dokumente/GSEHEN/Programmcode/GSEHEN/installer/Desktop/Gsehen_macos_2_0.dmg
+60	windows	Windows	/home/matthias/Dokumente/GSEHEN/Programmcode/GSEHEN/installer/Desktop/Gsehen_windows-x64_2_0.exe
