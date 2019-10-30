@@ -327,11 +327,11 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     startDate.setCellValueFactory(new PropertyValueFactory<CropPhase, String>("cropStart"));
     duration.setMinWidth(125);
     duration.setStyle("-fx-alignment:top-center; -fx-font-weight: bold;");
-    duration.setCellValueFactory(new PropertyValueFactory<CropPhase, Integer>("duration"));
+    duration.setCellValueFactory(new PropertyValueFactory<CropPhase, String>("duration"));
     cropRootingZone.setMinWidth(200);
-    cropRootingZone.setStyle("-fx-alignment:top-center;  -fx-font-weight: bold;");
+    cropRootingZone.setStyle("-fx-alignment:top-center; -fx-font-weight: bold;");
     cropRootingZone
-        .setCellValueFactory(new PropertyValueFactory<CropPhase, Integer>("rootingZone"));
+      .setCellValueFactory(new PropertyValueFactory<CropPhase, String>("rootingZone"));
 
     // Sets each column not editable, except of 'duration' and 'cropRootingZone'
     cropTable.setEditable(true);
@@ -726,7 +726,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
                     : "",
                 gsehenInstance.formatDate(currentCalendarTime),
                 gsehenInstance.formatDoubleOneDecimal(currentPhaseDuration),
-                gsehenInstance.formatDoubleOneDecimal(rootingZones.get(index++))));
+                String.valueOf(rootingZones.get(index++))));
       }
       cropTable.getItems().addAll(FXCollections.observableArrayList(cropPhases));
     }

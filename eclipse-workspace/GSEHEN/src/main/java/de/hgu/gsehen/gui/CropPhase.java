@@ -25,7 +25,7 @@ public class CropPhase {
    *          - Phase 1 to 4.
    * @param description
    *          - Crop description.
-   * @param today
+   * @param todayMarker
    *          - Todays date.
    * @param cropStart
    *          - The date, the crop was set.
@@ -34,16 +34,14 @@ public class CropPhase {
    * @param rootingZone
    *          - RootingZone of each phase.
    */
-  public CropPhase(Integer phase, String description, String todayMarker, String cropStart, String duration,
-      String rootingZone) {
-
+  public CropPhase(Integer phase, String description, String todayMarker, String cropStart,
+      String duration, String rootingZone) {
     this.setPhase(phase);
     this.description = description;
     this.setTodayMarker(todayMarker);
     this.setCropStart(cropStart);
     this.setDuration(duration);
     this.rootingZone = rootingZone;
-
   }
 
   public Integer getPhase() {
