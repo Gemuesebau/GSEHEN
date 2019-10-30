@@ -1,11 +1,6 @@
 package de.hgu.gsehen.gsbalance;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import static de.hgu.gsehen.evapotranspiration.UtilityFunctions.getLevelForName;
 
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
@@ -20,6 +15,12 @@ import de.hgu.gsehen.model.ManualWaterSupply;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.model.WaterBalance;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.logging.Logger;
+
 public class Recommender {
   private static final Logger LOGGER = Logger.getLogger(Recommender.class.getName());
   private static final String COPY_WD_LOGLEVEL = System.getProperty("copyWdLoglevel", "FINE");
@@ -32,14 +33,6 @@ public class Recommender {
         event -> forAllFieldsAndPlots((field, plot) -> copyWeatherData(event, field, plot)));
     gsehenInstance.registerForEvent(ManualDataChanged.class,
         event -> performCalculations(event.getField(), event.getPlot()));
-  }
-
-  private Level getLevelForName(String copyWdLoglevel) {
-    try {
-      return (Level) Level.class.getField(copyWdLoglevel).get(null);
-    } catch (Exception e) {
-      return Level.INFO;
-    }
   }
 
   private DayData getCurrentDayData(Plot plot, final Date eventDayDataDate) {

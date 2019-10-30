@@ -294,8 +294,9 @@ public class Gsehen extends Application {
     Connection connection = null;
     try {
       connection = DriverManager.getConnection(url, user, password);
-    } catch (SQLException e) {
-      LOGGER.log(Level.SEVERE, "Can't connect ", e);
+    } catch (Exception e) {
+      LOGGER.log(Level.SEVERE, "Can't connect to crop database (internet), " + e);
+      LOGGER.log(Level.FINE, "Exception details: ", e);
     }
     try {
       em.getTransaction().begin();

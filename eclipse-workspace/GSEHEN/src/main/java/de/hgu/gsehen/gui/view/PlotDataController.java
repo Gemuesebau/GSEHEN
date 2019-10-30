@@ -5,12 +5,10 @@ import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXTextField;
-import com.sun.javafx.charts.Legend;
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEventListener;
-import de.hgu.gsehen.event.RecommendedActionChanged;
 import de.hgu.gsehen.gui.CombinedBarAndLineChart;
 import de.hgu.gsehen.gui.CropPhase;
 import de.hgu.gsehen.gui.GeoPoint;
@@ -46,11 +44,6 @@ import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Side;
-import javafx.scene.Node;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Accordion;
@@ -74,7 +67,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -130,12 +122,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private boolean isActive = true;
   private HBox bottomBox;
   private Text error;
-  private Double waterLevel;
-  private Double availableSoilWater;
-  @SuppressWarnings("rawtypes")
-  private XYChart.Series series;
-  private BarChart<String, Number> chart;
-  private NumberAxis axisY;
   private String pattern;
   private Double lat = 0.0;
   private Double lng = 0.0;
@@ -163,8 +149,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     pattern = ((SimpleDateFormat) dateFormat).toPattern();
 
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
-
-    gsehenInstance.registerForEvent(RecommendedActionChanged.class, event -> setChartData());
 
     mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
   }
@@ -410,19 +394,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       }
     });
 
-    // Balkendiagramm
-    waterLevel = 0.0;
-    CategoryAxis axisX = new CategoryAxis();
-    axisY = new NumberAxis(0, 20, 1);
-    chart = new BarChart<String, Number>(axisX, axisY);
-    chart.setPrefWidth(30);
-    chart.setTitle(mainBundle.getString("plotview.waterinsoil"));
-    chart.setLegendSide(Side.RIGHT);
-    axisY.setLabel("mm");
-
-    series = new XYChart.Series();
-    chart.getData().addAll(series);
-
     // Bewässerungsgrafik (Accordion)
     TitledPane wateringGraphicPane = new TitledPane();
     wateringGraphicPane.setText(mainBundle.getString("plotview.graphic"));
@@ -499,7 +470,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane.setConstraints(descriptionAccordion, 2, 8);
     GridPane.setConstraints(tablePane, 0, 9, 3, 1);
     GridPane.setConstraints(nextPhase, 0, 10);
-    GridPane.setConstraints(chart, 0, 11, 3, 1);
     GridPane.setConstraints(wateringStackPane, 0, 12, 3, 1);
     GridPane.setConstraints(scalingFactorLabel, 0, 13);
     GridPane.setConstraints(scalingFactor, 1, 13, 2, 1);
@@ -509,7 +479,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     GridPane centerGrid = gsehenGuiElements.gridPane(pane);
     centerGrid.getChildren().addAll(nameLabel, name, areaLabel, area, locationLabel, location,
         rootingZoneLabel, rootingZone, startTypeLabel, startType, cropLabel, cropChoiceBox,
-        descriptionAccordion, tablePane, nextPhase, chart, wateringStackPane, scalingFactorLabel,
+        descriptionAccordion, tablePane, nextPhase, wateringStackPane, scalingFactorLabel,
         scalingFactor, scalingValue);
 
     startType.valueProperty().addListener(new ChangeListener<String>() {
@@ -613,52 +583,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     currentItem = treeTableView.getSelectionModel().getSelectedIndex();
   }
 
-  @SuppressWarnings({ "rawtypes", "unchecked" })
-  private void setChartData() {
-    if (plot != null && plot.getRecommendedAction() != null) {
-      if (plot.getRecommendedAction().getProjectedDaysToIrrigation() != null) {
-        waterLevel = plot.getRecommendedAction().getAvailableWater();
-        int daysToIrrigation = plot.getRecommendedAction().getProjectedDaysToIrrigation();
-
-        if (!plot.getWaterBalance().equals(null)) {
-          final List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();
-          if (!dailyBalances.isEmpty()) {
-            int waterBalance = dailyBalances.size() - 1;
-            availableSoilWater = dailyBalances.get(waterBalance).getCurrentAvailableSoilWater()
-                * 1.1;
-            axisY.setUpperBound(availableSoilWater);
-          }
-        }
-
-        Legend legend = (Legend) chart.lookup(".chart-legend");
-        Legend.LegendItem li = null;
-        DecimalFormat df = new DecimalFormat("#.##");
-
-        if (waterLevel != null) {
-          XYChart.Data data = new XYChart.Data("waterLevel", waterLevel);
-          series.getData().add(data);
-          Node node = data.getNode();
-
-          if (daysToIrrigation == 0) {
-            node.setStyle("-fx-bar-fill: #ff0000;");
-            li = new Legend.LegendItem(df.format(waterLevel) + " mm",
-                new Rectangle(10, 4, Color.RED));
-          } else if (daysToIrrigation == 1) {
-            node.setStyle("-fx-bar-fill: #800080;");
-            li = new Legend.LegendItem(df.format(waterLevel) + " mm",
-                new Rectangle(10, 4, Color.PURPLE));
-          } else {
-            node.setStyle("-fx-bar-fill: #0000ff;");
-            li = new Legend.LegendItem(df.format(waterLevel) + " mm",
-                new Rectangle(10, 4, Color.BLUE));
-          }
-
-          legend.getItems().setAll(li);
-        }
-      }
-    }
-  }
-
   private void setNextPhase() {
     Date actualDate;
     Date nextDate;
@@ -728,13 +652,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   private SortedList<Data<Date, Number>> setCaswChartData() {
     caswDataList = new SortedList<Data<Date, Number>>(caswData,
         (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
-
     if (plot.getWaterBalance() != null && plot.getWaterBalance().getDailyBalances() != null) {
       for (DayData dayData : plot.getWaterBalance().getDailyBalances()) {
-
         Data<Date, Number> soilWaterData = new XYChart.Data(dayData.getDate(),
             dayData.getCurrentAvailableSoilWater() * (-1));
-
         caswData.add(soilWaterData);
       }
     }
@@ -1230,10 +1151,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
           setTableData();
 
-          if (plot.getRecommendedAction() != null
-              && plot.getRecommendedAction().getAvailableWater() != null) {
-            setChartData();
-          }
           if (plot.getManualData() != null) {
             setPrecBarChartData();
             setIrriBarChartData();

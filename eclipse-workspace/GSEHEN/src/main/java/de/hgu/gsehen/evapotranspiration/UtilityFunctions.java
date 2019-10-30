@@ -14,6 +14,20 @@ public class UtilityFunctions {
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
 
   /**
+   * Returns the java.util.logging.Level for the given level name.
+   *
+   * @param logLevelName the name of a level, like SEVERE .. FINEST
+   * @return the level for the given name
+   */
+  public static Level getLevelForName(String logLevelName) {
+    try {
+      return (Level) Level.class.getField(logLevelName).get(null);
+    } catch (Exception e) {
+      return Level.INFO;
+    }
+  }
+
+  /**
    * Method to convert wind speed measurements to a height of 2 m above ground level.
    *
    * @param v Windspeed in m/s
