@@ -50,9 +50,9 @@ function getPlugin() {
 		logStatistics(statistics);
 		return completeDayData;
 	};
-	var calculateDayDataForOneDay = function(pluginConfig, date, weatherDataArray) {
+	var calculateDayDataForOneDay = function(pluginConfig, dayDate, weatherDataArray) {
 		var dayData = new (Java.type("de.hgu.gsehen.evapotranspiration.DayData"))();
-		dayData.setDate(date);
+		dayData.setDate(dayDate);
 		dayData.setTempMax(arrayUtilities.objArrayMax(weatherDataArray, "temp"));
 		dayData.setTempMin(arrayUtilities.objArrayMin(weatherDataArray, "temp"));
 		dayData.setTempMean(arrayUtilities.objArrayMean(weatherDataArray, "temp"));
@@ -113,14 +113,12 @@ function getPlugin() {
 		while ((line = lineNumberReader.readLine()) != null) {
 			lineNumber++;
 			try {
-				// TODO make characters configurable?
 				var lineDate = dateFormat.parse(line.replace(/^"/, "").replace(/ .*/, ""));
 				//LOGGER.log(java.util.logging.Level.FINE, "date = " + date);
 				//LOGGER.log(java.util.logging.Level.FINE, "lineDate = " + lineDate);
 				//if (lineDate.getTime() >= timeStamp) {
 					var weatherDataMeasurementObject = arrayUtilities.arrayToObject(
 						processNumberColumns(line.split(/; */), numberFormat),
-						// TODO make columns/order in file configurable?
 						getWeatherDataAttributeNamesArray()
 					);
 					if (withExceptions) {
@@ -250,21 +248,23 @@ function getPlugin() {
 		};
 	};
 	var WeatherDataPlugin = Java.extend(Java.type("de.hgu.gsehen.model.WeatherDataPlugin"), {
-		determineDayData: function(weatherDataSource, date, beforeImport) {
+		//-----------
+		/*@Override*/determineDayData: function(weatherDataSource, date /* currently unused */, beforeImport) {
 			var pluginConfig = JSON.parse(weatherDataSource.getPluginConfigurationJSON());
 			beforeImport.accept(weatherDataSource);
 			var weatherDataArray = importWeatherData(date /* currently unused */, pluginConfig);
 			if (weatherDataArray.length == 0) {
-				return null; // TODO if no data in CSV for today ("date"), show warning!
+				return null;
 			}
-			return calculateDayData(pluginConfig, date, weatherDataArray);
+			return calculateDayData(pluginConfig, date /* currently unused */, weatherDataArray);
 		},
 		javaLocaleMap: null,
 		guiControls: null,
 		/*filechooserbutton: null,
 		/*filechooser: null,
 		/*dateerror: null*/
-		createAndFillSpecificControls: function(json, configElements, fixedNodesCount, fixedItemsCount,
+		//-----------
+		/*@Override*/createAndFillSpecificControls: function(json, configElements, fixedNodesCount, fixedItemsCount,
 				gsehenInstance, gsehenGui, classLoader, selLocale, javaLocaleMapParam, parentStackPane) {
 			javaLocaleMap = javaLocaleMapParam;
 			guiControls = {
@@ -290,7 +290,6 @@ function getPlugin() {
 			if (data != null && data.windspeedMeasHeightMeters != null) {
 				guiControls.windspeed.setNodeValue(data.windspeedMeasHeightMeters.doubleValue());
 			}
-			// TODO validate date format string against new SimpleDateFormat? ---> dateerror
 			guiControls.dateformat = new Packages.de.hgu.gsehen.gui.view.ConfigDialogStringField(
 					gsehenGui.text(msgBundle.getString("dateformat")),
 					gsehenGui.text(msgBundle.getString("dateformatexample")),
@@ -305,7 +304,6 @@ function getPlugin() {
 			if (data != null && data.numberFormat != null) {
 				guiControls.localeid.setNodeValue(reverseLookup(data.numberFormat, javaLocaleMap));
 			}
-			// TODO validate file path against new File?
 			guiControls.filepath = new Packages.de.hgu.gsehen.gui.view.ConfigDialogStringField(
 					gsehenGui.text(msgBundle.getString("filepath")),
 					gsehenGui.text(msgBundle.getString("filepathexample")),
@@ -338,7 +336,8 @@ function getPlugin() {
 			);
 			addConfigItems(configElements, specificConfigItems, fixedItemsCount);
 		},
-		getSpecificConfigurationJSON: function() {
+		//-----------
+		/*@Override*/getSpecificConfigurationJSON: function() {
 			return JSON.stringify(getConfigObject(guiControls, javaLocaleMap));
 		}
 	});

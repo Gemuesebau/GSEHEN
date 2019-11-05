@@ -453,6 +453,20 @@ public class FieldDataController extends Application
     }
   }
 
+  private void fillButtonBox(Node... additionalElements) {
+    final ObservableList<Node> children = buttonBox.getChildren();
+    children.clear();
+    children.addAll(back, save);
+    children.addAll(additionalElements);
+  }
+
+  private void putErrorInButtonBox(final String messageKey) {
+    Text error = new Text(mainBundle.getString(messageKey));
+    error.setFont(Font.font("Verdana", 14));
+    error.setFill(Color.RED);
+    fillButtonBox(error);
+  }
+
   /**
    * Creates the GUI for working with the details of a WeatherDataSource.
    *
@@ -496,7 +510,7 @@ public class FieldDataController extends Application
     );
     buttonBox = new HBox();
     buttonBox.setSpacing(10);
-    buttonBox.getChildren().addAll(back, save);
+    fillButtonBox();
 
     VBox bottomBox = new VBox(25);
     bottomBox.setSpacing(10);
@@ -536,11 +550,7 @@ public class FieldDataController extends Application
     final boolean bothSet = noneIsEmpty(
         new TextField[] { weatherDataSourceName, automaticImportIntervalSeconds.getNode() });
     if (!bothSet) {
-      Text error = new Text(mainBundle.getString("fieldview.error"));
-      error.setFont(Font.font("Verdana", 14));
-      error.setFill(Color.RED);
-      buttonBox.getChildren().clear();
-      buttonBox.getChildren().addAll(back, save, error);
+      putErrorInButtonBox("fieldview.form.values.missing");
     }
     return bothSet;
   }
@@ -617,13 +627,13 @@ public class FieldDataController extends Application
 
   private GridPane createGridPaneWithNodes(List<ConfigDialogElement<Node, Object>> nodes) {
     GridPane gridPane = gsehenGuiElements.gridPane(pane);
-    ObservableList<Node> children = gridPane.getChildren();
+    ObservableList<Node> gridPaneChildren = gridPane.getChildren();
     for (ConfigDialogElement<Node, Object> node : nodes) {
-      children.add(node.getLabel());
-      children.add(node.getNode());
+      gridPaneChildren.add(node.getLabel());
+      gridPaneChildren.add(node.getNode());
       final Text example = node.getExample();
       if (example != null) {
-        children.add(example);
+        gridPaneChildren.add(example);
       }
     }
     return gridPane;
@@ -636,12 +646,14 @@ public class FieldDataController extends Application
    * @return true if all values were applied successfully, false otherwise
    */
   private boolean setAndPopulateWeatherDataSource() {
+    WeatherDataSource currentWDS = wds;
+    boolean addWDStoList = false;
     try {
       if (selectedWeatherDataSource != null) {
         wds = selectedWeatherDataSource;
       } else {
         wds = new WeatherDataSource(DBUtil.generateUuid());
-        weatherDataSourceList.add(wds);
+        addWDStoList = true;
       }
       wds.setName(weatherDataSourceName.getText());
       wds.setPluginJsFileName(pluginJsFileName.getNodeValue());
@@ -654,7 +666,11 @@ public class FieldDataController extends Application
       processPluginSpecificConfiguration();
     } catch (Exception e) {
       LOGGER.log(Level.FINE, "Parsing or setting weather data source parameters failed", e);
+      wds = currentWDS;
       return false;
+    }
+    if (addWDStoList) {
+      weatherDataSourceList.add(wds);
     }
     return true;
   }
@@ -869,10 +885,7 @@ public class FieldDataController extends Application
         center.getChildren().addAll(createdSoil, delSoil);
         depth.setText(mainBundle.getString("fieldview.layer") + (layerList.size() + 1));
       } else {
-        Text error = gsehenGuiElements.text(mainBundle.getString("fieldview.error"));
-        error.setFill(Color.RED);
-        buttonBox.getChildren().clear();
-        buttonBox.getChildren().addAll(back, save, error);
+        putErrorInButtonBox("fieldview.form.values.missing");
       }
     });
 
@@ -944,17 +957,13 @@ public class FieldDataController extends Application
         treeTableView.getSelectionModel().clearSelection();
         treeTableView.getSelectionModel().select(currentItem);
       } else {
-        Text noNameOrSoil = gsehenGuiElements
-            .text(mainBundle.getString("fieldview.nonameorsoil"));
-        noNameOrSoil.setFill(Color.RED);
-        buttonBox.getChildren().clear();
-        buttonBox.getChildren().addAll(back, save, noNameOrSoil);
+        putErrorInButtonBox("fieldview.nonameorsoil");
       }
     });
 
     buttonBox = new HBox();
     buttonBox.setSpacing(10.0);
-    buttonBox.getChildren().addAll(back, save);
+    fillButtonBox();
 
     VBox bottomBox = new VBox(25);
     bottomBox.setSpacing(10);
@@ -1180,7 +1189,7 @@ public class FieldDataController extends Application
           treeTableView.getSelectionModel().select(currentItem);
         } else {
           Text profileChangeError = gsehenGuiElements
-              .text(mainBundle.getString("fieldview.error"));
+              .text(mainBundle.getString("fieldview.form.values.missing"));
           profileChangeError.setFill(Color.RED);
           HBox bottom = new HBox();
           bottom.setSpacing(10);
