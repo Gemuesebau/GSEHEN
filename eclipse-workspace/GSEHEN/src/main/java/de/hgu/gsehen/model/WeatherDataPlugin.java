@@ -25,28 +25,34 @@ public interface WeatherDataPlugin {
       Consumer<WeatherDataSource> beforeImport);
 
   /**
-   * Adds GUI controls to the given parent, after the fixed GUI nodes,
+   * Adds GUI controls to the given node list, after the fixed GUI nodes,
    * and fills them according to the given JSON data.
    *
    * <p>This method may add GUI controls for data import preview purposes.</p>
    *
    * <p>This method may save any GUI control references for later! (e.g., for error messages)</p>
    *
-   * @param json a JSON data string containing the values for the specific controls
+   * <p>Mind the difference between nodes and items; particularly, fixedNodesCount is equal to,
+   * <i>or greater than,</i> fixedItemsCount.</p>
+   *
+   * @param json a JSON data string containing the values for the specific controls, e.g. from DB
    * @param configNodes a GUI node list where new controls are to be added
-   * @param fixedNodesCount the number of the given parent's children to be left untouched
+   * @param fixedNodesCount the number of GUI nodes in the given list to be left untouched
    * @param fixedItemsCount the number of leading configuration items to be left untouched
    * @param gsehenInstance the application instance
    * @param gsehenGuiElements the GUI elements helper
-   * @param classLoader the class loader to be used for resource bundle lookup
+   * @param classLoader the class loader to be used for, e.g., resource bundle lookup
    * @param locale the currently selected UI locale
-   * @param javaLocaleMap a dictionary for available Java locale values, described in current locale
-   * @param parentStackPane a StackPane to be used for (modal) dialogs
+   * @param javaLocaleMap a dictionary for available Java locale values (described in "locale")
+   * @param parentStackPane a StackPane to be used for, e.g., (modal) dialogs
+   * @param errorSetter a String-consuming function that shows the given error message
+   * @param resetter a function that resets the (error-holding) GUI part
    */
   void createAndFillSpecificControls(String json, ObservableList<Node> configNodes,
       int fixedNodesCount, int fixedItemsCount, Gsehen gsehenInstance,
       GsehenGuiElements gsehenGuiElements, ClassLoader classLoader, Locale locale,
-      TreeMap<String, String> javaLocaleMap, StackPane parentStackPane);
+      TreeMap<String, String> javaLocaleMap, StackPane parentStackPane,
+      Consumer<String> errorSetter, Runnable resetter);
 
   /**
    * Returns the values currently contained in this plugin's own controls.

@@ -461,7 +461,11 @@ public class FieldDataController extends Application
   }
 
   private void putErrorInButtonBox(final String messageKey) {
-    Text error = new Text(mainBundle.getString(messageKey));
+    putErrorMessage(mainBundle.getString(messageKey));
+  }
+
+  private void putErrorMessage(final String message) {
+    Text error = new Text(message);
     error.setFont(Font.font("Verdana", 14));
     error.setFill(Color.RED);
     fillButtonBox(error);
@@ -645,6 +649,7 @@ public class FieldDataController extends Application
    * @see checkMandatoryBaseFields
    * @return true if all values were applied successfully, false otherwise
    */
+  @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
   private boolean setAndPopulateWeatherDataSource() {
     WeatherDataSource currentWDS = wds;
     boolean addWDStoList = false;
@@ -721,7 +726,7 @@ public class FieldDataController extends Application
           : "{}",
         configNodes, fixedNodesCount, fixedItemsCount, gsehenInstance, gsehenGuiElements,
         this.getClass().getClassLoader(), gsehenInstance.getSelectedLocale(), javaLocaleMap,
-        configStackPane
+        configStackPane, (message) -> putErrorMessage(message), () -> fillButtonBox()
     );
   }
 

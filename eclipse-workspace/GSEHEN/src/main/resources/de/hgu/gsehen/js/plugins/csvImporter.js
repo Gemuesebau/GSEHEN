@@ -189,20 +189,20 @@ function getPlugin() {
 	    inputGridPane.getChildren().add(closeButton);
 	    content.setBody(inputGridPane);
 	};
-	var addConfigItems = function(configElements, specificConfigItems, fixedItemsCount) {
+	var addConfigItems = function(configNodes, specificConfigItems, fixedItemsCount) {
 		var itemIndex = fixedItemsCount;
 		var specificConfigItemsCount = specificConfigItems.size();
 		for (var i=0; i<specificConfigItemsCount; i++) {
 			var item = specificConfigItems.get(i);
 			var label = item.getLabel();
-			configElements.add(label);
+			configNodes.add(label);
 	        setGridConstraints(label, 0, itemIndex);
 	        var node = item.getNode();
-	        configElements.add(node);
+	        configNodes.add(node);
 	        setGridConstraints(node, 1, itemIndex);
 			var example = item.getExample();
 			if (example != null) {
-				configElements.add(example);
+				configNodes.add(example);
 				example.setFont(
 					javafx.scene.text.Font.font("Arial", javafx.scene.text.FontPosture.ITALIC, 12)
 				);
@@ -238,15 +238,6 @@ function getPlugin() {
 		}
 		return null;
 	};
-	var getConfigObject = function(guiControls, javaLocaleMap) {
-		return {
-			measIntervalSeconds: guiControls.interval.getNodeValue(),              // 60
-			windspeedMeasHeightMeters: guiControls.windspeed.getNodeValue(),       // 2
-			dateFormatString: guiControls.dateformat.getNodeValue(),               // "y-M-d"
-			numberFormat: javaLocaleMap.get(guiControls.localeid.getNodeValue()),  // "Deutsch (GERMAN)"
-			dataFilePath: guiControls.filepath.getNodeValue()                      // "C:\\Data\\10MinDaten.csv"
-		};
-	};
 	var WeatherDataPlugin = Java.extend(Java.type("de.hgu.gsehen.model.WeatherDataPlugin"), {
 		//-----------
 		/*@Override*/determineDayData: function(weatherDataSource, date /* currently unused */, beforeImport) {
@@ -260,12 +251,24 @@ function getPlugin() {
 		},
 		javaLocaleMap: null,
 		guiControls: null,
+		setErrorInGUI: null,
+		resetGUI: null,
+		var getConfigObject = function() {
+			return {
+				measIntervalSeconds: guiControls.interval.getNodeValue(),              // 60
+				windspeedMeasHeightMeters: guiControls.windspeed.getNodeValue(),       // 2
+				dateFormatString: guiControls.dateformat.getNodeValue(),               // "y-M-d" ---> see newDateFormat
+				numberFormat: javaLocaleMap.get(guiControls.localeid.getNodeValue()),  // "Deutsch (GERMAN)"
+				dataFilePath: guiControls.filepath.getNodeValue()                      // "C:\\Data\\10MinDaten.csv"
+			};
+		};
 		/*filechooserbutton: null,
 		/*filechooser: null,
 		/*dateerror: null*/
 		//-----------
-		/*@Override*/createAndFillSpecificControls: function(json, configElements, fixedNodesCount, fixedItemsCount,
-				gsehenInstance, gsehenGui, classLoader, selLocale, javaLocaleMapParam, parentStackPane) {
+		/*@Override*/createAndFillSpecificControls: function(json, configNodes, fixedNodesCount, fixedItemsCount,
+				gsehenInstance, gsehenGui, classLoader, selLocale, javaLocaleMapParam, parentStackPane,
+				errorSetter, resetter) {
 			javaLocaleMap = javaLocaleMapParam;
 			guiControls = {
 				interval: null,
@@ -274,6 +277,8 @@ function getPlugin() {
 				localeid: null,
 				filepath: null
 			};
+			setErrorInGUI = errorSetter;
+			resetGUI = resetter;
 			var data = JSON.parse(json);
 			var msgBundle = java.util.ResourceBundle.getBundle(
 					"de.hgu.gsehen.js.plugins.csvImporter_i18n", selLocale, classLoader);
@@ -312,7 +317,7 @@ function getPlugin() {
 				guiControls.filepath.setNodeValue(data.dataFilePath);
 			}
 			/*filechooserbutton//Datei auswählen
-			/*filechooser//Dateipfad zur Wetterdatenquelle
+			/*filechooser//(ent)hält Dateipfad zur Wetterdatenquelle
 			/*dateerror//Falsches Format!*/
 			new Packages.de.hgu.gsehen.gui.view.ConfigDialogActionButton(
 					msgBundle.getString("importtest"), specificConfigItems, gsehenGui,
@@ -334,7 +339,7 @@ function getPlugin() {
 							arrayList);
 					}
 			);
-			addConfigItems(configElements, specificConfigItems, fixedItemsCount);
+			addConfigItems(configNodes, specificConfigItems, fixedItemsCount);
 		},
 		//-----------
 		/*@Override*/getSpecificConfigurationJSON: function() {
