@@ -1,5 +1,7 @@
 package de.hgu.gsehen.gui;
 
+import static de.hgu.gsehen.util.MessageUtil.logMessage;
+
 import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXToggleButton;
 
@@ -22,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -217,7 +220,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
       @SuppressWarnings("static-access")
       @Override
       public void handle(ActionEvent e) {
-        // TODO
         tabPane.getSelectionModel().select(4);
         gsehenInstance.getExports().createExport();
       }
@@ -741,7 +743,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           farmTreeView.getSelectionModel().select(item);
           event.consume();
 
-          LOGGER.info(item + " stacked on " + getTarget(row));
+          logMessage(LOGGER, Level.INFO, "tree.table.item.dropped", item, getTarget(row));
 
           Field field = null;
           Plot plot = null;
@@ -790,7 +792,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           autoField = null;
           gsehenInstance.sendFarmDataChanged(object, null);
         } else {
-          LOGGER.info(itemType + " can't be stack on " + destinationType);
+          logMessage(LOGGER, Level.INFO, "tree.table.item.drop.fail", itemType, destinationType);
         }
       }
     });
@@ -1038,7 +1040,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     // liste gelöschter farms, wird beim Speichern verarbeitet
     gsehenInstance.getDeletedFarms().addAll(delFarm);
 
-    LOGGER.info(object + " deleted.");
+    logMessage(LOGGER, Level.INFO, "tree.table.item.deleted", object);
     farmsList.removeAll(delFarm);
     gsehenInstance.sendFarmDataChanged(object, null);
   }

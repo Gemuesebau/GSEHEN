@@ -5,15 +5,15 @@ import de.hgu.gsehen.gsbalance.RecommendedAction;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MessageUtil {
+
+  public static final char END_OF_I18N_DATA = '¦';
+  public static final char END_OF_VALUE = '´';
 
   private static ResourceBundle logMessageBundle =
       ResourceBundle.getBundle("i18n.logmessages", Locale.ENGLISH);
@@ -37,6 +37,18 @@ public class MessageUtil {
     } else {
       return value;
     }
+  }
+
+  private static String replaceSeparatorChars(Object value) {
+    return String.valueOf(value).replace(END_OF_VALUE, '\'').replace(END_OF_I18N_DATA, '|');
+  }
+
+  private static StringBuilder encodeBaseData(String logMessageKey, Object... parameters) {
+    StringBuilder result = new StringBuilder(replaceSeparatorChars(logMessageKey));
+    for (Object object : parameters) {
+      result.append(END_OF_VALUE).append(replaceSeparatorChars(object));
+    }
+    return result.append(END_OF_I18N_DATA);
   }
 
   /**
@@ -70,12 +82,5 @@ public class MessageUtil {
         logMessageBundle.getString(logMessageKey),
         parameters
     ));
-  }
-
-  private static String encodeBaseData(String logMessageKey, Object... parameters) {
-    List<Object> result = new ArrayList<>();
-    result.add(logMessageKey);
-    result.addAll(Arrays.asList(parameters));
-    return result.toString();
   }
 }

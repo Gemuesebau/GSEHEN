@@ -1,11 +1,6 @@
 package de.hgu.gsehen.gsbalance;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import static de.hgu.gsehen.util.MessageUtil.logMessage;
 
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
@@ -17,6 +12,13 @@ import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilManualData;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TotalBalance {
 
@@ -245,7 +247,7 @@ public class TotalBalance {
           Double contentDifference;
           contentDifference = dailyBalances.get(i).getCurrentAvailableSoilWater()
               - dailyBalances.get(i - 1).getCurrentAvailableSoilWater();
-          LOGGER.log(Level.INFO, "contentDifferece =" + contentDifference);
+          logMessage(LOGGER, Level.INFO, "gsbalance.total.contentdifference", contentDifference);
           currentTotalWaterBalance += contentDifference;
         }
         dailyBalances.get(i).setCurrentTotalWaterBalance(currentTotalWaterBalance);

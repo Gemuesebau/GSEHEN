@@ -1,5 +1,7 @@
 package de.hgu.gsehen.gui.view;
 
+import static de.hgu.gsehen.util.MessageUtil.logException;
+
 import com.jfoenix.controls.JFXDatePicker;
 
 import de.hgu.gsehen.Gsehen;
@@ -25,7 +27,6 @@ import java.util.logging.Logger;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
@@ -357,22 +358,16 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
     Button save = gsehenGuiElements.button(100);
     save.setText(mainBundle.getString("menu.file.save"));
 
-    save.setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent e) {
-
-        startDate = startpicker.getValue();
-        endDate = endpicker.getValue();
-
-        try {
-          while (!startDate.isAfter(endDate)) {
-            arr = startDate;
-            startDate = startDate.plusDays(1);
-          }
-        } catch (Exception ex) {
-          LOGGER.log(Level.INFO, "Exception found in :" + ex);
+    save.setOnAction(e -> {
+      startDate = startpicker.getValue();
+      endDate = endpicker.getValue();
+      try {
+        while (!startDate.isAfter(endDate)) {
+          arr = startDate;
+          startDate = startDate.plusDays(1);
         }
-
+      } catch (Exception ex) {
+        logException(LOGGER, Level.INFO, ex, "logview.filter.save.exception");
       }
     });
 
@@ -387,7 +382,7 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
    * Reload Log.
    */
   public void onLogRecordPublish(LogRecord logRecord) {
-    // TODO: Anstatt hier immer die ganze Datei neu zu laden wäre es wünschenswert, den hier
+    // Anstatt hier immer die ganze Datei neu zu laden wäre es wünschenswert, den hier
     // ankommenden LogRecord zu verwenden
     // Idee wäre: logReord mit HTMLFormatter formaieren und dann in die observable list (this.data)
     // packen

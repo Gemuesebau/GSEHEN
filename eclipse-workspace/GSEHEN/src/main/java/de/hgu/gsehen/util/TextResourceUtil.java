@@ -1,5 +1,7 @@
 package de.hgu.gsehen.util;
 
+import static de.hgu.gsehen.util.MessageUtil.logException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -42,15 +44,16 @@ public class TextResourceUtil {
           + " }(Packages." + TextResourceUtil.class.getName() + ".getUtf8ResourceAsOneString("
           + "     \"/de/hgu/gsehen/js/\" + gsehenJsFileName)));"
           + "}");
-//      engine.eval("function loadGsehenJs(gsehenJsFileName) {"
-//          + "  eval("
-//          + "    Packages." + TextResourceUtil.class.getName() + ".getUtf8ResourceAsOneString("
-//          + "      \"/de/hgu/gsehen/js/\" + gsehenJsFileName)"
-//          + "  )"
-//          + "}");
+      //engine.eval("function loadGsehenJs(gsehenJsFileName) {"
+      //    + "  eval("
+      //    + "    Packages." + TextResourceUtil.class.getName() + ".getUtf8ResourceAsOneString("
+      //    + "      \"/de/hgu/gsehen/js/\" + gsehenJsFileName)"
+      //    + "  )"
+      //    + "}");
       engine.eval(getReaderForUtf8(jsResourceFileName));
     } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Can't evaluate " + jsResourceFileName, e);
+      logException(LOGGER, Level.SEVERE, e, "util.textresource.evaluatejs.error",
+          jsResourceFileName);
     }
     return engine;
   }

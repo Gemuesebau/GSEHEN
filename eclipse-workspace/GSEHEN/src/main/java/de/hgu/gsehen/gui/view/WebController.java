@@ -9,7 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javafx.concurrent.Worker.State;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
@@ -91,13 +90,7 @@ public abstract class WebController {
       if (newState == State.SUCCEEDED) {
         JSObject win = (JSObject)engine.executeScript("window");
         win.setMember("webController", this);
-        try {
-          engine.executeScript(loadWorkerSucceededScript);
-          // ein allgemeiner JavaFX-Anwendungs-Exceptionhandler ergibt aktuell wenig Sinn,
-          //  da derzeit noch zu viele Exceptions hochkommen (insbes. DB)
-        } catch (Exception e) {
-          Gsehen.jsException(AlertType.ERROR, this.getClass(), e.getMessage());
-        }
+        engine.executeScript(loadWorkerSucceededScript);
         loaded = true;
       }
     });

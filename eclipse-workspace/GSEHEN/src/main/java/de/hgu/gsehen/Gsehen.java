@@ -40,6 +40,7 @@ import de.hgu.gsehen.util.Pair;
 import de.hgu.gsehen.util.PluginUtil;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
@@ -48,6 +49,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -187,7 +189,7 @@ public class Gsehen extends Application {
       e.printStackTrace();
     }
     try {
-      importCropData(); // TODO why here and not later (start, near loadUserData, ...)? GSEH-16
+      importCropData(); // why here and not later (start, near loadUserData, ...)? GSEH-16
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -202,10 +204,15 @@ public class Gsehen extends Application {
       Class.forName("com.install4j.api.launcher.SplashScreen").getMethod("hide", new Class[0])
         .invoke(null, new Object[0]);
     } catch (Exception e) {
-      jsException(AlertType.WARNING, Gsehen.class, "Couldn't close splash screen:\n\n"
-          + e.getClass().getName() + "\n" + e.getMessage()
-          + "\n\n(start with -D" + SPLASH_WARNING_PROPNAME + "=" + SPLASH_WARNING_FALSE
-          + " to avoid this message)");
+      errorDialog(
+          AlertType.WARNING,
+          "gui.dialog.exception",
+          "splash.screen.close.error.dialog.text",
+          e.getClass().getName(),
+          e.getMessage(),
+          SPLASH_WARNING_PROPNAME,
+          SPLASH_WARNING_FALSE
+      );
     }
   }
 
@@ -217,6 +224,10 @@ public class Gsehen extends Application {
   @SuppressWarnings({ "checkstyle:rightcurly" })
   @Override
   public void start(Stage stage) {
+    Thread.setDefaultUncaughtExceptionHandler((thread, e) -> errorDialog(
+        AlertType.ERROR, "gui.dialog.exception", "unknown.application.error.dialog.text",
+        renderWithCausesAndTargets(e)
+    ));
     Parent root;
     try {
       FXMLLoader loader = new FXMLLoader(getClass().getResource(MAIN_FXML), mainBundle);
@@ -242,8 +253,6 @@ public class Gsehen extends Application {
     plots = new Plots(this, (BorderPane) scene.lookup(PLOTS_VIEW_ID));
     logs = new Logs(this, (BorderPane) scene.lookup(LOGS_VIEW_ID));
     exports = new DataExport(this, (BorderPane) scene.lookup(EXPORTS_VIEW_ID));
-
-    // dayDataCalculation = new DayDataCalculation();
     new Recommender();
 
     InputStream input = this.getClass()
@@ -276,11 +285,29 @@ public class Gsehen extends Application {
     hideLaunch4JSplashScreen();
   }
 
+  private StringBuilder renderWithCausesAndTargets(Throwable e) {
+    return renderWithCausesAndTargets(e, "", "");
+  }
+
+  private StringBuilder renderWithCausesAndTargets(Throwable e, String title, String indenting) {
+    StringBuilder builder = new StringBuilder(indenting + title + e.toString() + "\n");
+    if (e.getCause() != null) {
+      builder.append(renderWithCausesAndTargets(e.getCause(), "Cause: ", "  " + indenting));
+    }
+    if (e instanceof InvocationTargetException) {
+      Throwable target = ((InvocationTargetException)e).getTargetException();
+      if (target != null) {
+        builder.append(renderWithCausesAndTargets(target, "Target: ", "  " + indenting));
+      }
+    }
+    return builder;
+  }
+
   /**
    * PostgreSQL DB connection and storing in Persistence.
    *
    * @throws SQLException
-   *           if SELECTing from PostgreSQL, our saving into local DB, fails
+   *           if SELECTing from PostgreSQL, or saving into local DB, fails
    */
   public static void importCropData() throws SQLException {
     final String url = "jdbc:postgresql:"
@@ -841,23 +868,14 @@ public class Gsehen extends Application {
     }
   }
 
-  /**
-   * Prompts with an exception.
-   *
-   * @param controllerClass
-   *          the controller that belongs to the target web view
-   */
-  public static void jsException(AlertType alertType, Class<?> controllerClass, String message) {
-    final String contentTextKey = "gui.dialog.js.exception."
-        + controllerClass.getSimpleName().toLowerCase();
-    errorDialog(alertType, contentTextKey, message);
-  }
-
-  private static void errorDialog(AlertType alertType, String contentTextKey, String headerText) {
+  private static void errorDialog(AlertType alertType, String headerTextKey, String contentTextKey,
+      Object... contentTextParameters) {
     Alert dialog = new Alert(alertType);
-    dialog.setTitle("GSEHEN");
-    dialog.setContentText(headerText);
-    dialog.setHeaderText(instance.getBundle().getString(contentTextKey));
+    dialog.getDialogPane().setMinWidth(600);
+    dialog.setTitle(instance.getBundle().getString("gsehen.name"));
+    dialog.setHeaderText(instance.getBundle().getString(headerTextKey));
+    dialog.setContentText(MessageFormat.format(instance.getBundle().getString(contentTextKey),
+        contentTextParameters));
     dialog.showAndWait();
   }
 
@@ -872,7 +890,6 @@ public class Gsehen extends Application {
 
   @SuppressWarnings({ "checkstyle:javadocmethod" })
   public static void updateDayData() {
-    // dayDataCalculation.recalculateDayData();
     new PluginUtil().recalculateDayData(wdsUuid -> Recommender.clearDayData(wdsUuid));
     // man könnte auch die in Zeile 247 gebaute Instanz des Recommenders (s.o.) speichern,
     //   und alle Methoden dort non-static machen.

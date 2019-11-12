@@ -50,16 +50,25 @@ public class PluginUtil {
     for (WeatherDataSource weatherDataSource : gsehenInstance.getWeatherDataSources()) {
       List<DayData> dayData = null;
       final String pluginJsFileName = weatherDataSource.getPluginJsFileName();
+      Exception detDaydataException = null;
       try {
         dayData = PluginUtil.getPlugin(
             pluginJsFileName,
             WeatherDataPlugin.class
         ).determineDayData(weatherDataSource, today, wds -> beforeImport.accept(wds.getUuid()));
       } catch (Exception e) {
+        detDaydataException = e;
         logException(LOGGER, Level.SEVERE, e, "wd.plugin.error.det.daydata", pluginJsFileName);
       }
       logMessage(LOGGER, Level.INFO, "wd.import.result", weatherDataSource.getName(),
           dayData == null ? 1 : 0);
+      if (dayData == null) {
+        if (detDaydataException != null) {
+          throw new RuntimeException(detDaydataException);
+        } else {
+          throw new RuntimeException("day data null");
+        }
+      }
       gsehenInstance.sendDayDataChanged(dayData, weatherDataSource, null);
     }
   }
