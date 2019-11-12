@@ -65,7 +65,7 @@ public class CollectionUtil {
    *
    * @param arraySize the desired array size
    * @param objectProducerFunction a function that produces the objects to
-   *     put at the respective array position each
+   *     put at the respective array position
    * @return the array with objects at each position, according to the given
    *     producer function
    */

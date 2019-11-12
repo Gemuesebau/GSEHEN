@@ -1,5 +1,7 @@
 package de.hgu.gsehen.util;
 
+import static de.hgu.gsehen.util.MessageUtil.logException;
+import static de.hgu.gsehen.util.MessageUtil.logMessage;
 import static de.hgu.gsehen.util.TextResourceUtil.evaluateJsResource;
 
 import de.hgu.gsehen.Gsehen;
@@ -54,10 +56,10 @@ public class PluginUtil {
             WeatherDataPlugin.class
         ).determineDayData(weatherDataSource, today, wds -> beforeImport.accept(wds.getUuid()));
       } catch (Exception e) {
-        LOGGER.log(Level.SEVERE, "Error when running 'determineDayData' in " + pluginJsFileName, e);
+        logException(LOGGER, Level.SEVERE, e, "wd.plugin.error.det.daydata", pluginJsFileName);
       }
-      LOGGER.log(Level.INFO, "Weather data import from '" + weatherDataSource.getName() + "' was "
-          + (dayData == null ? "NOT " : "") + "successful");
+      logMessage(LOGGER, Level.INFO, "wd.import.result", weatherDataSource.getName(),
+          dayData == null ? 1 : 0);
       gsehenInstance.sendDayDataChanged(dayData, weatherDataSource, null);
     }
   }

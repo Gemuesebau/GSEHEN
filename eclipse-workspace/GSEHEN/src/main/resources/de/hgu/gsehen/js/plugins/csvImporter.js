@@ -241,6 +241,7 @@ function getPlugin() {
 	var WeatherDataPlugin = Java.extend(Java.type("de.hgu.gsehen.model.WeatherDataPlugin"), {
 		//-----------
 		/*@Override*/determineDayData: function(weatherDataSource, date /* currently unused */, beforeImport) {
+			throw new java.lang.RuntimeException("Fehlertest");
 			var pluginConfig = JSON.parse(weatherDataSource.getPluginConfigurationJSON());
 			beforeImport.accept(weatherDataSource);
 			var weatherDataArray = importWeatherData(date /* currently unused */, pluginConfig);
@@ -253,7 +254,7 @@ function getPlugin() {
 		guiControls: null,
 		setErrorInGUI: null,
 		resetGUI: null,
-		var getConfigObject = function() {
+		getConfigObject: function() {
 			return {
 				measIntervalSeconds: guiControls.interval.getNodeValue(),              // 60
 				windspeedMeasHeightMeters: guiControls.windspeed.getNodeValue(),       // 2
@@ -261,7 +262,7 @@ function getPlugin() {
 				numberFormat: javaLocaleMap.get(guiControls.localeid.getNodeValue()),  // "Deutsch (GERMAN)"
 				dataFilePath: guiControls.filepath.getNodeValue()                      // "C:\\Data\\10MinDaten.csv"
 			};
-		};
+		},
 		/*filechooserbutton: null,
 		/*filechooser: null,
 		/*dateerror: null*/
