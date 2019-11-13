@@ -945,7 +945,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           treeTableView.getSelectionModel().clearSelection();
           treeTableView.getSelectionModel().select(currentItem);
         } else {
-          Text wateringError = gsehenGuiElements.text(mainBundle.getString("fieldview.form.values.missing"));
+          Text wateringError =
+              gsehenGuiElements.text(mainBundle.getString("fieldview.form.values.missing"));
           wateringError.setFill(Color.RED);
           GridPane.setConstraints(wateringError, 0, 6);
           center.getChildren().add(wateringError);
@@ -1039,7 +1040,8 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           treeTableView.getSelectionModel().select(currentItem);
         }
       } else {
-        Text plotError = gsehenGuiElements.text(mainBundle.getString("fieldview.form.values.missing"));
+        Text plotError =
+            gsehenGuiElements.text(mainBundle.getString("fieldview.form.values.missing"));
         plotError.setFill(Color.RED);
         bottomBox.getChildren().clear();
         bottomBox.getChildren().addAll(harvest, watering, save, plotError);

@@ -886,24 +886,24 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           for (Farm farm : farmsList) {
             if (farm.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
                 .getSelectedItem().getValue().getClass().getSimpleName().equals("Farm")) {
-              LOGGER
-                  .info("\"Farm\": " + event.getOldValue() + " renamed in " + event.getNewValue());
+              logMessage(LOGGER, Level.INFO, "cell.edit.event.farm.renamed",
+                  event.getOldValue(), event.getNewValue());
               farm.setName(event.getNewValue());
               object = farm;
             }
             for (Field field : farm.getFields()) {
               if (field.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
                   .getSelectedItem().getValue().getClass().getSimpleName().equals("Field")) {
-                LOGGER.info(
-                    "\"Field\": " + event.getOldValue() + " renamed in " + event.getNewValue());
+                logMessage(LOGGER, Level.INFO, "cell.edit.event.field.renamed",
+                    event.getOldValue(), event.getNewValue());
                 field.setName(event.getNewValue());
                 object = field;
               }
               for (Plot plot : field.getPlots()) {
                 if (plot.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
                     .getSelectedItem().getValue().getClass().getSimpleName().equals("Plot")) {
-                  LOGGER.info(
-                      "\"Plot\": " + event.getOldValue() + " renamed in " + event.getNewValue());
+                  logMessage(LOGGER, Level.INFO, "cell.edit.event.plot.renamed",
+                      event.getOldValue(), event.getNewValue());
                   plot.setName(event.getNewValue());
                   object = plot;
                 }

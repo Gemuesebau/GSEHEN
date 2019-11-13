@@ -79,9 +79,8 @@ public class PluginUtil {
     try {
       return (T) ((Invocable) engine).invokeFunction("getPlugin");
     } catch (Exception e) {
-      final String errorMessage = "Error when getting plugin '" + pluginJsFileName + "'";
-      LOGGER.log(Level.SEVERE, errorMessage, e);
-      throw new RuntimeException(errorMessage, e);
+      logException(LOGGER, Level.SEVERE, e, "get.plugin.error", pluginJsFileName);
+      throw new RuntimeException("Error when getting plugin '" + pluginJsFileName + "'", e);
     }
   }
 }

@@ -1,6 +1,7 @@
 package de.hgu.gsehen.gsbalance;
 
 import static de.hgu.gsehen.evapotranspiration.UtilityFunctions.getLevelForName;
+import static de.hgu.gsehen.util.MessageUtil.logMessage;
 
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
@@ -115,8 +116,8 @@ public class Recommender {
       Date date = eventDayData.getDate();
       if (event.isFromWeatherDataSource(field.getWeatherDataSourceUuid())
           && UtilityFunctions.determineDataStartDate(plot).compareTo(date) <= 0) {
-        LOGGER.log(getLevelForName(COPY_WD_LOGLEVEL),
-            "Replacing day data for plot " + plot.getName() + " at " + date);
+        logMessage(LOGGER, getLevelForName(COPY_WD_LOGLEVEL), "replacing.day.data.for.plot.at.date",
+            plot.getName(), date);
         copyWeatherData(eventDayData, getCurrentDayData(plot, date));
       }
     }

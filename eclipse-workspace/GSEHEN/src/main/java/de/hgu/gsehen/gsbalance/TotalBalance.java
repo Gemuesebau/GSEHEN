@@ -67,11 +67,11 @@ public class TotalBalance {
         soilZone = soilManualData.getSoilZone();
       } else {
         soilZone = 10;
-        LOGGER.log(Level.INFO, "No soil zone: set to standard 10cm");
+        logMessage(LOGGER, Level.INFO, "no.soil.zone.set.to.standard.10cm");
       }
     } else {
       soilZone = 10;
-      LOGGER.log(Level.INFO, "No soil zone: set to standard 10cm");
+      logMessage(LOGGER, Level.INFO, "no.soil.zone.set.to.standard.10cm");
     }
     CropDevelopmentStatus cropDevelopmentStatus = plot.getCropDevelopmentStatus();
     Integer currentRootingZone = null;
@@ -150,18 +150,16 @@ public class TotalBalance {
           currentRootingZone = rootingZone4;
         }
 
-
       }
     }
     Integer maxRootingZone = plot.getRootingZone();
     if (maxRootingZone != null) {
       if (currentRootingZone > maxRootingZone) {
         currentRootingZone = maxRootingZone;
-        LOGGER.log(Level.INFO, "currentRootingZone set to maxRootingZone");
+        logMessage(LOGGER, Level.INFO, "currentrootingzone.set.to.maxrootingzone");
       }
     }
     dayData.setCurrentRootingZone(currentRootingZone);
-
   }
 
   @SuppressWarnings("checkstyle:javadocmethod")
@@ -187,7 +185,7 @@ public class TotalBalance {
     dayData.setCurrentAvailableSoilWater(currentAvailableSoilWater);
   }
 
-  // TODO: Starkregenereignis und dauer der Pause konfigurierbar machen.
+  // TODO: Starkregenereignis und dauer der Pause konfigurierbar machen. Dann auch Logging anpassen!
   /**
    * Method to calculate the total water balance of a plot.
    * 
@@ -202,22 +200,22 @@ public class TotalBalance {
         rainMax = soilManualData.getRainMax();
       } else {
         rainMax = 30.0;
-        LOGGER.log(Level.INFO, "MaxRain event set to 30mm");
+        logMessage(LOGGER, Level.INFO, "maxrain.event.set.to.30mm");
       }
     } else {
       rainMax = 30.0;
-      LOGGER.log(Level.INFO, "MaxRain event set to 30mm");
+      logMessage(LOGGER, Level.INFO, "maxrain.event.set.to.30mm");
     }
     if (soilManualData != null) {
       if (soilManualData.getDaysPause() != null) {
         daysPause = soilManualData.getDaysPause();
       } else {
         daysPause = 2;
-        LOGGER.log(Level.INFO, "Days Pause set to 2");
+        logMessage(LOGGER, Level.INFO, "days.pause.set.to.2");
       }
     } else {
       daysPause = 2;
-      LOGGER.log(Level.INFO, "Days Pause set to 2");
+      logMessage(LOGGER, Level.INFO, "days.pause.set.to.2");
     }
     Double startValue;
     List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();

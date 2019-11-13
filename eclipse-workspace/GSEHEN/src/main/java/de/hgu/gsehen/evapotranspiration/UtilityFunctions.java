@@ -1,17 +1,16 @@
 package de.hgu.gsehen.evapotranspiration;
 
+import static de.hgu.gsehen.util.MessageUtil.logMessage;
 import static java.lang.Math.log;
 
-import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.model.Plot;
-
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class UtilityFunctions {
 
-  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(UtilityFunctions.class.getName());
 
   /**
    * Returns the java.util.logging.Level for the given level name.
@@ -56,9 +55,8 @@ public class UtilityFunctions {
     } else if (soilStart != null) {
       return (soilStart);
     } else {
-      final String Error = "Für den Plot" + plot.getName() + plot.getUuid()
-          + "wurde weder ein Boden- noch ein Kultur-Startdatum gesetzt.";
-      LOGGER.log(Level.SEVERE, Error);
+      logMessage(LOGGER, Level.SEVERE, "utility.determine.data.startdate.error",
+          plot.getName(), plot.getUuid());
       return (null);
     }
   }

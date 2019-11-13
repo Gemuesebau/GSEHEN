@@ -1,6 +1,7 @@
 package de.hgu.gsehen.gui.view;
 
 import static de.hgu.gsehen.util.JavaFxUtil.noneIsEmpty;
+import static de.hgu.gsehen.util.MessageUtil.logException;
 
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTabPane;
@@ -670,7 +671,7 @@ public class FieldDataController extends Application
       wds.setLocationMetersAboveSeaLevel(metersAbove.getNodeValue());
       processPluginSpecificConfiguration();
     } catch (Exception e) {
-      LOGGER.log(Level.FINE, "Parsing or setting weather data source parameters failed", e);
+      logException(LOGGER, Level.FINE, e, "weather.data.source.parameter.failure");
       wds = currentWDS;
       return false;
     }

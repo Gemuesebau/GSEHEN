@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleStringProperty;
 
 public class CsvItem {
 
+  @SuppressWarnings({ "checkstyle:multiplevariabledeclarations", "emptylineseparator" })
   private SimpleStringProperty f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13;
 
   public String getF1() {
@@ -58,6 +59,23 @@ public class CsvItem {
     return f13.get();
   }
 
+  /**
+   * Constructs a new CsvItem from the given String arguments.
+   *
+   * @param f1 field 1
+   * @param f2 field 2
+   * @param f3 field 3
+   * @param f4 field 4
+   * @param f5 field 5
+   * @param f6 field 6
+   * @param f7 field 7
+   * @param f8 field 8
+   * @param f9 field 9
+   * @param f10 field 10
+   * @param f11 field 11
+   * @param f12 field 12
+   * @param f13 field 13
+   */
   public CsvItem(String f1, String f2, String f3, String f4, String f5, String f6, String f7,
       String f8, String f9, String f10, String f11, String f12, String f13) {
     this.f1 = new SimpleStringProperty(f1);

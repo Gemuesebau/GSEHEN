@@ -1,5 +1,7 @@
 package de.hgu.gsehen.gui.view;
 
+import static de.hgu.gsehen.util.MessageUtil.logMessage;
+
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.DrawableFilterChanged;
 import de.hgu.gsehen.event.DrawableSelected;
@@ -65,7 +67,7 @@ public abstract class FarmDataController extends WebController {
             drawables = flattenDrawables(farmsArray);
             Pair<GeoPoint> viewport = event.getViewport();
             lastViewport = viewport != null ? viewport : findBounds(drawables);
-            redrawOrReload(event.getClass().getSimpleName());
+            redrawOrReload(event);
           }
         });
     gsehenInstance.registerForEvent(DrawableSelected.class,
@@ -92,7 +94,7 @@ public abstract class FarmDataController extends WebController {
           public void handle(DrawableFilterChanged event) {
             currentFilter = event.getFilter();
             lastViewport = findBounds(drawables);
-            redrawOrReload(event.getClass().getSimpleName());
+            redrawOrReload(event);
           }
         });
   }
@@ -114,31 +116,31 @@ public abstract class FarmDataController extends WebController {
     engine.executeScript("redraw();");
   }
 
-  private void redrawOrReload(String reason) {
+  private void redrawOrReload(Object reasonObject) {
     if (!isLoaded()) {
-      logAboutToReload(reason, "reload");
+      logAboutToReload(reasonObject, 0);
       reload();
     } else {
-      logAboutToReload(reason, "redraw");
+      logAboutToReload(reasonObject, 1);
       redraw();
     }
   }
 
   private void refocusOrReload(Object event) {
     if (!isLoaded()) {
-      logAboutToReload(event.getClass().getSimpleName(), "reload");
+      logAboutToReload(event.getClass().getSimpleName(), 0);
       reload();
     } else {
-      logAboutToReload(event.getClass().getSimpleName(), "refocus");
+      logAboutToReload(event.getClass().getSimpleName(), 2);
       engine.executeScript("if ((typeof clearAndSetViewportByController)==\"function\") "
           + "clearAndSetViewportByController();");
     }
   }
 
-  private void logAboutToReload(String reason, String verb) {
-    getLogger().log(Level.INFO,
-        "About to " + verb + " " + this.getClass().getSimpleName() + " web view due to " + reason
-            + ", with drawables=" + Arrays.asList(drawables) + " and lastViewport=" + lastViewport);
+  private void logAboutToReload(Object reasonObject, int verbIndex) {
+    logMessage(getLogger(), Level.INFO, "about.to.refresh.web.view",
+        verbIndex, this.getClass().getSimpleName(), reasonObject.getClass().getSimpleName(),
+        Arrays.asList(drawables), lastViewport);
   }
 
   private Drawable[] drawables;
@@ -153,8 +155,8 @@ public abstract class FarmDataController extends WebController {
   public FarmDataController(Gsehen application, WebView webView) {
     super(application, webView);
 
-    ChangeListener<Number> splitPaneWidthHeightDividerPositionListener = (observable, oldValue,
-        newValue) -> redrawOrReload(observable.getClass().getSimpleName());
+    ChangeListener<Number> splitPaneWidthHeightDividerPositionListener =
+        (observable, oldValue, newValue) -> redrawOrReload(observable);
     SplitPane mainSplitPane = getMainSplitPane();
     mainSplitPane.widthProperty().addListener(splitPaneWidthHeightDividerPositionListener);
     mainSplitPane.heightProperty().addListener(splitPaneWidthHeightDividerPositionListener);

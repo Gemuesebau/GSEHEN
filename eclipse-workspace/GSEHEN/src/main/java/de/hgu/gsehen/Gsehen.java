@@ -2,6 +2,8 @@ package de.hgu.gsehen;
 
 import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
 import static de.hgu.gsehen.util.DBUtil.executeQuery;
+import static de.hgu.gsehen.util.MessageUtil.logException;
+import static de.hgu.gsehen.util.MessageUtil.logMessage;
 
 import com.jfoenix.controls.JFXTabPane;
 
@@ -162,7 +164,7 @@ public class Gsehen extends Application {
 
     soilProfilesList = loadAll(SoilProfile.class);
     weatherDataSourcesList = loadAll(WeatherDataSource.class);
-    LOGGER.log(Level.INFO, "Loaded Croplist");
+    logMessage(LOGGER, Level.INFO, "loaded.croplist");
     crops = loadAll(Crop.class);
     messages = CollectionUtil.listToMap(loadAll(Messages.class),
         message -> message.getKey() + "." + message.getLocaleId());
@@ -322,8 +324,8 @@ public class Gsehen extends Application {
     try {
       connection = DriverManager.getConnection(url, user, password);
     } catch (Exception e) {
-      LOGGER.log(Level.SEVERE, "Can't connect to crop database (internet), " + e);
-      LOGGER.log(Level.FINE, "Exception details: ", e);
+      logMessage(LOGGER, Level.SEVERE, "import.crop.data.connection.error.heading", e);
+      logException(LOGGER, Level.FINE, e, "import.crop.data.connection.error.details");
     }
     try {
       em.getTransaction().begin();
@@ -336,7 +338,7 @@ public class Gsehen extends Application {
     } catch (Exception e) {
       em.getTransaction().rollback();
     } finally {
-      LOGGER.log(Level.INFO, "Loading from PostgreSQL was successful!");
+      logMessage(LOGGER, Level.INFO, "loading.from.postgresql.was.successful");
       em.close();
     }
   }
@@ -365,7 +367,7 @@ public class Gsehen extends Application {
         em.persist(targetObject);
       }
     } catch (SQLException e) {
-      LOGGER.log(Level.WARNING, "no connection" + e.getLocalizedMessage());
+      logMessage(LOGGER, Level.WARNING, "gsehen.sql.connection.transfer.error", e);
     }
   }
 
@@ -375,9 +377,8 @@ public class Gsehen extends Application {
     try {
       // target object does already exist? => Update existing!
       targetObject = targetQuery.getSingleResult();
-      LOGGER.log(Level.INFO,
-          "Target " + targetClass.getSimpleName() + " " + keyParts + " existing: " + targetObject,
-          targetObject);
+      logMessage(LOGGER, Level.INFO, "target.object.existing",
+          targetClass.getSimpleName(), keyParts, targetObject);
     } catch (NoResultException e) {
       // target object does not exist yet? => Create new!
       try {
@@ -386,9 +387,8 @@ public class Gsehen extends Application {
         throw new RuntimeException(
             "Can't create target " + targetClass.getSimpleName() + " instance", e);
       }
-      LOGGER.log(Level.INFO,
-          "Target " + targetClass.getSimpleName() + " " + keyParts + " new: " + targetObject,
-          targetObject);
+      logMessage(LOGGER, Level.INFO, "target.object.new",
+          targetClass.getSimpleName(), keyParts, targetObject);
     }
     return targetObject;
   }
@@ -517,7 +517,7 @@ public class Gsehen extends Application {
       processFarmsEtc(em);
       em.getTransaction().commit();
     } catch (Exception e) {
-      LOGGER.log(Level.WARNING, "Problem: " + e.getMessage());
+      logMessage(LOGGER, Level.WARNING, "save.user.data.db.error", e);
       em.getTransaction().rollback();
     } finally {
       em.close();
@@ -567,19 +567,19 @@ public class Gsehen extends Application {
       Class<? extends GsehenEventListener<FarmDataChanged>> skipClass) {
     if (object instanceof Farm) {
       farmsList.add((Farm) object);
-      LOGGER.info("Added farm " + object.getName());
+      logMessage(LOGGER, Level.INFO, "added.drawable.farm", object.getName());
     } else if (object instanceof Field) {
       Field fieldObj = (Field) object;
       getNewFieldsFarm().getFields().add(fieldObj);
       setLocation(fieldObj);
       fieldObj.setArea(fieldObj.getPolygon().calculateArea(fieldObj.getPolygon().getGeoPoints()));
-      LOGGER.info("Added field " + object.getName());
+      logMessage(LOGGER, Level.INFO, "added.drawable.field", object.getName());
     } else if (object instanceof Plot) {
       Plot plotObjc = (Plot) object;
       plotObjc.setIsActive(true);
       plotObjc.setArea(plotObjc.getPolygon().calculateArea(plotObjc.getPolygon().getGeoPoints()));
       getNewPlotsField(getNewFieldsFarm()).getPlots().add(plotObjc);
-      LOGGER.info("Added plot " + object.getName());
+      logMessage(LOGGER, Level.INFO, "added.drawable.plot", object.getName());
     }
     sendFarmDataChanged(object, skipClass);
   }
