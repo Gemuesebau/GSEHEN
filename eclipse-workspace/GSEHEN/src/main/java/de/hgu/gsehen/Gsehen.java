@@ -160,7 +160,6 @@ public class Gsehen extends Application {
 
   {
     instance = this;
-    setSelectedLocale(Locale.GERMAN);
 
     soilProfilesList = loadAll(SoilProfile.class);
     weatherDataSourcesList = loadAll(WeatherDataSource.class);
@@ -169,6 +168,10 @@ public class Gsehen extends Application {
     messages = CollectionUtil.listToMap(loadAll(Messages.class),
         message -> message.getKey() + "." + message.getLocaleId());
 
+    loadPreferences();
+    setSelectedLocale(Locale.forLanguageTag(
+        getPreferenceValue("locale", System.getProperty("locale", Locale.GERMAN.toLanguageTag()))
+    ));
     mainBundle = ResourceBundle.getBundle("i18n.main", getSelectedLocale());
   }
 
@@ -191,7 +194,7 @@ public class Gsehen extends Application {
       e.printStackTrace();
     }
     try {
-      importCropData(); // why here and not later (start, near loadUserData, ...)? GSEH-16
+      importCropData(); // why here and not later (start, near loadFarmData, ...)? GSEH-16
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -232,6 +235,7 @@ public class Gsehen extends Application {
     ));
     Parent root;
     try {
+      logMessage(LOGGER, Level.INFO, "gsehen.about.to.load", MAIN_FXML);
       FXMLLoader loader = new FXMLLoader(getClass().getResource(MAIN_FXML), mainBundle);
       root = loader.load();
       mainController = loader.getController();
@@ -274,7 +278,7 @@ public class Gsehen extends Application {
       }
     });
 
-    loadUserData();
+    loadFarmData();
 
     treeTable = new GsehenTreeTable() {
       @Override
@@ -478,12 +482,17 @@ public class Gsehen extends Application {
   }
 
   /**
-   * Loads the user-created data (preferences, farms (fields, plots (water balance (day data))) ).
+   * Loads the preferences (user-created data).
    */
-  public void loadUserData() {
+  public void loadPreferences() {
     preferences = loadEntities(Preferences.class);
     preferencesMap = CollectionUtil.listToMap(preferences, p -> p.getKey(), p -> p.getValue());
+  }
 
+  /**
+   * Loads the farms (fields, plots (water balance (day data))) (user-created data).
+   */
+  public void loadFarmData() {
     farmsList = loadEntities(Farm.class);
     dataChanged = false;
     sendFarmDataChanged(null, null);
@@ -639,6 +648,10 @@ public class Gsehen extends Application {
     return preferencesMap.get(key);
   }
 
+  public String getPreferenceValue(String key, String def) {
+    return preferencesMap.containsKey(key) ? getPreferenceValue(key) : def;
+  }
+
   public void setPreferenceValue(String key, String value) {
     preferencesMap.put(key, value);
   }
@@ -763,7 +776,7 @@ public class Gsehen extends Application {
   }
 
   /**
-   * Notifies listeners registered for the (type of) event supplied by the given supplier.
+   * Notifies listeners registered for the given (type of) event.
    *
    * @param event
    *          the actual event to be sent to the registered listeners
@@ -773,9 +786,9 @@ public class Gsehen extends Application {
   @SuppressWarnings({ "unchecked" })
   private <T extends GsehenEvent> void notifyEventListeners(T event,
       Class<? extends GsehenEventListener<? extends T>> skipClass) {
-    List<GsehenEventListener<?>> farmDataChgListeners = eventListeners.get(event.getClass());
-    if (farmDataChgListeners != null) {
-      farmDataChgListeners.forEach(listener -> {
+    List<GsehenEventListener<?>> listeners = eventListeners.get(event.getClass());
+    if (listeners != null) {
+      listeners.forEach(listener -> {
         if (skipClass != null && skipClass.equals(listener.getClass())
             || skipClass != null && skipClass.equals(listener.getClass().getEnclosingClass())) {
           return;
@@ -950,7 +963,7 @@ public class Gsehen extends Application {
   }
 
   @SuppressWarnings("checkstyle:javadocmethod")
-  public void setSelectedLocale(Locale selectedLocale) {
+  public void setSelectedLocale(final Locale selectedLocale) {
     this.selectedLocale = selectedLocale;
     oneDecimalNumberFormat = (DecimalFormat) NumberFormat.getNumberInstance(selectedLocale);
     oneDecimalNumberFormat.applyPattern("#,##0.0");
@@ -959,8 +972,14 @@ public class Gsehen extends Application {
     moreDecimalNumberFormat = (DecimalFormat) NumberFormat.getNumberInstance(selectedLocale);
     moreDecimalNumberFormat.applyPattern("#,#######0.0000000");
     dateFormat = new SimpleDateFormat("dd.MM.yyyy", selectedLocale);
+    logMessage(LOGGER, Level.INFO, "gsehen.locale.applied", selectedLocale.toLanguageTag());
   }
 
+  /**
+   * Getter for selectedLocale.
+   *
+   * @return the currently selected application locale
+   */
   public Locale getSelectedLocale() {
     return selectedLocale;
   }

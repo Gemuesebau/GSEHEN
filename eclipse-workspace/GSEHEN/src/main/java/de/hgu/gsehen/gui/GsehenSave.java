@@ -16,9 +16,9 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public final class GsehenSave {
-  private Gsehen gsehenInstance;
-  private GsehenGuiElements gsehenGuiElements;
-  protected final ResourceBundle mainBundle;
+  private final Gsehen gsehenInstance;
+  private final GsehenGuiElements gsehenGuiElements;
+  private final ResourceBundle mainBundle;
 
   {
     gsehenInstance = Gsehen.getInstance();

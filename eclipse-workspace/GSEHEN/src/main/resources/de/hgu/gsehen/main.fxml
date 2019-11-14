@@ -22,7 +22,7 @@
 					<menus>
 						<Menu mnemonicParsing="false" text="%menu.file">
 							<items>
-								<MenuItem mnemonicParsing="false" onAction="#loadUserData" text="%menu.file.load" />
+								<MenuItem mnemonicParsing="false" onAction="#loadFarmData" text="%menu.file.load" />
 								<MenuItem mnemonicParsing="false" onAction="#saveUserData" text="%menu.file.save" />
 								<SeparatorMenuItem />
 								<MenuItem fx:id="updateDayDataMenuItem" mnemonicParsing="false" onAction="#updateDayData" text="%menu.view.developer.update.day.data" />

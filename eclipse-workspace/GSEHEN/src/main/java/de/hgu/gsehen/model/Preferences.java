@@ -14,6 +14,7 @@ public class Preferences {
 
   private String value;
 
+  @SuppressWarnings("checkstyle:javadocmethod")
   public Preferences(String key, String value) {
     super();
     this.key = key;

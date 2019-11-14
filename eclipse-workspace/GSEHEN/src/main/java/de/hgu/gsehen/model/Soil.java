@@ -1,13 +1,13 @@
 package de.hgu.gsehen.model;
 
+import de.hgu.gsehen.Gsehen;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-
-import de.hgu.gsehen.Gsehen;
 
 /**
  * Class representing a type of soil.

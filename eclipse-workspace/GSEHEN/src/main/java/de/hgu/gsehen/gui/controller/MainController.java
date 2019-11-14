@@ -143,12 +143,12 @@ public class MainController {
   /**
    * Handles the user's request to (re)load the user-created data (farms, fields, plots, ..).
    */
-  public void loadUserData() {
-    gsehenInstance.loadUserData();
+  public void loadFarmData() {
+    gsehenInstance.loadFarmData();
   }
 
   /**
-   * Handles the user's request to save the user-created data (farms, fields, plots, ..).
+   * Handles the user's request to save all user-created data (prefs; farms, fields, plots, ..).
    */
   public void saveUserData() {
     gsehenInstance.saveUserData();
