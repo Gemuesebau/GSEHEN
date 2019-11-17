@@ -267,8 +267,9 @@ function getPlugin() {
 		/*dateerror: null*/
 		//-----------
 		/*@Override*/createAndFillSpecificControls: function(json, configNodes, fixedNodesCount, fixedItemsCount,
-				gsehenInstance, gsehenGui, classLoader, selLocale, javaLocaleMapParam, parentStackPane,
+				gsehenInstance, classLoader, selLocale, javaLocaleMapParam, parentStackPane,
 				errorSetter, resetter) {
+			var gsehenGui = Packages.de.hgu.gsehen.gui.GsehenGuiElements;
 			javaLocaleMap = javaLocaleMapParam;
 			guiControls = {
 				interval: null,

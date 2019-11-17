@@ -2,7 +2,6 @@ package de.hgu.gsehen.model;
 
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
-import de.hgu.gsehen.gui.GsehenGuiElements;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -40,7 +39,6 @@ public interface WeatherDataPlugin {
    * @param fixedNodesCount the number of GUI nodes in the given list to be left untouched
    * @param fixedItemsCount the number of leading configuration items to be left untouched
    * @param gsehenInstance the application instance
-   * @param gsehenGuiElements the GUI elements helper
    * @param classLoader the class loader to be used for, e.g., resource bundle lookup
    * @param locale the currently selected UI locale
    * @param javaLocaleMap a dictionary for available Java locale values (described in "locale")
@@ -50,7 +48,7 @@ public interface WeatherDataPlugin {
    */
   void createAndFillSpecificControls(String json, ObservableList<Node> configNodes,
       int fixedNodesCount, int fixedItemsCount, Gsehen gsehenInstance,
-      GsehenGuiElements gsehenGuiElements, ClassLoader classLoader, Locale locale,
+      ClassLoader classLoader, Locale locale,
       TreeMap<String, String> javaLocaleMap, StackPane parentStackPane,
       Consumer<String> errorSetter, Runnable resetter);
 

@@ -11,9 +11,9 @@ public class ConfigDialogActionButton extends ConfigDialogElement<JFXButton, Str
 
   @SuppressWarnings("checkstyle:javadocmethod")
   public ConfigDialogActionButton(String caption, List<ConfigDialogElement<Node, Object>> add,
-      GsehenGuiElements gsehenGuiElements, EventHandler<ActionEvent> handler) {
+      EventHandler<ActionEvent> handler) {
     super(
-        gsehenGuiElements.text(""), gsehenGuiElements.jfxButton(caption, handler), null, add,
+        GsehenGuiElements.text(""), GsehenGuiElements.jfxButton(caption, handler), null, add,
         (node, value) -> { },
         node -> null);
   }

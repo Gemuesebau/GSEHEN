@@ -53,13 +53,14 @@ public class DataExport {
    * PDFBox: http://www.apache.org/licenses/LICENSE-2.0.txt & https://pdfbox.apache.org/download.cgi
    */
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
-  protected final ResourceBundle mainBundle;
-  private GsehenGuiElements gsehenGuiElements;
-  private Gsehen gsehenInstance;
+  private Gsehen gsehenInstance = Gsehen.getInstance();
+  protected final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",
+      gsehenInstance.getSelectedLocale());
   private List<Plot> plotList;
   private BorderPane pane;
   private GridPane centerGrid;
-  private TreeTableView<Drawable> treeTableView;
+  private TreeTableView<Drawable> treeTableView = (TreeTableView<Drawable>)gsehenInstance.getScene()
+        .lookup(FARM_TREE_VIEW_ID);
   private Farm farm;
   private Text headline;
   private int fieldCounter;
@@ -76,16 +77,6 @@ public class DataExport {
   private Cell<PDPage> cell;
   private Row<PDPage> headerRow;
   private Row<PDPage> row;
-
-  {
-    gsehenInstance = Gsehen.getInstance();
-    gsehenGuiElements = new GsehenGuiElements();
-
-    mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
-
-    treeTableView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
-        .lookup(FARM_TREE_VIEW_ID);
-  }
 
   /**
    * Constructs a new data export associated with the given BorderPane.
@@ -136,9 +127,9 @@ public class DataExport {
         pane.setVisible(true);
 
         // GridPane - Center Section
-        centerGrid = gsehenGuiElements.gridPane(pane);
+        centerGrid = GsehenGuiElements.gridPane(pane);
 
-        headline = gsehenGuiElements.text(
+        headline = GsehenGuiElements.text(
             mainBundle.getString("dataexport.head") + " \"" + farm.getName() + "\"",
             FontWeight.BOLD);
 
@@ -150,7 +141,7 @@ public class DataExport {
         for (Field field : farm.getFields()) {
           JFXCheckBox allCheckBox = new JFXCheckBox(mainBundle.getString("dataexport.all"));
           allCheckBox.setStyle("-fx-font-weight: bold");
-          Text fieldText = gsehenGuiElements.text(field.getName());
+          Text fieldText = GsehenGuiElements.text(field.getName());
 
           GridPane.setConstraints(fieldText, 0, fieldCounter);
           GridPane.setConstraints(allCheckBox, 1, fieldCounter);
@@ -194,7 +185,7 @@ public class DataExport {
           fieldCounter = plotCounter + 2;
         }
 
-        Button exportButton = gsehenGuiElements.button(150);
+        Button exportButton = GsehenGuiElements.button(150);
         exportButton.setText(mainBundle.getString("dataexport.export"));
         exportButton.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -212,7 +203,7 @@ public class DataExport {
                 e1.printStackTrace();
               }
             } else {
-              mwsWarning = gsehenGuiElements.text(mainBundle.getString("dataexport.mwswarning"),
+              mwsWarning = GsehenGuiElements.text(mainBundle.getString("dataexport.mwswarning"),
                   FontWeight.BOLD);
               mwsWarning.setFill(javafx.scene.paint.Color.RED);
               GridPane.setConstraints(mwsWarning, 0, plotCounter + 4);

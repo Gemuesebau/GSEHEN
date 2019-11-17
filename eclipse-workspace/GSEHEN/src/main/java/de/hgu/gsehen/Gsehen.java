@@ -5,8 +5,11 @@ import static de.hgu.gsehen.util.DBUtil.executeQuery;
 import static de.hgu.gsehen.util.MessageUtil.logException;
 import static de.hgu.gsehen.util.MessageUtil.logMessage;
 
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXTabPane;
-
+import com.jfoenix.controls.JFXTextField;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.event.DayDataChanged;
 import de.hgu.gsehen.event.DrawableFilterChanged;
@@ -19,6 +22,7 @@ import de.hgu.gsehen.event.ManualDataChanged;
 import de.hgu.gsehen.event.RecommendedActionChanged;
 import de.hgu.gsehen.gsbalance.Recommender;
 import de.hgu.gsehen.gui.GeoPoint;
+import de.hgu.gsehen.gui.GsehenGuiElements;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
 import de.hgu.gsehen.gui.view.DataExport;
@@ -61,23 +65,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
+import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import javafx.application.Application;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -229,10 +242,14 @@ public class Gsehen extends Application {
   @SuppressWarnings({ "checkstyle:rightcurly" })
   @Override
   public void start(Stage stage) {
-    Thread.setDefaultUncaughtExceptionHandler((thread, e) -> errorDialog(
-        AlertType.ERROR, "gui.dialog.exception", "unknown.application.error.dialog.text",
-        renderWithCausesAndTargets(e)
-    ));
+    Thread.setDefaultUncaughtExceptionHandler((thread, e) -> {
+      if (errorDialog(
+          AlertType.CONFIRMATION, "gui.dialog.exception", "unknown.application.error.dialog.text",
+          renderWithCausesAndTargets(e)
+      )) {
+        logException(LOGGER, Level.SEVERE, e, "unknown.application.error");
+      }
+    });
     Parent root;
     try {
       logMessage(LOGGER, Level.INFO, "gsehen.about.to.load", MAIN_FXML);
@@ -881,15 +898,15 @@ public class Gsehen extends Application {
     }
   }
 
-  private static void errorDialog(AlertType alertType, String headerTextKey, String contentTextKey,
-      Object... contentTextParameters) {
+  private static boolean errorDialog(AlertType alertType, String headerTextKey,
+      String contentTextKey, Object... contentTextParameters) {
     Alert dialog = new Alert(alertType);
     dialog.getDialogPane().setMinWidth(600);
     dialog.setTitle(instance.getBundle().getString("gsehen.name"));
     dialog.setHeaderText(instance.getBundle().getString(headerTextKey));
     dialog.setContentText(MessageFormat.format(instance.getBundle().getString(contentTextKey),
         contentTextParameters));
-    dialog.showAndWait();
+    return dialog.showAndWait().get().equals(ButtonType.OK);
   }
 
   private static String textInputDialog(String contentTextKey, String headerText) {
@@ -1034,4 +1051,89 @@ public class Gsehen extends Application {
     return true;
   }
 
+
+  /**
+   * Shows a dialog when the user wants to exit.
+   */
+  public static void editPreferences() {
+    Map<String, JFXTextField> fields = new TreeMap<>();
+    fields.put("pref.0.locale",
+        GsehenGuiElements.jfxTextField(instance.getPreferenceValue("locale")));
+    fields.put("pref.1.googleMapsApiKey",
+        GsehenGuiElements.jfxTextField(instance.getPreferenceValue("googleMapsApiKey")));
+    Map<String, EventHandler<ActionEvent>> buttons = new TreeMap<>();
+    buttons.put("prefs.0.save", e -> {
+      String currentPrefValue;
+      currentPrefValue = fields.get("pref.0.locale").getText();
+      if (currentPrefValue != null) { // literal null!
+        instance.setPreferenceValue("locale", currentPrefValue);
+      }
+      currentPrefValue = fields.get("pref.1.googleMapsApiKey").getText();
+      if (currentPrefValue != null) { // literal null!
+        instance.setPreferenceValue("googleMapsApiKey", currentPrefValue);
+      }
+    });
+    buttons.put("prefs.1.cancel", e -> {
+    });
+    instance.showDialog("prefs.title", fields, buttons);
+  }
+
+  /**
+   * Shows a dialog.
+   * @param fields 
+   *
+   * @param buttons the buttons to add at the bottom of the dialog. Dialog is closed on ANY of them
+   */
+  public void showDialog(String headingKey, Map<String, JFXTextField> fields,
+      Map<String, EventHandler<ActionEvent>> buttons) {
+    StackPane stackPane = new StackPane();
+    JFXDialogLayout content = new JFXDialogLayout();
+    JFXDialog dialog = new JFXDialog(stackPane, content, JFXDialog.DialogTransition.CENTER);
+    Scene principalScene = getScene();
+    Stage gsehenWindow = (Stage)principalScene.getWindow();
+    GridPane inputGridPane = new GridPane();
+    inputGridPane.setHgap(6);
+    inputGridPane.setVgap(6);
+    ObservableList<Node> gridPaneChildren = inputGridPane.getChildren();
+    int row = addFieldTable(fields, gridPaneChildren);
+    addButtons(buttons, gridPaneChildren, () -> {
+      dialog.close();
+      stackPane.setVisible(false);
+      gsehenWindow.setScene(principalScene);
+    }, row);
+    content.setHeading(new Text(mainBundle.getString(headingKey)));
+    content.setBody(inputGridPane);
+    gsehenWindow.setScene(new Scene(stackPane, 300, 250));
+    dialog.show();
+  }
+
+  private int addFieldTable(Map<String, JFXTextField> fields, ObservableList<Node> nodeList) {
+    Text currentText;
+    int i = 0;
+    if (fields != null) {
+      for (Entry<String, JFXTextField> entry : fields.entrySet()) {
+        currentText = GsehenGuiElements.text(mainBundle.getString(entry.getKey()));
+        GridPane.setConstraints(currentText, 0, i);
+        GridPane.setConstraints(entry.getValue(), 1, i++);
+        nodeList.addAll(currentText, entry.getValue());
+      }
+    }
+    return i + 1;
+  }
+
+  private void addButtons(Map<String, EventHandler<ActionEvent>> buttons,
+      ObservableList<Node> nodeList, Runnable afterEventHandling, int row) {
+    JFXButton currentButton;
+    int i = 0;
+    for (Entry<String, EventHandler<ActionEvent>> entry : buttons.entrySet()) {
+      currentButton = GsehenGuiElements
+          .jfxButton(mainBundle.getString(entry.getKey()));
+      currentButton.setOnAction(e -> {
+        entry.getValue().handle(e);
+        afterEventHandling.run();
+      });
+      GridPane.setConstraints(currentButton, i++, row);
+      nodeList.add(currentButton);
+    }
+  }
 }

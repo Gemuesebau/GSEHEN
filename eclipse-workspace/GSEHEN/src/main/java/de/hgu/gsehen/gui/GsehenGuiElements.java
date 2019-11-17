@@ -2,7 +2,7 @@ package de.hgu.gsehen.gui;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
-
+import com.jfoenix.controls.JFXTextField;
 import de.hgu.gsehen.Gsehen;
 
 import java.text.DateFormat;
@@ -26,19 +26,14 @@ import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 
 public class GsehenGuiElements {
-
-  private Gsehen gsehenInstance;
-
-  {
-    gsehenInstance = Gsehen.getInstance();
-  }
+  private static Gsehen gsehenInstance = Gsehen.getInstance();
 
   /**
    * Creates a GridPane.
    * 
    * @return - the GridPane.
    */
-  public GridPane gridPane(BorderPane pane) {
+  public static GridPane gridPane(BorderPane pane) {
     GridPane grid = new GridPane();
 
     grid.setPadding(new Insets(20, 0, 10, 20));
@@ -72,7 +67,7 @@ public class GsehenGuiElements {
    *          a particular font weight for this text
    * @return - the Text.
    */
-  public Text text(String text, FontWeight fontWeight) {
+  public static Text text(String text, FontWeight fontWeight) {
     Text textElement = new Text();
     if (fontWeight != null) {
       textElement.setFont(Font.font("Arial", fontWeight, 14));
@@ -90,7 +85,7 @@ public class GsehenGuiElements {
    *          the initial text of this Text element
    * @return - the Text.
    */
-  public Text text(String text) {
+  public static Text text(String text) {
     return text(text, null);
   }
 
@@ -99,7 +94,7 @@ public class GsehenGuiElements {
    * 
    * @return - the Button.
    */
-  public Button button(double width) {
+  public static Button button(double width) {
     Button button = new Button();
     button.setId("glass-grey");
     button.setPrefSize(width, 25);
@@ -112,7 +107,7 @@ public class GsehenGuiElements {
    *
    * @return - the JFXButton.
    */
-  public JFXButton jfxButton(String label) {
+  public static JFXButton jfxButton(String label) {
     return jfxButton(label, null);
   }
 
@@ -122,7 +117,7 @@ public class GsehenGuiElements {
    * @param handler the action handler to attach
    * @return - the JFXButton.
    */
-  public JFXButton jfxButton(String label, EventHandler<ActionEvent> handler) {
+  public static JFXButton jfxButton(String label, EventHandler<ActionEvent> handler) {
     final JFXButton jfxButton = new JFXButton(label);
     jfxButton.setButtonType(com.jfoenix.controls.JFXButton.ButtonType.RAISED);
     jfxButton.setStyle("-fx-background-color: #e8e8e8; -fx-text-fill: black;");
@@ -133,11 +128,23 @@ public class GsehenGuiElements {
   }
 
   /**
+   * Creates a JFXTextField with an action handler.
+   *
+   * @param text the initial text
+   * @return - the JFXTextField.
+   */
+  public static JFXTextField jfxTextField(String text) {
+    final JFXTextField jfxTextField = new JFXTextField(text);
+    jfxTextField.setStyle("-fx-background-color: #e8e8e8; -fx-text-fill: black;");
+    return jfxTextField;
+  }
+
+  /**
    * Creates a DatePicker.
    * 
    * @return - the DatePicker.
    */
-  public DatePicker datepicker() {
+  public static DatePicker datepicker() {
     DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,
         gsehenInstance.getSelectedLocale());
     String pattern = ((SimpleDateFormat) dateFormat).toPattern();
@@ -178,7 +185,7 @@ public class GsehenGuiElements {
    * @param items the items to put into the combo box initially
    * @return the new combo box
    */
-  public <T> JFXComboBox<T> comboBox(T[] items) {
+  public static <T> JFXComboBox<T> comboBox(T[] items) {
     JFXComboBox<T> comboBox = new JFXComboBox<T>();
     comboBox.getItems().addAll(items);
     return comboBox;

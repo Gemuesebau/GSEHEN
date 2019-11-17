@@ -27,13 +27,7 @@ import javafx.scene.web.WebView;
  */
 @SuppressWarnings({ "checkstyle:commentsindentation" })
 public class MainController {
-  private Gsehen gsehenInstance;
-  private GsehenGuiElements gsehenGuiElements;
-
-  {
-    gsehenInstance = Gsehen.getInstance();
-    gsehenGuiElements = new GsehenGuiElements();
-  }
+  private Gsehen gsehenInstance = Gsehen.getInstance();
 
   // Views
   @FXML
@@ -70,7 +64,7 @@ public class MainController {
     tabPane.getTabs().clear();
     tabPane.getTabs().add(aboutViewTab);
 
-    aboutBack = gsehenGuiElements.button(100);
+    aboutBack = GsehenGuiElements.button(100);
 
     WebEngine engine = aboutWebView.getEngine();
     engine.load(
@@ -104,7 +98,7 @@ public class MainController {
     tabPane.getTabs().clear();
     tabPane.getTabs().add(contactViewTab);
 
-    contactBack = gsehenGuiElements.button(100);
+    contactBack = GsehenGuiElements.button(100);
 
     WebEngine engine = contactWebView.getEngine();
     engine.load("https://www.hs-geisenheim.de/personen/person/231/");
@@ -196,6 +190,11 @@ public class MainController {
 
   public void setExportViewTab(Tab exportViewTab) {
     this.exportViewTab = exportViewTab;
+  }
+
+  @FXML
+  public void editPreferences() {
+    Gsehen.editPreferences();
   }
 
   @FXML

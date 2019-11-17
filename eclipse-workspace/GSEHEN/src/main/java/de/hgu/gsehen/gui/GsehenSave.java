@@ -1,75 +1,31 @@
 package de.hgu.gsehen.gui;
 
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDialog;
-import com.jfoenix.controls.JFXDialogLayout;
-
 import de.hgu.gsehen.Gsehen;
-
-import java.util.ResourceBundle;
-
+import java.util.Map;
+import java.util.TreeMap;
 import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.text.Text;
-import javafx.stage.Stage;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 public final class GsehenSave {
-  private final Gsehen gsehenInstance;
-  private final GsehenGuiElements gsehenGuiElements;
-  private final ResourceBundle mainBundle;
-
-  {
-    gsehenInstance = Gsehen.getInstance();
-
-    gsehenGuiElements = new GsehenGuiElements();
-
-    mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
-  }
+  private final Gsehen gsehenInstance = Gsehen.getInstance();
 
   /**
    * Shows a dialog when the user wants to exit.
    */
   public void exitApplication() {
-    StackPane stackPane = new StackPane();
-    JFXDialogLayout content = new JFXDialogLayout();
-    content.setHeading(new Text(mainBundle.getString("save.titel")));
-    JFXDialog dialog = new JFXDialog(stackPane, content, JFXDialog.DialogTransition.CENTER);
-    Stage stage = (Stage) gsehenInstance.getScene().getWindow();
-    stage.setScene(new Scene(stackPane, 300, 250));
-    dialog.show();
-
-    final JFXButton saveButton = gsehenGuiElements
-        .jfxButton(mainBundle.getString("save.saveandexit"));
-    saveButton.setOnAction(e -> {
+    Map<String, EventHandler<ActionEvent>> buttons = new TreeMap<>();
+    buttons.put("save.0.saveandexit", e -> {
       gsehenInstance.saveUserData();
       Platform.exit();
       System.exit(0);
     });
-    GridPane.setConstraints(saveButton, 0, 1);
-
-    final JFXButton exitButton = gsehenGuiElements
-        .jfxButton(mainBundle.getString("save.exitwithoutsave"));
-    exitButton.setOnAction(e -> {
+    buttons.put("save.1.exitwithoutsave", e -> {
       Platform.exit();
       System.exit(0);
     });
-    GridPane.setConstraints(exitButton, 1, 1);
-
-    final JFXButton cancelButton = gsehenGuiElements
-        .jfxButton(mainBundle.getString("save.cancel"));
-    cancelButton.setOnAction(e -> {
-      dialog.close();
-      stackPane.setVisible(false);
-      stage.setScene(gsehenInstance.getScene());
+    buttons.put("save.2.cancel", e -> {
     });
-    GridPane.setConstraints(cancelButton, 2, 1);
-
-    final GridPane inputGridPane = new GridPane();
-    inputGridPane.setHgap(6);
-    inputGridPane.setVgap(6);
-    inputGridPane.getChildren().addAll(saveButton, exitButton, cancelButton);
-    content.setBody(inputGridPane);
+    gsehenInstance.showDialog("save.title", null, buttons);
   }
 }
