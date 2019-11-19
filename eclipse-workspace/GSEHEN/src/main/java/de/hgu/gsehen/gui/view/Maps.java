@@ -57,7 +57,8 @@ public class Maps extends FarmDataController {
   public Drawable getDrawableWithEmptyPolygon(String typeKey)
       throws InstantiationException, IllegalAccessException {
     Drawable drawable = (Drawable) typesMap.get(typeKey).newInstance();
-    drawable.setNameAndPolygon("Unbenannt", new GeoPolygon()); // FIXME localize
+    drawable.setNameAndPolygon(application.getBundle().getString("gui.view.Map.unnamed.drawable"),
+        new GeoPolygon());
     return drawable;
   }
 
@@ -97,7 +98,7 @@ public class Maps extends FarmDataController {
    * @param west western longitude
    */
   public void mapBoundsChanged(double north, double south, double east, double west) {
-    getLogger().info("Map bounds changed to"
+    getLogger().fine("Map bounds changed to"
         + " north: "  + north
         + ", south: " + south
         + ", east: "  + east

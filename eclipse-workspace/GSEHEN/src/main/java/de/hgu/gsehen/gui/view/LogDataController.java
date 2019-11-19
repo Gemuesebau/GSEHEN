@@ -53,7 +53,6 @@ import javafx.util.StringConverter;
 public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private Gsehen gsehenInstance;
-  private GsehenGuiElements gsehenGuiElements;
   protected final ResourceBundle mainBundle;
   private BorderPane pane;
   private ObservableList<LogEntry> data;
@@ -67,8 +66,6 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   {
     gsehenInstance = Gsehen.getInstance();
     gsehenInstance.registerForEvent(FarmDataChanged.class, this);
-
-    gsehenGuiElements = new GsehenGuiElements();
 
     mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
   }
@@ -355,7 +352,7 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
 
     upBox.getChildren().addAll(levelBox, slev, elev);
 
-    Button save = gsehenGuiElements.button(100);
+    Button save = GsehenGuiElements.button(100);
     save.setText(mainBundle.getString("menu.file.save"));
 
     save.setOnAction(e -> {

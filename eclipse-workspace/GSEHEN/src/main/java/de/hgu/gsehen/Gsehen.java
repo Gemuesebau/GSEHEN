@@ -42,6 +42,7 @@ import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.WeatherDataSource;
 import de.hgu.gsehen.util.CollectionUtil;
 import de.hgu.gsehen.util.DBUtil;
+import de.hgu.gsehen.util.GsehenLocalizedException;
 import de.hgu.gsehen.util.Pair;
 import de.hgu.gsehen.util.PluginUtil;
 import java.io.IOException;
@@ -72,6 +73,8 @@ import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -82,7 +85,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
@@ -94,6 +96,7 @@ import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Duration;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
@@ -207,11 +210,44 @@ public class Gsehen extends Application {
       e.printStackTrace();
     }
     try {
-      importCropData(); // why here and not later (start, near loadFarmData, ...)? GSEH-16
+      importCropData();
     } catch (Exception e) {
       e.printStackTrace();
     }
     Application.launch(args);
+  }
+
+  public static boolean isDeveloperMode() {
+    return Boolean.TRUE.toString().equalsIgnoreCase(System.getProperty("developerMode"));
+  }
+
+  private static void errorDialog(AlertType alertType, Runnable onOk, String headerTextKey,
+      String contentTextKey, Object[] contentTextParameters) {
+    Alert dialog = new Alert(alertType);
+    dialog.getDialogPane().setMinWidth(600);
+    dialog.setTitle(instance.getBundle().getString("gsehen.name"));
+    dialog.setHeaderText(instance.getBundle().getString(headerTextKey));
+    dialog.setContentText(MessageFormat.format(instance.getBundle().getString(contentTextKey),
+        contentTextParameters));
+    boolean[] closeRequestedByUs = new boolean[] { false };
+    dialog.setOnCloseRequest(dialogEvent -> {
+      if (!closeRequestedByUs[0]) {
+        Timeline dialogCloser =
+            new Timeline(new KeyFrame(Duration.millis(550), event -> {
+              if (dialog.isShowing()) {
+                if (onOk != null) {
+                  onOk.run();
+                }
+                closeRequestedByUs[0] = true;
+                dialog.close();
+              }
+            }));
+        dialogCloser.setCycleCount(1);
+        dialogCloser.play();
+        dialogEvent.consume();
+      }
+    });
+    dialog.show();
   }
 
   private static void hideLaunch4JSplashScreen() {
@@ -223,13 +259,9 @@ public class Gsehen extends Application {
         .invoke(null, new Object[0]);
     } catch (Exception e) {
       errorDialog(
-          AlertType.WARNING,
-          "gui.dialog.exception",
-          "splash.screen.close.error.dialog.text",
-          e.getClass().getName(),
-          e.getMessage(),
-          SPLASH_WARNING_PROPNAME,
-          SPLASH_WARNING_FALSE
+          AlertType.WARNING, null, "gui.dialog.exception", "splash.screen.close.error.dialog.text",
+          new Object[] { e.getClass().getName(), e.getMessage(),
+              SPLASH_WARNING_PROPNAME, SPLASH_WARNING_FALSE }
       );
     }
   }
@@ -243,12 +275,20 @@ public class Gsehen extends Application {
   @Override
   public void start(Stage stage) {
     Thread.setDefaultUncaughtExceptionHandler((thread, e) -> {
-      if (errorDialog(
-          AlertType.CONFIRMATION, "gui.dialog.exception", "unknown.application.error.dialog.text",
-          renderWithCausesAndTargets(e)
-      )) {
-        logException(LOGGER, Level.SEVERE, e, "unknown.application.error");
-      }
+      errorDialog(
+          AlertType.ERROR, () -> {
+            logException(LOGGER, Level.SEVERE, e, "unknown.application.error");
+          }, "gui.dialog.exception",
+          (
+              e instanceof GsehenLocalizedException
+                ? e.getMessage()
+                    : "unknown.application.error.dialog.text"
+          ), (
+              e instanceof GsehenLocalizedException
+                ? ((GsehenLocalizedException)e).getParameters()
+                    : new Object[] { renderWithCausesAndTargets(e) }
+          )
+      );
     });
     Parent root;
     try {
@@ -898,17 +938,6 @@ public class Gsehen extends Application {
     }
   }
 
-  private static boolean errorDialog(AlertType alertType, String headerTextKey,
-      String contentTextKey, Object... contentTextParameters) {
-    Alert dialog = new Alert(alertType);
-    dialog.getDialogPane().setMinWidth(600);
-    dialog.setTitle(instance.getBundle().getString("gsehen.name"));
-    dialog.setHeaderText(instance.getBundle().getString(headerTextKey));
-    dialog.setContentText(MessageFormat.format(instance.getBundle().getString(contentTextKey),
-        contentTextParameters));
-    return dialog.showAndWait().get().equals(ButtonType.OK);
-  }
-
   private static String textInputDialog(String contentTextKey, String headerText) {
     TextInputDialog dialog = new TextInputDialog();
     dialog.setTitle("GSEHEN");
@@ -921,8 +950,6 @@ public class Gsehen extends Application {
   @SuppressWarnings({ "checkstyle:javadocmethod" })
   public static void updateDayData() {
     new PluginUtil().recalculateDayData(wdsUuid -> Recommender.clearDayData(wdsUuid));
-    // man könnte auch die in Zeile 247 gebaute Instanz des Recommenders (s.o.) speichern,
-    //   und alle Methoden dort non-static machen.
   }
 
   @SuppressWarnings({ "checkstyle:javadocmethod" })
@@ -1080,8 +1107,9 @@ public class Gsehen extends Application {
 
   /**
    * Shows a dialog.
-   * @param fields 
    *
+   * @param headingKey message key for the dialog heading
+   * @param fields data entry rows as a map from row key to UI edit element
    * @param buttons the buttons to add at the bottom of the dialog. Dialog is closed on ANY of them
    */
   public void showDialog(String headingKey, Map<String, JFXTextField> fields,

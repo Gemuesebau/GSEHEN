@@ -80,7 +80,7 @@ public abstract class WebController {
     getLogger().info(message);
   }
 
-  @SuppressWarnings({"checkstyle:javadocmethod"})
+  @SuppressWarnings({ "checkstyle:javadocmethod", "checkstyle:linelength" })
   public WebController(Gsehen application, WebView webView) {
     this.application = application;
     engine = webView.getEngine();
@@ -90,7 +90,7 @@ public abstract class WebController {
       if (newState == State.SUCCEEDED) {
         JSObject win = (JSObject)engine.executeScript("window");
         win.setMember("webController", this);
-        engine.executeScript(loadWorkerSucceededScript);
+        engine.executeScript(loadWorkerSucceededScript); // is also executed when Google Maps displays some navigation (i.e., a link), and the user clicks on it ( = new page is loaded, probably not coming from us)
         loaded = true;
       }
     });

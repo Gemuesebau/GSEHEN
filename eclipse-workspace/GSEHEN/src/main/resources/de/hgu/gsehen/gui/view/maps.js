@@ -11,6 +11,7 @@ var map = null;
 var selectedType = null;
 var drawables = null;
 var polygons = {};
+var mapsJSAPILink = document.getElementById("mapsjsapilink").title;
 
 function addPolygonOptions(obj, style) {
   obj.editable = true;
@@ -145,6 +146,14 @@ function redraw() {
   map.fitBounds(viewportBounds);
 }
 
+function checkErrorAndGetLink() {
+	if (document.body.innerHTML.match(/((api[\w-]*key[\w-]*|gm-)err)/) != null) {
+		alert("Maps HTML document body contains " + RegExp.$1);
+		return mapsJSAPILink;
+	}
+	return null;
+}
+
 var mapsScriptElement = document.createElement("script");
 mapsScriptElement.src = "https://maps.googleapis.com/maps/api/js?key=" +
   webController.getGoogleMapsApiKey() + "&v=3.exp&sensor=false&libraries=drawing,places";
@@ -163,5 +172,7 @@ mapsScriptElement.onload = function () {
 	initAutocomplete();
 	drawingManager.setMap(map);
 	addEventListeners();
+
+	webController.googleMapsJavaScriptLoaded();
 };
 document.getElementById("scripts-parent").appendChild(mapsScriptElement);

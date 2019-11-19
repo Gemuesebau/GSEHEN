@@ -6,23 +6,29 @@ import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
 
 public class DeveloperController {
+  private static DeveloperController instance = null;
+
+  {
+    instance = this;
+  }
+
+  public static DeveloperController getInstance() {
+    return instance;
+  }
+
+  @FXML
+  private MenuItem developerMenu;
+
+  public MenuItem getDeveloperMenu() {
+    return developerMenu;
+  }
 
   @FXML
   @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
   private MenuItem reloadMapViewHTMLMenuItem;
 
   @FXML
-  @SuppressWarnings({"checkstyle:abbreviationaswordinname"})
-  private MenuItem reloadFarmViewHTMLMenuItem;
-
-  @FXML
-  private MenuItem jsPromptForFarmViewMenuItem;
-
-  @FXML
   private MenuItem jsPromptForMapViewMenuItem;
-
-  @FXML
-  private MenuItem updateDayDataMenuItem;
 
   @FXML
   @SuppressWarnings({"checkstyle:abbreviationaswordinname"})

@@ -1,5 +1,7 @@
 package de.hgu.gsehen.gui.controller;
 
+import static de.hgu.gsehen.Gsehen.isDeveloperMode;
+
 import com.jfoenix.controls.JFXTabPane;
 
 import de.hgu.gsehen.Gsehen;
@@ -23,11 +25,20 @@ import javafx.scene.web.WebView;
 /**
  * The GSEHEN Main-Controller.
  *
- * @author CWI
+ * @author CWI, AT
  */
 @SuppressWarnings({ "checkstyle:commentsindentation" })
 public class MainController {
   private Gsehen gsehenInstance = Gsehen.getInstance();
+
+  @FXML
+  @SuppressWarnings({ "checkstyle:javadocmethod" })
+  public void helpMenuShowing() {
+    if (!isDeveloperMode()) {
+      final DeveloperController developerController = DeveloperController.getInstance();
+      developerController.getDeveloperMenu().setVisible(false);
+    }
+  }
 
   // Views
   @FXML
@@ -183,7 +194,7 @@ public class MainController {
   public void setLogViewTab(Tab logViewTab) {
     this.logViewTab = logViewTab;
   }
-  
+
   public Tab getExportViewTab() {
     return exportViewTab;
   }

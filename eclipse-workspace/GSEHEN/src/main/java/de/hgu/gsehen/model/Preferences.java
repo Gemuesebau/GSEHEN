@@ -14,9 +14,13 @@ public class Preferences {
 
   private String value;
 
+  public Preferences() {
+    super();
+  }
+
   @SuppressWarnings("checkstyle:javadocmethod")
   public Preferences(String key, String value) {
-    super();
+    this();
     this.key = key;
     this.value = value;
   }

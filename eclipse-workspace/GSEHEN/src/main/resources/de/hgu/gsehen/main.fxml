@@ -14,7 +14,11 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-<SplitPane id="mainSplitPane" dividerPositions="0.33" minHeight="768.0" minWidth="1280.0" prefHeight="768.0" prefWidth="1366.0" stylesheets="@style/Global.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.hgu.gsehen.gui.controller.MainController">
+<SplitPane id="mainSplitPane" dividerPositions="0.33"
+	minHeight="768.0" minWidth="1280.0" prefHeight="768.0"
+	prefWidth="1366.0" stylesheets="@style/Global.css"
+	xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="de.hgu.gsehen.gui.controller.MainController">
 	<items>
 		<BorderPane id="mainBorderPane">
 			<top>
@@ -22,154 +26,210 @@
 					<menus>
 						<Menu mnemonicParsing="false" text="%menu.file">
 							<items>
-								<MenuItem mnemonicParsing="false" onAction="#loadFarmData" text="%menu.file.load" />
-								<MenuItem mnemonicParsing="false" onAction="#saveUserData" text="%menu.file.save" />
+								<MenuItem mnemonicParsing="false"
+									onAction="#loadFarmData" text="%menu.file.load" />
+								<MenuItem mnemonicParsing="false"
+									onAction="#saveUserData" text="%menu.file.save" />
 								<SeparatorMenuItem />
-								<MenuItem mnemonicParsing="false" onAction="#editPreferences" text="%menu.file.preferences" />
+								<MenuItem mnemonicParsing="false"
+									onAction="#editPreferences" text="%menu.file.preferences" />
 								<SeparatorMenuItem />
-								<MenuItem fx:id="updateDayDataMenuItem" mnemonicParsing="false" onAction="#updateDayData" text="%menu.view.developer.update.day.data" />
+								<MenuItem mnemonicParsing="false"
+									onAction="#updateDayData"
+									text="%menu.file.update.day.data" />
 								<SeparatorMenuItem />
-								<MenuItem mnemonicParsing="false" onAction="#exit" text="%menu.file.exit" />
+								<MenuItem mnemonicParsing="false" onAction="#exit"
+									text="%menu.file.exit" />
 							</items>
 						</Menu>
-						<!-- <Menu mnemonicParsing="false" text="%menu.view">
+						<Menu mnemonicParsing="false" text="%menu.help" onShowing="#helpMenuShowing">
 							<items>
-								<Menu mnemonicParsing="false" text="%menu.view.bounds">
-									<items>
-										<MenuItem mnemonicParsing="false" onAction="#setFarmViewportFromMap" text="%menu.view.bounds.mapToFarm" />
-										<MenuItem mnemonicParsing="false" onAction="#setMapViewportFromFarm" text="%menu.view.bounds.farmToMap" />
-									</items>
-								</Menu>
+								<MenuItem mnemonicParsing="false"
+									onAction="#openContactView" text="%menu.help.contact" />
+								<MenuItem mnemonicParsing="false" onAction="#about"
+									text="%menu.help.about" />
+								<MenuItem mnemonicParsing="false"
+									onAction="#openPluginsFolder"
+									text="%menu.help.openPluginsFolder" />
 								<fx:include source="developerMenu.fxml" />
-							</items>
-						</Menu> -->
-						<Menu mnemonicParsing="false" text="%menu.help">
-							<items>
-								<MenuItem fx:id="contactMenuItem" mnemonicParsing="false" onAction="#openContactView" text="%menu.help.contact" />
-								<MenuItem fx:id="aboutUsMenuItem" mnemonicParsing="false" onAction="#about" text="%menu.help.about" />
-								<MenuItem fx:id="openPluginsFolderMenuItem" mnemonicParsing="false" onAction="#openPluginsFolder" text="%menu.help.openPluginsFolder" />
 							</items>
 						</Menu>
 					</menus>
 				</MenuBar>
 			</top>
-         <bottom>
-            <AnchorPane prefWidth="385.0" BorderPane.alignment="CENTER">
-               <children>
-      				<ImageView id="imageView" fx:id="imageView" disable="true" fitHeight="175.0" fitWidth="420.0" mouseTransparent="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-               </children>
-            </AnchorPane>
-         </bottom>
-         <center>
-								<AnchorPane id="leftAnchorPane" prefHeight="800.0" prefWidth="385.0" BorderPane.alignment="CENTER">
-               <children>
-                  <BorderPane id="tableBorderPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <top>
-                        <TreeTableView id="farmTreeView" prefHeight="250.0" prefWidth="393.0" BorderPane.alignment="CENTER">
-                           <columnResizePolicy>
-                              <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                           </columnResizePolicy>
-                        </TreeTableView>
-                     </top>
-                     <center>
-                        <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
-                           <children>
-                              <HBox id="filterHBox">
-                                 <children>
-                                    <Label id="filterLabel" text="Label" />
-                                    <TextField id="filterField" />
-                                    <JFXToggleButton id="archiveButton" />
-                                 </children>
-                                 <VBox.margin>
-                                    <Insets />
-                                 </VBox.margin>
-                              </HBox>
-                              <AnchorPane prefWidth="385.0">
-                                 <children>
-                                    <ScrollPane prefWidth="385.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                       <content>
-                                          <AnchorPane prefWidth="385.0">
-                                             <children>
-                                                <BorderPane id="detailBorderPane" prefWidth="385.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                             </children>
-                                          </AnchorPane>
-                                       </content>
-                                    </ScrollPane>
-                                 </children>
-                              </AnchorPane>
-                           </children>
-                        </VBox>
-                     </center>
-                  </BorderPane>
-               </children>
-								</AnchorPane>
-         </center>
+			<bottom>
+				<AnchorPane prefWidth="385.0"
+					BorderPane.alignment="CENTER">
+					<children>
+						<ImageView id="imageView" fx:id="imageView"
+							disable="true" fitHeight="175.0" fitWidth="420.0"
+							mouseTransparent="true" nodeOrientation="INHERIT"
+							pickOnBounds="true" preserveRatio="true"
+							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+							AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+					</children>
+				</AnchorPane>
+			</bottom>
+			<center>
+				<AnchorPane id="leftAnchorPane" prefHeight="800.0"
+					prefWidth="385.0" BorderPane.alignment="CENTER">
+					<children>
+						<BorderPane id="tableBorderPane"
+							AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+							AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+							<top>
+								<TreeTableView id="farmTreeView"
+									prefHeight="250.0" prefWidth="393.0"
+									BorderPane.alignment="CENTER">
+									<columnResizePolicy>
+										<TreeTableView
+											fx:constant="CONSTRAINED_RESIZE_POLICY" />
+									</columnResizePolicy>
+								</TreeTableView>
+							</top>
+							<center>
+								<VBox prefHeight="200.0" prefWidth="100.0"
+									BorderPane.alignment="CENTER">
+									<children>
+										<HBox id="filterHBox">
+											<children>
+												<Label id="filterLabel" text="Label" />
+												<TextField id="filterField" />
+												<JFXToggleButton id="archiveButton" />
+											</children>
+											<VBox.margin>
+												<Insets />
+											</VBox.margin>
+										</HBox>
+										<AnchorPane prefWidth="385.0">
+											<children>
+												<ScrollPane prefWidth="385.0"
+													AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+													AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+													<content>
+														<AnchorPane prefWidth="385.0">
+															<children>
+																<BorderPane id="detailBorderPane"
+																	prefWidth="385.0" AnchorPane.bottomAnchor="0.0"
+																	AnchorPane.leftAnchor="0.0"
+																	AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+															</children>
+														</AnchorPane>
+													</content>
+												</ScrollPane>
+											</children>
+										</AnchorPane>
+									</children>
+								</VBox>
+							</center>
+						</BorderPane>
+					</children>
+				</AnchorPane>
+			</center>
 		</BorderPane>
-      <JFXTabPane id="tabPane" fx:id="tabPane">
-         <tabs>
+		<JFXTabPane id="tabPane" fx:id="tabPane">
+			<tabs>
 				<Tab fx:id="mapViewTab" closable="false" text="MapView">
 					<content>
-						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+						<AnchorPane minHeight="0.0" minWidth="0.0"
+							prefHeight="180.0" prefWidth="200.0">
 							<children>
-								<WebView id="mapsWebView" layoutX="48.0" layoutY="85.0" prefHeight="369.0" prefWidth="296.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+								<WebView id="mapsWebView" layoutX="48.0" layoutY="85.0"
+									prefHeight="369.0" prefWidth="296.0"
+									AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+									AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
 							</children>
 						</AnchorPane>
 					</content>
 				</Tab>
-            <Tab fx:id="fieldViewTab" closable="false" text="FieldView">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <BorderPane id="fieldsBorderPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                     </children></AnchorPane>
-               </content>
-            </Tab>
-            <Tab fx:id="plotViewTab" closable="false" text="PlotView">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <BorderPane id="plotsBorderPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                     </children></AnchorPane>
-               </content>
-            </Tab>
-            <Tab fx:id="logViewTab" closable="false" text="LogView">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <BorderPane id="logsBorderPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                     </children></AnchorPane>
-               </content>
-            </Tab>
-            <Tab fx:id="exportViewTab" closable="false" text="Export">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <BorderPane id="exportsBorderPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-	            <Tab fx:id="contactViewTab" closable="false" text="Kontakt">
-	               <content>
-	                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-	                     <children>
-	                        <WebView fx:id="contactWebView" layoutX="403.0" layoutY="18.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-	                        <Button fx:id="contactBack" cancelButton="true" layoutX="15.0" layoutY="700.0" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" onAction="#backToMainView" text="Zurück" AnchorPane.bottomAnchor="36.0" AnchorPane.leftAnchor="20.0" />
-	                     </children>
-	                  </AnchorPane>
-	               </content>
-	            </Tab>
-	            <Tab fx:id="aboutViewTab" closable="false" text="Über uns">
-	               <content>
-	                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-	                     <children>
-	                        <WebView fx:id="aboutWebView" layoutX="403.0" layoutY="18.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-	                        <Button fx:id="aboutBack" cancelButton="true" layoutX="20.0" layoutY="700.0" mnemonicParsing="false" onAction="#backToMainView" text="Zurück" AnchorPane.bottomAnchor="36.0" AnchorPane.leftAnchor="20.0" />
-	                     </children>
-	                  </AnchorPane>
-	               </content>
-	            </Tab>
-         </tabs>
-      </JFXTabPane>
+				<Tab fx:id="fieldViewTab" closable="false" text="FieldView">
+					<content>
+						<AnchorPane minHeight="0.0" minWidth="0.0"
+							prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<BorderPane id="fieldsBorderPane" prefHeight="200.0"
+									prefWidth="200.0" AnchorPane.bottomAnchor="0.0"
+									AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+									AnchorPane.topAnchor="0.0" />
+							</children>
+						</AnchorPane>
+					</content>
+				</Tab>
+				<Tab fx:id="plotViewTab" closable="false" text="PlotView">
+					<content>
+						<AnchorPane minHeight="0.0" minWidth="0.0"
+							prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<BorderPane id="plotsBorderPane" prefHeight="200.0"
+									prefWidth="200.0" AnchorPane.bottomAnchor="0.0"
+									AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+									AnchorPane.topAnchor="0.0" />
+							</children>
+						</AnchorPane>
+					</content>
+				</Tab>
+				<Tab fx:id="logViewTab" closable="false" text="LogView">
+					<content>
+						<AnchorPane minHeight="0.0" minWidth="0.0"
+							prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<BorderPane id="logsBorderPane" prefHeight="200.0"
+									prefWidth="200.0" AnchorPane.bottomAnchor="0.0"
+									AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+									AnchorPane.topAnchor="0.0" />
+							</children>
+						</AnchorPane>
+					</content>
+				</Tab>
+				<Tab fx:id="exportViewTab" closable="false" text="Export">
+					<content>
+						<AnchorPane minHeight="0.0" minWidth="0.0"
+							prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<BorderPane id="exportsBorderPane" prefHeight="200.0"
+									prefWidth="200.0" AnchorPane.bottomAnchor="0.0"
+									AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+									AnchorPane.topAnchor="0.0" />
+							</children>
+						</AnchorPane>
+					</content>
+				</Tab>
+				<Tab fx:id="contactViewTab" closable="false" text="Kontakt">
+					<content>
+						<AnchorPane minHeight="0.0" minWidth="0.0"
+							prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<WebView fx:id="contactWebView" layoutX="403.0"
+									layoutY="18.0" prefHeight="200.0" prefWidth="200.0"
+									AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0"
+									AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+								<Button fx:id="contactBack" cancelButton="true"
+									layoutX="15.0" layoutY="700.0" maxHeight="-Infinity"
+									maxWidth="-Infinity" mnemonicParsing="false"
+									onAction="#backToMainView" text="Zurück"
+									AnchorPane.bottomAnchor="36.0" AnchorPane.leftAnchor="20.0" />
+							</children>
+						</AnchorPane>
+					</content>
+				</Tab>
+				<Tab fx:id="aboutViewTab" closable="false" text="Über uns">
+					<content>
+						<AnchorPane minHeight="0.0" minWidth="0.0"
+							prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<WebView fx:id="aboutWebView" layoutX="403.0"
+									layoutY="18.0" prefHeight="200.0" prefWidth="200.0"
+									AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0"
+									AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+								<Button fx:id="aboutBack" cancelButton="true"
+									layoutX="20.0" layoutY="700.0" mnemonicParsing="false"
+									onAction="#backToMainView" text="Zurück"
+									AnchorPane.bottomAnchor="36.0" AnchorPane.leftAnchor="20.0" />
+							</children>
+						</AnchorPane>
+					</content>
+				</Tab>
+			</tabs>
+		</JFXTabPane>
 	</items>
 </SplitPane>

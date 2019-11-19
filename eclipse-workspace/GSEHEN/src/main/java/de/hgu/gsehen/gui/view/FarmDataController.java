@@ -1,5 +1,6 @@
 package de.hgu.gsehen.gui.view;
 
+import static de.hgu.gsehen.Gsehen.isDeveloperMode;
 import static de.hgu.gsehen.util.MessageUtil.logMessage;
 
 import de.hgu.gsehen.Gsehen;
@@ -13,9 +14,11 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.util.GsehenLocalizedException;
 import de.hgu.gsehen.util.Pair;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -26,13 +29,17 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.logging.Level;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.SplitPane;
 import javafx.scene.web.WebView;
+import javafx.util.Duration;
 
 public abstract class FarmDataController extends WebController {
   private static final String GOOGLE_MAPS_API_KEY_PROPKEY = "google.maps.api.key";
   private Gsehen gsehenInstance;
+  private String oldPropertiesFileName;
   private Map<Class<? extends GsehenEvent>, Class<? extends 
       GsehenEventListener<? extends GsehenEvent>>> eventListeners = new HashMap<>();
   private Predicate<Drawable> currentFilter = drawable -> true;
@@ -154,6 +161,9 @@ public abstract class FarmDataController extends WebController {
    */
   public FarmDataController(Gsehen application, WebView webView) {
     super(application, webView);
+    oldPropertiesFileName = System.getProperty("user.home")
+        + File.separator + ".gsehenIrrigationManager" + File.separator + "properties"
+        + File.separator + ".GSEHEN.build.properties";
 
     ChangeListener<Number> splitPaneWidthHeightDividerPositionListener =
         (observable, oldValue, newValue) -> redrawOrReload(observable);
@@ -237,40 +247,59 @@ public abstract class FarmDataController extends WebController {
     return currentFilter.test(drawable);
   }
 
+  private String getGoogleMapsApiKeyFromProperties() {
+    Reader reader = null;
+    try {
+      reader = new InputStreamReader(
+          new FileInputStream(oldPropertiesFileName), "ISO-8859-1");
+      Properties properties = new Properties();
+      try {
+        properties.load(reader);
+      } catch (Exception e) {
+        throw new IOException("Properties not readable", e);
+      }
+      return properties.getProperty(GOOGLE_MAPS_API_KEY_PROPKEY);
+    } catch (Exception e2) {
+      logMessage(getLogger(), Level.CONFIG, "gsehen.build.properties.error", oldPropertiesFileName);
+      return null;
+    }
+  }
+
   /**
-   * Determines the Google Maps API Key.
+   * Returns the Google Maps API Key as set in user preferences.
    *
    * @return the API key
    */
   public String getGoogleMapsApiKey() {
-    final String propertiesFileName = System.getProperty("user.home")
-        + File.separator + ".gsehenIrrigationManager" + File.separator + "properties"
-        + File.separator + ".GSEHEN.build.properties";
-    Reader reader = null;
-    try {
-      reader = new InputStreamReader(
-          new FileInputStream(
-              propertiesFileName), "ISO-8859-1");
-    } catch (Exception e2) {
-      throw new RuntimeException(
-          "External properties not found; propertiesFileName =\n" + propertiesFileName
-          + "\n# with contents:\ngoogle.maps.api.key=<put Google Maps API key here>", e2);
-      // TODO show apikey.html (and import user's key) ---> GSEH-15
+    String googleMapsApiKey = gsehenInstance.getPreferenceValue("googleMapsApiKey");
+    return googleMapsApiKey == null ? "(unset)" : googleMapsApiKey;
+  }
+
+  @SuppressWarnings("checkstyle:javadocmethod")
+  public void googleMapsJavaScriptLoaded() {
+    if (!isDeveloperMode()) {
+      Timeline mapsErrChecker = new Timeline(new KeyFrame(Duration.seconds(4), event -> {
+        String googleApiLink = (String)runJavaScript("checkErrorAndGetLink()");
+        if (googleApiLink != null) {
+          String apiKeyFromProperties = getGoogleMapsApiKeyFromProperties();
+          throw new GsehenLocalizedException(
+              "google.maps.api.key.problem.dialog.text",
+              googleApiLink,
+              apiKeyFromProperties == null ? 0 : 1,
+              apiKeyFromProperties == null ? "" : oldPropertiesFileName,
+              apiKeyFromProperties == null ? "" : apiKeyFromProperties
+          );
+        }
+      }));
+      mapsErrChecker.setCycleCount(1);
+      mapsErrChecker.play();
     }
-    Properties properties = new Properties();
-    try {
-      properties.load(reader);
-    } catch (Exception e) {
-      throw new RuntimeException("Properties not readable", e); // TODO really use properties?
-    }
-    return properties.getProperty(GOOGLE_MAPS_API_KEY_PROPKEY);
   }
 
   /**
    * Determines the map or farm view polygon color for the given type (object).
    *
-   * @param typeObject
-   *          a "Drawable", or a String
+   * @param typeObject a "Drawable", or a String
    * @return the appropriate stroke and fill color for the given type
    */
   public String getFillStyle(Object typeObject) {
