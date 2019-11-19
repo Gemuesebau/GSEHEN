@@ -94,14 +94,27 @@ public class MainController {
 
   @FXML
   private void openPluginsFolder(ActionEvent o) {
-    File pluginsFolderObj = new File(System.getProperty("user.home") + File.separator
+    File pluginsFolder = new File(System.getProperty("user.home") + File.separator
         + ".gsehenIrrigationManager" + File.separator + "plugins");
-    pluginsFolderObj.mkdirs();
-    try {
-      Desktop.getDesktop().open(pluginsFolderObj);
-    } catch (IOException e) {
-      throw new RuntimeException("Couldn't open plugins folder!", e);
+    pluginsFolder.mkdirs();
+    String openPluginFolderCommand = gsehenInstance.getPreferenceValue("openPluginFolderCommand");
+    if (openPluginFolderCommand != null && openPluginFolderCommand.trim().length() != 0) {
+      try {
+        Runtime.getRuntime().exec(openPluginFolderCommand, new String[0], pluginsFolder).waitFor();
+      } catch (Exception e) {
+        throwOpenPluginsFolderException(e);
+      }
+    } else {
+      try {
+        Desktop.getDesktop().open(pluginsFolder);
+      } catch (IOException e) {
+        throwOpenPluginsFolderException(e);
+      }
     }
+  }
+
+  private void throwOpenPluginsFolderException(Exception e) {
+    throw new RuntimeException("Couldn't open plugins folder!", e);
   }
 
   @FXML

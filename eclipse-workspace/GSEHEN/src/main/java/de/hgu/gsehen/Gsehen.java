@@ -1088,16 +1088,22 @@ public class Gsehen extends Application {
         GsehenGuiElements.jfxTextField(instance.getPreferenceValue("locale")));
     fields.put("pref.1.googleMapsApiKey",
         GsehenGuiElements.jfxTextField(instance.getPreferenceValue("googleMapsApiKey")));
+    fields.put("pref.2.openPluginFolderCommand",
+        GsehenGuiElements.jfxTextField(instance.getPreferenceValue("openPluginFolderCommand")));
     Map<String, EventHandler<ActionEvent>> buttons = new TreeMap<>();
     buttons.put("prefs.0.save", e -> {
       String currentPrefValue;
       currentPrefValue = fields.get("pref.0.locale").getText();
-      if (currentPrefValue != null) { // literal null!
+      if (currentPrefValue != null) {
         instance.setPreferenceValue("locale", currentPrefValue);
       }
       currentPrefValue = fields.get("pref.1.googleMapsApiKey").getText();
-      if (currentPrefValue != null) { // literal null!
+      if (currentPrefValue != null) {
         instance.setPreferenceValue("googleMapsApiKey", currentPrefValue);
+      }
+      currentPrefValue = fields.get("pref.2.openPluginFolderCommand").getText();
+      if (currentPrefValue != null) {
+        instance.setPreferenceValue("openPluginFolderCommand", currentPrefValue);
       }
     });
     buttons.put("prefs.1.cancel", e -> {
