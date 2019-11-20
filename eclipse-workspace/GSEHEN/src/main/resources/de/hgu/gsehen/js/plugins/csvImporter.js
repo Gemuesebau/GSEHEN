@@ -113,6 +113,15 @@ function getPlugin() {
 		while ((line = lineNumberReader.readLine()) != null) {
 			lineNumber++;
 			try {
+				/*
+
+  hallo \" welt
+
+
+substrstwre = \\(.) replacejs = m.group(1)
+substrstwre = "" replacejs = '"'
+
+				*/
 				var lineDate = dateFormat.parse(line.replace(/^"/, "").replace(/ .*/, ""));
 				//LOGGER.log(java.util.logging.Level.FINE, "date = " + date);
 				//LOGGER.log(java.util.logging.Level.FINE, "lineDate = " + lineDate);

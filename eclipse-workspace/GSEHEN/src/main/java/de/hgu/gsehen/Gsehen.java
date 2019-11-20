@@ -1160,8 +1160,7 @@ public class Gsehen extends Application {
     JFXButton currentButton;
     int i = 0;
     for (Entry<String, EventHandler<ActionEvent>> entry : buttons.entrySet()) {
-      currentButton = GsehenGuiElements
-          .jfxButton(mainBundle.getString(entry.getKey()));
+      currentButton = GsehenGuiElements.jfxButton(mainBundle.getString(entry.getKey()));
       currentButton.setOnAction(e -> {
         entry.getValue().handle(e);
         afterEventHandling.run();
