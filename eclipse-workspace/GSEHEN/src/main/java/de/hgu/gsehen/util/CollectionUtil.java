@@ -126,17 +126,29 @@ public class CollectionUtil {
     return result;
   }
 
+  @SafeVarargs
   @SuppressWarnings("checkstyle:javadocmethod")
-  public static <S, T> T[] mapArrayValues(S[] sourceArray, Class<T> targetClass,
-      Function<S, T> mapper) {
-    if (sourceArray == null) {
-      return null;
+  public static <S, T> T[] mapArrayValues(Class<T> targetClass, Function<S, T> mapper,
+      S[]... sourceArrays) {
+    int targetArraySize = 0;
+    if (sourceArrays != null) {
+      for (S[] sourceArray : sourceArrays) {
+        if (sourceArray != null) {
+          targetArraySize += sourceArray.length;
+        }
+      }
     }
     @SuppressWarnings("unchecked")
-    T[] targetArray = (T[]) Array.newInstance(targetClass, sourceArray.length);
+    T[] targetArray = (T[]) Array.newInstance(targetClass, targetArraySize);
     int index = 0;
-    for (S sourceItem : sourceArray) {
-      targetArray[index++] = mapper.apply(sourceItem);
+    if (sourceArrays != null) {
+      for (S[] sourceArray : sourceArrays) {
+        if (sourceArray != null) {
+          for (S sourceItem : sourceArray) {
+            targetArray[index++] = mapper.apply(sourceItem);
+          }
+        }
+      }
     }
     return targetArray;
   }

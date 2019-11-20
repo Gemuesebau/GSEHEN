@@ -3,7 +3,7 @@ alert("Maps (re)loaded, now running custom JavaScript");
 #include("typeControl.js")
 #include("searchControl.js")
 #include("objectArray.js")
-#include("../../js/commons.js")
+#include("commons.js")
 
 var drawingManager = null;
 var viewportBounds = null;

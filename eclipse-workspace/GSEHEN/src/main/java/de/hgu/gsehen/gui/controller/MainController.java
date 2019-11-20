@@ -94,8 +94,7 @@ public class MainController {
 
   @FXML
   private void openPluginsFolder(ActionEvent o) {
-    File pluginsFolder = new File(System.getProperty("user.home") + File.separator
-        + ".gsehenIrrigationManager" + File.separator + "plugins");
+    File pluginsFolder = Gsehen.getPluginsFolder();
     pluginsFolder.mkdirs();
     String openPluginFolderCommand = gsehenInstance.getPreferenceValue("openPluginFolderCommand");
     if (openPluginFolderCommand != null && openPluginFolderCommand.trim().length() != 0) {

@@ -45,6 +45,7 @@ import de.hgu.gsehen.util.DBUtil;
 import de.hgu.gsehen.util.GsehenLocalizedException;
 import de.hgu.gsehen.util.Pair;
 import de.hgu.gsehen.util.PluginUtil;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -949,7 +950,7 @@ public class Gsehen extends Application {
 
   @SuppressWarnings({ "checkstyle:javadocmethod" })
   public static void updateDayData() {
-    new PluginUtil().recalculateDayData(wdsUuid -> Recommender.clearDayData(wdsUuid));
+    new PluginUtil().recalculateDayData();
   }
 
   @SuppressWarnings({ "checkstyle:javadocmethod" })
@@ -1168,5 +1169,10 @@ public class Gsehen extends Application {
       GridPane.setConstraints(currentButton, i++, row);
       nodeList.add(currentButton);
     }
+  }
+
+  public static File getPluginsFolder() {
+    return new File(System.getProperty("user.home") + File.separator + ".gsehenIrrigationManager"
+        + File.separator + "plugins");
   }
 }

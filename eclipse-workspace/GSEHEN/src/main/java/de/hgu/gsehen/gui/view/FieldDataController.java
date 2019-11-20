@@ -17,6 +17,7 @@ import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilManualData;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
+import de.hgu.gsehen.model.WeatherDataConfigurator;
 import de.hgu.gsehen.model.WeatherDataPlugin;
 import de.hgu.gsehen.model.WeatherDataSource;
 import de.hgu.gsehen.util.CollectionUtil;
@@ -57,7 +58,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class FieldDataController extends Application
-    implements GsehenEventListener<FarmDataChanged> {
+    implements GsehenEventListener<FarmDataChanged>, WeatherDataConfigurator {
   private static final Logger LOGGER = Logger.getLogger(FieldDataController.class.getName());
   private static final String FARM_TREE_VIEW_ID = "#farmTreeView";
   protected final ResourceBundle mainBundle;
@@ -460,14 +461,7 @@ public class FieldDataController extends Application
   }
 
   private void putErrorInButtonBox(final String messageKey) {
-    putErrorMessage(mainBundle.getString(messageKey));
-  }
-
-  private void putErrorMessage(final String message) {
-    Text error = new Text(message);
-    error.setFont(Font.font("Verdana", 14));
-    error.setFill(Color.RED);
-    fillButtonBox(error);
+    setError(mainBundle.getString(messageKey));
   }
 
   /**
@@ -513,7 +507,7 @@ public class FieldDataController extends Application
     );
     buttonBox = new HBox();
     buttonBox.setSpacing(10);
-    fillButtonBox();
+    reset();
 
     VBox bottomBox = new VBox(25);
     bottomBox.setSpacing(10);
@@ -707,7 +701,7 @@ public class FieldDataController extends Application
     if (fixedNodesCount == -1) {
       return;
     }
-    final ObservableList<Node> configNodes = configElementsParent.getChildren();
+    final ObservableList<Node> configNodes = getConfigNodes();
     for (int i = configNodes.size() - 1; i >= fixedNodesCount; i--) {
       configNodes.remove(i);
     }
@@ -722,10 +716,7 @@ public class FieldDataController extends Application
     weatherDataPlugin.createAndFillSpecificControls(
         selectedWeatherDataSource != null && samePluginJsFileName(pluginJsFileName)
           ? selectedWeatherDataSource.getPluginConfigurationJSON()
-          : "{}",
-        configNodes, fixedNodesCount, fixedItemsCount, gsehenInstance,
-        this.getClass().getClassLoader(), gsehenInstance.getSelectedLocale(), javaLocaleMap,
-        configStackPane, (message) -> putErrorMessage(message), () -> fillButtonBox()
+          : "{}", this
     );
   }
 
@@ -967,7 +958,7 @@ public class FieldDataController extends Application
 
     buttonBox = new HBox();
     buttonBox.setSpacing(10.0);
-    fillButtonBox();
+    reset();
 
     VBox bottomBox = new VBox(25);
     bottomBox.setSpacing(10);
@@ -1207,5 +1198,53 @@ public class FieldDataController extends Application
 
   @Override
   public void start(Stage primaryStage) throws Exception {
+  }
+
+  @Override
+  public ObservableList<Node> getConfigNodes() {
+    return configElementsParent.getChildren();
+  }
+
+  @Override
+  public int getFixedNodesCount() {
+    return fixedNodesCount;
+  }
+
+  @Override
+  public int getFixedItemsCount() {
+    return fixedItemsCount;
+  }
+
+  @Override
+  public Gsehen getInstance() {
+    return gsehenInstance;
+  }
+
+  @Override
+  public Locale getLocale() {
+    return gsehenInstance.getSelectedLocale();
+  }
+
+  @Override
+  public TreeMap<String, String> getJavaLocaleMap() {
+    return javaLocaleMap;
+  }
+
+  @Override
+  public StackPane getParentStackPane() {
+    return configStackPane;
+  }
+
+  @Override
+  public void setError(String errorMessage) {
+    Text error = new Text(errorMessage);
+    error.setFont(Font.font("Verdana", 14));
+    error.setFill(Color.RED);
+    fillButtonBox(error);
+  }
+
+  @Override
+  public void reset() {
+    fillButtonBox();
   }
 }

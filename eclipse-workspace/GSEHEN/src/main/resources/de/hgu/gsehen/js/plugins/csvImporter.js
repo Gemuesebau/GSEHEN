@@ -1,4 +1,4 @@
-loadGsehenJs("arrayUtilities.js");
+loadLocalJavaScript("lib/arrayUtilities.js");
 
 function getPlugin() {
 	var calculateWindspeed2m = function(windspeed, windspeedMeasHeightMeters) {
@@ -61,7 +61,7 @@ function getPlugin() {
 		dayData.setAirHumidityRelMean(arrayUtilities.objArrayMean(weatherDataArray, "airHumidityRel"));
 		/* dayData.setGlobalRad(arrayUtilities.objArraySum(weatherDataArray, "globalRad") * pluginConfig.measIntervalSeconds / 1000000); */
 		dayData.setGlobalRad(arrayUtilities.objArraySum(weatherDataArray, "globalRad") * 0.0864 / ((60/(pluginConfig.measIntervalSeconds / 60))*24));
-		/* 0.0864*Glob/144 */
+		/* 0.0864*Glob/144  --->  das alles hier über Werttransformation?!! */
 
 		dayData.setPrecipitation(arrayUtilities.objArraySum(weatherDataArray, "precipitation"));
 		dayData.setWindspeed2m(
@@ -115,8 +115,7 @@ function getPlugin() {
 			try {
 				/*
 
-  hallo \" welt
-
+"  hallo \" welt "
 
 substrstwre = \\(.) replacejs = m.group(1)
 substrstwre = "" replacejs = '"'
@@ -166,37 +165,6 @@ substrstwre = "" replacejs = '"'
 	};
 	var setGridConstraints = function(element, columnIndex, nodeIndex) {
 		javafx.scene.layout.GridPane.setConstraints(element, columnIndex, nodeIndex);
-	};
-	var showImportPreview = function(gsehenInstance, gsehenGui, parentStackPane, msgBundle,
-			arrayList) {
-	    var content = new com.jfoenix.controls.JFXDialogLayout();
-	    content.setHeading(new javafx.scene.text.Text(msgBundle.getString("importpreview")));
-	    var dialog = new com.jfoenix.controls.JFXDialog(
-	    	parentStackPane,
-	    	content,
-	    	com.jfoenix.controls.JFXDialog.DialogTransition.CENTER
-	    );
-	    dialog.show();
-
-	    var columnKeys = [];
-	    columnKeys.push("lineNumber");
-	    getWeatherDataAttributeNamesArray(columnKeys);
-	    columnKeys.push("exceptionMsg");
-	    var previewTable = createTableView(arrayList, columnKeys, msgBundle);
-	    setGridConstraints(previewTable, 0, 0);
-
-	    var closeButton = gsehenGui.jfxButton(msgBundle.getString("importpreviewclose"));
-	    closeButton.setOnAction(function(e) {
-	      dialog.close();
-	    });
-	    setGridConstraints(closeButton, 0, 1);
-
-	    var inputGridPane = new javafx.scene.layout.GridPane();
-	    inputGridPane.setHgap(6);
-	    inputGridPane.setVgap(6);
-	    inputGridPane.getChildren().add(previewTable);
-	    inputGridPane.getChildren().add(closeButton);
-	    content.setBody(inputGridPane);
 	};
 	var addConfigItems = function(configNodes, specificConfigItems, fixedItemsCount) {
 		var itemIndex = fixedItemsCount;
@@ -249,19 +217,15 @@ substrstwre = "" replacejs = '"'
 	};
 	var WeatherDataPlugin = Java.extend(Java.type("de.hgu.gsehen.model.WeatherDataPlugin"), {
 		//-----------
-		/*@Override*/determineDayData: function(weatherDataSource, date /* currently unused */, beforeImport) {
+		/*@Override*/determineDayData: function(weatherDataSource, date /* currently unused */) {
 			var pluginConfig = JSON.parse(weatherDataSource.getPluginConfigurationJSON());
-			beforeImport.accept(weatherDataSource);
 			var weatherDataArray = importWeatherData(date /* currently unused */, pluginConfig);
 			if (weatherDataArray.length == 0) {
 				return null;
 			}
 			return calculateDayData(pluginConfig, date /* currently unused */, weatherDataArray);
 		},
-		javaLocaleMap: null,
-		guiControls: null,
-		setErrorInGUI: null,
-		resetGUI: null,
+		//----------------------------------------------------------------------------------------
 		getConfigObject: function() {
 			return {
 				measIntervalSeconds: guiControls.interval.getNodeValue(),              // 60
@@ -271,15 +235,32 @@ substrstwre = "" replacejs = '"'
 				dataFilePath: guiControls.filepath.getNodeValue()                      // "C:\\Data\\10MinDaten.csv"
 			};
 		},
+		createGuiControl: function(item, type, hasExample, itemObjectsList, data, dataKey) {
+			var ConfigField = Packages.de.hgu.gsehen.gui.view["ConfigDialog" + type];
+			guiControls[item] = new ConfigField(
+					gsehenGui.text(msgBundle.getString(item)),
+					hasExample ? gsehenGui.text(msgBundle.getString(item + "example")) : null,
+					itemObjectsList, gsehenInstance);
+			if (data != null && data[dataKey] != null) {
+				var temp = data[dataKey];
+				if (type == "DoubleField") {
+					temp = temp.doubleValue();
+				}
+				guiControls.interval.setNodeValue(temp);
+			}
+		},
+		gsehenGui: null,
+		confGui: null,
+		guiControls: null,
+		gsehenInstance: null,
+		msgBundle: null,
 		/*filechooserbutton: null,
 		/*filechooser: null,
 		/*dateerror: null*/
 		//-----------
-		/*@Override*/createAndFillSpecificControls: function(json, configNodes, fixedNodesCount, fixedItemsCount,
-				gsehenInstance, classLoader, selLocale, javaLocaleMapParam, parentStackPane,
-				errorSetter, resetter) {
-			var gsehenGui = Packages.de.hgu.gsehen.gui.GsehenGuiElements;
-			javaLocaleMap = javaLocaleMapParam;
+		/*@Override*/createAndFillSpecificControls: function(json, configurator) {
+			gsehenGui = Packages.de.hgu.gsehen.gui.GsehenGuiElements;
+			confGui = configurator;
 			guiControls = {
 				interval: null,
 				windspeed: null,
@@ -287,32 +268,15 @@ substrstwre = "" replacejs = '"'
 				localeid: null,
 				filepath: null
 			};
-			setErrorInGUI = errorSetter;
-			resetGUI = resetter;
-			var data = JSON.parse(json);
-			var msgBundle = java.util.ResourceBundle.getBundle(
-					"de.hgu.gsehen.js.plugins.csvImporter_i18n", selLocale, classLoader);
+			gsehenInstance = configurator.getInstance();
+			msgBundle = loadLocalResourceBundle("csvImporter_i18n", confGui.getLocale());
 			var specificConfigItems = new java.util.ArrayList();
-			guiControls.interval = new Packages.de.hgu.gsehen.gui.view.ConfigDialogDoubleField(
-					gsehenGui.text(msgBundle.getString("interval")), null,
-					specificConfigItems, gsehenInstance);
-			if (data != null && data.measIntervalSeconds != null) {
-				guiControls.interval.setNodeValue(data.measIntervalSeconds.doubleValue());
-			}
-			guiControls.windspeed = new Packages.de.hgu.gsehen.gui.view.ConfigDialogDoubleField(
-					gsehenGui.text(msgBundle.getString("windspeed")), null,
-					specificConfigItems, gsehenInstance);
-			if (data != null && data.windspeedMeasHeightMeters != null) {
-				guiControls.windspeed.setNodeValue(data.windspeedMeasHeightMeters.doubleValue());
-			}
-			guiControls.dateformat = new Packages.de.hgu.gsehen.gui.view.ConfigDialogStringField(
-					gsehenGui.text(msgBundle.getString("dateformat")),
-					gsehenGui.text(msgBundle.getString("dateformatexample")),
-					specificConfigItems, gsehenInstance);
-			if (data != null && data.dateFormatString != null) {
-				guiControls.dateformat.setNodeValue(data.dateFormatString);
-			}
-			guiControls.localeid = new Packages.de.hgu.gsehen.gui.view.ConfigDialogComboBox(
+			var data = JSON.parse(json);
+			createGuiControl("interval", "DoubleField", false, specificConfigItems, data, "measIntervalSeconds");
+			createGuiControl("windspeed", "DoubleField", false, specificConfigItems, data, "windspeedMeasHeightMeters");
+			createGuiControl("dateformat", "StringField", true, specificConfigItems, data, "dateFormatString");
+			createGuiControl("localeid", "ComboBox", true, specificConfigItems, data, "dateFormatString");
+			guiControls.localeid = new Packages.de.hgu.gsehen.gui.view.ConfigDialog(
 					gsehenGui.text(msgBundle.getString("localeid")),
 					gsehenGui.comboBox(getLocaleDisplay(javaLocaleMap)), null,
 					specificConfigItems, function(event) { });
@@ -354,7 +318,38 @@ substrstwre = "" replacejs = '"'
 		//-----------
 		/*@Override*/getSpecificConfigurationJSON: function() {
 			return JSON.stringify(getConfigObject(guiControls, javaLocaleMap));
-		}
+		},
+		showImportPreview: function(gsehenInstance, gsehenGui, parentStackPane, msgBundle,
+				arrayList) {
+		    var content = new com.jfoenix.controls.JFXDialogLayout();
+		    content.setHeading(new javafx.scene.text.Text(msgBundle.getString("importpreview")));
+		    var dialog = new com.jfoenix.controls.JFXDialog(
+		    	parentStackPane,
+		    	content,
+		    	com.jfoenix.controls.JFXDialog.DialogTransition.CENTER
+		    );
+		    dialog.show();
+
+		    var columnKeys = [];
+		    columnKeys.push("lineNumber");
+		    getWeatherDataAttributeNamesArray(columnKeys);
+		    columnKeys.push("exceptionMsg");
+		    var previewTable = createTableView(arrayList, columnKeys, msgBundle);
+		    setGridConstraints(previewTable, 0, 0);
+
+		    var closeButton = gsehenGui.jfxButton(msgBundle.getString("importpreviewclose"));
+		    closeButton.setOnAction(function(e) {
+		      dialog.close();
+		    });
+		    setGridConstraints(closeButton, 0, 1);
+
+		    var inputGridPane = new javafx.scene.layout.GridPane();
+		    inputGridPane.setHgap(6);
+		    inputGridPane.setVgap(6);
+		    inputGridPane.getChildren().add(previewTable);
+		    inputGridPane.getChildren().add(closeButton);
+		    content.setBody(inputGridPane);
+		};
 	});
 	return new WeatherDataPlugin();
 }
