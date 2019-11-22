@@ -1,17 +1,18 @@
 package de.hgu.gsehen.gui;
 
-import de.hgu.gsehen.Gsehen;
+import static de.hgu.gsehen.util.MessageUtil.logMessage;
 
+import de.hgu.gsehen.Gsehen;
 import java.awt.Color;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.ResourceBundle;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.transformation.SortedList;
 import javafx.scene.chart.XYChart.Data;
 import javax.swing.JScrollPane;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -36,6 +37,7 @@ import org.jfree.data.xy.XYDataset;
  * @author CW
  */
 public class CombinedBarAndLineChart {
+  private static final Logger LOGGER = Logger.getLogger(CombinedBarAndLineChart.class.getName());
 
   protected final ResourceBundle mainBundle;
   private Gsehen gsehenInstance;
@@ -43,7 +45,6 @@ public class CombinedBarAndLineChart {
   private SortedList<Data<Date, Number>> twbDataList;
   private SortedList<Data<Date, Number>> precDataList;
   private SortedList<Data<Date, Number>> irriDataList;
-  private XYDataset dataSet;
 
   {
     gsehenInstance = Gsehen.getInstance();
@@ -71,19 +72,15 @@ public class CombinedBarAndLineChart {
     precDataList = precBarList;
     irriDataList = irriBarList;
 
-    // Create chart
     JFreeChart chart = ChartFactory.createTimeSeriesChart(mainBundle.getString("chart.name"),
-        mainBundle.getString("chart.date"), mainBundle.getString("chart.water"), dataSet);
-
-    // Create the plot and set tick-unit to 1 day
-    XYPlot plot = (XYPlot) chart.getPlot();
+        mainBundle.getString("chart.date"), mainBundle.getString("chart.water"), null);
+    XYPlot plot = (XYPlot)chart.getPlot();
     plot.setBackgroundPaint(Color.white);
     plot.setDomainGridlinePaint(Color.gray);
     plot.setRangeGridlinePaint(Color.gray);
     plot.setDomainPannable(true);
-    DateTickUnit tickUnit = new DateTickUnit(DateTickUnitType.DAY, 1);
-    DateAxis axis = (DateAxis) plot.getDomainAxis();
-    axis.setTickUnit(tickUnit);
+    DateAxis axis = (DateAxis)plot.getDomainAxis();
+    axis.setTickUnit(new DateTickUnit(DateTickUnitType.DAY, 1));
     axis.setVerticalTickLabels(true);
 
     ValueMarker marker = new ValueMarker(0);
@@ -97,111 +94,68 @@ public class CombinedBarAndLineChart {
     plot.setDataset(2, createPrecDataset());
     plot.setDataset(3, createIrriDataset());
 
+    plot.setRenderer(0, createRenderer(Color.green));
+    plot.setRenderer(1, createRenderer(Color.red));
     StackedXYBarRenderer.setDefaultShadowsVisible(false);
+    plot.setRenderer(2, createEventRenderer(Color.blue));
+    plot.setRenderer(3, createEventRenderer(Color.yellow));
 
-    // Create and set the renderer
-    XYItemRenderer caswRenderer = new XYLineAndShapeRenderer();
-    XYItemRenderer twbRenderer = new XYLineAndShapeRenderer();
-    StackedXYBarRenderer precRenderer = new StackedXYBarRenderer();
-    StackedXYBarRenderer irriRenderer = new StackedXYBarRenderer();
-    plot.setRenderer(0, caswRenderer);
-    plot.setRenderer(1, twbRenderer);
-    plot.setRenderer(2, precRenderer);
-    plot.setRenderer(3, irriRenderer);
-    plot.getRendererForDataset(plot.getDataset(0)).setSeriesPaint(0, Color.green);
-    plot.getRendererForDataset(plot.getDataset(1)).setSeriesPaint(0, Color.red);
-    plot.getRendererForDataset(plot.getDataset(2)).setSeriesPaint(0, Color.blue);
-    plot.getRendererForDataset(plot.getDataset(3)).setSeriesPaint(0, Color.yellow);
-
-    // define 'dataSet'
-    dataSet = plot.getDataset();
-
-    ChartPanel panel = new ChartPanel(chart);
-    JScrollPane scrollPane = new JScrollPane(panel);
-
-    return scrollPane;
+    return new JScrollPane(new ChartPanel(chart));
   }
 
   private XYDataset createCaswDataset() {
-    TimeSeriesCollection dataset = new TimeSeriesCollection();
-
-    TimeSeries caswSeries = new TimeSeries(mainBundle.getString("dataexport.soilwater"));
-
-    for (Data<Date, Number> data : caswDataList) {
-      Date date = data.getXValue();
-      LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      int year = localDate.getYear();
-      int month = localDate.getMonthValue();
-      int day = localDate.getDayOfMonth();
-
-      caswSeries.add(new Day(day, month, year), data.getYValue());
-    }
-
-    dataset.addSeries(caswSeries);
-
-    return dataset;
+    return createDataset("dataexport.soilwater", caswDataList);
   }
 
   private XYDataset createTwbDataset() {
-    TimeSeriesCollection dataset = new TimeSeriesCollection();
-
-    TimeSeries twbSeries = new TimeSeries(mainBundle.getString("dataexport.totalwater"));
-
-    for (Data<Date, Number> data : twbDataList) {
-      Date date = data.getXValue();
-      LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      int year = localDate.getYear();
-      int month = localDate.getMonthValue();
-      int day = localDate.getDayOfMonth();
-
-      twbSeries.add(new Day(day, month, year), data.getYValue());
-    }
-
-    dataset.addSeries(twbSeries);
-
-    return dataset;
+    return createDataset("dataexport.totalwater", twbDataList);
   }
 
   private TimeTableXYDataset createPrecDataset() {
-    TimeTableXYDataset dataset = new TimeTableXYDataset();
-
-    // TimeSeries precSeries = new TimeSeries("Prec. Series");
-
-    for (Data<Date, Number> data : precDataList) {
-      Date date = data.getXValue();
-      LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      int year = localDate.getYear();
-      int month = localDate.getMonthValue();
-      int day = localDate.getDayOfMonth();
-
-      dataset.add(new Day(day, month, year), (double) data.getYValue(),
-          mainBundle.getString("dataexport.precipitation"));
-    }
-
-    // dataset.addSeries(precSeries);
-
-    return dataset;
+    return createEventDataSet("dataexport.precipitation", precDataList);
   }
 
   private TimeTableXYDataset createIrriDataset() {
+    return createEventDataSet("dataexport.irrigation", irriDataList);
+  }
+
+  private TimeTableXYDataset createEventDataSet(final String eventNameKey,
+      final SortedList<Data<Date, Number>> dataList) {
     TimeTableXYDataset dataset = new TimeTableXYDataset();
-
-    // TimeSeries irriSeries = new TimeSeries("Irri. Series");
-
-    for (Data<Date, Number> data : irriDataList) {
-      Date date = data.getXValue();
-      LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-      int year = localDate.getYear();
-      int month = localDate.getMonthValue();
-      int day = localDate.getDayOfMonth();
-
-      dataset.add(new Day(day, month, year), (double) data.getYValue(),
-          mainBundle.getString("dataexport.irrigation"));
+    for (Data<Date, Number> data : dataList) {
+      dataset.add(toDay(data), (double)data.getYValue(),
+          mainBundle.getString(eventNameKey));
     }
-
-    // dataset.addSeries(irriSeries);
-
     return dataset;
   }
 
+  private XYDataset createDataset(final String seriesNameKey,
+      final SortedList<Data<Date, Number>> dataList) {
+    /*                       FINE    */
+    logMessage(LOGGER, Level.CONFIG, "creating.dataset.of.size", seriesNameKey, dataList.size());
+    TimeSeriesCollection dataset = new TimeSeriesCollection();
+    TimeSeries timeSeries = new TimeSeries(mainBundle.getString(seriesNameKey));
+    for (Data<Date, Number> data : dataList) {
+      timeSeries.add(toDay(data), data.getYValue());
+    }
+    dataset.addSeries(timeSeries);
+    return dataset;
+  }
+
+  private Day toDay(Data<Date, Number> data) {
+    LocalDate local = data.getXValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    return new Day(local.getDayOfMonth(), local.getMonthValue(), local.getYear());
+  }
+
+  private XYItemRenderer createRenderer(Color color) {
+    final XYItemRenderer renderer = new XYLineAndShapeRenderer();
+    renderer.setSeriesPaint(0, color);
+    return renderer;
+  }
+
+  private XYItemRenderer createEventRenderer(Color color) {
+    final XYItemRenderer renderer = new StackedXYBarRenderer();
+    renderer.setSeriesPaint(0, color);
+    return renderer;
+  }
 }

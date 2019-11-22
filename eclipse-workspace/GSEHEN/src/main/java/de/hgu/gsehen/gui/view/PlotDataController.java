@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -300,7 +301,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     // TableView where you can set the duration of each crop phase and the rooting-zone of each crop
     cropTable = new TableView();
 
-    // Each TableCollumn
+    // each TableColumn
     TableColumn phase = new TableColumn(mainBundle.getString("tableview.phase"));
     TableColumn description = new TableColumn(mainBundle.getString("tableview.description"));
     TableColumn today = new TableColumn(mainBundle.getString("tableview.currentphase"));
@@ -614,69 +615,55 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     }
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  private SortedList<Data<Date, Number>> setPrecBarChartData() {
-    precBarDataList = new SortedList<Data<Date, Number>>(precBarData,
-        (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
-
-    for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
-      Data<Date, Number> wateringData = new XYChart.Data();
-
-      if (mws.getPrecipitation() != 0.0) {
-        wateringData = new XYChart.Data(mws.getDate(), mws.getPrecipitation());
-        precBarData.add(wateringData);
-      }
-    }
-    return precBarDataList;
+  private void setPrecBarChartData() {
+    precBarDataList = createEventChartData(precBarData, mws -> mws.getPrecipitation());
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  private SortedList<Data<Date, Number>> setIrriBarChartData() {
-    irriBarDataList = new SortedList<Data<Date, Number>>(irriBarData,
-        (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
-
-    for (ManualWaterSupply mws : plot.getManualData().getManualWaterSupply()) {
-      Data<Date, Number> wateringData = new XYChart.Data();
-
-      if (mws.getIrrigation() != 0.0) {
-        wateringData = new XYChart.Data(mws.getDate(), mws.getIrrigation());
-        irriBarData.add(wateringData);
-      }
-    }
-    return irriBarDataList;
+  private void setIrriBarChartData() {
+    irriBarDataList = createEventChartData(irriBarData, mws -> mws.getIrrigation());
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  private SortedList<Data<Date, Number>> setCaswChartData() {
-    caswDataList = new SortedList<Data<Date, Number>>(caswData,
-        (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
-    if (plot.getWaterBalance() != null && plot.getWaterBalance().getDailyBalances() != null) {
-      for (DayData dayData : plot.getWaterBalance().getDailyBalances()) {
-        Data<Date, Number> soilWaterData = new XYChart.Data(dayData.getDate(),
-            dayData.getCurrentAvailableSoilWater() * (-1));
-        caswData.add(soilWaterData);
-      }
-    }
-    return caswDataList;
+  private void setCaswChartData() {
+    caswDataList = createChartData(caswData, dayData -> dayData.getCurrentAvailableSoilWater());
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  private SortedList<Data<Date, Number>> setTwbChartData() {
-    twbDataList = new SortedList<Data<Date, Number>>(twbData,
-        (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
+  private void setTwbChartData() {
+    twbDataList = createChartData(twbData, dayData -> dayData.getCurrentTotalWaterBalance());
+  }
 
-    if (plot.getWaterBalance() != null && plot.getWaterBalance().getDailyBalances() != null) {
-      for (DayData dayData : plot.getWaterBalance().getDailyBalances()) {
-
-        Data<Date, Number> totalWaterData = new XYChart.Data(dayData.getDate(),
-            dayData.getCurrentTotalWaterBalance() * (-1));
-
-        twbData.add(totalWaterData);
-      }
-    }
+  public void setupChartPanel() {
     chartPanel.setContent(
         barLineChart.scrollPane(precBarDataList, irriBarDataList, caswDataList, twbDataList));
-    return twbDataList;
+  }
+
+  private SortedList<Data<Date, Number>> createEventChartData(
+      final ObservableList<Data<Date, Number>> dataList,
+      final Function<ManualWaterSupply, Double> dataSource) {
+    final SortedList<Data<Date, Number>> sortedList = new SortedList<Data<Date, Number>>(dataList,
+        (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
+    dataList.clear();
+    for (ManualWaterSupply manualWaterSupply : plot.getManualData().getManualWaterSupply()) {
+      final Double data = dataSource.apply(manualWaterSupply);
+      if (data != 0.0) {
+        dataList.add(new XYChart.Data<Date, Number>(manualWaterSupply.getDate(), (Number)data));
+      }
+    }
+    return sortedList;
+  }
+
+  private SortedList<Data<Date, Number>> createChartData(
+      final ObservableList<Data<Date, Number>> dataList,
+      final Function<DayData, Double> dataSource) {
+    final SortedList<Data<Date, Number>> sortedList = new SortedList<Data<Date, Number>>(dataList,
+        (data1, data2) -> data1.getXValue().compareTo(data2.getXValue()));
+    dataList.clear();
+    if (plot.getWaterBalance() != null && plot.getWaterBalance().getDailyBalances() != null) {
+      for (DayData dayData : plot.getWaterBalance().getDailyBalances()) {
+        dataList.add(new XYChart.Data<Date, Number>(dayData.getDate(),
+            (Number)(dataSource.apply(dayData) * (-1))));
+      }
+    }
+    return sortedList;
   }
 
   @SuppressWarnings("checkstyle:all")
@@ -1156,6 +1143,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             setIrriBarChartData();
             setCaswChartData();
             setTwbChartData();
+            setupChartPanel();
           }
         } else {
           pane.setVisible(false);
@@ -1179,5 +1167,4 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   public static void setInstance(PlotDataController instance) {
     PlotDataController.instance = instance;
   }
-
 }

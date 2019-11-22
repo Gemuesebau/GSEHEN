@@ -50,22 +50,21 @@ public class TextFileUtil {
     final ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
     engine.put("LOGGER", LOGGER);
     try {
+      final String parent = new File(absoluteFileName).getParent().replace("\\", "\\\\");
       engine.eval(
           "function loadLocalJavaScript(relativePathAndName) {"
           + " function() {"
           + "     eval.apply(this, arguments);"
           + " }(Packages." + TextFileUtil.class.getName() + ".getUtf8FileAsOneString("
           + "     \""
-          + new File(absoluteFileName).getParent() + File.separatorChar
+          + parent + (File.separatorChar == '/' ? "/" : "\\\\")
           + "\" + relativePathAndName));"
           + "}"
           + "function loadLocalResourceBundle(bundleName, locale) {"
-          + " function() {"
-          + "     eval.apply(this, arguments);"
-          + " }(Packages." + TextFileUtil.class.getName() + ".getFileAsResourceBundle("
-          + "     \""
-          + new File(absoluteFileName).getParent()
-          + "\", bundleName, locale));"
+          + " return Packages." + TextFileUtil.class.getName() + ".getFileAsResourceBundle("
+              + "     \""
+              + parent
+              + "\", bundleName, locale);"
           + "}");
       engine.eval(getReaderForUtf8(absoluteFileName));
     } catch (Exception e) {

@@ -2,14 +2,6 @@ package de.hgu.gsehen.gsbalance;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.evapotranspiration.EnvCalculator;
 import de.hgu.gsehen.evapotranspiration.GeoData;
@@ -23,6 +15,16 @@ import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
 import de.hgu.gsehen.model.WaterBalance;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
+@SuppressWarnings({ "checkstyle:multiplevariabledeclarations", "checkstyle:emptylineseparator",
+    "checkstyle:variabledeclarationusagedistance"})
 class TotalBalanceTest {
   GeoData location;
   SimpleDateFormat tag;

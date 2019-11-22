@@ -10,8 +10,8 @@ import javafx.scene.text.Text;
 public class ConfigDialogComboBox extends ConfigDialogElement<JFXComboBox<String>, String> {
 
   @SuppressWarnings("checkstyle:javadocmethod")
-  public ConfigDialogComboBox(Text text, JFXComboBox<String> comboBox, Text label,
-      List<ConfigDialogElement<Node, Object>> add, EventHandler<ActionEvent> valueChangedHandler) {
+  public ConfigDialogComboBox(Text text, Text label, List<ConfigDialogElement<Node, Object>> add,
+      JFXComboBox<String> comboBox, EventHandler<ActionEvent> valueChangedHandler) {
     super(
         text, comboBox, label, add,
         (node, value) -> node.setValue(value),

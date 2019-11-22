@@ -1,12 +1,13 @@
 package de.hgu.gsehen.view;
 
+import de.hgu.gsehen.gui.GeoPoint;
+import de.hgu.gsehen.gui.GeoPolygon;
+
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import de.hgu.gsehen.gui.GeoPoint;
-import de.hgu.gsehen.gui.GeoPolygon;
-
+@SuppressWarnings("checkstyle:localvariablename")
 public class AreaTest {
 
   @Test

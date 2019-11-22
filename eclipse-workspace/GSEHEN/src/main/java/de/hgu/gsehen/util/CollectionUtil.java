@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class CollectionUtil {
@@ -167,5 +168,15 @@ public class CollectionUtil {
     if (check.get()) {
       ifTrue.run();
     }
+  }
+
+  @SuppressWarnings("checkstyle:javadocmethod")
+  public static <T> T findItem(Iterable<T> items, Predicate<T> match) {
+    for (T item : items) {
+      if (match.test(item)) {
+        return item;
+      }
+    }
+    return null;
   }
 }

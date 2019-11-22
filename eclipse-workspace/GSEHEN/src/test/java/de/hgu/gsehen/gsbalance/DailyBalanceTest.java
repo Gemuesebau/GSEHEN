@@ -1,13 +1,6 @@
 package de.hgu.gsehen.gsbalance;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.evapotranspiration.GeoData;
@@ -15,6 +8,12 @@ import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
 import de.hgu.gsehen.model.CropRootingZone;
 import de.hgu.gsehen.model.Plot;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class DailyBalanceTest {
   GeoData location;

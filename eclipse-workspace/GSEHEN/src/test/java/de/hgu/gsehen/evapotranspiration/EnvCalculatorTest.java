@@ -10,6 +10,7 @@ import org.junit.Test;
 public class EnvCalculatorTest {
 
   @Test
+  @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
   public void testCalculateEt0() throws ParseException {
     GeoData location = new GeoData(false, 7.95, 49.99, 110);
     GeoData location2 = new GeoData(false, 7.95, 50.8, 100);

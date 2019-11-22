@@ -569,8 +569,9 @@ public class FieldDataController extends Application
     List<ConfigDialogElement<Node, Object>> weatherDataSourceConfigItems = new ArrayList<>();
     pluginJsFileName = new ConfigDialogComboBox(
         GsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatapluginjsfilenamelabel")),
-        GsehenGuiElements.comboBox(PluginUtil.getPluginJsFileNames()), null,
-        weatherDataSourceConfigItems, event -> setWeatherDataPlugin(getComboBoxValue(event)));
+        null, weatherDataSourceConfigItems,
+        GsehenGuiElements.comboBox(PluginUtil.getPluginJsFileNames()),
+        event -> setWeatherDataPlugin(((String)getComboBoxValue(event)).substring(2)));
     manualImport = new ConfigDialogCheckBox(
         GsehenGuiElements.text(mainBundle.getString("fieldview.weatherdatamanualimportlabel")),
         null, weatherDataSourceConfigItems);
@@ -603,7 +604,7 @@ public class FieldDataController extends Application
   }
 
   private String numberExample(final String string) {
-    return " " + gsehenInstance.formatDoubleOneDecimal(gsehenInstance.parseDouble(string));
+    return " " + gsehenInstance.formatDoubleTwoDecimal(gsehenInstance.parseDouble(string));
   }
 
   private void configureNodes(List<ConfigDialogElement<Node, Object>> nodes, int startIndex) {
@@ -654,7 +655,7 @@ public class FieldDataController extends Application
         addWDStoList = true;
       }
       wds.setName(weatherDataSourceName.getText());
-      wds.setPluginJsFileName(pluginJsFileName.getNodeValue());
+      wds.setPluginJsFileName(pluginJsFileName.getNodeValue().substring(2));
       wds.setManualImportActive(manualImport.getNodeValue());
       wds.setAutomaticImportActive(automaticImport.getNodeValue());
       wds.setAutomaticImportFrequencySeconds(automaticImportIntervalSeconds.getNodeValue());
@@ -678,7 +679,8 @@ public class FieldDataController extends Application
     if (selectedWeatherDataSource != null) {
       weatherDataSourceName.setText(selectedWeatherDataSource.getName());
       final String selectedPluginJsFileName = selectedWeatherDataSource.getPluginJsFileName();
-      pluginJsFileName.setNodeValue(selectedPluginJsFileName);
+      pluginJsFileName.setNodeValue(CollectionUtil.findItem(pluginJsFileName.getNode().getItems(),
+          item -> item.substring(2).equals(selectedPluginJsFileName)));
       manualImport.setNodeValue(selectedWeatherDataSource.isManualImportActive());
       automaticImport.setNodeValue(selectedWeatherDataSource.isAutomaticImportActive());
       automaticImportIntervalSeconds

@@ -228,73 +228,69 @@ substrstwre = "" replacejs = '"'
 		//----------------------------------------------------------------------------------------
 		getConfigObject: function() {
 			return {
-				measIntervalSeconds: guiControls.interval.getNodeValue(),              // 60
-				windspeedMeasHeightMeters: guiControls.windspeed.getNodeValue(),       // 2
-				dateFormatString: guiControls.dateformat.getNodeValue(),               // "y-M-d" ---> see newDateFormat
-				numberFormat: javaLocaleMap.get(guiControls.localeid.getNodeValue()),  // "Deutsch (GERMAN)"
-				dataFilePath: guiControls.filepath.getNodeValue()                      // "C:\\Data\\10MinDaten.csv"
+				measIntervalSeconds: this.guiControls.interval.getNodeValue(),              // 60
+				windspeedMeasHeightMeters: this.guiControls.windspeed.getNodeValue(),       // 2
+				dateFormatString: this.guiControls.dateformat.getNodeValue(),               // "y-M-d" ---> see newDateFormat
+				numberFormat: this.javaLocaleMap.get(this.guiControls.localeid.getNodeValue()),  // "Deutsch (GERMAN)"
+				dataFilePath: this.guiControls.filepath.getNodeValue()                      // "C:\\Data\\10MinDaten.csv"
 			};
 		},
-		createGuiControl: function(item, type, hasExample, itemObjectsList, data, dataKey) {
+		createGuiControl: function(item, type, hasExample, itemObjectsList, data, dataKey, transform, comboBox) {
 			var ConfigField = Packages.de.hgu.gsehen.gui.view["ConfigDialog" + type];
-			guiControls[item] = new ConfigField(
-					gsehenGui.text(msgBundle.getString(item)),
-					hasExample ? gsehenGui.text(msgBundle.getString(item + "example")) : null,
-					itemObjectsList, gsehenInstance);
+			var text = this.gsehenGui.text(this.msgBundle.getString(item));
+			var example = hasExample ? this.gsehenGui.text(this.msgBundle.getString(item + "example")) : null;
+			if (comboBox != null) {
+				this.guiControls[item] = new ConfigField(text, example, itemObjectsList, comboBox, function(event) { });
+			}
+			else {
+				this.guiControls[item] = new ConfigField(text, example, itemObjectsList, this.gsehenInstance);
+			}
 			if (data != null && data[dataKey] != null) {
+				var control = this.guiControls[item];
 				var temp = data[dataKey];
-				if (type == "DoubleField") {
-					temp = temp.doubleValue();
+				if (transform != null) {
+					temp = transform(temp);
 				}
-				guiControls.interval.setNodeValue(temp);
+				control.setNodeValue(temp);
 			}
 		},
 		gsehenGui: null,
-		confGui: null,
+		javaLocaleMap: null,
 		guiControls: null,
 		gsehenInstance: null,
 		msgBundle: null,
+		parentStackPane: null,
 		/*filechooserbutton: null,
 		/*filechooser: null,
 		/*dateerror: null*/
 		//-----------
 		/*@Override*/createAndFillSpecificControls: function(json, configurator) {
-			gsehenGui = Packages.de.hgu.gsehen.gui.GsehenGuiElements;
-			confGui = configurator;
-			guiControls = {
+			this.gsehenGui = Packages.de.hgu.gsehen.gui.GsehenGuiElements;
+			this.javaLocaleMap = configurator.getJavaLocaleMap();
+			this.guiControls = {
 				interval: null,
 				windspeed: null,
 				dateformat: null,
 				localeid: null,
 				filepath: null
 			};
-			gsehenInstance = configurator.getInstance();
-			msgBundle = loadLocalResourceBundle("csvImporter_i18n", confGui.getLocale());
+			this.gsehenInstance = configurator.getInstance();
+			this.msgBundle = loadLocalResourceBundle("csvImporter_i18n", configurator.getLocale());
+			this.parentStackPane = configurator.getParentStackPane();
 			var specificConfigItems = new java.util.ArrayList();
 			var data = JSON.parse(json);
-			createGuiControl("interval", "DoubleField", false, specificConfigItems, data, "measIntervalSeconds");
-			createGuiControl("windspeed", "DoubleField", false, specificConfigItems, data, "windspeedMeasHeightMeters");
-			createGuiControl("dateformat", "StringField", true, specificConfigItems, data, "dateFormatString");
-			createGuiControl("localeid", "ComboBox", true, specificConfigItems, data, "dateFormatString");
-			guiControls.localeid = new Packages.de.hgu.gsehen.gui.view.ConfigDialog(
-					gsehenGui.text(msgBundle.getString("localeid")),
-					gsehenGui.comboBox(getLocaleDisplay(javaLocaleMap)), null,
-					specificConfigItems, function(event) { });
-			if (data != null && data.numberFormat != null) {
-				guiControls.localeid.setNodeValue(reverseLookup(data.numberFormat, javaLocaleMap));
-			}
-			guiControls.filepath = new Packages.de.hgu.gsehen.gui.view.ConfigDialogStringField(
-					gsehenGui.text(msgBundle.getString("filepath")),
-					gsehenGui.text(msgBundle.getString("filepathexample")),
-					specificConfigItems, gsehenInstance);
-			if (data != null && data.dataFilePath != null) {
-				guiControls.filepath.setNodeValue(data.dataFilePath);
-			}
+			this.createGuiControl("interval", "DoubleField", false, specificConfigItems, data, "measIntervalSeconds", function(temp) { return temp.doubleValue(); });
+			this.createGuiControl("windspeed", "DoubleField", false, specificConfigItems, data, "windspeedMeasHeightMeters", function(temp) { return temp.doubleValue(); });
+			this.createGuiControl("dateformat", "StringField", true, specificConfigItems, data, "dateFormatString");
+			this.createGuiControl("localeid", "ComboBox", false, specificConfigItems, data, "numberFormat", function(temp) { return reverseLookup(temp, configurator.getJavaLocaleMap()); },
+					this.gsehenGui.comboBox(getLocaleDisplay(this.javaLocaleMap)));
+			this.createGuiControl("filepath", "StringField", true, specificConfigItems, data, "dataFilePath");
 			/*filechooserbutton//Datei auswählen
 			/*filechooser//(ent)hält Dateipfad zur Wetterdatenquelle
 			/*dateerror//Falsches Format!*/
+			var weatherDataPlugin = this;
 			new Packages.de.hgu.gsehen.gui.view.ConfigDialogActionButton(
-					msgBundle.getString("importtest"), specificConfigItems, gsehenGui,
+					this.msgBundle.getString("importtest"), specificConfigItems,
 					function(event) {
 						var arrayList = new (
 							Java.extend(java.util.ArrayList, Packages.de.hgu.gsehen.model.Stack, {
@@ -305,26 +301,24 @@ substrstwre = "" replacejs = '"'
 						)();
 						importWeatherData(
 							Packages.de.hgu.gsehen.util.DateUtil.truncToDay(new java.util.Date()),
-							getConfigObject(guiControls, javaLocaleMap),
+							weatherDataPlugin.getConfigObject(),
 							arrayList,
 							true
 						);
-						showImportPreview(gsehenInstance, gsehenGui, parentStackPane, msgBundle,
-							arrayList);
+						showImportPreview(arrayList);
 					}
 			);
-			addConfigItems(configNodes, specificConfigItems, fixedItemsCount);
+			addConfigItems(configurator.getConfigNodes(), specificConfigItems, configurator.getFixedItemsCount());
 		},
 		//-----------
 		/*@Override*/getSpecificConfigurationJSON: function() {
-			return JSON.stringify(getConfigObject(guiControls, javaLocaleMap));
+			return JSON.stringify(this.getConfigObject());
 		},
-		showImportPreview: function(gsehenInstance, gsehenGui, parentStackPane, msgBundle,
-				arrayList) {
+		showImportPreview: function(arrayList) {
 		    var content = new com.jfoenix.controls.JFXDialogLayout();
-		    content.setHeading(new javafx.scene.text.Text(msgBundle.getString("importpreview")));
+		    content.setHeading(this.gsehenGui.text(this.msgBundle.getString("importpreview")));
 		    var dialog = new com.jfoenix.controls.JFXDialog(
-		    	parentStackPane,
+		    	this.parentStackPane,
 		    	content,
 		    	com.jfoenix.controls.JFXDialog.DialogTransition.CENTER
 		    );
@@ -334,10 +328,10 @@ substrstwre = "" replacejs = '"'
 		    columnKeys.push("lineNumber");
 		    getWeatherDataAttributeNamesArray(columnKeys);
 		    columnKeys.push("exceptionMsg");
-		    var previewTable = createTableView(arrayList, columnKeys, msgBundle);
+		    var previewTable = createTableView(arrayList, columnKeys, this.msgBundle);
 		    setGridConstraints(previewTable, 0, 0);
 
-		    var closeButton = gsehenGui.jfxButton(msgBundle.getString("importpreviewclose"));
+		    var closeButton = this.gsehenGui.jfxButton(this.msgBundle.getString("importpreviewclose"));
 		    closeButton.setOnAction(function(e) {
 		      dialog.close();
 		    });
@@ -349,7 +343,7 @@ substrstwre = "" replacejs = '"'
 		    inputGridPane.getChildren().add(previewTable);
 		    inputGridPane.getChildren().add(closeButton);
 		    content.setBody(inputGridPane);
-		};
+		}
 	});
 	return new WeatherDataPlugin();
 }

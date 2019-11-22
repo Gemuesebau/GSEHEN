@@ -21,14 +21,22 @@ public class PluginUtil {
 
   private static final Logger LOGGER = Logger.getLogger(PluginUtil.class.getName());
   private static final String PLUGINS_FOLDER =
-      Gsehen.class.getResource("/de/hgu/gsehen/js/plugins").getPath();
+      new File(Gsehen.class.getResource("/de/hgu/gsehen/js/plugins").getPath()).getAbsolutePath();
   private static final String USER_PLUGINS_FOLDER = Gsehen.getPluginsFolder().getAbsolutePath();
 
-  @SuppressWarnings({ "checkstyle:javadocmethod", "checkstyle:avoidescapedunicodecharacters" })
+  /**
+   * Returns a String array of decorated plug-in names.
+   *
+   * <p>The plug-in names are the pure JavaScript file names (w/o their paths),
+   * but each prefixed by two characters indicating whether a plug-in is "built-in", i.e., delivered
+   * with the GSEHEN application installation package.</p>
+   *
+   * @return the marked plug-in file names array
+   */
   public static String[] getPluginJsFileNames() {
     return CollectionUtil.mapArrayValues(String.class,
-        file -> (file.getParent().equals(PLUGINS_FOLDER) ? "\u25C6 " : "  ")
-            + file.getName(),
+        file -> "" + (file.getParent().equals(PLUGINS_FOLDER) ? (char)9670 : ' ')
+            + ' ' + file.getName(),
         getJsFiles(PLUGINS_FOLDER),
         getJsFiles(USER_PLUGINS_FOLDER)
     );
