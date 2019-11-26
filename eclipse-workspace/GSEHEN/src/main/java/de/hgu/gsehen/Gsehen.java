@@ -774,10 +774,9 @@ public class Gsehen extends Application {
    * Sends a "DayDataChanged" event to all listeners registered for that kind of event, except the
    * listeners that belong to the given "skipClass".
    *
-   * @param dayData
-   *          the current "DayData"
-   * @param skipClass
-   *          the event listener class to skip when iterating the listeners, or null
+   * @param dayData the current "DayData"
+   * @param weatherDataSource the weather data source that is the origin of the change
+   * @param skipClass the event listener class to skip when iterating the listeners, or null
    */
   public void sendDayDataChanged(List<DayData> dayData, WeatherDataSource weatherDataSource,
       Class<? extends GsehenEventListener<DayDataChanged>> skipClass) {

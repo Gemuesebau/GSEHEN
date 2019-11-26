@@ -144,7 +144,7 @@ public class MainController {
   }
 
   /**
-   * Save & Exit Event.
+   * Save &amp; Exit Event.
    */
   public void exit() {
     if (gsehenInstance.isDataChanged()) {

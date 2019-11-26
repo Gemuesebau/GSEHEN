@@ -35,7 +35,7 @@ public class Farm extends Drawable implements DrawableParent {
    * de.hgu.gsehen.model.Farm.setFields(Field...), oder
    * de.hgu.gsehen.model.Farm.getFields().add(...) gesetzt.
    *
-   * @see de.hgu.gsehen.model.Farm.setFields
+   * @see de.hgu.gsehen.model.Farm#setFields(List)
    * @param name der Name der Farm
    * @param polygon die Umrisse der Hauptgebäudeanlage, nicht der Felder!
    */

@@ -11,7 +11,7 @@ import static java.lang.Math.tan;
 
 import java.util.Calendar;
 
-import org.junit.platform.commons.annotation.Testable;
+//import org.junit.platform.commons.annotation.Testable;
 
 public class EnvCalculator {
   private static final double ALPHA = 0.23;
@@ -41,7 +41,7 @@ public class EnvCalculator {
    * @param dayData An Object of the DayData class
    * @param geoData An Object of the GeoData class
    */
-  @Testable
+  //@Testable
   public static void calculateEt0(DayData dayData, GeoData geoData) {
     Integer yday = tellDoy(dayData);
 

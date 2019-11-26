@@ -31,7 +31,7 @@ import org.jfree.data.time.TimeTableXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 /**
- * Graphic for irrigation, precipitation, current available soil water & current total water
+ * Graphic for irrigation, precipitation, current available soil water &amp; current total water
  * balance.
  * 
  * @author CW

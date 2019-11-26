@@ -40,12 +40,6 @@
     </exec>
   </target>
 
-  <!-- <target name="delete-test-db-file"> // wofür?
-    <exec executable="cmd" os="Windows 10">
-      <arg value="/c &quot;del C:\Users\Alex\test.mv.db&quot;" />
-    </exec>
-  </target> -->
-
   <target name="list-db-file">
     <exec executable="cmd" os="Windows 10" dir="${data.dir}">
       <arg value="/c &quot;dir gsehen-h2-local.db.mv.db | findstr h2&quot;" />
@@ -76,5 +70,36 @@
     <exec executable="cmd" os="Windows 10">
       <arg value="/c &quot;dir bin&quot;" />
     </exec>
+  </target>
+
+  <target name="javadoc" description="generate documentation">
+    <javadoc sourcepath="src/main/java" destdir="javadoc/main" failonerror="true"
+    	charset="utf-8" docencoding="utf-8" encoding="utf-8">
+        <classpath path="lib/main/antlr-2.7.7.jar" />
+        <classpath path="lib/main/boxable-1.5.jar" />
+        <classpath path="lib/main/byte-buddy-1.8.15.jar" />
+        <classpath path="lib/main/classmate-1.3.4.jar" />
+        <classpath path="lib/main/commons-csv-1.2.jar" />
+        <classpath path="lib/main/commons-logging-1.2.jar" />
+        <classpath path="lib/main/dom4j-1.6.1.jar" />
+        <classpath path="lib/main/fontbox-2.0.0.jar" />
+        <classpath path="lib/main/guava-18.0.jar" />
+        <classpath path="lib/main/h2-1.4.195.jar" />
+        <classpath path="lib/main/hibernate-commons-annotations-5.0.4.Final.jar" />
+        <classpath path="lib/main/hibernate-core-5.3.4.Final.jar" />
+        <classpath path="lib/main/jandex-2.0.5.Final.jar" />
+        <classpath path="lib/main/javassist-3.23.1-GA.jar" />
+        <classpath path="lib/main/javax.activation-api-1.2.0.jar" />
+        <classpath path="lib/main/javax.persistence-api-2.2.jar" />
+        <classpath path="lib/main/jboss-logging-3.3.2.Final.jar" />
+        <classpath path="lib/main/jboss-transaction-api_1.2_spec-1.1.1.Final.jar" />
+        <classpath path="lib/main/jcommon-1.0.23.jar" />
+        <classpath path="lib/main/jfoenix-8.0.7.jar" />
+        <classpath path="lib/main/jfreechart-1.0.19.jar" />
+        <classpath path="lib/main/jsoup-1.9.2.jar" />
+        <classpath path="lib/main/pdfbox-app-2.0.12.jar" />
+        <classpath path="lib/main/postgresql-42.2.2.jar" />
+        <classpath path="lib/main/slf4j-api-1.7.10.jar" />
+    </javadoc>
   </target>
 </project>
