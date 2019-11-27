@@ -18,7 +18,8 @@ public class ManualData {
   @OneToMany(cascade = {CascadeType.ALL})
   private List<ManualWaterSupply> manualWaterSupply = new ArrayList<ManualWaterSupply>();
 
-  public ManualData() {}
+  public ManualData() {
+  }
 
   public ManualData(List<ManualWaterSupply> manualWaterSupply) {
     super();

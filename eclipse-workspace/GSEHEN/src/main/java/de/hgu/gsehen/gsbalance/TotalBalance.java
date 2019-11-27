@@ -190,6 +190,7 @@ public class TotalBalance {
    * Method to calculate the total water balance of a plot.
    * 
    * @param plot the desired plot
+   * @param soilProfile the soil profile
    */
   public static void calculateTotalWaterBalance(Plot plot, SoilProfile soilProfile) {
     SoilManualData soilManualData = soilProfile.getSoilManualData();

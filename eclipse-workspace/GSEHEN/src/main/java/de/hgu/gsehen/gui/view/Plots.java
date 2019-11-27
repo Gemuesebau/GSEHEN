@@ -8,6 +8,8 @@ public class Plots extends PlotDataController {
   /**
    * Constructs the PlotView.
    *
+   * @param application the Gsehen application singleton reference
+   * @param pane the associated border pane
    */
   public Plots(Gsehen application, BorderPane pane) {
     super(application, pane);

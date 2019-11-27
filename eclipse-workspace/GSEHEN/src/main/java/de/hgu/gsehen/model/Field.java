@@ -134,9 +134,11 @@ public class Field extends Drawable implements DrawableParent {
     this.area = area;
   }
 
-  public void configure() {}
+  public void configure() {
+  }
 
-  public void modify() {}
+  public void modify() {
+  }
 
   @Override
   public void forAllChildDrawables(Consumer<Drawable> handler) {

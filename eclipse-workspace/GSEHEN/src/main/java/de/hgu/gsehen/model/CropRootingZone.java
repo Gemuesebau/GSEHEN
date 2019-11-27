@@ -10,7 +10,8 @@ public class CropRootingZone {
   Integer rootingZone3;
   Integer rootingZone4;
 
-  public CropRootingZone() {}
+  public CropRootingZone() {
+  }
 
   /**
    * User input for rooting crop rooting Zones.

@@ -136,6 +136,7 @@ public class FieldDataController extends Application
   /**
    * Constructs a new field data controller associated with the given BorderPane.
    *
+   * @param application the Gsehen application singleton reference
    * @param pane
    *          - the associated BorderPane.
    */

@@ -199,8 +199,7 @@ public class Gsehen extends Application {
   /**
    * Main method.
    *
-   * @param args
-   *          the command line arguments
+   * @param args the command line arguments
    */
   @SuppressWarnings({ "checkstyle:rightcurly" })
   public static void main(String[] args) {

@@ -217,13 +217,17 @@ public class Plot extends Drawable {
     this.cropRootingZone = cropRootingZone;
   }
 
-  public void visualize() {}
+  public void visualize() {
+  }
 
-  public void configure() {}
+  public void configure() {
+  }
 
-  public void modify() {}
+  public void modify() {
+  }
 
-  public void archive() {}
+  public void archive() {
+  }
 
   /**
    * Constructor for Plot.
@@ -236,12 +240,14 @@ public class Plot extends Drawable {
    * @param weatherData Subordianted weather Data source
    * @param rootingZone Maximum rooting zone for the plot
    * @param waterBalance WaterBalance containing, DayData
+   * @param manualData the plot's manual data
    * @param recommendedAction RecommendedAction Irrigation recommendation
    * @param soilStartDate Start of waterbalancing for soil, Date
    * @param soilStartValue Water content in mm for first soillayer 10cm
    * @param calculationPaused Is the calculation paused due to heavy rainfall
    * @param crop Subordinated crop
    * @param cropDevelopmentStatus user input data concerning crop development phases
+   * @param cropRootingZone the crop's rooting zone
    * @param cropStart Start date of the crop
    * @param cropEnd End date of the crop
    * @param isActive Is the plot active and not archived

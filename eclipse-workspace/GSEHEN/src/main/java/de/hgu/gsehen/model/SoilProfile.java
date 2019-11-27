@@ -35,6 +35,7 @@ public class SoilProfile implements Named {
    * same size, since soils and depths belong to one another each.
    *
    * @param name a name for the new SoilProfile
+   * @param soilManualData the soil's manual data
    * @param soilType the list of soils in this profile
    * @param profileDepth the list of soil depths in this profile
    */
@@ -47,7 +48,8 @@ public class SoilProfile implements Named {
     this.profileDepth = profileDepth;
   }
 
-  public SoilProfile() {}
+  public SoilProfile() {
+  }
 
   public String getUuid() {
     return uuid;
@@ -82,11 +84,14 @@ public class SoilProfile implements Named {
     this.profileDepth = profileDepth;
   }
 
-  public void configure() {}
+  public void configure() {
+  }
 
-  public void visualize() {}
+  public void visualize() {
+  }
 
-  public void modify() {}
+  public void modify() {
+  }
 
   public SoilManualData getSoilManualData() {
     return soilManualData;

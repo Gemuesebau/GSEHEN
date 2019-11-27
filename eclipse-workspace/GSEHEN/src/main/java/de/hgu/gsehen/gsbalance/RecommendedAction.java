@@ -34,7 +34,8 @@ public class RecommendedAction {
     this.projectedDaysToIrrigation = projectedDaysToIrrigation;
   }
 
-  public RecommendedAction() {}
+  public RecommendedAction() {
+  }
 
   public RecommendedActionEnum getRecommendation() {
     return recommendation;

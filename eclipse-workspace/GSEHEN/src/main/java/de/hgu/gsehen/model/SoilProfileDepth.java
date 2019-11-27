@@ -12,7 +12,8 @@ public class SoilProfileDepth {
   private long id;
   private double depth;
 
-  public SoilProfileDepth() {}
+  public SoilProfileDepth() {
+  }
 
   public SoilProfileDepth(double depth) {
     super();

@@ -156,6 +156,7 @@ public abstract class FarmDataController extends WebController {
   /**
    * Constructs a new farm data controller associated with the given WebView.
    *
+   * @param application the Gsehen application singleton reference
    * @param webView
    *          the associated WebView
    */

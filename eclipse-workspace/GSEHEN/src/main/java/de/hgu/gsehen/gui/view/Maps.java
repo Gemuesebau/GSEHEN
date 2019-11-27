@@ -32,6 +32,7 @@ public class Maps extends FarmDataController {
   /**
    * Constructs a new map in the given WebView.
    *
+   * @param application the Gsehen application singleton reference
    * @param webView the WebView where to load the map
    */
   public Maps(Gsehen application, WebView webView) {
@@ -50,13 +51,14 @@ public class Maps extends FarmDataController {
   /**
    * Creates a new Drawable; intended to be called from web JavaScript.
    *
+   * @param typeKey the key of the actual type of drawable to be created
    * @return a new drawable of the given type, with an empty GeoPolygon 
    * @throws IllegalAccessException via Class.newInstance
    * @throws InstantiationException via Class.newInstance
    */
   public Drawable getDrawableWithEmptyPolygon(String typeKey)
       throws InstantiationException, IllegalAccessException {
-    Drawable drawable = (Drawable) typesMap.get(typeKey).newInstance();
+    Drawable drawable = (Drawable)typesMap.get(typeKey).newInstance();
     drawable.setNameAndPolygon(application.getBundle().getString("gui.view.Map.unnamed.drawable"),
         new GeoPolygon());
     return drawable;

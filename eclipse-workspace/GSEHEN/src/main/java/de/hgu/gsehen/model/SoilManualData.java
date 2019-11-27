@@ -15,14 +15,16 @@ public class SoilManualData {
   Double rainMax;
   Integer daysPause;
 
-  public SoilManualData() {}
+  public SoilManualData() {
+  }
 
   /**
    * User input data for soil parameters.
-   * 
+   *
+   * @param soilKc the soil's "kc" value
    * @param soilZone manually provided soil depth for calculations without crop
    * @param rainMax manually provided "strong rain event" in mm after wich a calaculation pause is
-   *        sheduled
+   *        scheduled
    * @param daysPause manually provided period of days the calculation pause is lasting
    */
   public SoilManualData(Double soilKc, Integer soilZone, Double rainMax, Integer daysPause) {

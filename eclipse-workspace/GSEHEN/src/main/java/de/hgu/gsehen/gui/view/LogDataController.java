@@ -73,6 +73,7 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   /**
    * Constructs a new plot data controller associated with the given BorderPane.
    *
+   * @param application the Gsehen application singleton reference
    * @param pane
    *          - the associated BorderPane.
    */
@@ -114,7 +115,7 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
    * 
    * @param path
    *          from the log file.
-   * @return
+   * @return a list of log entries
    */
   protected ArrayList<LogEntry> readLog(String path) {
     ArrayList<LogEntry> logEntries = new ArrayList<>();
@@ -151,7 +152,7 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   /**
    * Generate TableView and TableColumns also fill TableCells.
    * 
-   * @return
+   * @return the generated table view
    */
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public Parent createContent() {
@@ -377,6 +378,8 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
 
   /**
    * Reload Log.
+   *
+   * @param logRecord the newly published log record
    */
   public void onLogRecordPublish(LogRecord logRecord) {
     // Anstatt hier immer die ganze Datei neu zu laden wäre es wünschenswert, den hier

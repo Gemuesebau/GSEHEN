@@ -62,6 +62,7 @@ public class CombinedBarAndLineChart {
    *          - list with current available soil water data.
    * @param twbList
    *          - list with total water balance.
+   * @return a scroll pane with plots based on the given data
    */
   public JScrollPane scrollPane(SortedList<Data<Date, Number>> precBarList,
       SortedList<Data<Date, Number>> irriBarList, SortedList<Data<Date, Number>> caswList,

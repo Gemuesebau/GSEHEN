@@ -30,7 +30,8 @@ public class GsehenGuiElements {
 
   /**
    * Creates a GridPane.
-   * 
+   *
+   * @param pane the pane that will be holding the generated grid pane
    * @return - the GridPane.
    */
   public static GridPane gridPane(BorderPane pane) {
@@ -91,7 +92,8 @@ public class GsehenGuiElements {
 
   /**
    * Creates a Button.
-   * 
+   *
+   * @param width the desired button width
    * @return - the Button.
    */
   public static Button button(double width) {
@@ -105,6 +107,7 @@ public class GsehenGuiElements {
   /**
    * Creates a JFXButton.
    *
+   * @param label the label (text) for the button
    * @return - the JFXButton.
    */
   public static JFXButton jfxButton(String label) {
@@ -114,6 +117,7 @@ public class GsehenGuiElements {
   /**
    * Creates a JFXButton with an action handler.
    *
+   * @param label the label (text) for the button
    * @param handler the action handler to attach
    * @return - the JFXButton.
    */
@@ -182,6 +186,7 @@ public class GsehenGuiElements {
   /**
    * Creates a combo box.
    *
+   * @param <T> the combo box generic type
    * @param items the items to put into the combo box initially
    * @return the new combo box
    */

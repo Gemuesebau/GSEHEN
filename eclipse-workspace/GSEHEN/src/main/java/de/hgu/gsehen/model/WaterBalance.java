@@ -19,7 +19,8 @@ public class WaterBalance {
   @OneToMany(cascade = {CascadeType.ALL})
   private List<DayData> dailyBalances = new ArrayList<DayData>();
 
-  public WaterBalance() {}
+  public WaterBalance() {
+  }
 
   public WaterBalance(List<DayData> dailyBalances) {
     super();

@@ -17,6 +17,8 @@ public class CollectionUtil {
    * Adds a value to a list that is itself contained in a map.
    * If there isn't yet a list mapped by the given key, it is created.
    *
+   * @param <K> the "key" type
+   * @param <V> the "value" type
    * @param map the map containing the lists (as map values)
    * @param key the key for looking up (or putting) the mapped list
    * @param listValue the value to add to the mapped list
@@ -48,6 +50,7 @@ public class CollectionUtil {
   /**
    * Returns the first non-null object in the given array.
    *
+   * @param <T> the array element type
    * @param objects an arbitrary number of objects
    * @return the first of the given objects that is not null
    */

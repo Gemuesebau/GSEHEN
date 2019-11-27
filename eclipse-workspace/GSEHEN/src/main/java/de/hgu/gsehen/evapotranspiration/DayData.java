@@ -206,6 +206,8 @@ public class DayData implements Comparable<DayData> {
    * @param windspeed2m Mean windspeed at 2 meters above ground level in m/s
    * @param et0 daily evapotranspiration in mm
    * @param currentKc is the days kc value
+   * @param etc crop evapotranspiration
+   * @param irrigation irrigation
    * @param dailyBalance is the daily Water blance in mm
    * @param currentRootingZone is the current rooting zone of the subordinated crop
    * @param currentAvailableSoilWater is the available soil water at this state
@@ -237,7 +239,8 @@ public class DayData implements Comparable<DayData> {
     this.currentTotalWaterBalance = currentTotalWaterBalance;
   }
 
-  public DayData() {}
+  public DayData() {
+  }
 
 
 }

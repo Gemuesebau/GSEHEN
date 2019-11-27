@@ -174,6 +174,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
   /**
    * Adds the FarmTreeView.
+   *
+   * @param skipClass skip-class for the generated "DrawableSelected" event
    */
   @SuppressWarnings("unchecked")
   public void addFarmTreeView(Class<? extends GsehenEventListener<GsehenViewEvent>> skipClass) {

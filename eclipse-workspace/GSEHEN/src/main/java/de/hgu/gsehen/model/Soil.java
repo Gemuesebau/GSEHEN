@@ -17,7 +17,8 @@ import javax.persistence.Id;
 @Entity
 public class Soil implements Named {
 
-  public Soil() {}
+  public Soil() {
+  }
 
   @Id
   @GeneratedValue
@@ -71,6 +72,8 @@ public class Soil implements Named {
 
   /**
    * Creates the given soils.
+   *
+   * @return a list of soils
    */
   public List<Soil> soils() {
     final ResourceBundle mainBundle = ResourceBundle.getBundle("i18n.main",

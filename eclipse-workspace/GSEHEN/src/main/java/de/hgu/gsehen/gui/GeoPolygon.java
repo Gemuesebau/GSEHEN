@@ -147,9 +147,10 @@ public class GeoPolygon {
   }
 
   /**
-   * Calcutes the area of an object via GeoPoints.
-   * 
-   * @return - The calculeted area.
+   * Calculates the area of an object via GeoPoints.
+   *
+   * @param coordinates the points of an arbitrary polygon
+   * @return - The calculated area.
    */
   public double calculateArea(List<GeoPoint> coordinates) {
     double area = 0.0;

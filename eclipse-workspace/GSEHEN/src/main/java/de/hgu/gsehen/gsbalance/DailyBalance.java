@@ -23,6 +23,7 @@ public class DailyBalance {
    * 
    * @param dayData the day
    * @param plot the Plot
+   * @param soilProfile the soil profile
    */
   @SuppressWarnings("checkstyle:variabledeclarationusagedistance")
   public static void determineCurrentKc(DayData dayData, Plot plot, SoilProfile soilProfile) {

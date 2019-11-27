@@ -155,6 +155,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
   /**
    * Constructs a new plot data controller associated with the given BorderPane.
    *
+   * @param application the Gsehen application singleton reference
    * @param pane
    *          - the associated BorderPane.
    */
