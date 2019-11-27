@@ -73,13 +73,16 @@
 	</target>
 
 	<target name="show-javadoc" description="show documentation">
+		<exec executable="cmd" os="Windows 7">
+			<arg value="/c start &quot;JavaDoc&quot; javadoc/main/index.html" />
+		</exec>
 		<exec executable="cmd" os="Windows 10">
 			<arg value="/c start &quot;JavaDoc&quot; javadoc/main/index.html" />
 		</exec>
 	</target>
 
 	<target name="javadoc" description="generate documentation">
-		<javadoc sourcepath="src/main/java" destdir="javadoc/main" failonerror="true" charset="utf-8" docencoding="utf-8" encoding="utf-8" overview="src/main/resources/overview.html">
+		<javadoc sourcepath="src/main/java" destdir="javadoc/main" failonerror="true" charset="utf-8" docencoding="utf-8" encoding="utf-8" overview="src/main/resources/overview.html" additionalparam="--allow-script-in-comments">
 			<classpath path="lib/main/antlr-2.7.7.jar" />
 			<classpath path="lib/main/boxable-1.5.jar" />
 			<classpath path="lib/main/byte-buddy-1.8.15.jar" />

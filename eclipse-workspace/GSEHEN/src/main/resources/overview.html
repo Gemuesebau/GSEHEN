@@ -12,5 +12,12 @@
 <p class="block">Weather data plug-in authors:
 directly go to <a href="de/hgu/gsehen/model/WeatherDataPlugin.html" title="interface in de.hgu.gsehen.model" target="classFrame">
 <span class="interfaceName">WeatherDataPlugin</span></a></p>
+<script>
+var headingCorrectionTimeout = setTimeout(function(){
+	var headers = document.getElementsByClassName("header");
+	var contentContainers = document.getElementsByClassName("contentContainer");
+	headers[0].innerHTML = contentContainers[1].innerHTML;
+}, 2000);
+</script>
 </body>
 </html>
