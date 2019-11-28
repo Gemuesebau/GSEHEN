@@ -12,6 +12,7 @@
   </description>
 
 	<property name="data.dir" value="${user.home}/.gsehenIrrigationManager/data" />
+	<property name="show.javadoc.arg.windows" value="/c start &quot;JavaDoc&quot; javadoc/main/index.html" />
 
 	<target name="echo-os">
 		<echo message="${os.name}" />
@@ -74,10 +75,10 @@
 
 	<target name="show-javadoc" description="show documentation">
 		<exec executable="cmd" os="Windows 7">
-			<arg value="/c start &quot;JavaDoc&quot; javadoc/main/index.html" />
+			<arg value="${show.javadoc.arg.windows}" />
 		</exec>
 		<exec executable="cmd" os="Windows 10">
-			<arg value="/c start &quot;JavaDoc&quot; javadoc/main/index.html" />
+			<arg value="${show.javadoc.arg.windows}" />
 		</exec>
 	</target>
 

@@ -4,6 +4,45 @@ import de.hgu.gsehen.evapotranspiration.DayData;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Interface to be implemented by weather data (import) plug-ins.
+ *
+ * <p>Typical JavaScript code to implement this interface:</p>
+ * <code>
+ * // in "myPlugin.js"<br>
+ * // ...<br>
+ * function getPlugin() {<br>
+ * &nbsp;&nbsp;// ...<br>
+ * &nbsp;&nbsp;var WDPlugin = Java.extend(Java.type("de.hgu.gsehen.model.WeatherDataPlugin"), {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;// ...<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;determineDayData: function(weatherDataSource, date) {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;},<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;// ...<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;createAndFillSpecificControls: function(json, configurator) {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;},<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;// ...<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;getSpecificConfigurationJSON: function() {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;// ...<br>
+ * &nbsp;&nbsp;});<br>
+ * &nbsp;&nbsp;return new WDPlugin();<br>
+ * }
+ * </code>
+ * <p>The lifecycle is: for configuration of a weather data source, the application constructs an
+ * instance of WeatherDataPlugin by calling an actual plug-in JavaScript file's
+ * <code>getPlugin</code> function. On the obtained instance, typically the configuration-related
+ * methods are called as follows:
+ * <ol>
+ * <li>{@link de.hgu.gsehen.model.WeatherDataPlugin#createAndFillSpecificControls(String json,
+ *   WeatherDataConfigurator)}
+ * <li>{@link de.hgu.gsehen.model.WeatherDataPlugin#getSpecificConfigurationJSON()}
+ * </ol></p>
+ * <p>In between, the application users may use a GUI dialog to configure the weather data source
+ * using this plug-in.</p>
+ * <p>The same, OR A NEW, instance of this plug-in, will be used to perform the actual weather data
+ * import, using the following method:</p>
+ * {@link de.hgu.gsehen.model.WeatherDataPlugin#determineDayData(WeatherDataSource, Date)}
+ */
 public interface WeatherDataPlugin {
   /**
    * Determines the (weather) day data for the available measurement data.
