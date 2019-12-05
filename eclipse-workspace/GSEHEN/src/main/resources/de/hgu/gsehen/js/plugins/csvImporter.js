@@ -226,6 +226,7 @@ substrstwre = "" replacejs = '"'
 			return calculateDayData(pluginConfig, date /* currently unused */, weatherDataArray);
 		},
 		//----------------------------------------------------------------------------------------
+		// sollte sich darauf stützen, was in den createGuiControl-Aufrufen benannt wurde
 		getConfigObject: function() {
 			return {
 				measIntervalSeconds: this.guiControls.interval.getNodeValue(),              // 60
@@ -260,9 +261,7 @@ substrstwre = "" replacejs = '"'
 		gsehenInstance: null,
 		msgBundle: null,
 		parentStackPane: null,
-		/*filechooserbutton: null,
-		/*filechooser: null,
-		/*dateerror: null*/
+		/*filechooserbutton: null*/
 		//-----------
 		/*@Override*/createAndFillSpecificControls: function(json, configurator) {
 			this.gsehenGui = Packages.de.hgu.gsehen.gui.GsehenGuiElements;
@@ -279,15 +278,39 @@ substrstwre = "" replacejs = '"'
 			this.parentStackPane = configurator.getParentStackPane();
 			var specificConfigItems = new java.util.ArrayList();
 			var data = JSON.parse(json);
-			this.createGuiControl("interval", "DoubleField", false, specificConfigItems, data, "measIntervalSeconds", function(temp) { return temp.doubleValue(); });
-			this.createGuiControl("windspeed", "DoubleField", false, specificConfigItems, data, "windspeedMeasHeightMeters", function(temp) { return temp.doubleValue(); });
+			this.createGuiControl("interval", "DoubleField", false, specificConfigItems, data, "measIntervalSeconds",
+					function(v) { return v.doubleValue(); });
+			this.createGuiControl("windspeed", "DoubleField", false, specificConfigItems, data, "windspeedMeasHeightMeters",
+					function(v) { return v.doubleValue(); });
 			this.createGuiControl("dateformat", "StringField", true, specificConfigItems, data, "dateFormatString");
-			this.createGuiControl("localeid", "ComboBox", false, specificConfigItems, data, "numberFormat", function(temp) { return reverseLookup(temp, configurator.getJavaLocaleMap()); },
+			this.createGuiControl("localeid", "ComboBox", false, specificConfigItems, data, "numberFormat",
+					function(v) { return reverseLookup(v, configurator.getJavaLocaleMap()); },
 					this.gsehenGui.comboBox(getLocaleDisplay(this.javaLocaleMap)));
 			this.createGuiControl("filepath", "StringField", true, specificConfigItems, data, "dataFilePath");
-			/*filechooserbutton//Datei auswählen
-			/*filechooser//(ent)hält Dateipfad zur Wetterdatenquelle
-			/*dateerror//Falsches Format!*/
+
+			this.createGuiControl("charset", "StringField", true, specificConfigItems, data, "dataFile");
+			this.createGuiControl("lineend", "StringField", true, specificConfigItems, data, "dataFile");
+			this.createGuiControl("separatorchar", "StringField", true, specificConfigItems, data, "dataFile");
+			this.createGuiControl("quotechar", "StringField", true, specificConfigItems, data, "dataFile");
+			this.createGuiControl("quotedregexp", "StringField", true, specificConfigItems, data, "dataFile");
+			this.createGuiControl("quotedreplacejs", "StringField", true, specificConfigItems, data, "dataFile");
+			this.createGuiControl("headlinejs", "StringField", true, specificConfigItems, data, "dataFile");
+			arr.push("datetime");     // 0, de.hgu.gsehen.util.DateUtil.
+			arr.push("temperature");
+			arr.push("airhumidity");
+			arr.push("timeduration"); // 3, v*1000
+			arr.push("windspeed");
+			arr.push("globalrad");
+			arr.push("battery");
+			arr.push("precipitation");// 7, v/10
+			//Spalten + Werttransformation f(s, d, n) = [JavaScript-Ausdruck, der das String-Array "s" verwenden kann, oder die Funktionen d(ate) und n(umber) mit Spaltenindex als Parameter, welche die konfigurierten Formate nutzen]
+			// Problem: Zuordnung wird dann nur bei der Wertermittlung genutzt, aber nicht bei der "Auswertung" der Kopfzeile. Diese sollte mindestens in der Preview direkt unter dem fachlichen Spaltennamen (z.B. [tableviewcolumnname.dateTimeStr]) angezeigt werden....
+			//---> mit Hinweis auf erwartete Einheit, muss in Preview berücksichtigt werden
+			// (d.h., Preview zeigt zwar Zeilennummern, und Spalten wie in der Datei, aber bereits transformierte Daten,
+			// anhand Typ des zugeordneten Werts ..)
+
+			
+			/*filechooserbutton//Datei auswählen ---> filepath*/
 			var weatherDataPlugin = this;
 			new Packages.de.hgu.gsehen.gui.view.ConfigDialogActionButton(
 					this.msgBundle.getString("importtest"), specificConfigItems,
