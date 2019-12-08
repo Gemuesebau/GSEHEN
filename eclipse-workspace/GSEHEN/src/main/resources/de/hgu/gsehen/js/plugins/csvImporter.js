@@ -25,6 +25,25 @@ function getPlugin() {
 		str += ("\n}");
 		LOGGER.log(java.util.logging.Level.CONFIG, str);
 	};
+	var calculateDayDataForOneDay = function(pluginConfig, dayDate, weatherDataArray) {
+		var dayData = new (Java.type("de.hgu.gsehen.evapotranspiration.DayData"))();
+		dayData.setDate(dayDate);
+		dayData.setTempMax(arrayUtilities.objArrayMax(weatherDataArray, "temp"));
+		dayData.setTempMin(arrayUtilities.objArrayMin(weatherDataArray, "temp"));
+		dayData.setTempMean(arrayUtilities.objArrayMean(weatherDataArray, "temp"));
+		dayData.setAirHumidityRelMax(arrayUtilities.objArrayMax(weatherDataArray, "airHumidityRel"));
+		dayData.setAirHumidityRelMin(arrayUtilities.objArrayMin(weatherDataArray, "airHumidityRel"));
+		dayData.setAirHumidityRelMean(arrayUtilities.objArrayMean(weatherDataArray, "airHumidityRel"));
+		/* dayData.setGlobalRad(arrayUtilities.objArraySum(weatherDataArray, "globalRad") * pluginConfig.measIntervalSeconds / 1000000); */
+		dayData.setGlobalRad(arrayUtilities.objArraySum(weatherDataArray, "globalRad") * 0.0864 / ((60/(pluginConfig.measIntervalSeconds / 60))*24));
+		/* 0.0864*Glob/144  --->  das alles hier über Werttransformation?!! */
+
+		dayData.setPrecipitation(arrayUtilities.objArraySum(weatherDataArray, "precipitation"));
+		dayData.setWindspeed2m(
+			calculateWindspeed2m(arrayUtilities.objArrayMean(weatherDataArray, "windspeed"), pluginConfig.windspeedMeasHeightMeters)
+		);
+		return dayData;
+	};
 	var processWeatherDataForOneDay = function(currentWeatherDataForOneDay, completeDayData, pluginConfig, statistics) {
 		if (currentWeatherDataForOneDay.length > 0) {
 			completeDayData.add(calculateDayDataForOneDay(pluginConfig, currentWeatherDataForOneDay[0].lineDate, currentWeatherDataForOneDay));
@@ -49,38 +68,6 @@ function getPlugin() {
 		processWeatherDataForOneDay(currentWeatherDataForOneDay, completeDayData, pluginConfig, statistics);
 		logStatistics(statistics);
 		return completeDayData;
-	};
-	var calculateDayDataForOneDay = function(pluginConfig, dayDate, weatherDataArray) {
-		var dayData = new (Java.type("de.hgu.gsehen.evapotranspiration.DayData"))();
-		dayData.setDate(dayDate);
-		dayData.setTempMax(arrayUtilities.objArrayMax(weatherDataArray, "temp"));
-		dayData.setTempMin(arrayUtilities.objArrayMin(weatherDataArray, "temp"));
-		dayData.setTempMean(arrayUtilities.objArrayMean(weatherDataArray, "temp"));
-		dayData.setAirHumidityRelMax(arrayUtilities.objArrayMax(weatherDataArray, "airHumidityRel"));
-		dayData.setAirHumidityRelMin(arrayUtilities.objArrayMin(weatherDataArray, "airHumidityRel"));
-		dayData.setAirHumidityRelMean(arrayUtilities.objArrayMean(weatherDataArray, "airHumidityRel"));
-		/* dayData.setGlobalRad(arrayUtilities.objArraySum(weatherDataArray, "globalRad") * pluginConfig.measIntervalSeconds / 1000000); */
-		dayData.setGlobalRad(arrayUtilities.objArraySum(weatherDataArray, "globalRad") * 0.0864 / ((60/(pluginConfig.measIntervalSeconds / 60))*24));
-		/* 0.0864*Glob/144  --->  das alles hier über Werttransformation?!! */
-
-		dayData.setPrecipitation(arrayUtilities.objArraySum(weatherDataArray, "precipitation"));
-		dayData.setWindspeed2m(
-			calculateWindspeed2m(arrayUtilities.objArrayMean(weatherDataArray, "windspeed"), pluginConfig.windspeedMeasHeightMeters)
-		);
-		return dayData;
-	};
-	var newNumberFormat = function(numberLocaleId) {
-		var locale = java.util.Locale.ENGLISH;
-		try {
-			locale = java.util.Locale.class.getField(numberLocaleId).get(null);
-		}
-		catch (e) {
-			LOGGER.log(java.util.logging.Level.SEVERE, e.getClass().getName());
-		}
-		return java.text.NumberFormat.getNumberInstance(locale);
-	};
-	var newDateFormat = function(dateFormatString) {
-		return new java.text.SimpleDateFormat(dateFormatString);
 	};
 	var getWeatherDataAttributeNamesArray = function(arr) {
 		if (arr == null) {
@@ -107,7 +94,7 @@ function getPlugin() {
 		var lineNumberReader = new java.io.LineNumberReader(new java.io.FileReader(pluginConfig.dataFilePath));
 		var line;
 		var lineNumber = 0;
-		var numberFormat = newNumberFormat(pluginConfig.numberFormat);
+		var numberFormat = newNumberFormat(pluginConfig.numberFormat); // now in de.hgu.gsehen.util.TransformableTypedColumnData
 		var dateFormat = newDateFormat(pluginConfig.dateFormatString);
 		LOGGER.log(java.util.logging.Level.FINE, "dateFormat = " + dateFormat.toPattern());
 		while ((line = lineNumberReader.readLine()) != null) {
@@ -120,6 +107,8 @@ function getPlugin() {
 substrstwre = \\(.) replacejs = m.group(1)
 substrstwre = "" replacejs = '"'
 
+aktuell: lineDate nur tagesgenau, was hier intern nützlich ist, aber nicht ausreicht, um in DayData
+den "exakten" Zeitpunkt der letzten berücksichtigten Messwertzeile zu übergeben! GSEH-35
 				*/
 				var lineDate = dateFormat.parse(line.replace(/^"/, "").replace(/ .*/, ""));
 				//LOGGER.log(java.util.logging.Level.FINE, "date = " + date);
@@ -226,14 +215,14 @@ substrstwre = "" replacejs = '"'
 			return calculateDayData(pluginConfig, date /* currently unused */, weatherDataArray);
 		},
 		//----------------------------------------------------------------------------------------
-		// sollte sich darauf stützen, was in den createGuiControl-Aufrufen benannt wurde
+		// TODO! sollte sich darauf stützen, was in den createGuiControl-Aufrufen benannt wurde
 		getConfigObject: function() {
 			return {
-				measIntervalSeconds: this.guiControls.interval.getNodeValue(),              // 60
-				windspeedMeasHeightMeters: this.guiControls.windspeed.getNodeValue(),       // 2
-				dateFormatString: this.guiControls.dateformat.getNodeValue(),               // "y-M-d" ---> see newDateFormat
-				numberFormat: this.javaLocaleMap.get(this.guiControls.localeid.getNodeValue()),  // "Deutsch (GERMAN)"
-				dataFilePath: this.guiControls.filepath.getNodeValue()                      // "C:\\Data\\10MinDaten.csv"
+				measIntervalSeconds: this.guiControls.interval.getNodeValue(),                  // 60
+				windspeedMeasHeightMeters: this.guiControls.windspeed.getNodeValue(),           // 2
+				dateFormatString: this.guiControls.dateformat.getNodeValue(),                   // "y-M-d" ---> see newDateFormat
+				numberFormat: this.javaLocaleMap.get(this.guiControls.localeid.getNodeValue()), // "Deutsch (GERMAN)" ---> see newNumberFormat
+				dataFilePath: this.guiControls.filepath.getNodeValue()                          // "C:\\Data\\10MinDaten.csv"
 			};
 		},
 		createGuiControl: function(item, type, hasExample, itemObjectsList, data, dataKey, transform, comboBox) {
