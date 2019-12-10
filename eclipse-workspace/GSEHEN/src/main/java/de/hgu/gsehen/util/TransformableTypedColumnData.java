@@ -1,5 +1,8 @@
 package de.hgu.gsehen.util;
 
+import de.hgu.gsehen.model.SimpleWeatherData;
+
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -7,12 +10,15 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Function;
-import de.hgu.gsehen.model.SimpleWeatherData;
 
 public class TransformableTypedColumnData<D> {
 
@@ -49,15 +55,14 @@ public class TransformableTypedColumnData<D> {
   }
 
   public static NumberFormat newNumberFormat(String numberLocaleId) {
-      Locale locale = Locale.ENGLISH; // useful if not re-throwing exception below
-      try {
-          locale = (Locale)Locale.class.getField(numberLocaleId).get(null);
-      }
-      catch (Exception e) {
-          throw new IllegalArgumentException("\"" + numberLocaleId + "\" is not a valid "
-              + "java Locale", e);
-      }
-      return newNumberFormat(locale);
+    Locale locale = Locale.ENGLISH; // useful if not re-throwing exception below
+    try {
+      locale = (Locale)Locale.class.getField(numberLocaleId).get(null);
+    } catch (Exception e) {
+      throw new IllegalArgumentException("\"" + numberLocaleId + "\" is not a valid "
+            + "java Locale", e);
+    }
+    return newNumberFormat(locale);
   }
 
   private static NumberFormat newNumberFormat(Locale locale) {
@@ -69,14 +74,14 @@ public class TransformableTypedColumnData<D> {
     return s -> ((Number)parse(format, s)).doubleValue();
   }
 
-  public static Function<String, Integer> intParser(String numberLocaleId) {
-    final NumberFormat format = newNumberFormat(numberLocaleId);
-    return s -> ((Number)parse(format, s)).intValue();
-  }
-
   public static Function<String, Double> doubleParser(Locale numberLocale) {
     final NumberFormat format = newNumberFormat(numberLocale);
     return s -> ((Number)parse(format, s)).doubleValue();
+  }
+
+  public static Function<String, Integer> intParser(String numberLocaleId) {
+    final NumberFormat format = newNumberFormat(numberLocaleId);
+    return s -> ((Number)parse(format, s)).intValue();
   }
 
   public static Function<String, Integer> intParser(Locale numberLocale) {
@@ -89,13 +94,13 @@ public class TransformableTypedColumnData<D> {
     return v -> format.format(v);
   }
 
-  public static Function<Integer, String> intFormatter(String numberLocaleId) {
-    final NumberFormat format = newNumberFormat(numberLocaleId);
+  public static Function<Double, String> doubleFormatter(Locale numberLocale) {
+    final NumberFormat format = newNumberFormat(numberLocale);
     return v -> format.format(v);
   }
 
-  public static Function<Double, String> doubleFormatter(Locale numberLocale) {
-    final NumberFormat format = newNumberFormat(numberLocale);
+  public static Function<Integer, String> intFormatter(String numberLocaleId) {
+    final NumberFormat format = newNumberFormat(numberLocaleId);
     return v -> format.format(v);
   }
 
@@ -105,7 +110,7 @@ public class TransformableTypedColumnData<D> {
   }
 
   public static DateFormat newDateFormat(String dateFormatString) {
-      return new SimpleDateFormat(dateFormatString);
+    return new SimpleDateFormat(dateFormatString);
   }
 
   public static Function<String, Date> dateParser(String dateFormat) {
@@ -120,7 +125,6 @@ public class TransformableTypedColumnData<D> {
 
   private class ColumnDefinition<T> {
     private String key;
-    private Class<T> type;
     private Function<String, T> parser;
     private Function<T, T> transformer;
     private Function<T, String> formatter;
@@ -129,19 +133,22 @@ public class TransformableTypedColumnData<D> {
     private ColumnDefinition(String key, Class<T> type, Function<String, T> parser,
         Function<T, T> transformer, Function<T, String> formatter, BiConsumer<D, T> setter) {
       this.key = key;
-      this.type = type;
       this.parser = parser;
       this.transformer = transformer;
       this.formatter = formatter;
       this.setter = setter;
     }
 
-    private void setTo(String field, D data) {
-      setter.accept(data, transformer.apply(parser.apply(field)));
+    private T transform(T value) {
+      return transformer != null ? transformer.apply(value) : value;
     }
 
-    private String stringToString(String field) {
-      return formatter.apply(transformer.apply(parser.apply(field)));
+    private void setPropertyValue(String columnString, D data) {
+      setter.accept(data, transform(parser.apply(columnString)));
+    }
+
+    private String stringToString(String columnString) {
+      return formatter.apply(transform(parser.apply(columnString)));
     }
   }
 
@@ -160,13 +167,22 @@ public class TransformableTypedColumnData<D> {
         dateFormatter("dd.MM.yyyy, HH:mm:ss"), (d, v) -> d.setDateTime(v));
     columnData.addColumnDefinition(6, "batterymV", "Double", doubleParser("GERMAN"), v -> 1000 * v,
         doubleFormatter(Locale.forLanguageTag("de")),
-        (d, v) -> System.out.println("Data object of type " + d.getClass().getSimpleName() + "has "
-            + "no property to take battery millivolts " + v));
-    columnData.process(
-        null,//"C:\\Users\\Alex\\Google Drive\\CGS\\GSEHEN\\Wetterdaten\\GSEHENWetter.csv",
+        (d, v) -> d.getAirHumidityRel()); // System.out.println("Data object of type " +
+    // d.getClass().getSimpleName() + "has " + "no property to take battery millivolts " + v)
+    columnData.processAsRows(
+        "GSEHENWetter.csv",
         "utf-8",
-        15
+        15,
+        a -> System.out.println(Arrays.asList(a)),
+        (i, l) -> l.get(0).length() > 0 && Character.isLetter(l.get(0).charAt(0))
     );
+        //columnData.processAsDataObjects(
+        //    "GSEHENWetter.csv",
+        //    "utf-8",
+        //    15,
+        //    a -> System.out.println(a.getDateTime()),
+        //    (i, l) -> l.get(0).length() > 0 && Character.isLetter(l.get(0).charAt(0))
+        //);
   }
 
   private ColumnDataText columnDataText;
@@ -185,9 +201,10 @@ public class TransformableTypedColumnData<D> {
   }
 
   public <T> void addColumnDefinition(Integer inputColumnIndex, String key, Class<T> type,
-      Function<String, T> parser, Function<T, T> transformer, Function<T, String> formatter,
-      BiConsumer<D, T> setter) {
-    addColumnDefinition(inputColumnIndex, new ColumnDefinition<T>(key, type, parser, transformer, formatter, setter));
+      Function<String, T> parser, Function<T, T> transformer,
+      Function<T, String> formatter, BiConsumer<D, T> setter) {
+    addColumnDefinition(inputColumnIndex, new ColumnDefinition<T>(key, type, parser, transformer,
+        formatter, setter));
   }
 
   public <T> void addColumnDefinition(Integer inputColIndex, String key, String javaTypeSimpleName,
@@ -198,22 +215,72 @@ public class TransformableTypedColumnData<D> {
     addColumnDefinition(inputColIndex, key, type, parser, transformer, formatter, setter);
   }
 
-//  public void process(String fileName, String charsetName, int maxLinesCount,
-//      BiConsumer<Integer, List<String>> lineResultHandler) throws IOException {
-//    process(new FileInputStream(fileName), charsetName, maxLinesCount, lineResultHandler);
-//  }
+  private void iterateOverColumns(List<String> columnStrings,
+      BiConsumer<Integer, TransformableTypedColumnData<D>.ColumnDefinition<?>> columnHandler) {
+    int columnCount = columnStrings.size();
+    for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+      TransformableTypedColumnData<D>.ColumnDefinition<?> columnDefinition =
+          columnDefinitionMap.get(columnIndex);
+      columnHandler.accept(columnIndex, columnDefinition);
+    }
+  }
 
-  public void process(InputStream in, String charsetName, int maxLinesCount/*,
-      BiConsumer<Integer, List<String>> lineResultHandler*/) throws IOException {
+  public String[] getKeysRow(int columnCount) {
+    String[] row = new String[columnCount];
+    for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+      TransformableTypedColumnData<D>.ColumnDefinition<?> columnDefinition =
+          columnDefinitionMap.get(columnIndex);
+      row[columnIndex] = columnDefinition != null
+          ? columnDefinition.key :
+            null;
+    }
+    return row;
+  }
+
+  public void processAsRows(InputStream in, String charsetName, int maxLinesCount,
+      Consumer<String[]> rowHandler, BiPredicate<Integer, List<String>> headingRowCheck)
+          throws IOException {
     columnDataText.process(in, charsetName, maxLinesCount, (lineNumber, columnStrings) -> {
-      D dataObject = createDataObject();
-      int columnCount = columnStrings.size();
-      for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+      boolean isHeadingRow = headingRowCheck.test(lineNumber, columnStrings);
+      String[] row = new String[columnStrings.size()];
+      iterateOverColumns(columnStrings, (columnIndex, columnDefinition) -> {
         String columnString = columnStrings.get(columnIndex);
-        TransformableTypedColumnData<D>.ColumnDefinition<?> columnDefinition =
-            columnDefinitionMap.get(columnIndex);
-        columnDefinition.stringToString(columnString);
+        row[columnIndex] = !isHeadingRow && columnDefinition != null
+            ? columnString + " -> " + columnDefinition.stringToString(columnString) :
+              columnString;
+      });
+      rowHandler.accept(row);
+    });
+  }
+
+  public void processAsRows(String fileName, String charsetName, int maxLinesCount,
+      Consumer<String[]> rowHandler, BiPredicate<Integer, List<String>> headingRowCheck)
+          throws IOException {
+    processAsRows(new FileInputStream(fileName), charsetName, maxLinesCount, rowHandler,
+        headingRowCheck);
+  }
+
+  public void processAsDataObjects(InputStream in, String charsetName, int maxLinesCount,
+      Consumer<D> dataObjectHandler, BiPredicate<Integer, List<String>> headingRowCheck)
+          throws IOException {
+    columnDataText.process(in, charsetName, maxLinesCount, (lineNumber, columnStrings) -> {
+      if (!headingRowCheck.test(lineNumber, columnStrings)) {
+        D dataObject = createDataObject();
+        iterateOverColumns(columnStrings, (columnIndex, columnDefinition) -> {
+          String columnString = columnStrings.get(columnIndex);
+          if (columnDefinition != null) {
+            columnDefinition.setPropertyValue(columnString, dataObject);
+          }
+        });
+        dataObjectHandler.accept(dataObject);
       }
     });
+  }
+
+  public void processAsDataObjects(String fileName, String charsetName, int maxLinesCount,
+      Consumer<D> dataObjHandler, BiPredicate<Integer, List<String>> headingRowCheck)
+          throws IOException {
+    processAsDataObjects(new FileInputStream(fileName), charsetName, maxLinesCount, dataObjHandler,
+        headingRowCheck);
   }
 }
