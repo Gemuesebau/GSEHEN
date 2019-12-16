@@ -26,6 +26,9 @@ function getPlugin() {
 		LOGGER.log(java.util.logging.Level.CONFIG, str);
 	};
 	var calculateDayDataForOneDay = function(pluginConfig, dayDate, weatherDataArray) {
+		// über grouping lösen. einem entspr. Predicate muss außer dem aktuellen auch der letzte Datensatz gegeben werden.
+		// muss nach erstem Parse-Schritt sein, aber nicht notwendigerweise mit "Zwischenobjekt" ( = Schritt 2). Dieses kann
+		// zugunsten des ZIEL-Objekts (nach Aggregation!) wieder eingespart werden!!
 		var dayData = new (Java.type("de.hgu.gsehen.evapotranspiration.DayData"))();
 		dayData.setDate(dayDate);
 		dayData.setTempMax(arrayUtilities.objArrayMax(weatherDataArray, "temp"));
@@ -36,7 +39,7 @@ function getPlugin() {
 		dayData.setAirHumidityRelMean(arrayUtilities.objArrayMean(weatherDataArray, "airHumidityRel"));
 		/* dayData.setGlobalRad(arrayUtilities.objArraySum(weatherDataArray, "globalRad") * pluginConfig.measIntervalSeconds / 1000000); */
 		dayData.setGlobalRad(arrayUtilities.objArraySum(weatherDataArray, "globalRad") * 0.0864 / ((60/(pluginConfig.measIntervalSeconds / 60))*24));
-		/* 0.0864*Glob/144  --->  das alles hier über Werttransformation?!! */
+		/* 0.0864*Glob/144  --->  das alles hier über Werttransformation?!! pluginConfig reinreichen?! (put, dann exec eval?) */
 
 		dayData.setPrecipitation(arrayUtilities.objArraySum(weatherDataArray, "precipitation"));
 		dayData.setWindspeed2m(
