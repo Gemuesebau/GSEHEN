@@ -131,8 +131,12 @@ public class TransformableColumnData {
       return transformer != null ? transformer.apply(value) : value;
     }
 
+    private T stringToValue(String columnString) {
+      return transform(parser.apply(columnString));
+    }
+
     private String stringToString(String columnString) {
-      return formatter.apply(transform(parser.apply(columnString)));
+      return formatter.apply(stringToValue(columnString));
     }
   }
 
@@ -151,7 +155,7 @@ public class TransformableColumnData {
     columnData.addColumnDefinition(6, "batterymV", "Double", doubleParser("GERMAN"), v -> 1000 * v,
         doubleFormatter(Locale.forLanguageTag("de")));
     columnData.processAsRows(
-        "C:\\Users\\atappe\\Desktop\\GSEHENWetter.csv",
+        "",
         "utf-8",
         15,
         a -> System.out.println(Arrays.asList(a)),
@@ -193,13 +197,15 @@ public class TransformableColumnData {
     addColumnDefinition(inputColIndex, key, type, parser, transformer, formatter);
   }
 
-  private void iterateOverColumns(List<String> columnStrings,
+  private void iterateOverColumns(List<String> columnStrings, boolean havingColumnDefinition,
       BiConsumer<Integer, TransformableColumnData.ColumnDefinition<?>> columnHandler) {
     int columnCount = columnStrings.size();
     for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
       TransformableColumnData.ColumnDefinition<?> columnDefinition =
           columnDefinitionMap.get(columnIndex);
-      columnHandler.accept(columnIndex, columnDefinition);
+      if (!havingColumnDefinition || columnDefinition != null) {
+        columnHandler.accept(columnIndex, columnDefinition);
+      }
     }
   }
 
@@ -221,7 +227,7 @@ public class TransformableColumnData {
     columnDataText.process(in, charsetName, maxLinesCount, (lineNumber, columnStrings) -> {
       boolean isHeadingRow = headingRowCheck.test(lineNumber, columnStrings);
       String[] row = new String[columnStrings.size()];
-      iterateOverColumns(columnStrings, (columnIndex, columnDefinition) -> {
+      iterateOverColumns(columnStrings, false, (columnIndex, columnDefinition) -> {
         String columnString = columnStrings.get(columnIndex);
         row[columnIndex] = !isHeadingRow && columnDefinition != null
             ? columnString + " -> " + columnDefinition.stringToString(columnString) :
@@ -236,5 +242,36 @@ public class TransformableColumnData {
           throws IOException {
     processAsRows(new FileInputStream(fileName), charsetName, maxLinesCount, rowHandler,
         headingRowCheck);
+  }
+
+  public void process(InputStream in, String charsetName, int maxLinesCount,
+      Consumer<Object[]> valuesHandler, BiConsumer<Integer, Object> columnValueHandler,
+      BiPredicate<Integer, List<String>> headingRowCheck)
+          throws IOException {
+    columnDataText.process(in, charsetName, maxLinesCount, (lineNumber, columnStrings) -> {
+      if (!headingRowCheck.test(lineNumber, columnStrings)) {
+        Object[] values = new Object[columnStrings.size()];
+        iterateOverColumns(columnStrings, true, (columnIndex, columnDefinition) -> {
+          values[columnIndex] = columnDefinition.stringToValue(columnStrings.get(columnIndex));
+        });
+        if (valuesHandler != null) {
+          valuesHandler.accept(values);
+        }
+        if (columnValueHandler != null) {
+          iterateOverColumns(columnStrings, true, (columnIndex, columnDefinition) -> {
+            columnValueHandler.accept(columnIndex,
+                columnDefinition.stringToValue(columnStrings.get(columnIndex)));
+          });
+        }
+      }
+    });
+  }
+
+  public void process(String fileName, String charsetName, int maxLinesCount,
+      Consumer<Object[]> valuesHandler, BiConsumer<Integer, Object> columnValueHandler,
+      BiPredicate<Integer, List<String>> headingRowCheck)
+          throws IOException {
+    process(new FileInputStream(fileName), charsetName, maxLinesCount, valuesHandler,
+        columnValueHandler, headingRowCheck);
   }
 }

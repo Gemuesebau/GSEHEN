@@ -18,6 +18,10 @@ public class DateUtil {
     return truncToDayUsingCalendar(Calendar.getInstance(), date);
   }
 
+  public static boolean sameDay(Date date1, Date date2) {
+    return truncToDay(date1).toString().equals(truncToDay(date2).toString());
+  }
+
   /**
    * Checks whether the given date is between the given borders.
    * If "start" is null, then the lower bound isn't checked,
