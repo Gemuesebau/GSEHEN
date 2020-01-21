@@ -287,13 +287,13 @@ den "exakten" Zeitpunkt der letzten berücksichtigten Messwertzeile zu übergebe
 			this.createGuiControl("quotedregexp", "StringField", true, specificConfigItems, data, "dataFile");
 			this.createGuiControl("quotedreplacejs", "StringField", true, specificConfigItems, data, "dataFile");
 			this.createGuiControl("headlinejs", "StringField", true, specificConfigItems, data, "dataFile");
-			arr.push("datetime");     // 0, de.hgu.gsehen.util.DateUtil.
+			arr.push("datetime");     // 0
 			arr.push("temperature");
 			arr.push("airhumidity");
 			arr.push("timeduration"); // 3, v*1000
 			arr.push("windspeed");
 			arr.push("globalrad");
-			arr.push("battery");
+			//arr.push("battery");
 			arr.push("precipitation");// 7, v/10
 			//Spalten + Werttransformation f(s, d, n) = [JavaScript-Ausdruck, der das String-Array "s" verwenden kann, oder die Funktionen d(ate) und n(umber) mit Spaltenindex als Parameter, welche die konfigurierten Formate nutzen]
 			// Problem: Zuordnung wird dann nur bei der Wertermittlung genutzt, aber nicht bei der "Auswertung" der Kopfzeile. Diese sollte mindestens in der Preview direkt unter dem fachlichen Spaltennamen (z.B. [tableviewcolumnname.dateTimeStr]) angezeigt werden....
