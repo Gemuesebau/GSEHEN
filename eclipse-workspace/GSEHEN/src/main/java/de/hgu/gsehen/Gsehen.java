@@ -1107,7 +1107,7 @@ public class Gsehen extends Application {
     });
     buttons.put("prefs.1.cancel", e -> {
     });
-    instance.showDialog("prefs.title", fields, buttons);
+    instance.showDialog("prefs.title", fields, buttons, "pref.3.hint");
   }
 
   /**
@@ -1118,7 +1118,7 @@ public class Gsehen extends Application {
    * @param buttons the buttons to add at the bottom of the dialog. Dialog is closed on ANY of them
    */
   public void showDialog(String headingKey, Map<String, JFXTextField> fields,
-      Map<String, EventHandler<ActionEvent>> buttons) {
+      Map<String, EventHandler<ActionEvent>> buttons, String hint) {
     StackPane stackPane = new StackPane();
     JFXDialogLayout content = new JFXDialogLayout();
     JFXDialog dialog = new JFXDialog(stackPane, content, JFXDialog.DialogTransition.CENTER);
@@ -1134,7 +1134,11 @@ public class Gsehen extends Application {
       stackPane.setVisible(false);
       gsehenWindow.setScene(principalScene);
     }, row);
-    content.setHeading(new Text(mainBundle.getString(headingKey)));
+    if (hint != null) {
+    content.setHeading(new Text(mainBundle.getString(headingKey) + mainBundle.getString(hint)));
+    } else {
+      content.setHeading(new Text(mainBundle.getString(headingKey)));
+    }
     content.setBody(inputGridPane);
     gsehenWindow.setScene(new Scene(stackPane, 300, 250));
     dialog.show();
