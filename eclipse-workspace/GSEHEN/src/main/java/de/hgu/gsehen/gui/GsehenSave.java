@@ -26,6 +26,6 @@ public final class GsehenSave {
     });
     buttons.put("save.2.cancel", e -> {
     });
-    gsehenInstance.showDialog("save.title", null, buttons);
+    gsehenInstance.showDialog("save.title", null, buttons, null);
   }
 }
