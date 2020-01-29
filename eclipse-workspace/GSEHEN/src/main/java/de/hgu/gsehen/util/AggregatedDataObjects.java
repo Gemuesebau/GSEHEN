@@ -149,11 +149,11 @@ public class AggregatedDataObjects<D> {
     objects.addColumnDefinition(0, "datetime", "Date", dateParser("d.M.y H:m:s"), null,
         dateFormatter("dd.MM.yyyy, HH:mm:ss"),
         dtList -> dtList.get(dtList.size() - 1), (dd, dt) -> dd.setDate(dt));
-    objects.addColumnDefinition(6, "batterymV", "Double", doubleParser("GERMAN"), v -> 1000 * v,
-        doubleFormatter(Locale.forLanguageTag("de")),
-        doubleMean(), (dd, d) -> dd.setBatteryMean(d));
+//    objects.addColumnDefinition(6, "batterymV", "Double", doubleParser("GERMAN"), v -> 1000 * v,
+//        doubleFormatter(Locale.forLanguageTag("de")),
+//        doubleMean(), (dd, d) -> dd.setBatteryMean(d));
     objects.process(
-        "",
+        "GSEHENWetter.csv",
         "utf-8",
         -1,
         (i, l) -> l.get(0).length() > 0 && Character.isLetter(l.get(0).charAt(0)),

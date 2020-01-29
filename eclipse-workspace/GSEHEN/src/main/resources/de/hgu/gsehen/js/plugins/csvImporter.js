@@ -7,69 +7,42 @@ function getPlugin() {
 			windspeedMeasHeightMeters
 		);
 	};
-	var incrementDaysCountForLinesCount = function(linesCount, statistics) {
-		var daysCount = statistics[linesCount];
-		statistics[linesCount] = daysCount == null ? 1 : daysCount + 1;
-	};
-	var logStatistics = function(statistics) {
-		for (var linesCount in statistics) {
-			LOGGER.log(java.util.logging.Level.CONFIG, "Found " + statistics[linesCount] + " days with " + linesCount + " data lines");
-		}
-		java.lang.Thread.sleep(3000);//DEBUG
-	};
-	var logObject = function(message, obj) {
-		var str = message + "{";
-		for (var attr in obj) {
-			str += ("\n  \"" + attr + "\": " + (typeof obj[attr] == "number" ? obj[attr] : "\"" + obj[attr] + "\""));
-		}
-		str += ("\n}");
-		LOGGER.log(java.util.logging.Level.CONFIG, str);
-	};
 	var calculateDayDataForOneDay = function(pluginConfig, dayDate, weatherDataArray) {
-		// über grouping lösen. einem entspr. Predicate muss außer dem aktuellen auch der letzte Datensatz gegeben werden.
-		// muss nach erstem Parse-Schritt sein, aber nicht notwendigerweise mit "Zwischenobjekt" ( = Schritt 2). Dieses kann
-		// zugunsten des ZIEL-Objekts (nach Aggregation!) wieder eingespart werden!!
 		var dayData = new (Java.type("de.hgu.gsehen.evapotranspiration.DayData"))();
-		dayData.setDate(dayDate);
+		dayData.setDate(dayDate); // FIXME
 		dayData.setTempMax(arrayUtilities.objArrayMax(weatherDataArray, "temp"));
 		dayData.setTempMin(arrayUtilities.objArrayMin(weatherDataArray, "temp"));
 		dayData.setTempMean(arrayUtilities.objArrayMean(weatherDataArray, "temp"));
 		dayData.setAirHumidityRelMax(arrayUtilities.objArrayMax(weatherDataArray, "airHumidityRel"));
 		dayData.setAirHumidityRelMin(arrayUtilities.objArrayMin(weatherDataArray, "airHumidityRel"));
 		dayData.setAirHumidityRelMean(arrayUtilities.objArrayMean(weatherDataArray, "airHumidityRel"));
-		/* dayData.setGlobalRad(arrayUtilities.objArraySum(weatherDataArray, "globalRad") * pluginConfig.measIntervalSeconds / 1000000); */
 		dayData.setGlobalRad(arrayUtilities.objArraySum(weatherDataArray, "globalRad") * 0.0864 / ((60/(pluginConfig.measIntervalSeconds / 60))*24));
-		/* 0.0864*Glob/144  --->  das alles hier über Werttransformation?!! pluginConfig reinreichen?! (put, dann exec eval?) */
-
+		/* 1/1000000 vs 0.0864*Glob/144 */
 		dayData.setPrecipitation(arrayUtilities.objArraySum(weatherDataArray, "precipitation"));
 		dayData.setWindspeed2m(
 			calculateWindspeed2m(arrayUtilities.objArrayMean(weatherDataArray, "windspeed"), pluginConfig.windspeedMeasHeightMeters)
 		);
 		return dayData;
 	};
-	var processWeatherDataForOneDay = function(currentWeatherDataForOneDay, completeDayData, pluginConfig, statistics) {
+	var processWeatherDataForOneDay = function(currentWeatherDataForOneDay, completeDayData, pluginConfig) {
 		if (currentWeatherDataForOneDay.length > 0) {
 			completeDayData.add(calculateDayDataForOneDay(pluginConfig, currentWeatherDataForOneDay[0].lineDate, currentWeatherDataForOneDay));
-			incrementDaysCountForLinesCount(currentWeatherDataForOneDay.length, statistics);
 		}
 	};
 	var calculateDayData = function(pluginConfig, date /* currently unused */, weatherDataArray) {
 		var completeDayData = new java.util.ArrayList();
 		var lastLineDayStamp = -1;
 		var currentWeatherDataForOneDay = [];
-		var statistics = {};
 		arrayUtilities.iterateArray(weatherDataArray, function (weatherDataLine) {
-			//logObject("Processing measurement ", weatherDataLine);
 			var lineDayStamp = 0 + weatherDataLine.lineDate.getTime();
 			if (lineDayStamp != lastLineDayStamp) {
-				processWeatherDataForOneDay(currentWeatherDataForOneDay, completeDayData, pluginConfig, statistics);
+				processWeatherDataForOneDay(currentWeatherDataForOneDay, completeDayData, pluginConfig);
 				lastLineDayStamp = lineDayStamp;
 				currentWeatherDataForOneDay = [];
 			}
 			currentWeatherDataForOneDay.push(weatherDataLine);
 		});
-		processWeatherDataForOneDay(currentWeatherDataForOneDay, completeDayData, pluginConfig, statistics);
-		logStatistics(statistics);
+		processWeatherDataForOneDay(currentWeatherDataForOneDay, completeDayData, pluginConfig);
 		return completeDayData;
 	};
 	var getWeatherDataAttributeNamesArray = function(arr) {
@@ -91,9 +64,49 @@ function getPlugin() {
 			return numberFormat.parse(str).doubleValue();
 		});
 	};
+	var newTransformableColumnData = function(pluginConfig) {
+		return new de.hgu.gsehen.util.TransformableColumnData(
+                new de.hgu.gsehen.util.ColumnDataText(
+                    pluginConfig.separatorChar,
+                    pluginConfig.quoteChar,
+                    pluginConfig.quotedRegExp,
+                    pluginConfig.quotedReplaceJS
+                )
+            );
+    };
 	var importWeatherData = function(date /* currently unused */, pluginConfig, stack, withExceptions) {
-		//var timeStamp = date.getTime();
-		var weatherDataArray = stack == null ? [] : stack;
+		var columnData = newTransformableColumnData(pluginConfig);
+		var columnDefProps = [
+			  "coldefdatetime",
+			  "coldeftemperature",
+			  "coldefairhumidity",
+			  "coldeftimeduration",
+			  "coldefwindspeed",
+			  "coldefglobalrad",
+			  "coldefprecipitation"
+		];
+		arrayUtilities.iterateArray(columnDefProps, function (columnDefProp) {
+			var colDefString = pluginConfig[columnDefProp];
+			// 7, v * 1000
+			columnData.addColumnDefinition(colDef, "datetime", "Date", dateParser("d.M.y H:m:s"), null,
+	        dateFormatter("dd.MM.yyyy, HH:mm:ss"));
+		});
+		
+		// FIXME parse user-provided column definition strings, add & process (see below);
+		//  two cases: preview (like below); after that, actual import (see TransformableTypedColumnData.main)
+	    
+	    columnData.addColumnDefinition(6, "batterymV", "Double", doubleParser("GERMAN"), v -> 1000 * v,
+	        doubleFormatter(Locale.forLanguageTag("de")));
+	    columnData.processAsRows(
+	        "",
+	        "utf-8",
+	        15,
+	        a -> System.out.println(Arrays.asList(a)),
+	        (i, l) -> l.get(0).length() > 0 && Character.isLetter(l.get(0).charAt(0))
+	    );
+
+
+	    var weatherDataArray = stack == null ? [] : stack;
 		var lineNumberReader = new java.io.LineNumberReader(new java.io.FileReader(pluginConfig.dataFilePath));
 		var line;
 		var lineNumber = 0;
@@ -103,31 +116,16 @@ function getPlugin() {
 		while ((line = lineNumberReader.readLine()) != null) {
 			lineNumber++;
 			try {
-				/*
-
-"  hallo \" welt "
-
-substrstwre = \\(.) replacejs = m.group(1)
-substrstwre = "" replacejs = '"'
-
-aktuell: lineDate nur tagesgenau, was hier intern nützlich ist, aber nicht ausreicht, um in DayData
-den "exakten" Zeitpunkt der letzten berücksichtigten Messwertzeile zu übergeben! GSEH-35
-				*/
 				var lineDate = dateFormat.parse(line.replace(/^"/, "").replace(/ .*/, ""));
-				//LOGGER.log(java.util.logging.Level.FINE, "date = " + date);
-				//LOGGER.log(java.util.logging.Level.FINE, "lineDate = " + lineDate);
-				//if (lineDate.getTime() >= timeStamp) {
-					var weatherDataMeasurementObject = arrayUtilities.arrayToObject(
-						processNumberColumns(line.split(/; */), numberFormat),
-						getWeatherDataAttributeNamesArray()
-					);
-					if (withExceptions) {
-						weatherDataMeasurementObject.lineNumber = lineNumber;
-					}
-					weatherDataMeasurementObject.lineDate = lineDate;
-					weatherDataArray.push(weatherDataMeasurementObject);
-					//logObject("Added measurement ", weatherDataMeasurementObject);
-				//}
+				var weatherDataMeasurementObject = arrayUtilities.arrayToObject(
+					processNumberColumns(line.split(/; */), numberFormat),
+					getWeatherDataAttributeNamesArray()
+				);
+				if (withExceptions) {
+					weatherDataMeasurementObject.lineNumber = lineNumber;
+				}
+				weatherDataMeasurementObject.lineDate = lineDate;
+				weatherDataArray.push(weatherDataMeasurementObject);
 			}
 			catch (e) {
 				LOGGER.log(java.util.logging.Level.CONFIG, "" + lineNumber + ": " + e);
@@ -218,17 +216,20 @@ den "exakten" Zeitpunkt der letzten berücksichtigten Messwertzeile zu übergebe
 			return calculateDayData(pluginConfig, date /* currently unused */, weatherDataArray);
 		},
 		//----------------------------------------------------------------------------------------
-		// TODO! sollte sich darauf stützen, was in den createGuiControl-Aufrufen benannt wurde
-		getConfigObject: function() {
-			return {
-				measIntervalSeconds: this.guiControls.interval.getNodeValue(),                  // 60
-				windspeedMeasHeightMeters: this.guiControls.windspeed.getNodeValue(),           // 2
-				dateFormatString: this.guiControls.dateformat.getNodeValue(),                   // "y-M-d" ---> see newDateFormat
-				numberFormat: this.javaLocaleMap.get(this.guiControls.localeid.getNodeValue()), // "Deutsch (GERMAN)" ---> see newNumberFormat
-				dataFilePath: this.guiControls.filepath.getNodeValue()                          // "C:\\Data\\10MinDaten.csv"
-			};
+		getConfigValue: function(item) {
+			var configObjectTransform = this.configObjectTransforms[item];
+			var configValue = this.guiControls[item].getNodeValue();
+			return configObjectTransform == null ? configValue : configObjectTransform(configValue);
 		},
-		createGuiControl: function(item, type, hasExample, itemObjectsList, data, dataKey, transform, comboBox) {
+		getConfigObject: function() {
+			var result = {};
+			for (var dataKey in this.itemsByDataKeys) {
+				result[dataKey] = this.getConfigValue(this.itemsByDataKeys[dataKey]);
+			}
+			java.lang.System.out.println(JSON.stringify(result, null, 2));
+			return result;
+		},
+		createGuiControl: function(item, type, hasExample, itemObjectsList, data, dataKey, transform, configObjectTransform, comboBox) {
 			var ConfigField = Packages.de.hgu.gsehen.gui.view["ConfigDialog" + type];
 			var text = this.gsehenGui.text(this.msgBundle.getString(item));
 			var example = hasExample ? this.gsehenGui.text(this.msgBundle.getString(item + "example")) : null;
@@ -246,18 +247,21 @@ den "exakten" Zeitpunkt der letzten berücksichtigten Messwertzeile zu übergebe
 				}
 				control.setNodeValue(temp);
 			}
+			this.itemsByDataKeys[dataKey] = item;
+			if (configObjectTransform != null) {
+				this.configObjectTransforms[item] = configObjectTransform;
+			}
 		},
 		gsehenGui: null,
-		javaLocaleMap: null,
 		guiControls: null,
+		itemsByDataKeys: null,
+		configObjectTransforms: null,
 		gsehenInstance: null,
 		msgBundle: null,
 		parentStackPane: null,
-		/*filechooserbutton: null*/
 		//-----------
 		/*@Override*/createAndFillSpecificControls: function(json, configurator) {
 			this.gsehenGui = Packages.de.hgu.gsehen.gui.GsehenGuiElements;
-			this.javaLocaleMap = configurator.getJavaLocaleMap();
 			this.guiControls = {
 				interval: null,
 				windspeed: null,
@@ -265,6 +269,8 @@ den "exakten" Zeitpunkt der letzten berücksichtigten Messwertzeile zu übergebe
 				localeid: null,
 				filepath: null
 			};
+			this.itemsByDataKeys = {};
+			this.configObjectTransforms = {};
 			this.gsehenInstance = configurator.getInstance();
 			this.msgBundle = loadLocalResourceBundle("csvImporter_i18n", configurator.getLocale());
 			this.parentStackPane = configurator.getParentStackPane();
@@ -277,32 +283,52 @@ den "exakten" Zeitpunkt der letzten berücksichtigten Messwertzeile zu übergebe
 			this.createGuiControl("dateformat", "StringField", true, specificConfigItems, data, "dateFormatString");
 			this.createGuiControl("localeid", "ComboBox", false, specificConfigItems, data, "numberFormat",
 					function(v) { return reverseLookup(v, configurator.getJavaLocaleMap()); },
-					this.gsehenGui.comboBox(getLocaleDisplay(this.javaLocaleMap)));
+					function(s) { return configurator.getJavaLocaleMap().get(s); },
+					this.gsehenGui.comboBox(getLocaleDisplay(configurator.getJavaLocaleMap())));
 			this.createGuiControl("filepath", "StringField", true, specificConfigItems, data, "dataFilePath");
+			this.createGuiControl("charset", "StringField", true, specificConfigItems, data, "dataFileCharset");
+			this.createGuiControl("separatorchar", "StringField", true, specificConfigItems, data, "separatorChar");
+			this.createGuiControl("quotechar", "StringField", true, specificConfigItems, data, "quoteChar");
+			this.createGuiControl("quotedregexp", "StringField", true, specificConfigItems, data, "quotedRegExp");
+			this.createGuiControl("quotedreplacejs", "StringField", true, specificConfigItems, data, "quotedReplaceJS");
+			this.createGuiControl("headlinejs", "StringField", true, specificConfigItems, data, "headlineJS");
+			this.createGuiControl("coldefdatetime", "StringField", true, specificConfigItems, data, "coldefdatetime");
+			this.createGuiControl("coldeftemperature", "StringField", false, specificConfigItems, data, "coldeftemperature");
+			this.createGuiControl("coldefairhumidity", "StringField", false, specificConfigItems, data, "coldefairhumidity");
+			this.createGuiControl("coldeftimeduration", "StringField", false, specificConfigItems, data, "coldeftimeduration");
+			this.createGuiControl("coldefwindspeed", "StringField", false, specificConfigItems, data, "coldefwindspeed");
+			this.createGuiControl("coldefglobalrad", "StringField", false, specificConfigItems, data, "coldefglobalrad");
+			this.createGuiControl("coldefprecipitation", "StringField", true, specificConfigItems, data, "coldefprecipitation");
 
-			this.createGuiControl("charset", "StringField", true, specificConfigItems, data, "dataFile");
-			this.createGuiControl("lineend", "StringField", true, specificConfigItems, data, "dataFile");
-			this.createGuiControl("separatorchar", "StringField", true, specificConfigItems, data, "dataFile");
-			this.createGuiControl("quotechar", "StringField", true, specificConfigItems, data, "dataFile");
-			this.createGuiControl("quotedregexp", "StringField", true, specificConfigItems, data, "dataFile");
-			this.createGuiControl("quotedreplacejs", "StringField", true, specificConfigItems, data, "dataFile");
-			this.createGuiControl("headlinejs", "StringField", true, specificConfigItems, data, "dataFile");
-			arr.push("datetime");     // 0
-			arr.push("temperature");
-			arr.push("airhumidity");
-			arr.push("timeduration"); // 3, v*1000
-			arr.push("windspeed");
-			arr.push("globalrad");
-			//arr.push("battery");
-			arr.push("precipitation");// 7, v/10
-			//Spalten + Werttransformation f(s, d, n) = [JavaScript-Ausdruck, der das String-Array "s" verwenden kann, oder die Funktionen d(ate) und n(umber) mit Spaltenindex als Parameter, welche die konfigurierten Formate nutzen]
-			// Problem: Zuordnung wird dann nur bei der Wertermittlung genutzt, aber nicht bei der "Auswertung" der Kopfzeile. Diese sollte mindestens in der Preview direkt unter dem fachlichen Spaltennamen (z.B. [tableviewcolumnname.dateTimeStr]) angezeigt werden....
-			//---> mit Hinweis auf erwartete Einheit, muss in Preview berücksichtigt werden
-			// (d.h., Preview zeigt zwar Zeilennummern, und Spalten wie in der Datei, aber bereits transformierte Daten,
-			// anhand Typ des zugeordneten Werts ..)
+/*
 
-			
-			/*filechooserbutton//Datei auswählen ---> filepath*/
+
+    AggregatedDataObjects<DayData> objects =
+        new AggregatedDataObjects<>(
+            newTransformableColumnData(pluginConfig)
+        );
+    objects.addColumnDefinition(0, "datetime", "Date", dateParser(dateformat), null,
+        dateFormatter("dd.MM.yyyy, HH:mm:ss"), // ??
+        dtList -> dtList.get(dtList.size() - 1), (dd, dt) -> dd.setDate(dt));
+    objects.addColumnDefinition(6, "batterymV", "Double", doubleParser("GERMAN"), v -> 1000 * v,
+        doubleFormatter(Locale.forLanguageTag("de")),
+        doubleMean(), (dd, d) -> dd.setBatteryMean(d));
+    objects.process(
+        "GSEHENWetter.csv",
+        charset,
+        -1,
+        headlinejs,
+        (last, current) -> {
+          return !DateUtil.sameDay(
+              (Date)current.getValue("datetime"), (Date)last.getValue("datetime"));
+        },
+        () -> new DayData(),
+        d -> System.out.println(d.getDate()) // hier, oder gleich oben, das neue DayData-Objekt in die Liste!
+    );
+
+
+*/
+
 			var weatherDataPlugin = this;
 			new Packages.de.hgu.gsehen.gui.view.ConfigDialogActionButton(
 					this.msgBundle.getString("importtest"), specificConfigItems,
@@ -327,7 +353,13 @@ den "exakten" Zeitpunkt der letzten berücksichtigten Messwertzeile zu übergebe
 		},
 		//-----------
 		/*@Override*/getSpecificConfigurationJSON: function() {
-			return JSON.stringify(this.getConfigObject());
+			try {
+				return JSON.stringify(this.getConfigObject());
+			}
+			catch (e) {
+				java.lang.System.err.println(e);
+				java.lang.System.err.println(e.message);
+			}
 		},
 		showImportPreview: function(arrayList) {
 		    var content = new com.jfoenix.controls.JFXDialogLayout();

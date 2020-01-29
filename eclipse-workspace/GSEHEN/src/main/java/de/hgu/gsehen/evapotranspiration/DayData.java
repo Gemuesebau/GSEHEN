@@ -241,8 +241,4 @@ public class DayData implements Comparable<DayData> {
 
   public DayData() {
   }
-
-  public void setBatteryMean(double d) {
-    System.out.println("DUMMY!!! removeme - " + d);
-  }
 }
