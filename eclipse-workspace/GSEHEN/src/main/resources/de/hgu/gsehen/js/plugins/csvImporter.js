@@ -45,112 +45,144 @@ function getPlugin() {
 		processWeatherDataForOneDay(currentWeatherDataForOneDay, completeDayData, pluginConfig);
 		return completeDayData;
 	};
-	var getWeatherDataAttributeNamesArray = function(arr) {
-		if (arr == null) {
-			arr = [];
-		}
-		arr.push("dateTimeStr");
-		arr.push("temp");
-		arr.push("airHumidityRel");
-		arr.push("timeDuration");
-		arr.push("windspeed");
-		arr.push("globalRad");
-		arr.push("battery");
-		arr.push("precipitation");
-		return arr;
-	};
 	var processNumberColumns = function(lineStringsArray, numberFormat) {
 		return arrayUtilities.transformArray(lineStringsArray, 1, function (str) {
 			return numberFormat.parse(str).doubleValue();
 		});
 	};
 	var newTransformableColumnData = function(pluginConfig) {
-		return new de.hgu.gsehen.util.TransformableColumnData(
-                new de.hgu.gsehen.util.ColumnDataText(
+		return new Packages.de.hgu.gsehen.util.TransformableColumnData(
+                new Packages.de.hgu.gsehen.util.ColumnDataText(
                     pluginConfig.separatorChar,
                     pluginConfig.quoteChar,
                     pluginConfig.quotedRegExp,
-                    pluginConfig.quotedReplaceJS
+                    new Function("m", "return " + pluginConfig.quotedReplaceJS)
                 )
             );
-    };
-	var importWeatherData = function(date /* currently unused */, pluginConfig, stack, withExceptions) {
+	};
+	var newConfiguredColumnData = function(pluginConfig, msgBundle) {
+		var tcd = Packages.de.hgu.gsehen.util.TransformableColumnData;
 		var columnData = newTransformableColumnData(pluginConfig);
 		var columnDefProps = [
-			  "coldefdatetime",
-			  "coldeftemperature",
-			  "coldefairhumidity",
-			  "coldeftimeduration",
-			  "coldefwindspeed",
-			  "coldefglobalrad",
-			  "coldefprecipitation"
+			"dateTimeDefinition",
+			"temperatureDefinition",
+			"airhumidityDefinition",
+			"timeDurationDefinition",
+			"windspeedDefinition",
+			"globalRadDefinition",
+			"precipitationDefinition"
 		];
-		arrayUtilities.iterateArray(columnDefProps, function (columnDefProp) {
-			var colDefString = pluginConfig[columnDefProp];
-			// 7, v * 1000
-			columnData.addColumnDefinition(colDef, "datetime", "Date", dateParser("d.M.y H:m:s"), null,
-	        dateFormatter("dd.MM.yyyy, HH:mm:ss"));
-		});
-		
-		// FIXME parse user-provided column definition strings, add & process (see below);
-		//  two cases: preview (like below); after that, actual import (see TransformableTypedColumnData.main)
-	    
-	    columnData.addColumnDefinition(6, "batterymV", "Double", doubleParser("GERMAN"), v -> 1000 * v,
-	        doubleFormatter(Locale.forLanguageTag("de")));
-	    columnData.processAsRows(
-	        "",
-	        "utf-8",
-	        15,
-	        a -> System.out.println(Arrays.asList(a)),
-	        (i, l) -> l.get(0).length() > 0 && Character.isLetter(l.get(0).charAt(0))
-	    );
-
-
-	    var weatherDataArray = stack == null ? [] : stack;
-		var lineNumberReader = new java.io.LineNumberReader(new java.io.FileReader(pluginConfig.dataFilePath));
-		var line;
-		var lineNumber = 0;
-		var numberFormat = newNumberFormat(pluginConfig.numberFormat); // now in de.hgu.gsehen.util.TransformableTypedColumnData
-		var dateFormat = newDateFormat(pluginConfig.dateFormatString);
-		LOGGER.log(java.util.logging.Level.FINE, "dateFormat = " + dateFormat.toPattern());
-		while ((line = lineNumberReader.readLine()) != null) {
-			lineNumber++;
-			try {
-				var lineDate = dateFormat.parse(line.replace(/^"/, "").replace(/ .*/, ""));
-				var weatherDataMeasurementObject = arrayUtilities.arrayToObject(
-					processNumberColumns(line.split(/; */), numberFormat),
-					getWeatherDataAttributeNamesArray()
-				);
-				if (withExceptions) {
-					weatherDataMeasurementObject.lineNumber = lineNumber;
-				}
-				weatherDataMeasurementObject.lineDate = lineDate;
-				weatherDataArray.push(weatherDataMeasurementObject);
+		var columnTypes = [
+			"Date",
+			"Double",
+			"Double",
+			"Double",
+			"Double",
+			"Double",
+			"Double"
+		];
+		var columnParsers = [
+			tcd.dateParser(pluginConfig.dateFormatString),
+			tcd.doubleParser(pluginConfig.numberFormat),
+			tcd.doubleParser(pluginConfig.numberFormat),
+			tcd.doubleParser(pluginConfig.numberFormat),
+			tcd.doubleParser(pluginConfig.numberFormat),
+			tcd.doubleParser(pluginConfig.numberFormat),
+			tcd.doubleParser(pluginConfig.numberFormat)
+		];
+		var previewOutputDoubleFormat = msgBundle.getString("importpreviewoutput.doubleformat");
+		var columnFormatters = [
+			tcd.dateFormatter(msgBundle.getString("importpreviewoutput.dateformat")),
+			tcd.doubleFormatter(previewOutputDoubleFormat),
+			tcd.doubleFormatter(previewOutputDoubleFormat),
+			tcd.doubleFormatter(previewOutputDoubleFormat),
+			tcd.doubleFormatter(previewOutputDoubleFormat),
+			tcd.doubleFormatter(previewOutputDoubleFormat),
+			tcd.doubleFormatter(previewOutputDoubleFormat)
+		];
+		var columnDefParser = java.util.regex.Pattern.compile("\\s*(\\d+)\\s*(,\\s*(.*))?");
+		function stringEmpty(str) {
+			return str == null || str == "";
+		}
+		function getTransformer(columnDefMatcher) {
+			if (stringEmpty(columnDefMatcher.group(2))) {
+				return null;
 			}
-			catch (e) {
-				LOGGER.log(java.util.logging.Level.CONFIG, "" + lineNumber + ": " + e);
-				if (!(lineNumber == 1 && e.getClass().getName() == "java.text.ParseException") && withExceptions) {
-					weatherDataArray.push({
-						"lineNumber": lineNumber,
-						"exceptionMsg": typeof e.getMessage == "function" ? e.getMessage() : e.message
-					});
+			return new Function("v", columnDefMatcher.group(3));
+		}
+		var maxCSVColIndex = -1;
+		for (var i=0; i<columnDefProps.length; i++) {
+			var columnDefProp = columnDefProps[i];
+			var colDefString = pluginConfig[columnDefProp];
+			var colDefMatcher = columnDefParser.matcher(colDefString);
+			if (colDefMatcher.matches()) {
+				var colIndex = java.lang.Integer.parseInt(colDefMatcher.group(1));
+				if (colIndex > maxCSVColIndex) {
+					maxCSVColIndex = colIndex;
 				}
+				columnData.addColumnDefinition(colIndex,
+						columnDefProp, columnTypes[i], columnParsers[i],
+						getTransformer(colDefMatcher), columnFormatters[i]);
+				// FIXME process (see below)
+				//  two cases: preview (like below); after that, actual import (see TransformableTypedColumnData.main)
 			}
 		}
-		return weatherDataArray;
+		return { columnData: columnData, maxCSVColIndex: maxCSVColIndex };
+    };
+	var importWeatherData = function(date /* currently unused */, pluginConfig, rowHandler, columnData) {
+	    columnData.processAsRows(
+	        pluginConfig.dataFilePath,
+	        pluginConfig.dataFileCharset,
+	        15,
+	        rowHandler,
+	        new Function("i,l", "return " + pluginConfig.headlineJS)
+	        // Java example: (i, l) -> l.get(0).length() > 0 && Character.isLetter(l.get(0).charAt(0))
+	    );
+	    //var weatherDataArray = stack == null ? [] : stack;
+		//var lineNumberReader = new java.io.LineNumberReader(new java.io.FileReader(pluginConfig.dataFilePath));
+		//var line;
+		//var lineNumber = 0;
+		//LOGGER.log(java.util.logging.Level.FINE, "dateFormat = " + dateFormat.toPattern());
+		//while ((line = lineNumberReader.readLine()) != null) {
+		//	lineNumber++;
+		//	try {
+		//		var lineDate = dateFormat.parse(line.replace(/^"/, "").replace(/ .*/, ""));
+		//		var weatherDataMeasurementObject = arrayUtilities.arrayToObject(
+		//			processNumberColumns(line.split(/; */), numberFormat),
+		//			getWeatherDataAttributeNamesArray()
+		//		);
+		//		if (withExceptions) {
+		//			weatherDataMeasurementObject.lineNumber = lineNumber;
+		//		}
+		//		weatherDataMeasurementObject.lineDate = lineDate;
+		//		weatherDataArray.push(weatherDataMeasurementObject);
+		//	}
+		//	catch (e) {
+		//		LOGGER.log(java.util.logging.Level.CONFIG, "" + lineNumber + ": " + e);
+		//		if (!(lineNumber == 1 && e.getClass().getName() == "java.text.ParseException") && withExceptions) {
+		//			weatherDataArray.push({
+		//				"lineNumber": lineNumber,
+		//				"exceptionMsg": typeof e.getMessage == "function" ? e.getMessage() : e.message
+		//			});
+		//		}
+		//	}
+		//}
+		//return weatherDataArray;
 	};
-	var createTableView = function(arrayList, columnKeys, msgBundle) {
+	var createTableView = function(csvWidth, msgKeys, msgBundle) {
 	    var tableView = new javafx.scene.control.TableView();
 	    var tableViewColumns = tableView.getColumns();
-	    for each(var columnKey in columnKeys) {
+	    for (var i=0; i<csvWidth; i++) {
 		    var column = new javafx.scene.control.TableColumn(
-		    		msgBundle.getString("tableviewcolumnname." + columnKey));
+		      msgBundle.getString("tableviewcolumnname." + msgKeys[i])); // TODO lineNumber? + Exceptions provozieren - TEST
 		    tableViewColumns.add(column);
 		    column.setMinWidth(20);
 		    column.setStyle("-fx-alignment:top-center; -fx-font-style: italic");
-		    column.setCellValueFactory(new javafx.scene.control.cell.MapValueFactory(columnKey));
+		    column.setUserData(i);
+		    column.setCellValueFactory(function(/*CellDataFeatures<String[], String>*/ p) {
+		    	return new javafx.beans.property.SimpleStringProperty(p.getValue()[p.getTableColumn().getUserData()]);
+		    });
 	    }
-	    tableView.getItems().addAll(javafx.collections.FXCollections.observableArrayList(arrayList));
 	    return tableView;
 	};
 	var setGridConstraints = function(element, columnIndex, nodeIndex) {
@@ -262,13 +294,7 @@ function getPlugin() {
 		//-----------
 		/*@Override*/createAndFillSpecificControls: function(json, configurator) {
 			this.gsehenGui = Packages.de.hgu.gsehen.gui.GsehenGuiElements;
-			this.guiControls = {
-				interval: null,
-				windspeed: null,
-				dateformat: null,
-				localeid: null,
-				filepath: null
-			};
+			this.guiControls = {};
 			this.itemsByDataKeys = {};
 			this.configObjectTransforms = {};
 			this.gsehenInstance = configurator.getInstance();
@@ -292,13 +318,13 @@ function getPlugin() {
 			this.createGuiControl("quotedregexp", "StringField", true, specificConfigItems, data, "quotedRegExp");
 			this.createGuiControl("quotedreplacejs", "StringField", true, specificConfigItems, data, "quotedReplaceJS");
 			this.createGuiControl("headlinejs", "StringField", true, specificConfigItems, data, "headlineJS");
-			this.createGuiControl("coldefdatetime", "StringField", true, specificConfigItems, data, "coldefdatetime");
-			this.createGuiControl("coldeftemperature", "StringField", false, specificConfigItems, data, "coldeftemperature");
-			this.createGuiControl("coldefairhumidity", "StringField", false, specificConfigItems, data, "coldefairhumidity");
-			this.createGuiControl("coldeftimeduration", "StringField", false, specificConfigItems, data, "coldeftimeduration");
-			this.createGuiControl("coldefwindspeed", "StringField", false, specificConfigItems, data, "coldefwindspeed");
-			this.createGuiControl("coldefglobalrad", "StringField", false, specificConfigItems, data, "coldefglobalrad");
-			this.createGuiControl("coldefprecipitation", "StringField", true, specificConfigItems, data, "coldefprecipitation");
+			this.createGuiControl("coldefdatetime", "StringField", true, specificConfigItems, data, "dateTimeDefinition");
+			this.createGuiControl("coldeftemperature", "StringField", false, specificConfigItems, data, "temperatureDefinition");
+			this.createGuiControl("coldefairhumidity", "StringField", false, specificConfigItems, data, "airhumidityDefinition");
+			this.createGuiControl("coldeftimeduration", "StringField", false, specificConfigItems, data, "timeDurationDefinition");
+			this.createGuiControl("coldefwindspeed", "StringField", false, specificConfigItems, data, "windspeedDefinition");
+			this.createGuiControl("coldefglobalrad", "StringField", false, specificConfigItems, data, "globalRadDefinition");
+			this.createGuiControl("coldefprecipitation", "StringField", true, specificConfigItems, data, "precipitationDefinition");
 
 /*
 
@@ -333,20 +359,14 @@ function getPlugin() {
 			new Packages.de.hgu.gsehen.gui.view.ConfigDialogActionButton(
 					this.msgBundle.getString("importtest"), specificConfigItems,
 					function(event) {
-						var arrayList = new (
-							Java.extend(java.util.ArrayList, Packages.de.hgu.gsehen.model.Stack, {
-								push: function(jsObj) {
-									arrayList.add(jsObj);
-								}
-							})
-						)();
-						importWeatherData(
-							Packages.de.hgu.gsehen.util.DateUtil.truncToDay(new java.util.Date()),
-							weatherDataPlugin.getConfigObject(),
-							arrayList,
-							true
-						);
-						showImportPreview(arrayList);
+						//var arrayList = new (
+						//	Java.extend(java.util.ArrayList, Packages.de.hgu.gsehen.model.Stack, {
+						//		push: function(jsObj) {
+						//			arrayList.add(jsObj);
+						//		}
+						//	})
+						//)();
+						weatherDataPlugin.showImportPreview();
 					}
 			);
 			addConfigItems(configurator.getConfigNodes(), specificConfigItems, configurator.getFixedItemsCount());
@@ -361,7 +381,7 @@ function getPlugin() {
 				java.lang.System.err.println(e.message);
 			}
 		},
-		showImportPreview: function(arrayList) {
+		showImportPreview: function() {
 		    var content = new com.jfoenix.controls.JFXDialogLayout();
 		    content.setHeading(this.gsehenGui.text(this.msgBundle.getString("importpreview")));
 		    var dialog = new com.jfoenix.controls.JFXDialog(
@@ -370,12 +390,20 @@ function getPlugin() {
 		    	com.jfoenix.controls.JFXDialog.DialogTransition.CENTER
 		    );
 		    dialog.show();
-
-		    var columnKeys = [];
-		    columnKeys.push("lineNumber");
-		    getWeatherDataAttributeNamesArray(columnKeys);
-		    columnKeys.push("exceptionMsg");
-		    var previewTable = createTableView(arrayList, columnKeys, this.msgBundle);
+		    var pluginConfig = this.getConfigObject();
+		    var columnDataHolderObj = newConfiguredColumnData(pluginConfig, this.msgBundle);
+		    var csvWidth = columnDataHolderObj.maxCSVColIndex + 1;
+		    var columnData = columnDataHolderObj.columnData;
+		    var previewTable = createTableView(csvWidth, columnData.getKeysRow(csvWidth), this.msgBundle);
+		    var previewTableItems = previewTable.getItems();
+			importWeatherData(
+				Packages.de.hgu.gsehen.util.DateUtil.truncToDay(new java.util.Date()),
+				pluginConfig,
+				function(strArr) {
+					previewTableItems.add(strArr); //System.out.println(Arrays.asList(a))
+				},
+				columnData
+			);
 		    setGridConstraints(previewTable, 0, 0);
 
 		    var closeButton = this.gsehenGui.jfxButton(this.msgBundle.getString("importpreviewclose"));

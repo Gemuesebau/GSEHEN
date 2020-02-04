@@ -1,7 +1,7 @@
 package de.hgu.gsehen.model;
 
 import de.hgu.gsehen.evapotranspiration.GeoData;
-
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -19,6 +19,7 @@ public class WeatherDataSource implements Named {
   private boolean automaticImportActive;
   private Double automaticImportFrequencySeconds;
   @SuppressWarnings("checkstyle:all")
+  @Column(length = Integer.MAX_VALUE)
   private String pluginConfigurationJSON;
   private double locationLng;
   private double locationLat;

@@ -225,14 +225,28 @@ public class TransformableColumnData {
       Consumer<String[]> rowHandler, BiPredicate<Integer, List<String>> headingRowCheck)
           throws IOException {
     columnDataText.process(in, charsetName, maxLinesCount, (lineNumber, columnStrings) -> {
-      boolean isHeadingRow = headingRowCheck.test(lineNumber, columnStrings);
       String[] row = new String[columnStrings.size()];
-      iterateOverColumns(columnStrings, false, (columnIndex, columnDefinition) -> {
-        String columnString = columnStrings.get(columnIndex);
-        row[columnIndex] = !isHeadingRow && columnDefinition != null
-            ? columnString + " -> " + columnDefinition.stringToString(columnString) :
-              columnString;
-      });
+      try {
+        boolean isHeadingRow = headingRowCheck.test(lineNumber, columnStrings);
+        iterateOverColumns(columnStrings, false, (columnIndex, columnDefinition) -> {
+          String columnString = columnStrings.get(columnIndex);
+          row[columnIndex] = !isHeadingRow && columnDefinition != null
+              ? columnString + " -> " + columnDefinition.stringToString(columnString) :
+                columnString;
+        });
+      } catch (Exception ex) {
+        StackTraceElement[] elements = ex.getStackTrace();
+        int elementCount = elements.length;
+        if (row.length > 0) {
+          row[0] = ex.getClass().getName();
+        }
+        if (row.length > 1) {
+          row[1] = ex.getMessage();
+        }
+        for (int i = 2; i < row.length; i++) {
+          row[i] = (i - 2) < elementCount ? elements[i - 2].toString() : "";
+        }
+      }
       rowHandler.accept(row);
     });
   }

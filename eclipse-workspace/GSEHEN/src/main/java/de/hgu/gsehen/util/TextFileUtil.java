@@ -15,6 +15,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
@@ -34,7 +35,9 @@ public class TextFileUtil {
    */
   public static String getUtf8FileAsOneString(String absoluteFileName) throws IOException {
     try (BufferedReader buffer = new BufferedReader(getReaderForUtf8(absoluteFileName))) {
-      return buffer.lines().collect(Collectors.joining("\n"));
+      String string = buffer.lines().collect(Collectors.joining("\n"));
+      //System.out.println(string);
+      return string;
     }
   }
 
@@ -49,16 +52,15 @@ public class TextFileUtil {
   public static ScriptEngine evaluateJavaScriptFile(String absoluteFileName) {
     final ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
     engine.put("LOGGER", LOGGER);
+    engine.put("engineGlobalScope", engine.getBindings(ScriptContext.GLOBAL_SCOPE));
     try {
       final String parent = new File(absoluteFileName).getParent().replace("\\", "\\\\");
       engine.eval(
           "function loadLocalJavaScript(relativePathAndName) {"
-          + " function() {"
-          + "     eval.apply(this, arguments);"
-          + " }(Packages." + TextFileUtil.class.getName() + ".getUtf8FileAsOneString("
-          + "     \""
+          + " eval.apply(engineGlobalScope, [Packages." + TextFileUtil.class.getName()
+          + ".getUtf8FileAsOneString(\""
           + parent + (File.separatorChar == '/' ? "/" : "\\\\")
-          + "\" + relativePathAndName));"
+          + "\" + relativePathAndName)]);"
           + "}"
           + "function loadLocalResourceBundle(bundleName, locale) {"
           + " return Packages." + TextFileUtil.class.getName() + ".getFileAsResourceBundle("
