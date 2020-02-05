@@ -9,7 +9,7 @@ function getPlugin() {
 	};
 	var calculateDayDataForOneDay = function(pluginConfig, dayDate, weatherDataArray) {
 		var dayData = new (Java.type("de.hgu.gsehen.evapotranspiration.DayData"))();
-		dayData.setDate(dayDate); // FIXME
+		dayData.setDate(dayDate); // FIXME see aggregation example in de.hgu.gsehen.util.AggregatedDataObjects.main(String[]), column definition for "datetime"!
 		dayData.setTempMax(arrayUtilities.objArrayMax(weatherDataArray, "temp"));
 		dayData.setTempMin(arrayUtilities.objArrayMin(weatherDataArray, "temp"));
 		dayData.setTempMean(arrayUtilities.objArrayMean(weatherDataArray, "temp"));
@@ -17,7 +17,7 @@ function getPlugin() {
 		dayData.setAirHumidityRelMin(arrayUtilities.objArrayMin(weatherDataArray, "airHumidityRel"));
 		dayData.setAirHumidityRelMean(arrayUtilities.objArrayMean(weatherDataArray, "airHumidityRel"));
 		dayData.setGlobalRad(arrayUtilities.objArraySum(weatherDataArray, "globalRad") * 0.0864 / ((60/(pluginConfig.measIntervalSeconds / 60))*24));
-		/* 1/1000000 vs 0.0864*Glob/144 */
+		/* 1/1000000 vs 0.0864*Glob/144 ---> see "doc" */
 		dayData.setPrecipitation(arrayUtilities.objArraySum(weatherDataArray, "precipitation"));
 		dayData.setWindspeed2m(
 			calculateWindspeed2m(arrayUtilities.objArrayMean(weatherDataArray, "windspeed"), pluginConfig.windspeedMeasHeightMeters)
@@ -31,7 +31,7 @@ function getPlugin() {
 	};
 	var calculateDayData = function(pluginConfig, date /* currently unused */, weatherDataArray) {
 		var completeDayData = new java.util.ArrayList();
-		var lastLineDayStamp = -1;
+		var lastLineDayStamp = -1; // FIXME now aggregation must be used, and last timestamp in each "group" (day) must be set.
 		var currentWeatherDataForOneDay = [];
 		arrayUtilities.iterateArray(weatherDataArray, function (weatherDataLine) {
 			var lineDayStamp = 0 + weatherDataLine.lineDate.getTime();
@@ -108,7 +108,7 @@ function getPlugin() {
 			if (stringEmpty(columnDefMatcher.group(2))) {
 				return null;
 			}
-			return new Function("v", columnDefMatcher.group(3));
+			return new Function("v", "return " + columnDefMatcher.group(3));
 		}
 		var maxCSVColIndex = -1;
 		for (var i=0; i<columnDefProps.length; i++) {
@@ -123,8 +123,8 @@ function getPlugin() {
 				columnData.addColumnDefinition(colIndex,
 						columnDefProp, columnTypes[i], columnParsers[i],
 						getTransformer(colDefMatcher), columnFormatters[i]);
-				// FIXME process (see below)
-				//  two cases: preview (like below); after that, actual import (see TransformableTypedColumnData.main)
+				// FIXME process case 2 (see below)
+				//  two cases: preview (done); after that, actual import (see TransformableTypedColumnData.main)
 			}
 		}
 		return { columnData: columnData, maxCSVColIndex: maxCSVColIndex };
@@ -138,43 +138,13 @@ function getPlugin() {
 	        new Function("i,l", "return " + pluginConfig.headlineJS)
 	        // Java example: (i, l) -> l.get(0).length() > 0 && Character.isLetter(l.get(0).charAt(0))
 	    );
-	    //var weatherDataArray = stack == null ? [] : stack;
-		//var lineNumberReader = new java.io.LineNumberReader(new java.io.FileReader(pluginConfig.dataFilePath));
-		//var line;
-		//var lineNumber = 0;
-		//LOGGER.log(java.util.logging.Level.FINE, "dateFormat = " + dateFormat.toPattern());
-		//while ((line = lineNumberReader.readLine()) != null) {
-		//	lineNumber++;
-		//	try {
-		//		var lineDate = dateFormat.parse(line.replace(/^"/, "").replace(/ .*/, ""));
-		//		var weatherDataMeasurementObject = arrayUtilities.arrayToObject(
-		//			processNumberColumns(line.split(/; */), numberFormat),
-		//			getWeatherDataAttributeNamesArray()
-		//		);
-		//		if (withExceptions) {
-		//			weatherDataMeasurementObject.lineNumber = lineNumber;
-		//		}
-		//		weatherDataMeasurementObject.lineDate = lineDate;
-		//		weatherDataArray.push(weatherDataMeasurementObject);
-		//	}
-		//	catch (e) {
-		//		LOGGER.log(java.util.logging.Level.CONFIG, "" + lineNumber + ": " + e);
-		//		if (!(lineNumber == 1 && e.getClass().getName() == "java.text.ParseException") && withExceptions) {
-		//			weatherDataArray.push({
-		//				"lineNumber": lineNumber,
-		//				"exceptionMsg": typeof e.getMessage == "function" ? e.getMessage() : e.message
-		//			});
-		//		}
-		//	}
-		//}
-		//return weatherDataArray;
 	};
 	var createTableView = function(csvWidth, msgKeys, msgBundle) {
 	    var tableView = new javafx.scene.control.TableView();
 	    var tableViewColumns = tableView.getColumns();
 	    for (var i=0; i<csvWidth; i++) {
 		    var column = new javafx.scene.control.TableColumn(
-		      msgBundle.getString("tableviewcolumnname." + msgKeys[i])); // TODO lineNumber? + Exceptions provozieren - TEST
+		      msgBundle.getString("tableviewcolumnname." + msgKeys[i]));
 		    tableViewColumns.add(column);
 		    column.setMinWidth(20);
 		    column.setStyle("-fx-alignment:top-center; -fx-font-style: italic");
@@ -258,7 +228,6 @@ function getPlugin() {
 			for (var dataKey in this.itemsByDataKeys) {
 				result[dataKey] = this.getConfigValue(this.itemsByDataKeys[dataKey]);
 			}
-			java.lang.System.out.println(JSON.stringify(result, null, 2));
 			return result;
 		},
 		createGuiControl: function(item, type, hasExample, itemObjectsList, data, dataKey, transform, configObjectTransform, comboBox) {
@@ -359,13 +328,6 @@ function getPlugin() {
 			new Packages.de.hgu.gsehen.gui.view.ConfigDialogActionButton(
 					this.msgBundle.getString("importtest"), specificConfigItems,
 					function(event) {
-						//var arrayList = new (
-						//	Java.extend(java.util.ArrayList, Packages.de.hgu.gsehen.model.Stack, {
-						//		push: function(jsObj) {
-						//			arrayList.add(jsObj);
-						//		}
-						//	})
-						//)();
 						weatherDataPlugin.showImportPreview();
 					}
 			);
@@ -400,7 +362,7 @@ function getPlugin() {
 				Packages.de.hgu.gsehen.util.DateUtil.truncToDay(new java.util.Date()),
 				pluginConfig,
 				function(strArr) {
-					previewTableItems.add(strArr); //System.out.println(Arrays.asList(a))
+					previewTableItems.add(strArr);
 				},
 				columnData
 			);
