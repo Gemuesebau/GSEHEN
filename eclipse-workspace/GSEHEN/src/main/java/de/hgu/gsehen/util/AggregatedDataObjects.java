@@ -2,15 +2,12 @@ package de.hgu.gsehen.util;
 
 import static de.hgu.gsehen.util.TransformableColumnData.dateFormatter;
 import static de.hgu.gsehen.util.TransformableColumnData.dateParser;
-import static de.hgu.gsehen.util.TransformableColumnData.doubleFormatter;
-import static de.hgu.gsehen.util.TransformableColumnData.doubleParser;
 
 import de.hgu.gsehen.evapotranspiration.DayData;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
@@ -26,6 +23,7 @@ public class AggregatedDataObjects<D> {
   private Map<Integer, BiConsumer<D, ?>> setterMap;
   private Map<String, Integer> columnsByKey;
 
+  @SuppressWarnings("unused")
   private static Aggregator<Double> doubleMean() {
     return dList -> dList.stream().mapToDouble(d -> d).average().getAsDouble();
   }
@@ -149,18 +147,13 @@ public class AggregatedDataObjects<D> {
     objects.addColumnDefinition(0, "datetime", "Date", dateParser("d.M.y H:m:s"), null,
         dateFormatter("dd.MM.yyyy, HH:mm:ss"),
         dtList -> dtList.get(dtList.size() - 1), (dd, dt) -> dd.setDate(dt));
-//    objects.addColumnDefinition(6, "batterymV", "Double", doubleParser("GERMAN"), v -> 1000 * v,
-//        doubleFormatter(Locale.forLanguageTag("de")),
-//        doubleMean(), (dd, d) -> dd.setBatteryMean(d));
     objects.process(
-        "GSEHENWetter.csv",
+        "",
         "utf-8",
         -1,
         (i, l) -> l.get(0).length() > 0 && Character.isLetter(l.get(0).charAt(0)),
-        (last, current) -> {
-          return !DateUtil.sameDay(
-              (Date)current.getValue("datetime"), (Date)last.getValue("datetime"));
-        },
+        (last, current) -> !DateUtil.sameDay(
+            (Date)current.getValue("datetime"), (Date)last.getValue("datetime")),
         () -> new DayData(),
         d -> System.out.println(d.getDate())
     );
