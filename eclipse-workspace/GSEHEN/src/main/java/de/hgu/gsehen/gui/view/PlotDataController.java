@@ -259,16 +259,11 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
     Accordion descriptionAccordion = new Accordion();
     descriptionAccordion.getPanes().add(descriptionPane);
 
-    // devPhase is a helper-object where you can set the duration of each crop phase
-    devPhase = new CropDevelopmentStatus();
-    // devRoot is a helper-object where you can set the rooting-zone of each crop
-    devRoot = new CropRootingZone();
-
     ChangeListener<Crop> changeListener = new ChangeListener<Crop>() {
       @Override
-      public void changed(ObservableValue<? extends Crop> observable, //
+      public void changed(ObservableValue<? extends Crop> observable,
           Crop oldValue, Crop newValue) {
-        if (oldValue != newValue) {
+        if (oldValue != null && newValue != null && oldValue != newValue) {
           // A tooltip, that shows the current crop description
           Tooltip tooltip = new Tooltip(
               gsehenInstance.localizeCropText(cropChoiceBox.getValue().getDescription()));
@@ -673,7 +668,10 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
    */
   private void setTableData() {
     cropTable.getItems().clear();
-
+    
+    devRoot = plot.getCropRootingZone();
+    devPhase = plot.getCropDevelopmentStatus();
+    
     Date cropdate = plot.getCropStart();
     Date soildate = plot.getSoilStartDate();
 
@@ -688,22 +686,20 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
       Calendar calendar = Calendar.getInstance();
       calendar.setTime(startDate);
 
-      List<Integer> durations = Arrays.asList(plot.getCrop().getPhase1(),
-          plot.getCrop().getPhase2(), plot.getCrop().getPhase3(), plot.getCrop().getPhase4());
       List<String> bbchs = Arrays.asList(plot.getCrop().getBbch1(), plot.getCrop().getBbch2(),
           plot.getCrop().getBbch3(), plot.getCrop().getBbch4());
       List<Integer> rootingZones = Arrays.asList(devRoot.getRootingZone1(),
           devRoot.getRootingZone2(), devRoot.getRootingZone3(), devRoot.getRootingZone4());
-      List<Integer> devCropDurations = Arrays.asList(devPhase.getPhase1(), devPhase.getPhase2(),
+      List<Integer> cropDurations = Arrays.asList(devPhase.getPhase1(), devPhase.getPhase2(),
           devPhase.getPhase3(), devPhase.getPhase4());
 
       cropPhases = new ArrayList<>();
       int index = 0;
-      for (Integer duration : durations) {
+      for (Integer duration : cropDurations) {
         if (duration == null || duration == 0) {
           break;
         }
-        final Integer currentPhaseDuration = devCropDurations.get(index);
+        final Integer currentPhaseDuration = cropDurations.get(index);
         final Date currentCalendarTime = calendar.getTime();
         calendar.add(Calendar.DAY_OF_YEAR, currentPhaseDuration);
         cropPhases
@@ -988,30 +984,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             plot.setRootingZone(Integer.valueOf(rootingZone.getText()));
           } else {
             plot.setRootingZone(null);
-          }
-          if (devPhase.getPhase1() != null) {
-            plot.getCrop().setPhase1(devPhase.getPhase1());
-          }
-          if (devPhase.getPhase2() != null) {
-            plot.getCrop().setPhase2(devPhase.getPhase2());
-          }
-          if (devPhase.getPhase3() != null) {
-            plot.getCrop().setPhase3(devPhase.getPhase3());
-          }
-          if (devPhase.getPhase4() != null) {
-            plot.getCrop().setPhase4(devPhase.getPhase4());
-          }
-          if (devRoot.getRootingZone1() != null) {
-            plot.getCrop().setRootingZone1(devRoot.getRootingZone1());
-          }
-          if (devRoot.getRootingZone2() != null) {
-            plot.getCrop().setRootingZone2(devRoot.getRootingZone2());
-          }
-          if (devRoot.getRootingZone3() != null) {
-            plot.getCrop().setRootingZone3(devRoot.getRootingZone3());
-          }
-          if (devRoot.getRootingZone4() != null) {
-            plot.getCrop().setRootingZone4(devRoot.getRootingZone4());
           }
           plot.setSoilStartValue(soilStartValue.getValue());
           plot.setIsActive(isActive);
