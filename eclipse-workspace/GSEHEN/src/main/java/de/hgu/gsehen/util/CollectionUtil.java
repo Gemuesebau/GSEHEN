@@ -3,6 +3,7 @@ package de.hgu.gsehen.util;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -181,5 +182,26 @@ public class CollectionUtil {
       }
     }
     return null;
+  }
+
+  public static <T> void eliminateDuplicates(List<T> list, Function<T, Object> criterion) {
+    Object lastCriterionValue = null;
+    Iterator<T> iterator = list.iterator();
+    while (iterator.hasNext()) {
+      Object criterionValue = criterion.apply(iterator.next());
+      if (objectsEqual(lastCriterionValue, criterionValue)) {
+        iterator.remove();
+      }
+      else {
+        lastCriterionValue = criterionValue;
+      }
+    }
+  }
+
+  public static boolean objectsEqual(Object a, Object b) {
+    if (a == null || b == null) {
+      return false;
+    }
+    return a.equals(b);
   }
 }

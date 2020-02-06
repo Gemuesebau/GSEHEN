@@ -67,11 +67,11 @@ public class TotalBalance {
         soilZone = soilManualData.getSoilZone();
       } else {
         soilZone = 10;
-        logMessage(LOGGER, Level.INFO, "no.soil.zone.set.to.standard.10cm");
+        logMessage(LOGGER, Level.FINE, "no.soil.zone.set.to.standard.10cm");
       }
     } else {
       soilZone = 10;
-      logMessage(LOGGER, Level.INFO, "no.soil.zone.set.to.standard.10cm");
+      logMessage(LOGGER, Level.FINE, "no.soil.zone.set.to.standard.10cm");
     }
     CropDevelopmentStatus cropDevelopmentStatus = plot.getCropDevelopmentStatus();
     Integer currentRootingZone = null;
@@ -156,7 +156,7 @@ public class TotalBalance {
     if (maxRootingZone != null) {
       if (currentRootingZone > maxRootingZone) {
         currentRootingZone = maxRootingZone;
-        logMessage(LOGGER, Level.INFO, "currentrootingzone.set.to.maxrootingzone");
+        logMessage(LOGGER, Level.FINE, "currentrootingzone.set.to.maxrootingzone");
       }
     }
     dayData.setCurrentRootingZone(currentRootingZone);
@@ -201,22 +201,22 @@ public class TotalBalance {
         rainMax = soilManualData.getRainMax();
       } else {
         rainMax = 30.0;
-        logMessage(LOGGER, Level.INFO, "maxrain.event.set.to.30mm");
+        logMessage(LOGGER, Level.FINE, "maxrain.event.set.to.30mm");
       }
     } else {
       rainMax = 30.0;
-      logMessage(LOGGER, Level.INFO, "maxrain.event.set.to.30mm");
+      logMessage(LOGGER, Level.FINE, "maxrain.event.set.to.30mm");
     }
     if (soilManualData != null) {
       if (soilManualData.getDaysPause() != null) {
         daysPause = soilManualData.getDaysPause();
       } else {
         daysPause = 2;
-        logMessage(LOGGER, Level.INFO, "days.pause.set.to.2");
+        logMessage(LOGGER, Level.FINE, "days.pause.set.to.2");
       }
     } else {
       daysPause = 2;
-      logMessage(LOGGER, Level.INFO, "days.pause.set.to.2");
+      logMessage(LOGGER, Level.FINE, "days.pause.set.to.2");
     }
     Double startValue;
     List<DayData> dailyBalances = plot.getWaterBalance().getDailyBalances();

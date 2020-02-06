@@ -16,7 +16,7 @@ function getPlugin() {
 	        new Function("i,l", "return " + pluginConfig.headlineJS),
 	        function(last, current) {
 	        	return !Packages.de.hgu.gsehen.util.DateUtil.sameDay(
-	        			current.getValue("datetime"), last.getValue("datetime"));
+	        			current.getValue("dateTimeDefinition"), last.getValue("dateTimeDefinition"));
 	        },
 	        function() {
 	        	return new (Java.type("de.hgu.gsehen.evapotranspiration.DayData"))();

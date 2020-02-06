@@ -43,11 +43,11 @@ public class DailyBalance {
         soilKc = soilProfile.getSoilManualData().getSoilKc();
       } else {
         soilKc = 0.3;
-        logMessage(LOGGER, Level.INFO, "no.soil.kc.set.to.standard.0.3");
+        logMessage(LOGGER, Level.FINE, "no.soil.kc.set.to.standard.0.3");
       }
     } else {
       soilKc = 0.3;
-      logMessage(LOGGER, Level.INFO, "no.soil.kc.set.to.standard.0.3");
+      logMessage(LOGGER, Level.FINE, "no.soil.kc.set.to.standard.0.3");
     }
     Double currentKc = null;
     int phase1;

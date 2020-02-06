@@ -23,9 +23,20 @@ public class AggregatedDataObjects<D> {
   private Map<Integer, BiConsumer<D, ?>> setterMap;
   private Map<String, Integer> columnsByKey;
 
-  @SuppressWarnings("unused")
-  private static Aggregator<Double> doubleMean() {
+  public static Aggregator<Double> doubleMin() {
+    return dList -> dList.stream().mapToDouble(d -> d).min().getAsDouble();
+  }
+
+  public static Aggregator<Double> doubleMax() {
+    return dList -> dList.stream().mapToDouble(d -> d).max().getAsDouble();
+  }
+
+  public static Aggregator<Double> doubleMean() {
     return dList -> dList.stream().mapToDouble(d -> d).average().getAsDouble();
+  }
+
+  public static Aggregator<Double> doubleSum() {
+    return dList -> dList.stream().mapToDouble(d -> d).sum();
   }
 
   public <T> void addColumnDefinition(Integer inputColIndex, String key, String javaType,

@@ -1,7 +1,8 @@
 package de.hgu.gsehen.evapotranspiration;
 
-import java.util.Date;
+import de.hgu.gsehen.Gsehen;
 
+import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -240,5 +241,12 @@ public class DayData implements Comparable<DayData> {
   }
 
   public DayData() {
+  }
+
+  @Override
+  public String toString() {
+    Gsehen instance = Gsehen.getInstance();
+    return "\n  " + instance.formatDateTime(date) + " " + instance.formatDoubleOneDecimal(tempMean)
+      + "°C";
   }
 }

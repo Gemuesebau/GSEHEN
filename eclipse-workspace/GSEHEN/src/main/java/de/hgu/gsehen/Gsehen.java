@@ -118,6 +118,7 @@ import org.hibernate.query.Query;
  */
 @SuppressWarnings({ "checkstyle:commentsindentation" })
 public class Gsehen extends Application {
+  private static final String I18N_MAIN = "i18n.main";
   private static final String SPLASH_WARNING_PROPNAME = "splashWarning";
   private static final String SPLASH_WARNING_FALSE = "false";
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
@@ -169,6 +170,7 @@ public class Gsehen extends Application {
   private DecimalFormat twoDecimalNumberFormat;
   private DecimalFormat moreDecimalNumberFormat;
   private SimpleDateFormat dateFormat;
+  private SimpleDateFormat dateTimeFormat;
   private List<Preferences> preferences;
   private Map<String, String> preferencesMap;
   
@@ -189,7 +191,7 @@ public class Gsehen extends Application {
     setSelectedLocale(Locale.forLanguageTag(
         getPreferenceValue("locale", System.getProperty("locale", Locale.GERMAN.toLanguageTag()))
     ));
-    mainBundle = ResourceBundle.getBundle("i18n.main", getSelectedLocale());
+    mainBundle = ResourceBundle.getBundle(I18N_MAIN, getSelectedLocale());
   }
 
   public List<Farm> getDeletedFarms() {
@@ -617,6 +619,8 @@ public class Gsehen extends Application {
 
   public <T extends GsehenEvent> void registerForEvent(Class<T> eventClass,
       GsehenEventListener<T> eventListener) {
+    logMessage(LOGGER, Level.INFO, "added.event.listener", eventClass.getSimpleName(),
+        eventListener);
     addToMappedList(eventListeners, eventClass, eventListener);
   }
 
@@ -843,6 +847,8 @@ public class Gsehen extends Application {
   private <T extends GsehenEvent> void notifyEventListeners(T event,
       Class<? extends GsehenEventListener<? extends T>> skipClass) {
     List<GsehenEventListener<?>> listeners = eventListeners.get(event.getClass());
+    logMessage(LOGGER, Level.INFO, "notifying.event.listeners", listeners.size(),
+        event.getClass().getSimpleName());
     if (listeners != null) {
       listeners.forEach(listener -> {
         if (skipClass != null && skipClass.equals(listener.getClass())
@@ -1005,8 +1011,7 @@ public class Gsehen extends Application {
     return null;
   }
 
-  @SuppressWarnings("checkstyle:javadocmethod")
-  public void setSelectedLocale(final Locale selectedLocale) {
+  private void setSelectedLocale(final Locale selectedLocale) {
     this.selectedLocale = selectedLocale;
     oneDecimalNumberFormat = (DecimalFormat) NumberFormat.getNumberInstance(selectedLocale);
     oneDecimalNumberFormat.applyPattern("#,##0.0");
@@ -1014,7 +1019,9 @@ public class Gsehen extends Application {
     twoDecimalNumberFormat.applyPattern("#,##0.00");
     moreDecimalNumberFormat = (DecimalFormat) NumberFormat.getNumberInstance(selectedLocale);
     moreDecimalNumberFormat.applyPattern("#,#######0.0000000");
-    dateFormat = new SimpleDateFormat("dd.MM.yyyy", selectedLocale);
+    ResourceBundle bundle = ResourceBundle.getBundle(I18N_MAIN, selectedLocale);
+    dateFormat = new SimpleDateFormat(bundle.getString("dateFormat"), selectedLocale);
+    dateTimeFormat = new SimpleDateFormat(bundle.getString("dateTimeFormat"), selectedLocale);
     logMessage(LOGGER, Level.INFO, "gsehen.locale.applied", selectedLocale.toLanguageTag());
   }
 
@@ -1061,6 +1068,10 @@ public class Gsehen extends Application {
 
   public String formatDate(Date date) {
     return dateFormat.format(date);
+  }
+
+  public String formatDateTime(Date date) {
+    return dateTimeFormat.format(date);
   }
 
   @SuppressWarnings("checkstyle:javadocmethod")
@@ -1135,7 +1146,7 @@ public class Gsehen extends Application {
       gsehenWindow.setScene(principalScene);
     }, row);
     if (hint != null) {
-    content.setHeading(new Text(mainBundle.getString(headingKey) + mainBundle.getString(hint)));
+      content.setHeading(new Text(mainBundle.getString(headingKey) + mainBundle.getString(hint)));
     } else {
       content.setHeading(new Text(mainBundle.getString(headingKey)));
     }

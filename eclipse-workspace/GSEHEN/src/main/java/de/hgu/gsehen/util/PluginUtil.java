@@ -72,6 +72,8 @@ public class PluginUtil {
           throw new RuntimeException("day data null");
         }
       }
+      dayData.sort((a, b) -> a.getDate().compareTo(b.getDate()));
+      CollectionUtil.eliminateDuplicates(dayData, d -> DateUtil.truncToDay(d.getDate()));
       gsehenInstance.sendDayDataChanged(dayData, weatherDataSource, null);
     }
   }

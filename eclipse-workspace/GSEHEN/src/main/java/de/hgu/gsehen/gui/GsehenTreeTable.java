@@ -6,6 +6,7 @@ import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXToggleButton;
 
 import de.hgu.gsehen.Gsehen;
+import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.event.DrawableSelected;
 import de.hgu.gsehen.event.FarmDataChanged;
 import de.hgu.gsehen.event.GsehenEvent;
@@ -435,11 +436,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
 
                 if (plot.getSoilStartValue() != null && plot.getRecommendedAction() != null) {
                   action.setText(getRecommendedActionText(
-                      plot)/*
-                            * + " : " + new
-                            * java.text.SimpleDateFormat("EE., dd.MM.yyyy, HH:mm:ss.SSS",
-                            * gsehenInstance.getSelectedLocale()).format(new java.util.Date())
-                            */);
+                      plot));
 
                 } else {
                   action = new Text("/");
@@ -1048,15 +1045,24 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   }
 
   private String getRecommendedActionText(Plot plot) {
-    return MessageUtil.renderMessage(gsehenInstance.getSelectedLocale(), mainBundle,
+    List<DayData> dailyBalances = plot.getWaterBalance() != null
+        ? plot.getWaterBalance().getDailyBalances() :
+        null;
+    String dateTimeInfo = (dailyBalances != null && dailyBalances.size() > 0)
+        ? gsehenInstance.formatDateTime(dailyBalances.get(dailyBalances.size() - 1).getDate())
+            + " — " : "";
+    return dateTimeInfo + MessageUtil.renderMessage(gsehenInstance.getSelectedLocale(), mainBundle,
         plot.getRecommendedAction());
   }
 
   private void updatePlotInfo(Plot plot) {
+    final String recommendedActionText = getRecommendedActionText(plot);
+    logMessage(LOGGER, Level.CONFIG, "tree.table.update.localized.plot.info",
+        plot, gsehenInstance.getSelectedLocale(), recommendedActionText);
     Platform.runLater(new Runnable() {
       @Override
       public void run() {
-        action.setText(getRecommendedActionText(plot));
+        action.setText(recommendedActionText);
       }
     });
   }
