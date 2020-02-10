@@ -191,8 +191,7 @@ public class CollectionUtil {
       Object criterionValue = criterion.apply(iterator.next());
       if (objectsEqual(lastCriterionValue, criterionValue)) {
         iterator.remove();
-      }
-      else {
+      } else {
         lastCriterionValue = criterionValue;
       }
     }

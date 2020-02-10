@@ -1,5 +1,6 @@
 package de.hgu.gsehen.util;
 
+import static de.hgu.gsehen.util.DateUtil.truncToDay;
 import static de.hgu.gsehen.util.MessageUtil.logException;
 import static de.hgu.gsehen.util.MessageUtil.logMessage;
 import static de.hgu.gsehen.util.TextFileUtil.evaluateJavaScriptFile;
@@ -9,16 +10,18 @@ import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.model.WeatherDataPlugin;
 import de.hgu.gsehen.model.WeatherDataSource;
 import java.io.File;
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 
 public class PluginUtil {
-  private Gsehen gsehenInstance = Gsehen.getInstance();
-
   private static final Logger LOGGER = Logger.getLogger(PluginUtil.class.getName());
   private static final String PLUGINS_FOLDER =
       new File(Gsehen.class.getResource("/de/hgu/gsehen/js/plugins").getPath()).getAbsolutePath();
@@ -47,35 +50,81 @@ public class PluginUtil {
   }
 
   /**
-   * Recalculates today's day data, for all registered weather data sources.
+   * Performs an automatic import, for all registered weather data sources.
+   *
+   * @param gsehenInstance the Gsehen singleton instance
    */
   @SuppressWarnings({ "checkstyle:rightcurly" })
-  public void recalculateDayData() {
-    final Date today = DateUtil.truncToDay(new Date());
+  public static void automaticImport(Gsehen gsehenInstance) {
     for (WeatherDataSource weatherDataSource : gsehenInstance.getWeatherDataSources()) {
-      List<DayData> dayData = null;
-      final String pluginJsFileName = weatherDataSource.getPluginJsFileName();
-      Exception detDaydataException = null;
-      try {
-        dayData = PluginUtil.getPlugin(pluginJsFileName, WeatherDataPlugin.class)
-            .determineDayData(weatherDataSource, today /* currently unused */);
-      } catch (Exception e) {
-        detDaydataException = e;
-        logException(LOGGER, Level.SEVERE, e, "wd.plugin.error.det.daydata", pluginJsFileName);
-      }
-      logMessage(LOGGER, Level.INFO, "wd.import.result", weatherDataSource.getName(),
-          dayData == null ? 1 : 0);
-      if (dayData == null) {
-        if (detDaydataException != null) {
-          throw new RuntimeException(detDaydataException);
-        } else {
-          throw new RuntimeException("day data null");
+      automaticImport(gsehenInstance, weatherDataSource);
+    }
+  }
+
+  private static void automaticImport(Gsehen gsehenInstance, WeatherDataSource weatherDataSource) {
+    final String pluginJsFileName = weatherDataSource.getPluginJsFileName();
+    try {
+      Double nextCheckMillis = getPlugin(pluginJsFileName, WeatherDataPlugin.class)
+          .getNextCheckMillis(weatherDataSource);
+      if (nextCheckMillis == null) {
+        if (weatherDataSource.isAutomaticImportActive()) {
+          updateDayData(gsehenInstance, weatherDataSource);
         }
+        nextCheckMillis = 1000.0 * 60.0 * 5.0; // after import, wait 5 minutes
       }
+      Timeline automaticImporter =
+          new Timeline(new KeyFrame(Duration.millis(nextCheckMillis), event -> {
+            automaticImport(gsehenInstance, weatherDataSource);
+          }));
+      automaticImporter.setCycleCount(1);
+      automaticImporter.play();
+    } catch (Exception e) {
+      logException(LOGGER, Level.SEVERE, e, "wd.plugin.error.det.daydata", pluginJsFileName);
+    }
+  }
+
+  /**
+   * Recalculates today's day data, for all registered weather data sources.
+   *
+   * @param gsehenInstance the Gsehen singleton instance
+   */
+  @SuppressWarnings({ "checkstyle:rightcurly" })
+  public static void updateDayData(Gsehen gsehenInstance) {
+    int detDaydataExceptionCount = 0;
+    for (WeatherDataSource weatherDataSource : gsehenInstance.getWeatherDataSources()) {
+      if (weatherDataSource.isManualImportActive()
+          && updateDayData(gsehenInstance, weatherDataSource)) {
+        detDaydataExceptionCount++;
+      }
+    }
+    if (detDaydataExceptionCount > 0) {
+      throw new RuntimeException(MessageFormat.format(
+          gsehenInstance.getBundle().getString("wd.import.exception"),
+          detDaydataExceptionCount,
+          detDaydataExceptionCount == 1 ? 0 : 1
+      ));
+    }
+  }
+
+  private static boolean updateDayData(Gsehen gsehenInstance, WeatherDataSource weatherDataSource) {
+    boolean threwException = false;
+    List<DayData> dayData = null;
+    final String pluginJsFileName = weatherDataSource.getPluginJsFileName();
+    try {
+      dayData = getPlugin(pluginJsFileName, WeatherDataPlugin.class)
+          .determineDayData(weatherDataSource, truncToDay(new Date()) /* currently unused */);
+    } catch (Exception e) {
+      threwException = true;
+      logException(LOGGER, Level.SEVERE, e, "wd.plugin.error.det.daydata", pluginJsFileName);
+    }
+    logMessage(LOGGER, Level.INFO, "wd.import.result", weatherDataSource.getName(),
+        dayData == null ? 1 : 0);
+    if (dayData != null) {
       dayData.sort((a, b) -> a.getDate().compareTo(b.getDate()));
-      CollectionUtil.eliminateDuplicates(dayData, d -> DateUtil.truncToDay(d.getDate()));
+      CollectionUtil.eliminateDuplicates(dayData, d -> truncToDay(d.getDate()));
       gsehenInstance.sendDayDataChanged(dayData, weatherDataSource, null);
     }
+    return threwException;
   }
 
   @SuppressWarnings({"unchecked", "checkstyle:javadocmethod"})

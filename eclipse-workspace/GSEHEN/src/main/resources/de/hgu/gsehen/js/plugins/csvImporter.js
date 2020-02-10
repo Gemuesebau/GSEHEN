@@ -203,7 +203,7 @@ function getPlugin() {
 		    column.setMinWidth(20);
 		    column.setStyle("-fx-alignment:top-center; -fx-font-style: italic");
 		    column.setUserData(i);
-		    column.setCellValueFactory(function(/*CellDataFeatures<String[], String>*/ p) {
+		    column.setCellValueFactory(function(p) {
 		    	return new javafx.beans.property.SimpleStringProperty(p.getValue()[p.getTableColumn().getUserData()]);
 		    });
 	    }
@@ -261,11 +261,28 @@ function getPlugin() {
 		}
 		return null;
 	};
+	var isoDayString = function(date) {
+		return new java.text.SimpleDateFormat("yyyy-MM-dd").format((typeof date) == "number" ? new java.util.Date(date) : date);
+	};
+	var dataFileModIsoDayString = function(pluginConfig) {
+		return isoDayString(0 + (new java.io.File(pluginConfig.dataFilePath)).lastModified());
+	};
 	var WeatherDataPlugin = Java.extend(Java.type("de.hgu.gsehen.model.WeatherDataPlugin"), {
 		//-----------
 		/*@Override*/determineDayData: function(weatherDataSource, date /* currently unused */) {
 			var pluginConfig = JSON.parse(weatherDataSource.getPluginConfigurationJSON());
+			pluginConfig.dataFileModIsoDay = dataFileModIsoDayString(pluginConfig);
+			weatherDataSource.setPluginConfigurationJSON(JSON.stringify(pluginConfig));
 			return calculateDayData(pluginConfig, date /* currently unused */);
+		},
+		//----------------------------------------------------------------------------------------
+		//-----------
+		/*@Override*/getNextCheckMillis: function(weatherDataSource) {
+			var pluginConfig = JSON.parse(weatherDataSource.getPluginConfigurationJSON());
+			if (pluginConfig.dataFileModIsoDay == null || pluginConfig.dataFileModIsoDay < dataFileModIsoDayString(pluginConfig)) {
+				return null;
+			}
+			return weatherDataSource.getAutomaticImportFrequencySeconds() * 1000;
 		},
 		//----------------------------------------------------------------------------------------
 		getConfigValue: function(item) {

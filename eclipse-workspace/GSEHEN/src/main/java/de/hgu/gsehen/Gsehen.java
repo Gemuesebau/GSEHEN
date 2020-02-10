@@ -348,6 +348,8 @@ public class Gsehen extends Application {
     treeTable.checkCalculation();
 
     hideLaunch4JSplashScreen();
+
+    automaticImport();
   }
 
   private StringBuilder renderWithCausesAndTargets(Throwable e) {
@@ -954,7 +956,12 @@ public class Gsehen extends Application {
 
   @SuppressWarnings({ "checkstyle:javadocmethod" })
   public static void updateDayData() {
-    new PluginUtil().recalculateDayData();
+    PluginUtil.updateDayData(getInstance());
+  }
+
+  @SuppressWarnings({ "checkstyle:javadocmethod" })
+  public static void automaticImport() {
+    PluginUtil.automaticImport(getInstance());
   }
 
   @SuppressWarnings({ "checkstyle:javadocmethod" })

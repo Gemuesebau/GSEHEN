@@ -45,6 +45,17 @@ import java.util.List;
  */
 public interface WeatherDataPlugin {
   /**
+   * Checks for new data, and returns the next check date.
+   *
+   * <p>This method may be called on a new instance of the plug-in, and should thus behave like a
+   * <i>static</i> method!</p>
+   *
+   * @param weatherDataSource the particular weather data source to use
+   * @return the next check date, or null if there's new data that should be imported
+   */
+  Double getNextCheckMillis(WeatherDataSource weatherDataSource);
+
+  /**
    * Determines the (weather) day data for the available measurement data.
    *
    * <p>This method may be called on a new instance of the plug-in, and should thus behave like a
