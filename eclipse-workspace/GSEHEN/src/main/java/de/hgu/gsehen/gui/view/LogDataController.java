@@ -5,8 +5,6 @@ import static de.hgu.gsehen.util.MessageUtil.logException;
 import com.jfoenix.controls.JFXDatePicker;
 
 import de.hgu.gsehen.Gsehen;
-import de.hgu.gsehen.event.FarmDataChanged;
-import de.hgu.gsehen.event.GsehenEventListener;
 import de.hgu.gsehen.gui.GsehenGuiElements;
 import de.hgu.gsehen.logging.Configurator;
 import de.hgu.gsehen.logging.LogDataHandler;
@@ -17,14 +15,20 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -48,95 +52,85 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
 
-public class LogDataController implements GsehenEventListener<FarmDataChanged> {
-  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
-  private Gsehen gsehenInstance;
-  protected final ResourceBundle mainBundle;
+public class LogDataController {
+  private static final int LOG_EVENT_HANDLE_THRESHOLD = Level.INFO.intValue();
+
+  private static final Logger LOGGER = Logger.getLogger(LogDataController.class.getName());
+
+  private Gsehen instance;
+  private ResourceBundle mainBundle;
+
   private BorderPane pane;
   private ObservableList<LogEntry> data;
-  public static LocalDate arr;
-  private static LocalDate startDate;
-  private static LocalDate endDate;
+  private ThreadLocal<ArrayList<LogEntry>> logEntryBuffer = new ThreadLocal<>();
+  private List<ArrayList<LogEntry>> logEntryBuffers = new ArrayList<>();
+  private LocalDate startDate;
+  private LocalDate endDate;
+  private JFXDatePicker startpicker = new JFXDatePicker();
+  private JFXDatePicker endpicker = new JFXDatePicker();
 
-  JFXDatePicker startpicker = new JFXDatePicker();
-  JFXDatePicker endpicker = new JFXDatePicker();
+  private synchronized void addLogEntryBuffer(ArrayList<LogEntry> logEntryBuffer) {
+    logEntryBuffers.add(logEntryBuffer);
+  }
 
-  {
-    gsehenInstance = Gsehen.getInstance();
-    gsehenInstance.registerForEvent(FarmDataChanged.class, this);
-
-    mainBundle = ResourceBundle.getBundle("i18n.main", gsehenInstance.getSelectedLocale());
+  private ArrayList<LogEntry> getLogEntryBuffer() {
+    ArrayList<LogEntry> result = logEntryBuffer.get();
+    if (result == null) {
+      result = new ArrayList<>();
+      addLogEntryBuffer(result);
+      logEntryBuffer.set(result);
+    }
+    return result;
   }
 
   /**
-   * Constructs a new plot data controller associated with the given BorderPane.
+   * Constructs a new log data controller associated with the given BorderPane.
    *
    * @param application the Gsehen application singleton reference
-   * @param pane
-   *          - the associated BorderPane.
+   * @param borderPane the associated BorderPane
    */
-  public LogDataController(Gsehen application, BorderPane pane) {
-    this.gsehenInstance = application;
-    this.pane = pane;
-
+  public LogDataController(Gsehen application, BorderPane borderPane) {
+    instance = application;
+    mainBundle = ResourceBundle.getBundle("i18n.main", instance.getSelectedLocale());
+    pane = borderPane;
     initLogData();
+    initializeLogUpdater();
     registerLogHandler();
-  }
-
-  protected void registerLogHandler() {
-    // Optional<Handler> optionalFileHandler = Arrays.stream(LOGGER.getHandlers()).filter(e -> e
-    // instanceof FileHandler).findAny();
-    // if (optionalFileHandler.isPresent()) {
-    // FileHandler fileHandler = (FileHandler) optionalFileHandler.get();
-    // }
-
-    LOGGER.addHandler(new LogDataHandler(this));
-  }
-
-  protected void initLogData() {
-    data = FXCollections.observableArrayList();
-    updateLogData();
-  }
-
-  protected void updateLogData() {
-    data.setAll(readLog(Configurator.LOG_FILE_NAME));
-  }
-
-  @Override
-  public void handle(FarmDataChanged event) {
-    pane.setVisible(true);
     createContent();
+    pane.setVisible(true);
   }
 
-  /**
-   * Read Log.
-   * 
-   * @param path
-   *          from the log file.
-   * @return a list of log entries
-   */
-  protected ArrayList<LogEntry> readLog(String path) {
+  private void registerLogHandler() {
+    Logger.getLogger("").addHandler(new LogDataHandler(this));
+  }
+
+  private void initLogData() {
+    data = FXCollections.observableArrayList();
+    final ArrayList<LogEntry> logEntries = readLog(Configurator.LOG_FILE_NAME);
+    final int size = logEntries.size();
+    int fromIndex = size
+        - Integer.parseInt(instance.getPreferenceValue("logViewInitialLineCount", "20"));
+    if (fromIndex < 0) {
+      fromIndex = 0;
+    }
+    data.setAll(logEntries.subList(fromIndex, size)); 
+  }
+
+  private ArrayList<LogEntry> readLog(String path) {
     ArrayList<LogEntry> logEntries = new ArrayList<>();
-    FileReader fileReader;
-
     File file = new File(path);
-
     if (file.exists()) {
+      flushLogFile(file);
       try {
-        fileReader = new FileReader(file);
-
-        BufferedReader fileStream = new BufferedReader(fileReader);
-
-        String line = fileStream.readLine();
-
-        while (line != null) {
+        BufferedReader fileStream = new BufferedReader(new FileReader(file));
+        String line;
+        while ((line = fileStream.readLine()) != null) {
           String[] parts = line.split(" ", 4);
           logEntries.add(new LogEntry(parts[0], parts[1], parts[2], parts[3]));
-          line = fileStream.readLine();
         }
-
         fileStream.close();
       } catch (FileNotFoundException e) {
         e.printStackTrace();
@@ -145,8 +139,31 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
         e.printStackTrace();
       }
     }
-
     return logEntries;
+  }
+
+  private void flushLogFile(File file) {
+    for (Handler handler : Logger.getLogger("").getHandlers()) {
+      if (handler instanceof FileHandler) {
+        System.out.println("#### " + ((FileHandler)handler).getFormatter()); // FIXME implement log file flushing!
+      }
+    }
+  }
+
+  private void initializeLogUpdater() {
+    Timeline logUpdater =
+        new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+          moveLogEntries();
+        }));
+    logUpdater.setCycleCount(Timeline.INDEFINITE);
+    logUpdater.play();
+  }
+
+  private synchronized void moveLogEntries() {
+    for (ArrayList<LogEntry> logEntryBuffer : logEntryBuffers) {
+      data.addAll(logEntryBuffer);
+      logEntryBuffer.clear();
+    }
   }
 
   /**
@@ -361,7 +378,6 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
       endDate = endpicker.getValue();
       try {
         while (!startDate.isAfter(endDate)) {
-          arr = startDate;
           startDate = startDate.plusDays(1);
         }
       } catch (Exception ex) {
@@ -377,17 +393,23 @@ public class LogDataController implements GsehenEventListener<FarmDataChanged> {
   }
 
   /**
-   * Reload Log.
+   * Handle a log event.
    *
    * @param logRecord the newly published log record
    */
   public void onLogRecordPublish(LogRecord logRecord) {
-    // Anstatt hier immer die ganze Datei neu zu laden wäre es wünschenswert, den hier
-    // ankommenden LogRecord zu verwenden
-    // Idee wäre: logReord mit HTMLFormatter formaieren und dann in die observable list (this.data)
-    // packen
-    // Nachteil vom kompletten ersetzen ist auch, dass der Zustand der TableView (Scroll, Highlight
-    // etc.) zurückgesetzt wird
-    updateLogData();
+    if (logRecord == null || logRecord.getLevel().intValue() < LOG_EVENT_HANDLE_THRESHOLD) {
+      return;
+    }
+    Date dateTime = new Date(logRecord.getMillis());
+    try {
+      getLogEntryBuffer().add(
+          new LogEntry(new SimpleDateFormat(Configurator.DATE_PATTERN).format(dateTime),
+          new SimpleDateFormat(Configurator.TIME_PATTERN).format(dateTime),
+          String.valueOf(logRecord.getLevel()), logRecord.getMessage())
+      );
+    } catch (Exception e) {
+      System.err.println("LogDataController.onLogRecordPublish: Exception " + e);
+    }
   }
 }

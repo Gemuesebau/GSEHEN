@@ -1107,6 +1107,8 @@ public class Gsehen extends Application {
         GsehenGuiElements.jfxTextField(instance.getPreferenceValue("googleMapsApiKey")));
     fields.put("pref.2.openPluginFolderCommand",
         GsehenGuiElements.jfxTextField(instance.getPreferenceValue("openPluginFolderCommand")));
+    fields.put("pref.3.logViewInitialLineCount",
+        GsehenGuiElements.jfxTextField(instance.getPreferenceValue("logViewInitialLineCount")));
     Map<String, EventHandler<ActionEvent>> buttons = new TreeMap<>();
     buttons.put("prefs.0.save", e -> {
       String currentPrefValue;
@@ -1121,6 +1123,10 @@ public class Gsehen extends Application {
       currentPrefValue = fields.get("pref.2.openPluginFolderCommand").getText();
       if (currentPrefValue != null) {
         instance.setPreferenceValue("openPluginFolderCommand", currentPrefValue);
+      }
+      currentPrefValue = fields.get("pref.3.logViewInitialLineCount").getText();
+      if (currentPrefValue != null) {
+        instance.setPreferenceValue("logViewInitialLineCount", currentPrefValue);
       }
     });
     buttons.put("prefs.1.cancel", e -> {

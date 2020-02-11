@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.util.logging.LogManager;
 
 public class Configurator {
+  public static final String TIME_PATTERN = "HH:mm:ss";
+  public static final String DATE_PATTERN = "yyyy-MM-dd";
 
   // MUST be kept equivalent to the java.util.logging.FileHandler.pattern in logging.properties!
   public static final String LOG_FILE_NAME =
