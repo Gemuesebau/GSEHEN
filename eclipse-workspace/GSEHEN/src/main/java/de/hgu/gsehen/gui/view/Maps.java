@@ -9,7 +9,9 @@ import de.hgu.gsehen.model.Drawable;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.util.MessageUtil;
 import de.hgu.gsehen.util.Pair;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.scene.web.WebView;
 
@@ -100,13 +102,7 @@ public class Maps extends FarmDataController {
    * @param west western longitude
    */
   public void mapBoundsChanged(double north, double south, double east, double west) {
-    getLogger().fine("Map bounds changed to"
-        + " north: "  + north
-        + ", south: " + south
-        + ", east: "  + east
-        + ", west: "  + west
-        + "; setting as lastViewport"
-    );
+    MessageUtil.logMessage(getLogger(), Level.INFO, "map.bounds.changed", north, south, east, west);
     setLastViewport(north, south, east, west);
   }
 }

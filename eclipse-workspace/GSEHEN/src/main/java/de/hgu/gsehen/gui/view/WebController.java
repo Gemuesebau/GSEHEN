@@ -1,9 +1,12 @@
 package de.hgu.gsehen.gui.view;
 
-import de.hgu.gsehen.Gsehen;
+import static de.hgu.gsehen.util.MessageUtil.logMessage;
+import static de.hgu.gsehen.util.MessageUtil.logMessageRaw;
 
+import de.hgu.gsehen.Gsehen;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,7 +52,7 @@ public abstract class WebController {
       throw new RuntimeException(fileName + " couldn't be loaded", e);
     }
     finally {
-      getLogger().info("finished processing " + fileName + " (" + totalRead + " bytes read)");
+      logMessage(getLogger(), Level.INFO, "finished.processing.file", fileName, totalRead);
     }
   }
 
@@ -77,7 +80,15 @@ public abstract class WebController {
   protected abstract Logger getLogger();
 
   protected void alert(String message) {
-    getLogger().info(message);
+    if (message.startsWith("[!]")) {
+      logMessageRaw(getLogger(), Level.INFO, message);
+    } else {
+      logMessage(getLogger(), Level.INFO, message);
+    }
+  }
+
+  public void alertWithParam(String messageKey, Object parameter) {
+    logMessage(getLogger(), Level.INFO, messageKey, parameter);
   }
 
   @SuppressWarnings({ "checkstyle:javadocmethod", "checkstyle:linelength" })
@@ -86,6 +97,7 @@ public abstract class WebController {
     engine = webView.getEngine();
     engine.setOnAlert(event -> alert(event.getData()));
     engine.executeScript("console.log = function(message){alert(message)};");
+    engine.executeScript("alertWithParam = function(message,param){if(webController!=null)webController.alertWithParam(message,param);else alert(\"[!] \"+message+\" \"+param)};");
     engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
       if (newState == State.SUCCEEDED) {
         JSObject win = (JSObject)engine.executeScript("window");
@@ -94,6 +106,6 @@ public abstract class WebController {
         loaded = true;
       }
     });
-    getLogger().info("WebEngine initialized");
+    logMessage(getLogger(), Level.INFO, "web.engine.initialized");
   }
 }

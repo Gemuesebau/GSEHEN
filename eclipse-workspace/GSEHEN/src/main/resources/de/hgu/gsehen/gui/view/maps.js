@@ -1,4 +1,4 @@
-alert("Maps (re)loaded, now running custom JavaScript");
+alert("maps.reloaded.running.javascript");
 
 #include("typeControl.js")
 #include("searchControl.js")
@@ -22,7 +22,7 @@ function addPolygonOptions(obj, style) {
 }
 
 function setSelectedType(type) {
-  alert("Setting type for new objects to: " + type);
+  alertWithParam("setting.type.for.new.objects", type);
   selectedType = type;
   var style = webController.getFillStyle(type);
   var overlayType = google.maps.drawing.OverlayType;
@@ -114,18 +114,18 @@ function forAllPolygons(handler) {
 
 function redraw() {
   forAllPolygons(function (uuid, polygon) {
-    alert("Removing polygon with UUID=" + uuid);
+    alertWithParam("removing.polygon.with.uuid", uuid);
     polygon.setMap(null);
   });
   polygons = {};
   drawables = webController.getDrawables();
   if (drawables == null) {
-    alert("Got 'null' drawables!");
+    alert("got.null.drawables");
     setDefaultViewportBounds();
   }
   else {
     if (drawables.length == 0) {
-      alert("Got no drawables");
+      alert("got.no.drawables");
       setDefaultViewportBounds();
     }
     else {
@@ -148,7 +148,7 @@ function redraw() {
 
 function checkErrorAndGetLink() {
 	if (document.body.innerHTML.match(/((api[\w-]*key[\w-]*|gm-)err)/) != null) {
-		alert("Maps HTML document body contains " + RegExp.$1);
+		alertWithParam("maps.html.document.body.contains", RegExp.$1);
 		return mapsJSAPILink;
 	}
 	return null;

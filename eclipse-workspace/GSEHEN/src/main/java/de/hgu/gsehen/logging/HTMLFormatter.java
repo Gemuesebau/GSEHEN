@@ -15,8 +15,7 @@ import java.util.regex.Pattern;
  */
 @SuppressWarnings({"checkstyle:abbreviationaswordinname", "checkstyle:rightcurly"})
 public class HTMLFormatter extends SimpleFormatter {
-  private SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Configurator.DATE_PATTERN + " "
-      + Configurator.TIME_PATTERN);
+  private SimpleDateFormat simpleDateFormat = Configurator.newSimpleDateFormat();
 
   private Pattern leadingWhitespace = Pattern.compile("^\\s");
   private static final String LEADING_WHITESPACE_REPLACE = "\u00A0";

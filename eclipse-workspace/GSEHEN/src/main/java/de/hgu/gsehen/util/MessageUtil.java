@@ -1,5 +1,6 @@
 package de.hgu.gsehen.util;
 
+import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.gsbalance.RecommendedAction;
 
 import java.text.DecimalFormat;
@@ -9,11 +10,13 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 public class MessageUtil {
 
   public static final char END_OF_I18N_DATA = '¦';
   public static final char END_OF_VALUE = '´';
+  public static final String END_OF_VALUE_STR = "" + END_OF_VALUE;
 
   private static ResourceBundle logMessageBundle =
       ResourceBundle.getBundle("i18n.logmessages", Locale.ENGLISH);
@@ -37,6 +40,26 @@ public class MessageUtil {
     } else {
       return value;
     }
+  }
+
+  private static Pattern numberPattern = Pattern.compile("\\d+");
+
+  public static String localizedLogMessage(String logFileMessage) {
+    int indexOfPipe = logFileMessage.indexOf(END_OF_I18N_DATA);
+    if (indexOfPipe == -1) {
+      return logFileMessage;
+    }
+    String[] msgParts = logFileMessage.substring(0, indexOfPipe).split(END_OF_VALUE_STR);
+    Object[] parameters = new Object[msgParts.length - 1];
+    for (int i = 0; i < parameters.length; i++) {
+      Object msgPart = msgParts[i + 1];
+      if (numberPattern.matcher((String)msgPart).matches()) {
+        msgPart = Long.valueOf((String)msgPart);
+      }
+      parameters[i] = msgPart;
+    }
+    return MessageFormat.format(Gsehen.getInstance().getLogBundle().getString(msgParts[0]),
+        parameters);
   }
 
   private static String replaceSeparatorChars(Object value) {
@@ -82,5 +105,18 @@ public class MessageUtil {
         logMessageBundle.getString(logMessageKey),
         parameters
     ));
+  }
+
+  /**
+   * Logging wrapper.
+   *
+   * @param logger the logger to use for the actual logging
+   * @param level the log level to use
+   * @param logMessage the log message
+   * @param parameters the parameters for message formatting
+   */
+  public static void logMessageRaw(Logger logger, Level level, String logMessage,
+      Object... parameters) {
+    logger.log(level, MessageFormat.format(logMessage, parameters));
   }
 }

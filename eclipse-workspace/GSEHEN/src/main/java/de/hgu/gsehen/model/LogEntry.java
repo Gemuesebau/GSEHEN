@@ -1,24 +1,30 @@
 package de.hgu.gsehen.model;
 
+import java.util.Arrays;
+
 public class LogEntry {
   public String date;
   public String time;
   public String level;
-  public String massage;
+  public String message;
 
+  @Override
+  public String toString() {
+    return Arrays.asList(date, time, level, message).toString();
+  }
   
   /**
    * getter and setters for LogEntries.
    * @param date for date entry
    * @param time for time entry
    * @param level for level entry
-   * @param massage for massage entry
+   * @param message for message entry
    */
-  public LogEntry(String date, String time, String level, String massage) {
+  public LogEntry(String date, String time, String level, String message) {
     this.date = date;
     this.time = time;
     this.level = level;
-    this.massage = massage;
+    this.message = message;
   }
 
   public String getDate() {
@@ -45,11 +51,11 @@ public class LogEntry {
     this.level = level;
   }
 
-  public String getMassage() {
-    return massage;
+  public String getMessage() {
+    return message;
   }
 
-  public void setMassage(String massage) {
-    this.massage = massage;
+  public void setMessage(String message) {
+    this.message = message;
   }
 }

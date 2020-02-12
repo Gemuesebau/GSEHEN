@@ -135,10 +135,10 @@ public abstract class FarmDataController extends WebController {
 
   private void refocusOrReload(Object event) {
     if (!isLoaded()) {
-      logAboutToReload(event.getClass().getSimpleName(), 0);
+      logAboutToReload(event, 0);
       reload();
     } else {
-      logAboutToReload(event.getClass().getSimpleName(), 2);
+      logAboutToReload(event, 2);
       engine.executeScript("if ((typeof clearAndSetViewportByController)==\"function\") "
           + "clearAndSetViewportByController();");
     }
@@ -146,8 +146,12 @@ public abstract class FarmDataController extends WebController {
 
   private void logAboutToReload(Object reasonObject, int verbIndex) {
     logMessage(getLogger(), Level.INFO, "about.to.refresh.web.view",
-        verbIndex, this.getClass().getSimpleName(), reasonObject.getClass().getSimpleName(),
+        verbIndex, this.getClass().getSimpleName(), simpleClassNameOrNull(reasonObject),
         Arrays.asList(drawables), lastViewport);
+  }
+
+  private String simpleClassNameOrNull(Object obj) {
+    return obj == null ? "null" : obj.getClass().getSimpleName();
   }
 
   private Drawable[] drawables;

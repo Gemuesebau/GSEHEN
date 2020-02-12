@@ -1,6 +1,6 @@
 package de.hgu.gsehen.gui.view;
 
-import static de.hgu.gsehen.util.MessageUtil.logException;
+import static de.hgu.gsehen.util.MessageUtil.logMessage;
 
 import com.jfoenix.controls.JFXDatePicker;
 
@@ -9,7 +9,7 @@ import de.hgu.gsehen.gui.GsehenGuiElements;
 import de.hgu.gsehen.logging.Configurator;
 import de.hgu.gsehen.logging.LogDataHandler;
 import de.hgu.gsehen.model.LogEntry;
-
+import de.hgu.gsehen.util.MessageUtil;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,11 +17,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -33,12 +38,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
+import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableColumn;
@@ -47,30 +54,64 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 
 public class LogDataController {
   private static final int LOG_EVENT_HANDLE_THRESHOLD = Level.INFO.intValue();
-
   private static final Logger LOGGER = Logger.getLogger(LogDataController.class.getName());
 
   private Gsehen instance;
   private ResourceBundle mainBundle;
-
   private BorderPane pane;
+
   private ObservableList<LogEntry> data;
   private ThreadLocal<ArrayList<LogEntry>> logEntryBuffer = new ThreadLocal<>();
   private List<ArrayList<LogEntry>> logEntryBuffers = new ArrayList<>();
-  private LocalDate startDate;
-  private LocalDate endDate;
-  private JFXDatePicker startpicker = new JFXDatePicker();
-  private JFXDatePicker endpicker = new JFXDatePicker();
+
+  private ThreadLocal<SimpleDateFormat[]> dateFormats = new ThreadLocal<>();
+  @SuppressWarnings("unchecked")
+  private Supplier<SimpleDateFormat>[] dateFormatSuppliers = new Supplier[] {
+      () -> Configurator.newSimpleDateFormatOnlyDate(),
+      () -> Configurator.newSimpleDateFormatOnlyTime()
+  };
+
+  private boolean useFilter = false;
+
+  private String startDateTimeStr;
+  private String endDateTimeStr;
+
+  private JFXDatePicker startDatePicker = new JFXDatePicker();
+  private JFXDatePicker endDatePicker = new JFXDatePicker();
+
+  private Node[] startTimeSpinners;
+  private Node[] endTimeSpinners;
+
+  private int fromLevel;
+  private int toLevel;
+
+  private ChoiceBox<String> fromLevelChoiceBox;
+  private ChoiceBox<String> toLevelChoiceBox;
+
+  private synchronized void fillDateFormats(SimpleDateFormat[] formats) {
+    for (int i = 0; i < formats.length; i++) {
+      formats[i] = dateFormatSuppliers[i].get();
+    }
+  }
+
+  private SimpleDateFormat getFormat(int index) {
+    SimpleDateFormat[] formats = dateFormats.get();
+    if (formats == null) {
+      formats = new SimpleDateFormat[2];
+      fillDateFormats(formats);
+      dateFormats.set(formats);
+    }
+    return formats[index];
+  }
 
   private synchronized void addLogEntryBuffer(ArrayList<LogEntry> logEntryBuffer) {
     logEntryBuffers.add(logEntryBuffer);
@@ -86,6 +127,13 @@ public class LogDataController {
     return result;
   }
 
+  private void configurePicker(JFXDatePicker startDatePicker, StringConverter<LocalDate> converter,
+      String promptText) {
+    startDatePicker.setShowWeekNumbers(true);
+    startDatePicker.setConverter(converter);
+    startDatePicker.setPromptText(promptText);
+  }
+
   /**
    * Constructs a new log data controller associated with the given BorderPane.
    *
@@ -94,6 +142,29 @@ public class LogDataController {
    */
   public LogDataController(Gsehen application, BorderPane borderPane) {
     instance = application;
+    String applicationDateFormat = instance.getFormat();
+    StringConverter<LocalDate> converter = new StringConverter<LocalDate>() {
+      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(applicationDateFormat);
+      @Override
+      public String toString(LocalDate date) {
+        if (date != null) {
+          return dateFormatter.format(date);
+        } else {
+          return "";
+        }
+      }
+
+      @Override
+      public LocalDate fromString(String string) {
+        if (string != null && !string.isEmpty()) {
+          return LocalDate.parse(string, dateFormatter);
+        } else {
+          return null;
+        }
+      }
+    };
+    configurePicker(startDatePicker, converter, applicationDateFormat);
+    configurePicker(endDatePicker, converter, applicationDateFormat);
     mainBundle = ResourceBundle.getBundle("i18n.main", instance.getSelectedLocale());
     pane = borderPane;
     initLogData();
@@ -129,7 +200,10 @@ public class LogDataController {
         String line;
         while ((line = fileStream.readLine()) != null) {
           String[] parts = line.split(" ", 4);
-          logEntries.add(new LogEntry(parts[0], parts[1], parts[2], parts[3]));
+          LogEntry logEntry = newLogEntry(parts[0], parts[1], parts[2], parts[3]);
+          if (logEntry != null) {
+            logEntries.add(logEntry);
+          }
         }
         fileStream.close();
       } catch (FileNotFoundException e) {
@@ -145,7 +219,7 @@ public class LogDataController {
   private void flushLogFile(File file) {
     for (Handler handler : Logger.getLogger("").getHandlers()) {
       if (handler instanceof FileHandler) {
-        System.out.println("#### " + ((FileHandler)handler).getFormatter()); // FIXME implement log file flushing!
+        handler.flush();
       }
     }
   }
@@ -185,12 +259,12 @@ public class LogDataController {
     levelCol.setSortable(false);
     levelCol.setCellValueFactory(new PropertyValueFactory<LogEntry, String>("level"));
 
-    TableColumn massageCol = new TableColumn(mainBundle.getString("logview.text"));
-    massageCol.setSortable(false);
-    massageCol.setCellValueFactory(new PropertyValueFactory<LogEntry, String>("massage"));
+    TableColumn messageCol = new TableColumn(mainBundle.getString("logview.text"));
+    messageCol.setSortable(false);
+    messageCol.setCellValueFactory(new PropertyValueFactory<LogEntry, String>("message"));
 
     TableView tableView = new TableView();
-    tableView.getColumns().addAll(dateCol, timeCol, levelCol, massageCol);
+    tableView.getColumns().addAll(dateCol, timeCol, levelCol, messageCol);
 
     tableView.setItems(data);
 
@@ -218,178 +292,142 @@ public class LogDataController {
   /**
    * Popup-Window for Filtering the entries.
    */
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings("unchecked")
   public void popupfilteroptions() {
-
     Stage stage = new Stage();
     stage.setTitle(mainBundle.getString("logview.filter"));
-    Label titleTime = new Label(mainBundle.getString("logview.time") + ":");
-    titleTime.setFont(Font.font("Arial", 14));
 
-    // JFXDatePicker and Label for Filter Date
-    Label startLabel = new Label(mainBundle.getString("logview.from") + ":");
-    startLabel.setFont(Font.font("Arial", 14));
+    GridPane gridPane = new GridPane();
+    gridPane.setPadding(new Insets(15, 15, 15, 15));
+    int rowIndex = 0;
+    setRow(gridPane, rowIndex++, newHeading(mainBundle.getString("logview.from")));
+    setRow(gridPane, rowIndex++, true, newLabel(mainBundle.getString("logview.date")),
+        startDatePicker);
+    setRow(gridPane, rowIndex++, newLabel(mainBundle.getString("logview.time"), 5.0));
+    startTimeSpinners = setRow(gridPane, rowIndex++,
+        newSpinner(23), newSpinner(59), newSpinner(59));
 
-    Label endLabel = new Label(mainBundle.getString("logview.to") + ":");
-    endLabel.setFont(Font.font("Arial", 14));
+    setRow(gridPane, rowIndex++, true, new Separator(), newPaddedSeparator(10, 0, 10, 0));
+    setRow(gridPane, rowIndex++, newHeading(mainBundle.getString("logview.to")));
+    setRow(gridPane, rowIndex++, true, newLabel(mainBundle.getString("logview.date")),
+        endDatePicker);
+    setRow(gridPane, rowIndex++, newLabel(mainBundle.getString("logview.time"), 5.0));
+    endTimeSpinners = setRow(gridPane, rowIndex++,
+        newSpinner(23), newSpinner(59), newSpinner(59));
 
-    Label titledate = new Label(mainBundle.getString("logview.date") + ":");
-    titledate.setFont(Font.font("Arial", 14));
+    setRow(gridPane, rowIndex++, true, new Separator(), newPaddedSeparator(10, 0, 10, 0));
+    setRow(gridPane, rowIndex++, newHeading(mainBundle.getString("logview.level")));
+    fromLevelChoiceBox = (ChoiceBox<String>)setRow(gridPane, rowIndex++, true,
+        newLabel(mainBundle.getString("logview.from")), newLevelChoiceBox(s -> s.selectLast()))[1];
+    toLevelChoiceBox = (ChoiceBox<String>)setRow(gridPane, rowIndex++, true,
+        newLabel(mainBundle.getString("logview.to")), newLevelChoiceBox(s -> s.selectFirst()))[1];
 
-    // Converter
-    StringConverter<LocalDate> converter = new StringConverter<LocalDate>() {
-      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
-      @Override
-      public String toString(LocalDate date) {
-        if (date != null) {
-          return dateFormatter.format(date);
-        } else {
-          return "";
+    setRow(gridPane, rowIndex++, true,
+        newPaddedSeparator(10, 0, 20, 0), newPaddedSeparator(10, 0, 20, 0));
+    Button save = GsehenGuiElements.button(100);
+    save.setText(mainBundle.getString("menu.file.save"));
+    save.setOnAction(e -> {
+      LocalDate startDate = nvl(startDatePicker.getValue(), LocalDate.ofEpochDay(0));
+      LocalDate endDate = nvl(endDatePicker.getValue(), LocalDate.now().plusDays(1));
+      while (!endDate.isAfter(startDate)) {
+        endDate = endDate.plusDays(1);
+      }
+      LocalTime startTime = LocalTime.of(getStartTimeSpinnerValue(0),
+          getStartTimeSpinnerValue(1), getStartTimeSpinnerValue(2));
+      LocalTime endTime = LocalTime.of(getEndTimeSpinnerValue(0),
+          getEndTimeSpinnerValue(1), getEndTimeSpinnerValue(2));
+      DateTimeFormatter formatter = Configurator.newDateTimeFormatter();
+      startDateTimeStr = LocalDateTime.of(startDate, startTime).format(formatter);
+      endDateTimeStr = LocalDateTime.of(endDate, endTime).format(formatter);
+      fromLevel = Level.parse(fromLevelChoiceBox.valueProperty().get()).intValue();
+      toLevel = Level.parse(toLevelChoiceBox.valueProperty().get()).intValue();
+      logMessage(LOGGER, Level.INFO, "logview.filter.save", startDateTimeStr, endDateTimeStr,
+          fromLevel, toLevel);
+      useFilter = true;
+      LogEntry debugRemovedLogEntry = null;
+      for (Iterator<LogEntry> iterator = data.iterator(); iterator.hasNext(); ) {
+        LogEntry logEntry = iterator.next();
+        if (filterReject(logEntry.date, logEntry.time, logEntry.level)) {
+          debugRemovedLogEntry = logEntry;
+          iterator.remove();
         }
       }
+      System.err.println("########################## " + debugRemovedLogEntry);
+    });
+    setRow(gridPane, rowIndex++, true, null, save);
 
-      @Override
-      public LocalDate fromString(String string) {
-        if (string != null && !string.isEmpty()) {
-          return LocalDate.parse(string, dateFormatter);
-        } else {
-          return null;
-        }
-      }
-    };
-    startpicker.setShowWeekNumbers(true);
-    startpicker.setConverter(converter);
-    startpicker.setPromptText("dd-MM-yyyy");
-
-    endpicker.setShowWeekNumbers(true);
-    endpicker.setConverter(converter);
-    endpicker.setPromptText("dd-MM-yyyy");
-
-    HBox startBox = new HBox();
-    startBox.getChildren().addAll(startLabel, startpicker);
-
-    HBox endBox = new HBox();
-    endBox.getChildren().addAll(endLabel, endpicker);
-
-    HBox dateBox = new HBox();
-    dateBox.getChildren().addAll(titledate);
-
-    VBox upBox = new VBox(20);
-    upBox.setPadding(new Insets(10, 10, 10, 10));
-    upBox.setSpacing(10);
-    upBox.getChildren().addAll(dateBox, startBox, endBox);
-
-    HBox titlebox = new HBox();
-    titlebox.setCenterShape(true);
-    titlebox.getChildren().add(titleTime);
-    upBox.getChildren().add(titlebox);
-
-    Group rootGroup = new Group();
-    Scene scene = new Scene(rootGroup, 400, 600);
-    rootGroup.getChildren().addAll(upBox);
+    Scene scene = new Scene(gridPane, 400, 600);
     stage.setScene(scene);
     stage.centerOnScreen();
     stage.show();
+  }
 
-    String[] startstyles = { "spinner1", "spinner2", "spinner3" };
+  private Node newPaddedSeparator(double i, double j, double k, double l) {
+    Separator separator = new Separator();
+    separator.setPadding(new Insets(i, j, k, l));
+    return separator;
+  }
 
-    // Spinner von
-    SpinnerValueFactory hour = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23);
-    Spinner ssp = new Spinner();
-    ssp.setValueFactory(hour);
-    ssp.getStyleClass().add(startstyles[0]);
+  @SuppressWarnings("unchecked")
+  private int getStartTimeSpinnerValue(int i) {
+    return ((Spinner<Integer>)startTimeSpinners[i]).valueProperty().get();
+  }
+
+  @SuppressWarnings("unchecked")
+  private int getEndTimeSpinnerValue(int i) {
+    return ((Spinner<Integer>)endTimeSpinners[i]).valueProperty().get();
+  }
+
+  private ChoiceBox<String> newLevelChoiceBox(Consumer<SingleSelectionModel<String>> initAction) {
+    ChoiceBox<String> choiceBox = new ChoiceBox<>();
+    choiceBox.getItems().addAll("SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINER", "FINEST");
+    initAction.accept(choiceBox.getSelectionModel());
+    return choiceBox;
+  }
+
+  private Node newHeading(String text) {
+    Label label = new Label(text);
+    label.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+    return label;
+  }
+
+  private Label newLabel(String text) {
+    return newLabel(text, null);
+  }
+
+  private Label newLabel(String text, Double top) {
+    Label label = new Label(text + ":");
+    label.setFont(Font.font("Arial", 14));
+    if (top != null) {
+      label.setPadding(new Insets(top, 0, 0, 0));
+    }
+    return label;
+  }
+
+  private Spinner<Integer> newSpinner(int maxValue) {
+    Spinner<Integer> ssp = new Spinner<>();
+    ssp.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, maxValue));
     ssp.setPrefWidth(60);
-    SpinnerValueFactory minute = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59);
-    Spinner ssp1 = new Spinner();
-    ssp1.setPrefWidth(60);
-    ssp1.setValueFactory(minute);
-    ssp1.getStyleClass().add(startstyles[1]);
-    SpinnerValueFactory sec = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59);
-    Spinner ssp2 = new Spinner();
-    ssp2.setPrefWidth(60);
-    ssp2.setValueFactory(sec);
-    ssp2.getStyleClass().add(startstyles[2]);
+    return ssp;
+  }
 
-    // Spinner bis
-    SpinnerValueFactory hours = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23);
-    Spinner esp = new Spinner();
-    esp.setValueFactory(hours);
-    esp.getStyleClass().add(startstyles[0]);
-    esp.setPrefWidth(60);
-    SpinnerValueFactory minutes = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59);
-    Spinner esp1 = new Spinner();
-    esp1.setPrefWidth(60);
-    esp1.setValueFactory(minutes);
-    esp1.getStyleClass().add(startstyles[1]);
-    SpinnerValueFactory seconds = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59);
-    Spinner esp2 = new Spinner();
-    esp2.setPrefWidth(60);
-    esp2.setValueFactory(seconds);
-    esp2.getStyleClass().add(startstyles[2]);
+  private Node[] setRow(GridPane gridPane, int rowIndex, Node... nodes) {
+    return setRow(gridPane, rowIndex, false, nodes);
+  }
 
-    Label slabel = new Label(" : ");
-    slabel.setFont(Font.font("Arial", 14));
-    Label slLabel = new Label(" : ");
-    slLabel.setFont(Font.font("Arial", 14));
-    Label elabel = new Label(" : ");
-    elabel.setFont(Font.font("Arial", 14));
-    Label elLabel = new Label(" : ");
-    elLabel.setFont(Font.font("Arial", 14));
-
-    HBox startSpinnerBox = new HBox();
-    startSpinnerBox.getChildren().addAll(ssp, slabel, ssp1, slLabel, ssp2);
-    HBox endSpinnerBox = new HBox();
-    endSpinnerBox.getChildren().addAll(esp, elabel, esp1, elLabel, esp2);
-
-    upBox.getChildren().addAll(startSpinnerBox, endSpinnerBox);
-
-    Text slevel = new Text(mainBundle.getString("logview.from") + ":");
-    slevel.setFont(Font.font("Arial", 14));
-    ChoiceBox stratcb = new ChoiceBox();
-    stratcb.getItems().addAll("SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINER", "FINEST");
-    stratcb.getSelectionModel().selectFirst();
-
-    HBox slev = new HBox();
-    slev.getChildren().addAll(slevel, stratcb);
-
-    Text elevel = new Text(mainBundle.getString("logview.to") + ":");
-    elevel.setFont(Font.font("Arial", 14));
-    ChoiceBox endcb = new ChoiceBox();
-    endcb.getItems().addAll("SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINER", "FINEST");
-    endcb.getSelectionModel().selectFirst();
-
-    Label levlabel = new Label(mainBundle.getString("logview.level") + ":");
-    levlabel.setFont(Font.font("Arial", 14));
-
-    HBox levelBox = new HBox();
-    levelBox.getChildren().addAll(levlabel);
-
-    HBox elev = new HBox();
-    elev.getChildren().addAll(elevel, endcb);
-
-    upBox.getChildren().addAll(levelBox, slev, elev);
-
-    Button save = GsehenGuiElements.button(100);
-    save.setText(mainBundle.getString("menu.file.save"));
-
-    save.setOnAction(e -> {
-      startDate = startpicker.getValue();
-      endDate = endpicker.getValue();
-      try {
-        while (!startDate.isAfter(endDate)) {
-          startDate = startDate.plusDays(1);
-        }
-      } catch (Exception ex) {
-        logException(LOGGER, Level.INFO, ex, "logview.filter.save.exception");
+  private Node[] setRow(GridPane gridPane, int rowIndex, boolean spanLastOverTwo, Node... nodes) {
+    for (int columnIndex = 0; columnIndex < nodes.length; columnIndex++) {
+      if (nodes[columnIndex] == null) {
+        continue;
       }
-    });
+      gridPane.add(nodes[columnIndex], columnIndex, rowIndex,
+          spanLastOverTwo && columnIndex == nodes.length - 1 ? 2 : 1, 1);
+    }
+    return nodes;
+  }
 
-    HBox button = new HBox();
-    button.getChildren().addAll(save);
-
-    upBox.getChildren().add(button);
-
+  private <T> T nvl(T a, T b) {
+    return a != null ? a : b;
   }
 
   /**
@@ -402,14 +440,31 @@ public class LogDataController {
       return;
     }
     Date dateTime = new Date(logRecord.getMillis());
-    try {
-      getLogEntryBuffer().add(
-          new LogEntry(new SimpleDateFormat(Configurator.DATE_PATTERN).format(dateTime),
-          new SimpleDateFormat(Configurator.TIME_PATTERN).format(dateTime),
-          String.valueOf(logRecord.getLevel()), logRecord.getMessage())
-      );
-    } catch (Exception e) {
-      System.err.println("LogDataController.onLogRecordPublish: Exception " + e);
+    LogEntry logEntry = newLogEntry(
+        getFormat(0).format(dateTime),
+        getFormat(1).format(dateTime),
+        String.valueOf(logRecord.getLevel()), logRecord.getMessage());
+    if (logEntry != null) {
+      getLogEntryBuffer().add(logEntry);
     }
+//    try {
+//    } catch (Exception e) {
+//      System.err.println("LogDataController.onLogRecordPublish: Exception " + e);
+//    }
+  }
+
+  private LogEntry newLogEntry(String date, String time, String level, String message) {
+    if (useFilter && filterReject(date, time, level)) {
+      return null;
+    }
+    return new LogEntry(date, time, level, MessageUtil.localizedLogMessage(message));
+  }
+
+  private boolean filterReject(String date, String time, String levelStr) {
+    int level = Level.parse(levelStr).intValue();
+    String dateTimeStr = date + " " + time;
+    return level < fromLevel || level > toLevel
+        || dateTimeStr.compareTo(startDateTimeStr) == -1
+        || dateTimeStr.compareTo(endDateTimeStr) == 1;
   }
 }

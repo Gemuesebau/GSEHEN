@@ -118,14 +118,15 @@ import org.hibernate.query.Query;
  */
 @SuppressWarnings({ "checkstyle:commentsindentation" })
 public class Gsehen extends Application {
-  private static final String I18N_MAIN = "i18n.main";
+  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private static final String SPLASH_WARNING_PROPNAME = "splashWarning";
   private static final String SPLASH_WARNING_FALSE = "false";
-  private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
-  protected final ResourceBundle mainBundle;
+  private static final String I18N_MAIN = "i18n.main";
+  private static final String I18N_LOGMESSAGES = "i18n.logmessages";
+  private final ResourceBundle mainBundle;
+  private final ResourceBundle logmessagesBundle;
 
   private static final String MAIN_FXML = "main.fxml";
-
   public static final String MAIN_SPLIT_PANE_ID = "#mainSplitPane";
   public static final String DEBUG_TEXTAREA_ID = "#debugTA";
   public static final String TAB_PANE_ID = "#tabPane";
@@ -148,7 +149,6 @@ public class Gsehen extends Application {
   private SplitPane mainSplitPane;
 
   private List<Farm> farmsList = new ArrayList<>();
-
   private List<Farm> deletedFarms = new ArrayList<>();
 
   private Scene scene;
@@ -169,6 +169,7 @@ public class Gsehen extends Application {
   private DecimalFormat oneDecimalNumberFormat;
   private DecimalFormat twoDecimalNumberFormat;
   private DecimalFormat moreDecimalNumberFormat;
+  private String dateFormatString;
   private SimpleDateFormat dateFormat;
   private SimpleDateFormat dateTimeFormat;
   private List<Preferences> preferences;
@@ -192,6 +193,7 @@ public class Gsehen extends Application {
         getPreferenceValue("locale", System.getProperty("locale", Locale.GERMAN.toLanguageTag()))
     ));
     mainBundle = ResourceBundle.getBundle(I18N_MAIN, getSelectedLocale());
+    logmessagesBundle = ResourceBundle.getBundle(I18N_LOGMESSAGES, getSelectedLocale());
   }
 
   public List<Farm> getDeletedFarms() {
@@ -888,6 +890,10 @@ public class Gsehen extends Application {
     return mainBundle;
   }
 
+  public ResourceBundle getLogBundle() {
+    return logmessagesBundle;
+  }
+
   public List<Farm> getFarmsList() {
     return farmsList;
   }
@@ -1027,7 +1033,8 @@ public class Gsehen extends Application {
     moreDecimalNumberFormat = (DecimalFormat) NumberFormat.getNumberInstance(selectedLocale);
     moreDecimalNumberFormat.applyPattern("#,#######0.0000000");
     ResourceBundle bundle = ResourceBundle.getBundle(I18N_MAIN, selectedLocale);
-    dateFormat = new SimpleDateFormat(bundle.getString("dateFormat"), selectedLocale);
+    dateFormatString = bundle.getString("dateFormat");
+    dateFormat = new SimpleDateFormat(dateFormatString, selectedLocale);
     dateTimeFormat = new SimpleDateFormat(bundle.getString("dateTimeFormat"), selectedLocale);
     logMessage(LOGGER, Level.INFO, "gsehen.locale.applied", selectedLocale.toLanguageTag());
   }
@@ -1075,6 +1082,10 @@ public class Gsehen extends Application {
 
   public String formatDate(Date date) {
     return dateFormat.format(date);
+  }
+
+  public String getFormat() {
+    return dateFormatString;
   }
 
   public String formatDateTime(Date date) {

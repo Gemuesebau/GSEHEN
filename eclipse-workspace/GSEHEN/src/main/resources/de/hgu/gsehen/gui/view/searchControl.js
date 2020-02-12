@@ -20,7 +20,7 @@ function initAutocomplete() {
     var bounds = new google.maps.LatLngBounds();
     places.forEach(function(place) {
       if (!place.geometry) {
-        alert("Returned place contains no geometry");
+        alert("returned.place.contains.no.geometry");
         return;
       }
       var icon = {

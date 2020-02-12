@@ -1,8 +1,7 @@
 function buildJavaScriptPolygon(javaPolygon, logIndent) {
-	return buildJavaScriptPolygonLatLngCallback(javaPolygon, logIndent != null ? function (lat, lng) {
-		LOGGER.info(logIndent + "added polygon point " + lng + ", " + lat);
-	}
-		 : null);
+	return buildJavaScriptPolygonLatLngCallback(javaPolygon, function (lat, lng) {
+		alertWithParam("added.polygon.point", lng + "|" + lat);
+	});
 }
 
 function buildJavaScriptPolygonLatLngCallback(javaPolygon, callbackFunc) {
@@ -39,8 +38,7 @@ var eventsDebouncer = {
 					delegateFuncArgsAsArray[0],
 					delegateFuncArgsAsArray[1]);
 		} else {
-			alert("No debounce implementation for " + delegateFuncArgsAsArray.length +
-				" delegate function arguments!");
+			alertWithParam("no.debounce.for.arguments.count", delegateFuncArgsAsArray.length);
 		}
 	}
 }
