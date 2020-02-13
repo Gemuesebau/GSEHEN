@@ -50,6 +50,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -96,6 +97,8 @@ public class LogDataController {
 
   private ChoiceBox<String> fromLevelChoiceBox;
   private ChoiceBox<String> toLevelChoiceBox;
+
+  private Stage filterOptionsDialog = null;
 
   private synchronized void fillDateFormats(SimpleDateFormat[] formats) {
     for (int i = 0; i < formats.length; i++) {
@@ -268,17 +271,13 @@ public class LogDataController {
 
     tableView.setItems(data);
 
-    EventHandler<? super MouseEvent> handler = event -> {
-    };
-
-    tableView.addEventHandler(MouseEvent.MOUSE_CLICKED, handler);
-
+    tableView.setTooltip(new Tooltip(mainBundle.getString("logview.tooltip")));
     tableView.setOnMouseClicked(new EventHandler<MouseEvent>() {
       @Override
       public void handle(MouseEvent mouseEvent) {
         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
           if (mouseEvent.getClickCount() == 2) {
-            popupfilteroptions();
+            popupFilterOptions();
           }
         }
       }
@@ -293,10 +292,15 @@ public class LogDataController {
    * Popup-Window for Filtering the entries.
    */
   @SuppressWarnings("unchecked")
-  public void popupfilteroptions() {
+  public void popupFilterOptions() {
+    if (filterOptionsDialog != null) {
+      filterOptionsDialog.setAlwaysOnTop(true);
+      filterOptionsDialog.setAlwaysOnTop(false);
+      return;
+    }
     Stage stage = new Stage();
+    filterOptionsDialog = stage;
     stage.setTitle(mainBundle.getString("logview.filter"));
-
     GridPane gridPane = new GridPane();
     gridPane.setPadding(new Insets(15, 15, 15, 15));
     int rowIndex = 0;
@@ -305,7 +309,7 @@ public class LogDataController {
         startDatePicker);
     setRow(gridPane, rowIndex++, newLabel(mainBundle.getString("logview.time"), 5.0));
     startTimeSpinners = setRow(gridPane, rowIndex++,
-        newSpinner(23), newSpinner(59), newSpinner(59));
+        newSpinner(23, false), newSpinner(59, false), newSpinner(59, false));
 
     setRow(gridPane, rowIndex++, true, new Separator(), newPaddedSeparator(10, 0, 10, 0));
     setRow(gridPane, rowIndex++, newHeading(mainBundle.getString("logview.to")));
@@ -313,7 +317,7 @@ public class LogDataController {
         endDatePicker);
     setRow(gridPane, rowIndex++, newLabel(mainBundle.getString("logview.time"), 5.0));
     endTimeSpinners = setRow(gridPane, rowIndex++,
-        newSpinner(23), newSpinner(59), newSpinner(59));
+        newSpinner(23, true), newSpinner(59, true), newSpinner(59, true));
 
     setRow(gridPane, rowIndex++, true, new Separator(), newPaddedSeparator(10, 0, 10, 0));
     setRow(gridPane, rowIndex++, newHeading(mainBundle.getString("logview.level")));
@@ -329,9 +333,6 @@ public class LogDataController {
     save.setOnAction(e -> {
       LocalDate startDate = nvl(startDatePicker.getValue(), LocalDate.ofEpochDay(0));
       LocalDate endDate = nvl(endDatePicker.getValue(), LocalDate.now().plusDays(1));
-      while (!endDate.isAfter(startDate)) {
-        endDate = endDate.plusDays(1);
-      }
       LocalTime startTime = LocalTime.of(getStartTimeSpinnerValue(0),
           getStartTimeSpinnerValue(1), getStartTimeSpinnerValue(2));
       LocalTime endTime = LocalTime.of(getEndTimeSpinnerValue(0),
@@ -344,21 +345,23 @@ public class LogDataController {
       logMessage(LOGGER, Level.INFO, "logview.filter.save", startDateTimeStr, endDateTimeStr,
           fromLevel, toLevel);
       useFilter = true;
-      LogEntry debugRemovedLogEntry = null;
       for (Iterator<LogEntry> iterator = data.iterator(); iterator.hasNext(); ) {
         LogEntry logEntry = iterator.next();
         if (filterReject(logEntry.date, logEntry.time, logEntry.level)) {
-          debugRemovedLogEntry = logEntry;
           iterator.remove();
         }
       }
-      System.err.println("########################## " + debugRemovedLogEntry);
     });
     setRow(gridPane, rowIndex++, true, null, save);
+
+    LocalDate now = LocalDate.now();
+    startDatePicker.setValue(now);
+    endDatePicker.setValue(now);
 
     Scene scene = new Scene(gridPane, 400, 600);
     stage.setScene(scene);
     stage.centerOnScreen();
+    stage.setOnHidden(we -> filterOptionsDialog = null);
     stage.show();
   }
 
@@ -404,9 +407,10 @@ public class LogDataController {
     return label;
   }
 
-  private Spinner<Integer> newSpinner(int maxValue) {
+  private Spinner<Integer> newSpinner(int maxValue, boolean initWithMax) {
     Spinner<Integer> ssp = new Spinner<>();
-    ssp.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, maxValue));
+    ssp.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, maxValue,
+        initWithMax ? maxValue : 0));
     ssp.setPrefWidth(60);
     return ssp;
   }
@@ -447,10 +451,6 @@ public class LogDataController {
     if (logEntry != null) {
       getLogEntryBuffer().add(logEntry);
     }
-//    try {
-//    } catch (Exception e) {
-//      System.err.println("LogDataController.onLogRecordPublish: Exception " + e);
-//    }
   }
 
   private LogEntry newLogEntry(String date, String time, String level, String message) {
@@ -464,7 +464,7 @@ public class LogDataController {
     int level = Level.parse(levelStr).intValue();
     String dateTimeStr = date + " " + time;
     return level < fromLevel || level > toLevel
-        || dateTimeStr.compareTo(startDateTimeStr) == -1
-        || dateTimeStr.compareTo(endDateTimeStr) == 1;
+        || dateTimeStr.compareTo(startDateTimeStr) < 0
+        || dateTimeStr.compareTo(endDateTimeStr) > 0;
   }
 }
