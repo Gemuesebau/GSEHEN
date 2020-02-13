@@ -46,7 +46,7 @@ function initialize(typeOptions) {
   map = new google.maps.Map(document.getElementById('mapcanvas'), { fullscreenControl: false });
   var typeControlDiv = document.createElement('div');
   var typeControl = new TypeControl(typeControlDiv, typeOptions, setSelectedType);
-  map.controls[google.maps.ControlPosition.TOP_CENTER].push(typeControlDiv);
+  map.controls[google.maps.ControlPosition.TOP_LEFT].push(typeControlDiv);
 }
 
 function addEventListeners() {
