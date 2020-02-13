@@ -43,7 +43,6 @@ function initialize(typeOptions) {
   if (typeOptions != null && typeOptions.length > 0) {
     setSelectedType(typeOptions[0].key);
   }
-  map = new google.maps.Map(document.getElementById('mapcanvas'), { fullscreenControl: false });
   var typeControlDiv = document.createElement('div');
   var typeControl = new TypeControl(typeControlDiv, typeOptions, setSelectedType);
   map.controls[google.maps.ControlPosition.TOP_LEFT].push(typeControlDiv);
@@ -156,11 +155,13 @@ function checkErrorAndGetLink() {
 
 var mapsScriptElement = document.createElement("script");
 mapsScriptElement.src = "https://maps.googleapis.com/maps/api/js?key=" +
-  webController.getGoogleMapsApiKey() + "&v=3.exp&sensor=false&libraries=drawing,places";
+	webController.getGoogleMapsApiKey() + "&v=3.exp&sensor=false&libraries=drawing,places";
 mapsScriptElement.onload = function () {
 	drawingManager = new google.maps.drawing.DrawingManager();
 	viewportBounds = new google.maps.LatLngBounds();
+	map = new google.maps.Map(document.getElementById('mapcanvas'), { fullscreenControl: false });
 
+	initAutocomplete();
 	initialize(objectArray(
 	  webController.getLocalizedTypes(),
 	  function objectConverter(pair) {
@@ -169,7 +170,6 @@ mapsScriptElement.onload = function () {
 	));
 
 	redraw();
-	initAutocomplete();
 	drawingManager.setMap(map);
 	addEventListeners();
 
