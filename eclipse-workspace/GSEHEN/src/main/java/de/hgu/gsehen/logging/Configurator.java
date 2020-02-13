@@ -10,6 +10,7 @@ import java.util.logging.LogManager;
 public class Configurator {
   public static final String TIME_PATTERN = "HH:mm:ss";
   public static final String DATE_PATTERN = "yyyy-MM-dd";
+  public static final String NEWLINE_REPLACE = "<br>";
 
   public static DateTimeFormatter newDateTimeFormatter() {
     return DateTimeFormatter.ofPattern(DATE_PATTERN + " " + TIME_PATTERN);

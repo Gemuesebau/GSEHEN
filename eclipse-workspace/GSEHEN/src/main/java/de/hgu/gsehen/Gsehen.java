@@ -1142,7 +1142,7 @@ public class Gsehen extends Application {
     });
     buttons.put("prefs.1.cancel", e -> {
     });
-    instance.showDialog("prefs.title", fields, buttons, "pref.3.hint");
+    instance.showDialog("prefs.title", fields, buttons, "prefs.hint");
   }
 
   /**
@@ -1170,7 +1170,8 @@ public class Gsehen extends Application {
       gsehenWindow.setScene(principalScene);
     }, row);
     if (hint != null) {
-      content.setHeading(new Text(mainBundle.getString(headingKey) + mainBundle.getString(hint)));
+      content.setHeading(new Text(mainBundle.getString(headingKey)
+          + "\n\n" + mainBundle.getString(hint)));
     } else {
       content.setHeading(new Text(mainBundle.getString(headingKey)));
     }

@@ -457,7 +457,8 @@ public class LogDataController {
     if (useFilter && filterReject(date, time, level)) {
       return null;
     }
-    return new LogEntry(date, time, level, MessageUtil.localizedLogMessage(message));
+    return new LogEntry(date, time, level, MessageUtil.localizedLogMessage(message)
+        .replace(Configurator.NEWLINE_REPLACE, "\n"));
   }
 
   private boolean filterReject(String date, String time, String levelStr) {

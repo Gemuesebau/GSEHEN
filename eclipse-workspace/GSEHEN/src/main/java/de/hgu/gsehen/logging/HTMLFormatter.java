@@ -1,5 +1,7 @@
 package de.hgu.gsehen.logging;
 
+import de.hgu.gsehen.util.MessageUtil;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -18,30 +20,24 @@ public class HTMLFormatter extends SimpleFormatter {
   private SimpleDateFormat simpleDateFormat = Configurator.newSimpleDateFormat();
 
   private Pattern leadingWhitespace = Pattern.compile("^\\s");
-  private static final String LEADING_WHITESPACE_REPLACE = "\u00A0";
+  private static final String NO_BREAK_SPACE = "\u00A0";
 
   private Pattern newline = Pattern.compile("\\r?\\n");
-  private static final String NEWLINE_REPLACE = "<br>";
 
   @Override
   public synchronized String format(LogRecord record) {
-    if (record.getThrown() != null) {
-      StringWriter stringWriter = new StringWriter();
-      record.getThrown().printStackTrace(new PrintWriter(stringWriter));
-      record.setMessage(record.getMessage() + "\n\u00A0\n"
-          + record.getThrown().getMessage() + "\n"
-          + stringWriter.toString());
+    String message = record.getMessage();
+    if (message == null) {
+      message = "";
+    }
+    Throwable thrown = record.getThrown();
+    if (thrown != null) {
+      message = MessageUtil.addParameterToMessage(message, completeMessage(thrown));
       record.setThrown(null);
     }
-    if (record.getMessage() != null) {
-      record.setMessage(
-          leadingWhitespace.matcher(
-              newline.matcher(
-                  record.getMessage()
-              ).replaceAll(NEWLINE_REPLACE)
-          ).replaceAll(LEADING_WHITESPACE_REPLACE)
-      );
-    }
+    record.setMessage(leadingWhitespace.matcher(
+            newline.matcher(message).replaceAll(Configurator.NEWLINE_REPLACE)
+    ).replaceFirst(NO_BREAK_SPACE));
     StringBuilder resultSB = new StringBuilder();
     resultSB.append(simpleDateFormat.format(new Date(record.getMillis())))
       .append(" ")
@@ -50,5 +46,13 @@ public class HTMLFormatter extends SimpleFormatter {
       .append(record.getMessage())
       .append("\n");
     return resultSB.toString();
+  }
+
+  private String completeMessage(Throwable thrown) {
+    StringWriter thrownStackTrace = new StringWriter();
+    thrown.printStackTrace(new PrintWriter(thrownStackTrace));
+    String thrownCompleteMessage = NO_BREAK_SPACE + "\n"
+              + thrown.getMessage() + "\n" + thrownStackTrace.toString();
+    return thrownCompleteMessage;
   }
 }

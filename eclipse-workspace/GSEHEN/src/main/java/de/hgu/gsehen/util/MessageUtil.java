@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MessageUtil {
@@ -42,7 +43,18 @@ public class MessageUtil {
     }
   }
 
+  public static String addParameterToMessage(String logFileMessage, String parameter) {
+    int indexOfPipe = logFileMessage.indexOf(END_OF_I18N_DATA);
+    if (indexOfPipe == -1) {
+      return logFileMessage + "\n" + parameter;
+    } else {
+      return logFileMessage.substring(0, indexOfPipe) + END_OF_VALUE
+          + replaceSeparatorChars(parameter) + logFileMessage.substring(indexOfPipe);
+    }
+  }
+
   private static Pattern numberPattern = Pattern.compile("\\d+");
+  private static Pattern parameterPattern = Pattern.compile("\\{(\\d+)");
 
   public static String localizedLogMessage(String logFileMessage) {
     int indexOfPipe = logFileMessage.indexOf(END_OF_I18N_DATA);
@@ -58,8 +70,19 @@ public class MessageUtil {
       }
       parameters[i] = msgPart;
     }
-    return MessageFormat.format(Gsehen.getInstance().getLogBundle().getString(msgParts[0]),
-        parameters);
+    String parameterizedMessage = Gsehen.getInstance().getLogBundle().getString(msgParts[0]);
+    int maxParameterIndex = -1;
+    Matcher parametersMatcher = parameterPattern.matcher(parameterizedMessage);
+    while (parametersMatcher.find()) {
+      int parameterIndex = Integer.parseInt(parametersMatcher.group(1));
+      if (parameterIndex > maxParameterIndex) {
+        maxParameterIndex = parameterIndex;
+      }
+    }
+    for (int i = maxParameterIndex + 1; i < parameters.length; i++) {
+      parameterizedMessage += "\n{" + i + "}";
+    }
+    return MessageFormat.format(parameterizedMessage, parameters);
   }
 
   private static String replaceSeparatorChars(Object value) {
@@ -67,7 +90,7 @@ public class MessageUtil {
   }
 
   private static StringBuilder encodeBaseData(String logMessageKey, Object... parameters) {
-    StringBuilder result = new StringBuilder(replaceSeparatorChars(logMessageKey));
+    StringBuilder result = new StringBuilder(replaceSeparatorChars(logMessageKey));// "invalid" key!
     for (Object object : parameters) {
       result.append(END_OF_VALUE).append(replaceSeparatorChars(object));
     }

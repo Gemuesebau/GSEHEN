@@ -1,5 +1,6 @@
 package de.hgu.gsehen.gui.view;
 
+import static de.hgu.gsehen.util.MessageUtil.logException;
 import static de.hgu.gsehen.util.MessageUtil.logMessage;
 import static de.hgu.gsehen.util.MessageUtil.logMessageRaw;
 
@@ -80,15 +81,23 @@ public abstract class WebController {
   protected abstract Logger getLogger();
 
   protected void alert(String message) {
-    if (message.startsWith("[!]")) {
-      logMessageRaw(getLogger(), Level.INFO, message);
-    } else {
-      logMessage(getLogger(), Level.INFO, message);
+    try {
+      if (message.startsWith("[!]")) {
+        logMessageRaw(getLogger(), Level.INFO, message);
+      } else {
+        logMessage(getLogger(), Level.INFO, message);
+      }
+    } catch (Exception e) {
+      logException(getLogger(), Level.SEVERE, e, "web.script.error");
     }
   }
 
   public void alertWithParam(String messageKey, Object parameter) {
-    logMessage(getLogger(), Level.INFO, messageKey, parameter);
+    try {
+      logMessage(getLogger(), Level.INFO, messageKey, parameter);
+    } catch (Exception e) {
+      logException(getLogger(), Level.SEVERE, e, "web.script.error");
+    }
   }
 
   @SuppressWarnings({ "checkstyle:javadocmethod", "checkstyle:linelength" })
