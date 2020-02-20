@@ -190,13 +190,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     archiveButton.setText(mainBundle.getString("treetableview.archive"));
 
     archiveButton.selectedProperty().addListener(((observable, oldValue, newValue) -> {
-      if (newValue == true) {
-        showArchive();
-        showAllDrawables();
-      } else {
-        fillTreeView();
-        showActiveDrawables();
-      }
+      fillTreeView();
+      updateDrawableFilter();
     }));
 
     filterLabel = (Label) Gsehen.getInstance().getScene().lookup(FILTER_LABEL_ID);
@@ -509,7 +504,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         });
 
     fillTreeView();
-    showActiveDrawables();
+    updateDrawableFilter();
     setupScrolling();
 
     farmTreeView.setContextMenu(menu);
@@ -519,39 +514,20 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     detailPane = (BorderPane) Gsehen.getInstance().getScene().lookup(DETAIL_BORDER_PANE_ID);
   }
 
-  private void showActiveDrawables() {
-    gsehenInstance.sendDrawableFilterChanged(drawable -> {
-      if (drawable instanceof Plot) {
-        return ((Plot) drawable).getIsActive();
-      } else {
-        return true;
-      }
-    }, null);
-  }
-
-  private void showAllDrawables() {
-    gsehenInstance.sendDrawableFilterChanged(drawable -> true, null);
-  }
-
-  /**
-   * Fills the TreeView with Farms, Fields and (inactive) Plots.
-   */
-  private void showArchive() {
-    farmsList = Gsehen.getInstance().getFarmsList();
-    farmTreeView.getRoot().getChildren().clear();
-    for (Farm farm : farmsList) {
-      if (farm.getFields() != null) {
-        for (Field field : farm.getFields()) {
-          if (field.getPlots() != null) {
-            for (Plot plot : field.getPlots()) {
-              if (!plot.getIsActive()) {
-                plotItem = createItem(rootItem, plot);
-              }
-            }
-          }
-        }
-      }
-    }
+  @SuppressWarnings("checkstyle:indentation")
+  private void updateDrawableFilter() {
+    gsehenInstance.sendDrawableFilterChanged(
+          archiveButton.isSelected()
+            ? drawable -> true
+            : drawable -> {
+                  if (drawable instanceof Plot) {
+                    return ((Plot) drawable).getIsActive();
+                  } else {
+                    return true;
+                  }
+            },
+          null
+    );
   }
 
   private void filterChanged(String filter) {
@@ -973,6 +949,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
    * Fills the TreeView with Farms, Fields and (active) Plots.
    */
   public void fillTreeView() {
+    boolean alsoInActive = archiveButton.isSelected();
     farmsList = Gsehen.getInstance().getFarmsList();
     farmTreeView.getRoot().getChildren().clear();
     for (Farm farm : farmsList) {
@@ -983,7 +960,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           fieldItem = createItem(farmItem, field);
           if (field.getPlots() != null) {
             for (Plot plot : field.getPlots()) {
-              if (plot.getIsActive()) {
+              if (alsoInActive || plot.getIsActive()) {
                 plot.setArea(plot.getPolygon().calculateArea(plot.getPolygon().getGeoPoints()));
                 plotItem = createItem(fieldItem, plot);
               }
