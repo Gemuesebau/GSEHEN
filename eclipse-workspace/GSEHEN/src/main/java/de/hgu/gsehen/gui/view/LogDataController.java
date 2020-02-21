@@ -3,7 +3,6 @@ package de.hgu.gsehen.gui.view;
 import static de.hgu.gsehen.util.MessageUtil.logMessage;
 
 import com.jfoenix.controls.JFXDatePicker;
-
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.gui.GsehenGuiElements;
 import de.hgu.gsehen.logging.Configurator;

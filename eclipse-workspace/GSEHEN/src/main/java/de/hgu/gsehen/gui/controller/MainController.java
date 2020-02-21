@@ -3,15 +3,12 @@ package de.hgu.gsehen.gui.controller;
 import static de.hgu.gsehen.Gsehen.isDeveloperMode;
 
 import com.jfoenix.controls.JFXTabPane;
-
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.gui.GsehenGuiElements;
 import de.hgu.gsehen.gui.GsehenSave;
-
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
-
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

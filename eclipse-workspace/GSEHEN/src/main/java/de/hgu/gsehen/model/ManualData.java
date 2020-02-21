@@ -1,7 +1,6 @@
 package de.hgu.gsehen.model;
 
 import java.util.ArrayList;
-
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;

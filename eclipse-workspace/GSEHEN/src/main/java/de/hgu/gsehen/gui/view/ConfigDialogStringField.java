@@ -1,9 +1,7 @@
 package de.hgu.gsehen.gui.view;
 
 import com.jfoenix.controls.JFXTextField;
-
 import de.hgu.gsehen.Gsehen;
-
 import java.util.List;
 import javafx.scene.Node;
 import javafx.scene.text.Text;

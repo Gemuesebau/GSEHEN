@@ -8,10 +8,8 @@ import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
 import de.hgu.gsehen.model.CropRootingZone;
 import de.hgu.gsehen.model.Plot;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -2,7 +2,6 @@ package de.hgu.gsehen.util;
 
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.gsbalance.RecommendedAction;
-
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;

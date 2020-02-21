@@ -1,7 +1,6 @@
 package de.hgu.gsehen.model;
 
 import de.hgu.gsehen.evapotranspiration.DayData;
-
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;

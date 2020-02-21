@@ -2,9 +2,7 @@ package de.hgu.gsehen.view;
 
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
-
 import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("checkstyle:localvariablename")

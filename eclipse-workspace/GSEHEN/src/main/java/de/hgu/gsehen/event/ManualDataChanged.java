@@ -2,7 +2,6 @@ package de.hgu.gsehen.event;
 
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
-
 import java.util.Date;
 
 public class ManualDataChanged extends GsehenEvent {

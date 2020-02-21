@@ -23,7 +23,6 @@ import de.hgu.gsehen.model.WeatherDataSource;
 import de.hgu.gsehen.util.CollectionUtil;
 import de.hgu.gsehen.util.DBUtil;
 import de.hgu.gsehen.util.PluginUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;

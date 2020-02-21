@@ -2,11 +2,9 @@ package de.hgu.gsehen.model;
 
 import de.hgu.gsehen.gui.GeoPoint;
 import de.hgu.gsehen.gui.GeoPolygon;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;

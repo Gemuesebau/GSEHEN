@@ -7,7 +7,6 @@ import de.hgu.gsehen.model.Crop;
 import de.hgu.gsehen.model.CropDevelopmentStatus;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.model.SoilProfile;
-
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;

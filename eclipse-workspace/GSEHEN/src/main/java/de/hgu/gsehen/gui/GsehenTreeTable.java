@@ -4,7 +4,6 @@ import static de.hgu.gsehen.util.MessageUtil.logMessage;
 
 import com.jfoenix.controls.JFXTabPane;
 import com.jfoenix.controls.JFXToggleButton;
-
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.evapotranspiration.DayData;
 import de.hgu.gsehen.event.DrawableSelected;

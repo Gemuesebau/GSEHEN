@@ -1,7 +1,6 @@
 package de.hgu.gsehen.evapotranspiration;
 
 import de.hgu.gsehen.Gsehen;
-
 import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

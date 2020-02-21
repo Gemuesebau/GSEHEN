@@ -1,7 +1,6 @@
 package de.hgu.gsehen.logging;
 
 import de.hgu.gsehen.gui.view.LogDataController;
-
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 

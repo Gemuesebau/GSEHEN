@@ -14,13 +14,11 @@ import de.hgu.gsehen.model.SoilManualData;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
 import de.hgu.gsehen.model.WaterBalance;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "checkstyle:multiplevariabledeclarations", "checkstyle:emptylineseparator",

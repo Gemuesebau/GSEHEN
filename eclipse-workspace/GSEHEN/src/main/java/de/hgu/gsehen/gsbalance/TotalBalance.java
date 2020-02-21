@@ -12,7 +12,6 @@ import de.hgu.gsehen.model.Soil;
 import de.hgu.gsehen.model.SoilManualData;
 import de.hgu.gsehen.model.SoilProfile;
 import de.hgu.gsehen.model.SoilProfileDepth;
-
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;

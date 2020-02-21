@@ -1,7 +1,6 @@
 package de.hgu.gsehen.model;
 
 import de.hgu.gsehen.Gsehen;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;

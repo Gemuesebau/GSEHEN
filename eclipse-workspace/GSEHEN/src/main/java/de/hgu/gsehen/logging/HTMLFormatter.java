@@ -1,7 +1,6 @@
 package de.hgu.gsehen.logging;
 
 import de.hgu.gsehen.util.MessageUtil;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -40,11 +39,11 @@ public class HTMLFormatter extends SimpleFormatter {
     ).replaceFirst(NO_BREAK_SPACE));
     StringBuilder resultSB = new StringBuilder();
     resultSB.append(simpleDateFormat.format(new Date(record.getMillis())))
-      .append(" ")
-      .append(record.getLevel())
-      .append(" ")
-      .append(record.getMessage())
-      .append("\n");
+        .append(" ")
+        .append(record.getLevel())
+        .append(" ")
+        .append(record.getMessage())
+        .append("\n");
     return resultSB.toString();
   }
 

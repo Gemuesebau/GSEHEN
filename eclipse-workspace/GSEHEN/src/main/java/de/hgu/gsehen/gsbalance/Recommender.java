@@ -15,7 +15,6 @@ import de.hgu.gsehen.model.ManualData;
 import de.hgu.gsehen.model.ManualWaterSupply;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.model.WaterBalance;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

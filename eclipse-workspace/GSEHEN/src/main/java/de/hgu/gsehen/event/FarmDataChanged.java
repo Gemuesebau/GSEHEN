@@ -1,7 +1,6 @@
 package de.hgu.gsehen.event;
 
 import de.hgu.gsehen.model.Farm;
-
 import java.util.List;
 
 public class FarmDataChanged extends GsehenViewEvent {
