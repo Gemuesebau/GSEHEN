@@ -247,18 +247,18 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
             tooltip.setStyle("-fx-font-style: italic; -fx-background-color: #ffffff; "
                 + "-fx-text-fill: #000000; -fx-font-size: 9pt;");
             cropChoiceBox.setTooltip(tooltip);
-
-            // Sets the accordion-content
             descriptionText
               .setText(gsehenInstance.localizeCropText(cropChoiceBox.getValue().getDescription()));
 
-            plot.setCropDevelopmentStatus(new CropDevelopmentStatus(
-                newVal.getPhase1(), newVal.getPhase2(),
-                newVal.getPhase3(), newVal.getPhase4()));
-            plot.setCropRootingZone(new CropRootingZone(
-                newVal.getRootingZone1(), newVal.getRootingZone2(),
-                newVal.getRootingZone3(), newVal.getRootingZone4()));
-            plot.setCrop(newVal);
+            if (!newVal.equals(plot.getCrop())) {
+              plot.setCropDevelopmentStatus(new CropDevelopmentStatus(
+                  newVal.getPhase1(), newVal.getPhase2(),
+                  newVal.getPhase3(), newVal.getPhase4()));
+              plot.setCropRootingZone(new CropRootingZone(
+                  newVal.getRootingZone1(), newVal.getRootingZone2(),
+                  newVal.getRootingZone3(), newVal.getRootingZone4()));
+              plot.setCrop(newVal);
+            }
             setTableData();
           }
         });
@@ -507,7 +507,6 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
 
     tabPane = gsehenInstance.getMainController().getJfxTabPane();
 
-    // Actions that will happen, if you click a 'plot' in the TreeTableView
     treeTableView = (TreeTableView<Drawable>) Gsehen.getInstance().getScene()
         .lookup(FARM_TREE_VIEW_ID);
     treeTableView.getSelectionModel().selectedItemProperty().addListener(
@@ -894,7 +893,7 @@ public class PlotDataController implements GsehenEventListener<FarmDataChanged> 
           gsehenInstance.sendFarmDataChanged(plot, null);
           tabPane.getSelectionModel().select(2);
           treeTableView.getSelectionModel().clearSelection();
-          treeTableView.getSelectionModel().select(currentItem); // FIXME - overwrites phase table - defaults from crop should only be set in plot's cropPhase etc. if a NEW crop is selected in combo box
+          treeTableView.getSelectionModel().select(currentItem);
         }
       } else {
         Text plotError =
