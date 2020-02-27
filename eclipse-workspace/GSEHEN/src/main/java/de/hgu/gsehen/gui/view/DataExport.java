@@ -12,6 +12,7 @@ import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.ManualWaterSupply;
 import de.hgu.gsehen.model.Plot;
+import de.hgu.gsehen.util.LoggingList;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
@@ -91,7 +92,7 @@ public class DataExport {
   @SuppressWarnings({ "checkstyle:all" })
   public void createExport() {
     for (int i = 0; i < treeTableView.getSelectionModel().getSelectedCells().size(); i++) {
-      List<Farm> farmsList = gsehenInstance.getFarmsList();
+      LoggingList<Farm> farmsList = gsehenInstance.getFarmsList();
       if (treeTableView.getSelectionModel().getSelectedCells().get(i) != null) {
         TreeItem<Drawable> selectedItem = treeTableView.getSelectionModel().getSelectedCells()
             .get(i).getTreeItem();

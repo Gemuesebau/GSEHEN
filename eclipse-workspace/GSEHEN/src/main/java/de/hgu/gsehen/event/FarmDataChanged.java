@@ -1,16 +1,16 @@
 package de.hgu.gsehen.event;
 
 import de.hgu.gsehen.model.Farm;
-import java.util.List;
+import de.hgu.gsehen.util.LoggingList;
 
 public class FarmDataChanged extends GsehenViewEvent {
-  private List<Farm> farms;
+  private LoggingList<Farm> farms;
 
-  public List<Farm> getFarms() {
+  public LoggingList<Farm> getFarms() {
     return farms;
   }
 
-  public void setFarms(List<Farm> farms) {
+  public void setFarms(LoggingList<Farm> farms) {
     this.farms = farms;
   }
 }

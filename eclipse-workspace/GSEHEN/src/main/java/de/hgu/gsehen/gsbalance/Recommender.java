@@ -1,6 +1,5 @@
 package de.hgu.gsehen.gsbalance;
 
-import static de.hgu.gsehen.evapotranspiration.UtilityFunctions.getLevelForName;
 import static de.hgu.gsehen.util.MessageUtil.logMessage;
 
 import de.hgu.gsehen.Gsehen;
@@ -15,15 +14,16 @@ import de.hgu.gsehen.model.ManualData;
 import de.hgu.gsehen.model.ManualWaterSupply;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.model.WaterBalance;
+import de.hgu.gsehen.util.LoggingList;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Recommender {
   private static final Logger LOGGER = Logger.getLogger(Recommender.class.getName());
-  private static final String COPY_WD_LOGLEVEL = System.getProperty("copyWdLoglevel", "FINE");
 
   private Gsehen gsehenInstance;
 
@@ -37,7 +37,7 @@ public class Recommender {
 
   @SuppressWarnings({ "checkstyle:needbraces", "checkstyle:indentation" })
   private static void forAllFieldsAndPlots(BiConsumer<Field, Plot> handler) {
-    final List<Farm> farmsList = Gsehen.getInstance().getFarmsList();
+    final LoggingList<Farm> farmsList = Gsehen.getInstance().getFarmsList();
     if (farmsList != null) for (Farm farm : farmsList) {
       if (farm != null && farm.getFields() != null) for (Field field : farm.getFields()) {
         if (field != null && field.getPlots() != null) for (Plot plot : field.getPlots()) {
@@ -50,8 +50,7 @@ public class Recommender {
   private void replaceDayData(DayDataChanged event, Field field, Plot plot) {
     if (event.isFromWeatherDataSource(field.getWeatherDataSourceUuid())) {
       if (plot.getWaterBalance() != null && plot.getWaterBalance().getDailyBalances() != null) {
-        logMessage(LOGGER, getLevelForName(COPY_WD_LOGLEVEL), "clear.day.data.for.plot",
-            plot.getName());
+        logMessage(LOGGER, Level.FINE, "clear.day.data.for.plot", plot.getName());
         plot.getWaterBalance().getDailyBalances().clear();
       }
     }
@@ -64,8 +63,7 @@ public class Recommender {
         Date date = eventDayData.getDate();
         if (date != null && event.isFromWeatherDataSource(field.getWeatherDataSourceUuid())
             && UtilityFunctions.determineDataStartDate(plot).compareTo(date) <= 0) {
-          logMessage(LOGGER, getLevelForName(COPY_WD_LOGLEVEL), "copy.day.data.for.plot.at.date",
-              plot.getName(), date);
+          logMessage(LOGGER, Level.FINE, "copy.day.data.for.plot.at.date", plot.getName(), date);
           copyWeatherData(eventDayData, getCurrentDayData(plot, date));
         }
       }

@@ -42,6 +42,8 @@ public class HTMLFormatter extends SimpleFormatter {
         .append(" ")
         .append(record.getLevel())
         .append(" ")
+        .append(record.getLoggerName().replace(' ', '_'))
+        .append(" ")
         .append(record.getMessage())
         .append("\n");
     return resultSB.toString();

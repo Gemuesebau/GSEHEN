@@ -60,7 +60,7 @@ public class Field extends Drawable implements DrawableParent {
   }
 
   public void setName(String name) {
-    this.name = name != null ? name : "Unbenannt"; // FIXME localize
+    this.name = name;
   }
 
   @Override

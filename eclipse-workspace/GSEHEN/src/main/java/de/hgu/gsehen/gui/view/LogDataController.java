@@ -31,6 +31,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
@@ -49,6 +50,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
@@ -62,7 +64,8 @@ import javafx.util.Duration;
 import javafx.util.StringConverter;
 
 public class LogDataController {
-  private static final int LOG_EVENT_HANDLE_THRESHOLD = Level.INFO.intValue();
+  private static final int LOG_EVENT_HANDLE_THRESHOLD = Level.parse(
+      System.getProperty("logViewLevel", "INFO")).intValue();
   private static final Logger LOGGER = Logger.getLogger(LogDataController.class.getName());
 
   private Gsehen instance;
@@ -82,6 +85,8 @@ public class LogDataController {
 
   private boolean useFilter = false;
 
+  private Pattern loggerFilter;
+
   private String startDateTimeStr;
   private String endDateTimeStr;
 
@@ -96,6 +101,8 @@ public class LogDataController {
 
   private ChoiceBox<String> fromLevelChoiceBox;
   private ChoiceBox<String> toLevelChoiceBox;
+
+  private TextField loggerRegex;
 
   private Stage filterOptionsDialog = null;
 
@@ -201,8 +208,8 @@ public class LogDataController {
         BufferedReader fileStream = new BufferedReader(new FileReader(file));
         String line;
         while ((line = fileStream.readLine()) != null) {
-          String[] parts = line.split(" ", 4);
-          LogEntry logEntry = newLogEntry(parts[0], parts[1], parts[2], parts[3]);
+          String[] parts = line.split(" ", 5);
+          LogEntry logEntry = newLogEntry(parts[0], parts[1], parts[2], parts[3], parts[4]);
           if (logEntry != null) {
             logEntries.add(logEntry);
           }
@@ -261,12 +268,16 @@ public class LogDataController {
     levelCol.setSortable(false);
     levelCol.setCellValueFactory(new PropertyValueFactory<LogEntry, String>("level"));
 
+    TableColumn loggerCol = new TableColumn(mainBundle.getString("logview.logger"));
+    loggerCol.setSortable(false);
+    loggerCol.setCellValueFactory(new PropertyValueFactory<LogEntry, String>("logger"));
+
     TableColumn messageCol = new TableColumn(mainBundle.getString("logview.text"));
     messageCol.setSortable(false);
     messageCol.setCellValueFactory(new PropertyValueFactory<LogEntry, String>("message"));
 
     TableView tableView = new TableView();
-    tableView.getColumns().addAll(dateCol, timeCol, levelCol, messageCol);
+    tableView.getColumns().addAll(dateCol, timeCol, levelCol, loggerCol, messageCol);
 
     tableView.setItems(data);
 
@@ -325,6 +336,16 @@ public class LogDataController {
     toLevelChoiceBox = (ChoiceBox<String>)setRow(gridPane, rowIndex++, true,
         newLabel(mainBundle.getString("logview.to")), newLevelChoiceBox(s -> s.selectFirst()))[1];
 
+    setRow(gridPane, rowIndex++, true, new Separator(), newPaddedSeparator(10, 0, 10, 0));
+    setRow(gridPane, rowIndex++, newHeading(mainBundle.getString("logview.logger")));
+    loggerRegex = (TextField)setRow(gridPane, rowIndex++, true,
+        newLabel(mainBundle.getString("logview.regex")), new TextField())[1];
+    loggerRegex.textProperty().addListener((o, oldValue, newValue) -> {
+      if (!isCompileable(newValue)) {
+        loggerRegex.setText(oldValue);
+      }
+    });
+
     setRow(gridPane, rowIndex++, true,
         newPaddedSeparator(10, 0, 20, 0), newPaddedSeparator(10, 0, 20, 0));
     Button save = GsehenGuiElements.button(100);
@@ -341,12 +362,13 @@ public class LogDataController {
       endDateTimeStr = LocalDateTime.of(endDate, endTime).format(formatter);
       fromLevel = Level.parse(fromLevelChoiceBox.valueProperty().get()).intValue();
       toLevel = Level.parse(toLevelChoiceBox.valueProperty().get()).intValue();
+      loggerFilter = Pattern.compile(loggerRegex.getText());
       logMessage(LOGGER, Level.INFO, "logview.filter.save", startDateTimeStr, endDateTimeStr,
           fromLevel, toLevel);
       useFilter = true;
       for (Iterator<LogEntry> iterator = data.iterator(); iterator.hasNext(); ) {
         LogEntry logEntry = iterator.next();
-        if (filterReject(logEntry.date, logEntry.time, logEntry.level)) {
+        if (filterReject(logEntry.date, logEntry.time, logEntry.level, logEntry.logger)) {
           iterator.remove();
         }
       }
@@ -362,6 +384,15 @@ public class LogDataController {
     stage.centerOnScreen();
     stage.setOnHidden(we -> filterOptionsDialog = null);
     stage.show();
+  }
+
+  private boolean isCompileable(String regex) {
+    try {
+      Pattern.compile(regex);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   private Node newPaddedSeparator(double i, double j, double k, double l) {
@@ -382,7 +413,13 @@ public class LogDataController {
 
   private ChoiceBox<String> newLevelChoiceBox(Consumer<SingleSelectionModel<String>> initAction) {
     ChoiceBox<String> choiceBox = new ChoiceBox<>();
-    choiceBox.getItems().addAll("SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINER", "FINEST");
+    for (String levelName : new String[] {
+        "SEVERE", "WARNING", "INFO", "CONFIG", "FINE", "FINER", "FINEST"
+    }) {
+      if (Level.parse(levelName).intValue() >= LOG_EVENT_HANDLE_THRESHOLD) {
+        choiceBox.getItems().add(levelName);
+      }
+    }
     initAction.accept(choiceBox.getSelectionModel());
     return choiceBox;
   }
@@ -446,25 +483,27 @@ public class LogDataController {
     LogEntry logEntry = newLogEntry(
         getFormat(0).format(dateTime),
         getFormat(1).format(dateTime),
-        String.valueOf(logRecord.getLevel()), logRecord.getMessage());
+        logRecord.getLevel() == null ? "null" : logRecord.getLevel().toString(),
+        logRecord.getLoggerName(), logRecord.getMessage());
     if (logEntry != null) {
       getLogEntryBuffer().add(logEntry);
     }
   }
 
-  private LogEntry newLogEntry(String date, String time, String level, String message) {
-    if (useFilter && filterReject(date, time, level)) {
+  private LogEntry newLogEntry(String date, String time, String level, String logger, String msg) {
+    if (useFilter && filterReject(date, time, level, logger)) {
       return null;
     }
-    return new LogEntry(date, time, level, MessageUtil.localizedLogMessage(message)
+    return new LogEntry(date, time, level, logger, MessageUtil.localizedLogMessage(msg)
         .replace(Configurator.NEWLINE_REPLACE, "\n"));
   }
 
-  private boolean filterReject(String date, String time, String levelStr) {
-    int level = Level.parse(levelStr).intValue();
+  private synchronized boolean filterReject(String date, String time, String level, String logger) {
+    int levelIntValue = Level.parse(level).intValue();
     String dateTimeStr = date + " " + time;
-    return level < fromLevel || level > toLevel
+    return levelIntValue < fromLevel || levelIntValue > toLevel
         || dateTimeStr.compareTo(startDateTimeStr) < 0
-        || dateTimeStr.compareTo(endDateTimeStr) > 0;
+        || dateTimeStr.compareTo(endDateTimeStr) > 0
+        || !loggerFilter.matcher(logger).find();
   }
 }

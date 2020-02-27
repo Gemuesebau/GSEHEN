@@ -1,6 +1,7 @@
 package de.hgu.gsehen;
 
 import static de.hgu.gsehen.util.CollectionUtil.addToMappedList;
+import static de.hgu.gsehen.util.CollectionUtil.simpleClassMap;
 import static de.hgu.gsehen.util.DBUtil.executeQuery;
 import static de.hgu.gsehen.util.MessageUtil.logException;
 import static de.hgu.gsehen.util.MessageUtil.logMessage;
@@ -22,6 +23,7 @@ import de.hgu.gsehen.event.ManualDataChanged;
 import de.hgu.gsehen.event.RecommendedActionChanged;
 import de.hgu.gsehen.gsbalance.Recommender;
 import de.hgu.gsehen.gui.GeoPoint;
+import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.gui.GsehenGuiElements;
 import de.hgu.gsehen.gui.GsehenTreeTable;
 import de.hgu.gsehen.gui.controller.MainController;
@@ -43,6 +45,7 @@ import de.hgu.gsehen.model.WeatherDataSource;
 import de.hgu.gsehen.util.CollectionUtil;
 import de.hgu.gsehen.util.DBUtil;
 import de.hgu.gsehen.util.GsehenLocalizedException;
+import de.hgu.gsehen.util.LoggingList;
 import de.hgu.gsehen.util.Pair;
 import de.hgu.gsehen.util.PluginUtil;
 import java.io.File;
@@ -74,6 +77,8 @@ import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -118,6 +123,13 @@ import org.hibernate.query.Query;
  */
 @SuppressWarnings({ "checkstyle:commentsindentation" })
 public class Gsehen extends Application {
+  private static final String NAME_INDEX_BASE = "( \\((\\d+)\\))";
+  private static Pattern NAME_INDEX = Pattern.compile(NAME_INDEX_BASE + "|");
+  private static Pattern NAME_INDEXES = Pattern.compile(NAME_INDEX_BASE + "+$");
+
+  private static final String SPECIAL_NAME_PREFIX = "" + (char)9670;
+  private static Pattern SPECIAL_MARK = Pattern.compile("^" + SPECIAL_NAME_PREFIX + "+");
+
   private static final Logger LOGGER = Logger.getLogger(Gsehen.class.getName());
   private static final String SPLASH_WARNING_PROPNAME = "splashWarning";
   private static final String SPLASH_WARNING_FALSE = "false";
@@ -143,12 +155,15 @@ public class Gsehen extends Application {
   private static Logs logs;
   private static DataExport exports;
 
+  private java.util.Map<String, Class<?>> typesMap =
+      simpleClassMap(new Class[] {Farm.class, Field.class, Plot.class});
+
   private GsehenTreeTable treeTable;
 
   @SuppressWarnings("unused")
   private SplitPane mainSplitPane;
 
-  private List<Farm> farmsList = new ArrayList<>();
+  private LoggingList<Farm> farmsList = new LoggingList<>();
   private List<Farm> deletedFarms = new ArrayList<>();
 
   private Scene scene;
@@ -556,7 +571,7 @@ public class Gsehen extends Application {
    * Loads the farms (fields, plots (water balance (day data))) (user-created data).
    */
   public void loadFarmData() {
-    farmsList = loadEntities(Farm.class);
+    farmsList = new LoggingList<Farm>(loadEntities(Farm.class));
     dataChanged = false;
     sendFarmDataChanged(null, null);
   }
@@ -652,7 +667,7 @@ public class Gsehen extends Application {
       Plot plotObjc = (Plot) object;
       plotObjc.setIsActive(true);
       plotObjc.setArea(plotObjc.getPolygon().calculateArea(plotObjc.getPolygon().getGeoPoints()));
-      getNewPlotsField(getNewFieldsFarm()).getPlots().add(plotObjc);
+      getNewPlotsField().getPlots().add(plotObjc);
       logMessage(LOGGER, Level.INFO, "added.drawable.plot", object.getName());
     }
     sendFarmDataChanged(object, skipClass);
@@ -677,9 +692,10 @@ public class Gsehen extends Application {
     field.setLocation(location);
   }
 
-  private Field getNewPlotsField(Farm farm) {
-    String newPlotsFieldName = mainBundle.getString("gui.control.objectTree.newPlotsFieldName");
+  private Field getNewPlotsField() {
+    String newPlotsFieldName = getSpecialName("newPlotsFieldName");
     Field newPlotsField = null;
+    Farm farm = getNewFieldsFarm();
     for (Field field : farm.getFields()) {
       if (field.getName().equals(newPlotsFieldName)) {
         newPlotsField = field;
@@ -694,7 +710,7 @@ public class Gsehen extends Application {
   }
 
   private Farm getNewFieldsFarm() {
-    String newFieldsFarmName = mainBundle.getString("gui.control.objectTree.newFieldsFarmName");
+    String newFieldsFarmName = getSpecialName("newFieldsFarmName");
     Farm newFieldsFarm = null;
     for (Farm farm : farmsList) {
       if (farm.getName().equals(newFieldsFarmName)) {
@@ -707,6 +723,10 @@ public class Gsehen extends Application {
       farmsList.add(newFieldsFarm);
     }
     return newFieldsFarm;
+  }
+
+  private String getSpecialName(String detailKey) {
+    return SPECIAL_NAME_PREFIX + ' ' + mainBundle.getString("gui.control.objectTree." + detailKey);
   }
 
   public String getPreferenceValue(String key) {
@@ -894,11 +914,11 @@ public class Gsehen extends Application {
     return logmessagesBundle;
   }
 
-  public List<Farm> getFarmsList() {
+  public LoggingList<Farm> getFarmsList() {
     return farmsList;
   }
 
-  public void setFarmsList(List<Farm> farmsList) {
+  public void setFarmsList(LoggingList<Farm> farmsList) {
     this.farmsList = farmsList;
   }
 
@@ -1212,5 +1232,77 @@ public class Gsehen extends Application {
   public static File getPluginsFolder() {
     return new File(System.getProperty("user.home") + File.separator + ".gsehenIrrigationManager"
         + File.separator + "plugins");
+  }
+
+  public Map<String, Class<?>> getTypesMap() {
+    return typesMap;
+  }
+
+  public Drawable getDrawableWithEmptyPolygon(String typeKey)
+      throws InstantiationException, IllegalAccessException {
+    Drawable drawable = (Drawable)typesMap.get(typeKey).newInstance();
+    drawable.setNameAndPolygon(
+        uniquify(drawable.getClass(), getBundle().getString("gui.view.Map.unnamed.drawable")),
+        new GeoPolygon());
+    return drawable;
+  }
+
+  public String uniquify(Class<? extends Drawable> drawableClass, String drawableName) {
+    drawableName = SPECIAL_MARK.matcher(drawableName).replaceFirst("");
+    String unindexedName = getUnindexedName(drawableName);
+    int currentMaxIndex = getNameIndex(drawableName, unindexedName) - 1;
+    if (currentMaxIndex < -1) {
+      currentMaxIndex = -1;
+    }
+    for (Farm farm : farmsList) {
+      if (Farm.class.isAssignableFrom(drawableClass)) {
+        int index = getNameIndex(farm.getName(), unindexedName);
+        if (index > currentMaxIndex) {
+          currentMaxIndex = index;
+        }
+      } else {
+        for (Field field : farm.getFields()) {
+          if (Field.class.isAssignableFrom(drawableClass)) {
+            int index = getNameIndex(field.getName(), unindexedName);
+            if (index > currentMaxIndex) {
+              currentMaxIndex = index;
+            }
+          } else {
+            for (Plot plot : field.getPlots()) {
+              if (Plot.class.isAssignableFrom(drawableClass)) {
+                int index = getNameIndex(plot.getName(), unindexedName);
+                if (index > currentMaxIndex) {
+                  currentMaxIndex = index;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    int newIndex = currentMaxIndex + 1;
+    return newIndex == 0 ? unindexedName : unindexedName + " (" + newIndex + ")";
+  }
+
+  private String getUnindexedName(String drawableName) {
+    return NAME_INDEXES.matcher(drawableName).replaceFirst("");
+  }
+
+  private int getNameIndex(String name, String unindexedName) {
+    if (name != null && name.startsWith(unindexedName)) {
+      Matcher matcher = NAME_INDEX.matcher(name.substring(unindexedName.length()));
+      if (!matcher.matches()) {
+        return -1;
+      } else {
+        String index = matcher.group(2);
+        if (index == null) {
+          return 0;
+        } else {
+          return Integer.parseInt(index);
+        }
+      }
+    } else {
+      return -1;
+    }
   }
 }

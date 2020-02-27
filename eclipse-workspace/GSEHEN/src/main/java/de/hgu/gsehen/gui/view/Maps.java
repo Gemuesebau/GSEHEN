@@ -1,14 +1,8 @@
 package de.hgu.gsehen.gui.view;
 
-import static de.hgu.gsehen.util.CollectionUtil.simpleClassMap;
-
 import de.hgu.gsehen.Gsehen;
 import de.hgu.gsehen.event.FarmDataChanged;
-import de.hgu.gsehen.gui.GeoPolygon;
 import de.hgu.gsehen.model.Drawable;
-import de.hgu.gsehen.model.Farm;
-import de.hgu.gsehen.model.Field;
-import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.util.MessageUtil;
 import de.hgu.gsehen.util.Pair;
 import java.util.logging.Level;
@@ -47,9 +41,6 @@ public class Maps extends FarmDataController {
     engine.load(MAPS_HTML_URL);
   }
 
-  private java.util.Map<String, Class<?>> typesMap =
-      simpleClassMap(new Class[] {Farm.class, Field.class, Plot.class});
-
   /**
    * Creates a new Drawable; intended to be called from web JavaScript.
    *
@@ -60,10 +51,7 @@ public class Maps extends FarmDataController {
    */
   public Drawable getDrawableWithEmptyPolygon(String typeKey)
       throws InstantiationException, IllegalAccessException {
-    Drawable drawable = (Drawable)typesMap.get(typeKey).newInstance();
-    drawable.setNameAndPolygon(application.getBundle().getString("gui.view.Map.unnamed.drawable"),
-        new GeoPolygon());
-    return drawable;
+    return application.getDrawableWithEmptyPolygon(typeKey);
   }
 
   /**
@@ -75,7 +63,7 @@ public class Maps extends FarmDataController {
   public Pair<String>[] getLocalizedTypes() {
     Pair<String>[] result = new Pair[3];
     int[] i = new int[] { 0 };
-    typesMap.keySet().forEach(type -> {
+    application.getTypesMap().keySet().forEach(type -> {
       result[i[0]++] =
           new Pair(type, application.getBundle().getString("gui.view.Map.drawableType." + type));
     });

@@ -6,24 +6,19 @@ public class LogEntry {
   public String date;
   public String time;
   public String level;
+  public String logger;
   public String message;
 
   @Override
   public String toString() {
-    return Arrays.asList(date, time, level, message).toString();
+    return Arrays.asList(date, time, level, logger, message).toString();
   }
-  
-  /**
-   * getter and setters for LogEntries.
-   * @param date for date entry
-   * @param time for time entry
-   * @param level for level entry
-   * @param message for message entry
-   */
-  public LogEntry(String date, String time, String level, String message) {
+
+  public LogEntry(String date, String time, String level, String logger, String message) {
     this.date = date;
     this.time = time;
     this.level = level;
+    this.logger = logger;
     this.message = message;
   }
 
@@ -49,6 +44,14 @@ public class LogEntry {
 
   public void setLevel(String level) {
     this.level = level;
+  }
+
+  public String getLogger() {
+    return logger;
+  }
+
+  public void setLogger(String logger) {
+    this.logger = logger;
   }
 
   public String getMessage() {

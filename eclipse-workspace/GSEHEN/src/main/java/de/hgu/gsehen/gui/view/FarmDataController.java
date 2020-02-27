@@ -15,6 +15,7 @@ import de.hgu.gsehen.model.DrawableParent;
 import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.util.GsehenLocalizedException;
+import de.hgu.gsehen.util.LoggingList;
 import de.hgu.gsehen.util.Pair;
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,7 +66,7 @@ public abstract class FarmDataController extends WebController {
 
           @Override
           public void handle(FarmDataChanged event) {
-            List<Farm> farms = event.getFarms();
+            LoggingList<Farm> farms = event.getFarms();
             Drawable[] farmsArray = new Drawable[farms.size()];
             int i = 0;
             for (Farm farm : farms) {

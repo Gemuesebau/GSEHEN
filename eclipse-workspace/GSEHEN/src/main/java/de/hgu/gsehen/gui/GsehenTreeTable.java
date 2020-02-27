@@ -18,6 +18,7 @@ import de.hgu.gsehen.model.Farm;
 import de.hgu.gsehen.model.Field;
 import de.hgu.gsehen.model.Plot;
 import de.hgu.gsehen.model.SoilProfile;
+import de.hgu.gsehen.util.LoggingList;
 import de.hgu.gsehen.util.MessageUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -47,6 +49,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableColumn.CellEditEvent;
+import javafx.scene.control.TreeTablePosition;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
@@ -151,7 +154,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private TreeItem<Drawable> trash;
   private TreeItem<Drawable> item;
   private TreeItem<Drawable> rootItem;
-  private List<Farm> farmsList = new ArrayList<>();
+  private LoggingList<Farm> farmsList = new LoggingList<>();
   private TreeItem<Drawable> selectedItem;
 
   private ContextMenu menu = new ContextMenu();
@@ -227,29 +230,14 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     deleteItem.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent e) {
-        for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedCells().size(); i++) {
-          farmTreeView.getSelectionModel().getSelectedCells().get(i).getTreeItem().getValue()
-              .setName("del");
-        }
-        trash = farmTreeView.getSelectionModel().getSelectedItem();
-        if (trash != null) {
-          removeItem();
-        }
+        deleteSelectedItem();
       }
     });
-
     farmTreeView.setOnKeyPressed(new EventHandler<KeyEvent>() {
       @Override
       public void handle(final KeyEvent keyEvent) {
         if (keyEvent.getCode().equals(KeyCode.DELETE)) {
-          for (int i = 0; i < farmTreeView.getSelectionModel().getSelectedCells().size(); i++) {
-            farmTreeView.getSelectionModel().getSelectedCells().get(i).getTreeItem().getValue()
-                .setName("del");
-          }
-          trash = farmTreeView.getSelectionModel().getSelectedItem();
-          if (trash != null) {
-            removeItem();
-          }
+          deleteSelectedItem();
         }
       }
     });
@@ -511,6 +499,52 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     farmTreeView.getSelectionModel().setCellSelectionEnabled(true);
 
     detailPane = (BorderPane) Gsehen.getInstance().getScene().lookup(DETAIL_BORDER_PANE_ID);
+  }
+
+  private void deleteSelectedItem() {
+    /*
+    for (TreeTablePosition<Drawable, ?> sel : farmTreeView.getSelectionModel().getSelectedCells()) {
+      sel.getTreeItem().getValue().setName("del"); // not used?! FIXME review whole method
+    }
+    */
+    trash = farmTreeView.getSelectionModel().getSelectedItem();
+    if (trash != null) {
+      List<Farm> delFarm = new ArrayList<Farm>();
+      List<Field> delField = new ArrayList<Field>();
+      List<Plot> delPlot = new ArrayList<Plot>();
+      
+      Drawable object = null;
+      
+      for (Farm farm : farmsList) {
+        if (trash.getValue().getName().equals(farm.getName())) {
+          delFarm.add(farm);
+          object = farm;
+        } else {
+          for (Field field : farm.getFields()) {
+            if (trash.getValue().getName().equals(field.getName())) {
+              delField.add(field);
+              object = field;
+            } else {
+              for (Plot plot : field.getPlots()) {
+                if (trash.getValue().getName().equals(plot.getName())) {
+                  delPlot.add(plot);
+                  object = plot;
+                }
+              }
+            }
+            field.getPlots().removeAll(delPlot);
+          }
+        }
+        farm.getFields().removeAll(delField);
+      }
+      
+      // liste gelöschter farms, wird beim Speichern verarbeitet
+      gsehenInstance.getDeletedFarms().addAll(delFarm);
+      
+      logMessage(LOGGER, Level.INFO, "tree.table.item.deleted", object);
+      farmsList.removeAll(delFarm);
+      gsehenInstance.sendFarmDataChanged(object, null);
+    }
   }
 
   @SuppressWarnings("checkstyle:indentation")
@@ -860,25 +894,28 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
           for (Farm farm : farmsList) {
             if (farm.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
                 .getSelectedItem().getValue().getClass().getSimpleName().equals("Farm")) {
+              String uniqueName = gsehenInstance.uniquify(Farm.class, event.getNewValue());
               logMessage(LOGGER, Level.INFO, "cell.edit.event.farm.renamed",
-                  event.getOldValue(), event.getNewValue());
-              farm.setName(event.getNewValue());
+                  event.getOldValue(), uniqueName);
+              farm.setName(uniqueName);
               object = farm;
             }
             for (Field field : farm.getFields()) {
               if (field.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
                   .getSelectedItem().getValue().getClass().getSimpleName().equals("Field")) {
+              String uniqueName = gsehenInstance.uniquify(Field.class, event.getNewValue());
                 logMessage(LOGGER, Level.INFO, "cell.edit.event.field.renamed",
-                    event.getOldValue(), event.getNewValue());
-                field.setName(event.getNewValue());
+                    event.getOldValue(), uniqueName);
+                field.setName(uniqueName);
                 object = field;
               }
               for (Plot plot : field.getPlots()) {
                 if (plot.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
                     .getSelectedItem().getValue().getClass().getSimpleName().equals("Plot")) {
+              String uniqueName = gsehenInstance.uniquify(Plot.class, event.getNewValue());
                   logMessage(LOGGER, Level.INFO, "cell.edit.event.plot.renamed",
-                      event.getOldValue(), event.getNewValue());
-                  plot.setName(event.getNewValue());
+                      event.getOldValue(), uniqueName);
+                  plot.setName(uniqueName);
                   object = plot;
                 }
               }
@@ -977,47 +1014,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     parent.getChildren().add(item);
     item.setExpanded(true);
     return item;
-  }
-
-  /**
-   * Removes an item (and his childs) from the TreeTableView.
-   */
-  public void removeItem() {
-    List<Farm> delFarm = new ArrayList<Farm>();
-    List<Field> delField = new ArrayList<Field>();
-    List<Plot> delPlot = new ArrayList<Plot>();
-
-    Drawable object = null;
-
-    for (Farm farm : farmsList) {
-      if (trash.getValue().getName().equals(farm.getName())) {
-        delFarm.add(farm);
-        object = farm;
-      } else {
-        for (Field field : farm.getFields()) {
-          if (trash.getValue().getName().equals(field.getName())) {
-            delField.add(field);
-            object = field;
-          } else {
-            for (Plot plot : field.getPlots()) {
-              if (trash.getValue().getName().equals(plot.getName())) {
-                delPlot.add(plot);
-                object = plot;
-              }
-            }
-          }
-          field.getPlots().removeAll(delPlot);
-        }
-      }
-      farm.getFields().removeAll(delField);
-    }
-
-    // liste gelöschter farms, wird beim Speichern verarbeitet
-    gsehenInstance.getDeletedFarms().addAll(delFarm);
-
-    logMessage(LOGGER, Level.INFO, "tree.table.item.deleted", object);
-    farmsList.removeAll(delFarm);
-    gsehenInstance.sendFarmDataChanged(object, null);
   }
 
   private String getRecommendedActionText(Plot plot) {

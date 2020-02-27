@@ -17,6 +17,7 @@ public class MessageUtil {
   public static final char END_OF_I18N_DATA = '¦';
   public static final char END_OF_VALUE = '´';
   public static final String END_OF_VALUE_STR = "" + END_OF_VALUE;
+  public static final String GSEHEN_PREFIX = Gsehen.class.getPackage().getName();
 
   private static ResourceBundle logMessageBundle =
       ResourceBundle.getBundle("i18n.logmessages", Locale.ENGLISH);
@@ -140,5 +141,23 @@ public class MessageUtil {
   public static void logMessageRaw(Logger logger, Level level, String logMessage,
       Object... parameters) {
     logger.log(level, MessageFormat.format(logMessage, parameters));
+  }
+
+  /**
+   * Logs the current stack trace.
+   *
+   * @param logger the logger to use
+   * @param level the level to use
+   */
+  public static void logFilteredStackTrace(Logger logger, Level level) {
+    int i = 0;
+    for (StackTraceElement element : new Exception().getStackTrace()) {
+      if (i > 0 && element.getClassName().startsWith(GSEHEN_PREFIX)) {
+        logMessageRaw(logger, level, String.format("%4d ", i)
+            + element.getClassName() + "." + element.getMethodName()
+            + "(" + element.getFileName() + ":" + element.getLineNumber() + ")");
+      }
+      i++;
+    }    
   }
 }
