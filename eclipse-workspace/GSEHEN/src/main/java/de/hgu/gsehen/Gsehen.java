@@ -693,7 +693,7 @@ public class Gsehen extends Application {
   }
 
   private Field getNewPlotsField() {
-    String newPlotsFieldName = getSpecialName("newPlotsFieldName");
+    String newPlotsFieldName = getNewPlotsFieldName();
     Field newPlotsField = null;
     Farm farm = getNewFieldsFarm();
     for (Field field : farm.getFields()) {
@@ -710,7 +710,7 @@ public class Gsehen extends Application {
   }
 
   private Farm getNewFieldsFarm() {
-    String newFieldsFarmName = getSpecialName("newFieldsFarmName");
+    String newFieldsFarmName = getNewFieldsFarmName();
     Farm newFieldsFarm = null;
     for (Farm farm : farmsList) {
       if (farm.getName().equals(newFieldsFarmName)) {
@@ -723,6 +723,14 @@ public class Gsehen extends Application {
       farmsList.add(newFieldsFarm);
     }
     return newFieldsFarm;
+  }
+
+  public String getNewPlotsFieldName() {
+    return getSpecialName("newPlotsFieldName");
+  }
+
+  public String getNewFieldsFarmName() {
+    return getSpecialName("newFieldsFarmName");
   }
 
   private String getSpecialName(String detailKey) {

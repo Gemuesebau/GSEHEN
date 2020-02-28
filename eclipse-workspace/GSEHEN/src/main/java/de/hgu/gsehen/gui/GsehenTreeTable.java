@@ -22,6 +22,7 @@ import de.hgu.gsehen.util.LoggingList;
 import de.hgu.gsehen.util.MessageUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -33,7 +34,6 @@ import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -49,12 +49,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableColumn.CellEditEvent;
-import javafx.scene.control.TreeTablePosition;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -75,8 +75,6 @@ import javafx.util.Duration;
 public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewEvent> {
   private Gsehen gsehenInstance;
   private PlotDataController plotInstance;
-  private Farm autoFarm;
-  private Field autoField;
   protected final ResourceBundle mainBundle;
 
   private Map<Class<? extends GsehenEvent>, Class<? extends GsehenEventListener
@@ -85,12 +83,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private <T extends GsehenEvent> void setEventListenerClass(Class<T> eventClass,
       Class<? extends GsehenEventListener<T>> eventListenerClass) {
     eventListeners.put(eventClass, eventListenerClass);
-  }
-
-  @SuppressWarnings("unchecked")
-  protected <T extends GsehenEvent> Class<? extends GsehenEventListener<T>> getEventListenerClass(
-      Class<T> eventClass) {
-    return (Class<? extends GsehenEventListener<T>>) eventListeners.get(eventClass);
   }
 
   {
@@ -137,7 +129,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   private static final Logger LOGGER = Logger.getLogger(GsehenTreeTable.class.getName());
   // private static final String PLOT_RECOMMENDED_ACTION_TEXT_ID = "#plotRecommendedActionText";
 
-  private Farm farm;
   private Timeline scrolltimeline = new Timeline();
   private double scrollDirection = 0;
 
@@ -502,48 +493,47 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
   }
 
   private void deleteSelectedItem() {
-    /*
-    for (TreeTablePosition<Drawable, ?> sel : farmTreeView.getSelectionModel().getSelectedCells()) {
-      sel.getTreeItem().getValue().setName("del"); // not used?! FIXME review whole method
-    }
-    */
     trash = farmTreeView.getSelectionModel().getSelectedItem();
     if (trash != null) {
-      List<Farm> delFarm = new ArrayList<Farm>();
-      List<Field> delField = new ArrayList<Field>();
-      List<Plot> delPlot = new ArrayList<Plot>();
-      
-      Drawable object = null;
-      
-      for (Farm farm : farmsList) {
-        if (trash.getValue().getName().equals(farm.getName())) {
-          delFarm.add(farm);
-          object = farm;
-        } else {
-          for (Field field : farm.getFields()) {
-            if (trash.getValue().getName().equals(field.getName())) {
-              delField.add(field);
-              object = field;
-            } else {
-              for (Plot plot : field.getPlots()) {
-                if (trash.getValue().getName().equals(plot.getName())) {
-                  delPlot.add(plot);
-                  object = plot;
+      Drawable trashDrawable = trash.getValue();
+      if (trashDrawable != null) {
+        List<Farm> delFarm = new ArrayList<Farm>();
+        List<Field> delField = new ArrayList<Field>();
+        List<Plot> delPlot = new ArrayList<Plot>();
+
+        Drawable object = null;
+
+        for (Farm farm : farmsList) {
+          if (trashDrawable instanceof Farm
+              && trashDrawable.getName().equals(farm.getName())) {
+            delFarm.add(farm);
+            object = farm;
+          } else {
+            for (Field field : farm.getFields()) {
+              if (trashDrawable instanceof Field
+                  && trashDrawable.getName().equals(field.getName())) {
+                delField.add(field);
+                object = field;
+              } else {
+                for (Plot plot : field.getPlots()) {
+                  if (trashDrawable instanceof Plot
+                      && trashDrawable.getName().equals(plot.getName())) {
+                    delPlot.add(plot);
+                    object = plot;
+                  }
                 }
               }
+              field.getPlots().removeAll(delPlot);
             }
-            field.getPlots().removeAll(delPlot);
           }
+          farm.getFields().removeAll(delField);
         }
-        farm.getFields().removeAll(delField);
+        farmsList.removeAll(delFarm);
+        gsehenInstance.getDeletedFarms().addAll(delFarm);
+
+        logMessage(LOGGER, Level.INFO, "tree.table.item.deleted", object);
+        gsehenInstance.sendFarmDataChanged(object, null);
       }
-      
-      // liste gelöschter farms, wird beim Speichern verarbeitet
-      gsehenInstance.getDeletedFarms().addAll(delFarm);
-      
-      logMessage(LOGGER, Level.INFO, "tree.table.item.deleted", object);
-      farmsList.removeAll(delFarm);
-      gsehenInstance.sendFarmDataChanged(object, null);
     }
   }
 
@@ -694,7 +684,6 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     }
   }
 
-  @SuppressWarnings("unchecked")
   private TreeTableRow<Drawable> rowFactory(TreeTableView<Drawable> view) {
     TreeTableRow<Drawable> row = new TreeTableRow<>();
 
@@ -721,90 +710,71 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     row.setOnDragDropped(event -> {
       Dragboard db = event.getDragboard();
       if (acceptable(db, row)) {
-        int index = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
-        TreeItem<Drawable> item = farmTreeView.getTreeItem(index);
-
-        Drawable drawableItem = item.getValue();
-        String itemType = drawableItem.getClass().getSimpleName();
-
-        Drawable map = row.getTreeItem().getValue();
-        String destinationType = map.getClass().getSimpleName();
-
-        Drawable object = null;
-
+        TreeItem<Drawable> movedItem =
+            farmTreeView.getTreeItem((Integer)db.getContent(SERIALIZED_MIME_TYPE));
+        String itemType = getItemType(movedItem);
+        String destinationType = getItemType(row.getTreeItem());
         if (itemType.equals("Plot") && destinationType.equals("Field")
             || itemType.equals("Field") && destinationType.equals("Farm")) {
-
-          if (item.getParent().getValue().getName()
-              .equals(mainBundle.getString("gui.control.objectTree.newPlotsFieldName"))) {
-            autoFarm = (Farm) item.getParent().getParent().getValue();
-            autoField = (Field) item.getParent().getValue();
-          } else if (item.getParent().getValue().getName()
-              .equals(mainBundle.getString("gui.control.objectTree.newFieldsFarmName"))) {
-            autoFarm = (Farm) item.getParent().getValue();
-            autoField = (Field) item.getValue();
-          }
-
-          item.getParent().getChildren().remove(item);
-          getTarget(row).getChildren().add(item);
-          event.setDropCompleted(true);
-          farmTreeView.getSelectionModel().select(item);
-          event.consume();
-
-          logMessage(LOGGER, Level.INFO, "tree.table.item.dropped", item, getTarget(row));
-
-          Field field = null;
-          Plot plot = null;
-
-          // Updates the farmList
-          for (int i = 0; i < farmTreeView.getRoot().getChildren().size(); i++) {
-            farm = (Farm) farmTreeView.getRoot().getChildren().get(i).getValue();
-            object = farm;
-            for (int j = 0; j < farmTreeView.getRoot().getChildren().get(i).getChildren()
-                .size(); j++) {
-              field = (Field) farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
-                  .getValue();
-              object = field;
-
-              if (j == 0) {
-                farm.setFields(field);
-              } else {
-                List<Field> fields = farm.getFields();
-                fields.add(field);
-              }
-
-              for (int k = 0; k < farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
-                  .getChildren().size(); k++) {
-                plot = (Plot) farmTreeView.getRoot().getChildren().get(i).getChildren().get(j)
-                    .getChildren().get(k).getValue();
-                object = plot;
-                if (k == 0) {
-                  field.setPlots(plot);
-                } else {
-                  List<Plot> plots = farm.getFields().get(j).getPlots();
-                  plots.add(plot);
-                }
-              }
-            }
-          }
-          if (autoFarm != null || autoField.getName()
-              .equals((mainBundle.getString("gui.control.objectTree.newPlotsFieldName")))) {
-            autoFarm.getFields().remove(autoField);
-            if (autoFarm.getFields().isEmpty()) {
-              farmsList.remove(autoFarm);
-              gsehenInstance.setFarmsList(farmsList);
-            }
-            fillTreeView();
-          }
-          autoFarm = null;
-          autoField = null;
-          gsehenInstance.sendFarmDataChanged(object, null);
+          moveTreeItem(event, row, movedItem);
+          purgeSpecialItems();
+          updateObjects();
+          gsehenInstance.sendFarmDataChanged(movedItem.getValue(), null);
         } else {
           logMessage(LOGGER, Level.INFO, "tree.table.item.drop.fail", itemType, destinationType);
         }
       }
     });
+
     return row;
+  }
+
+  private String getItemType(TreeItem<Drawable> treeItem) {
+    return treeItem.getValue().getClass().getSimpleName();
+  }
+
+  private void updateObjects() {
+    for (TreeItem<Drawable> farmNode : farmTreeView.getRoot().getChildren()) {
+      List<Field> fields = ((Farm)farmNode.getValue()).getFields();
+      fields.clear();
+      for (TreeItem<Drawable> fieldNode : farmNode.getChildren()) {
+        Field field = (Field)fieldNode.getValue();
+        fields.add(field);
+        List<Plot> plots = field.getPlots();
+        plots.clear();
+        for (TreeItem<Drawable> plotNode : fieldNode.getChildren()) {
+          plots.add((Plot)plotNode.getValue());
+        }
+      }
+    }
+  }
+
+  private void purgeSpecialItems() {
+    Iterator<TreeItem<Drawable>> farmIterator = farmTreeView.getRoot().getChildren().iterator();
+    while (farmIterator.hasNext()) {
+      TreeItem<Drawable> farmNode = farmIterator.next();
+      Iterator<TreeItem<Drawable>> fieldIterator = farmNode.getChildren().iterator();
+      while (fieldIterator.hasNext()) {
+        TreeItem<Drawable> fieldNode = fieldIterator.next();
+        if (fieldNode.getValue().getName().equals(gsehenInstance.getNewPlotsFieldName())
+            && fieldNode.getChildren().isEmpty()) {
+          fieldIterator.remove();
+        }
+      }
+      if (farmNode.getValue().getName().equals(gsehenInstance.getNewFieldsFarmName())
+          && farmNode.getChildren().isEmpty()) {
+        farmIterator.remove();
+      }
+    }
+  }
+
+  private void moveTreeItem(DragEvent event, TreeTableRow<Drawable> row, TreeItem<Drawable> item) {
+    item.getParent().getChildren().remove(item);
+    getTarget(row).getChildren().add(item);
+    event.setDropCompleted(true);
+    farmTreeView.getSelectionModel().select(item);
+    event.consume();
+    logMessage(LOGGER, Level.INFO, "tree.table.item.dropped", item, getTarget(row));
   }
 
   @SuppressWarnings("rawtypes")
@@ -821,9 +791,8 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     return result;
   }
 
-  @SuppressWarnings("rawtypes")
-  private TreeItem getTarget(TreeTableRow<Drawable> row) {
-    TreeItem target = farmTreeView.getRoot();
+  private TreeItem<Drawable> getTarget(TreeTableRow<Drawable> row) {
+    TreeItem<Drawable> target = farmTreeView.getRoot();
     if (!row.isEmpty()) {
       target = row.getTreeItem();
     }
@@ -903,7 +872,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
             for (Field field : farm.getFields()) {
               if (field.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
                   .getSelectedItem().getValue().getClass().getSimpleName().equals("Field")) {
-              String uniqueName = gsehenInstance.uniquify(Field.class, event.getNewValue());
+                String uniqueName = gsehenInstance.uniquify(Field.class, event.getNewValue());
                 logMessage(LOGGER, Level.INFO, "cell.edit.event.field.renamed",
                     event.getOldValue(), uniqueName);
                 field.setName(uniqueName);
@@ -912,7 +881,7 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
               for (Plot plot : field.getPlots()) {
                 if (plot.getName().equals(event.getOldValue()) && farmTreeView.getSelectionModel()
                     .getSelectedItem().getValue().getClass().getSimpleName().equals("Plot")) {
-              String uniqueName = gsehenInstance.uniquify(Plot.class, event.getNewValue());
+                  String uniqueName = gsehenInstance.uniquify(Plot.class, event.getNewValue());
                   logMessage(LOGGER, Level.INFO, "cell.edit.event.plot.renamed",
                       event.getOldValue(), uniqueName);
                   plot.setName(uniqueName);
