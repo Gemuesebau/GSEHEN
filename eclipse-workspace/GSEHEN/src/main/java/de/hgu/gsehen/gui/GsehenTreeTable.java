@@ -54,7 +54,6 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -716,9 +715,13 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
         String destinationType = getItemType(row.getTreeItem());
         if (itemType.equals("Plot") && destinationType.equals("Field")
             || itemType.equals("Field") && destinationType.equals("Farm")) {
-          moveTreeItem(event, row, movedItem);
-          purgeSpecialItems();
-          updateObjects();
+          moveInFarmDataObjects(movedItem, getTarget(row));
+          purgeSpecialDataObjects();
+          fillTreeView();
+          event.setDropCompleted(true);
+          farmTreeView.getSelectionModel().select(movedItem); // TODO this doesn't work - re-find!
+          event.consume();
+          logMessage(LOGGER, Level.INFO, "tree.table.item.dropped", item, getTarget(row));
           gsehenInstance.sendFarmDataChanged(movedItem.getValue(), null);
         } else {
           logMessage(LOGGER, Level.INFO, "tree.table.item.drop.fail", itemType, destinationType);
@@ -729,52 +732,54 @@ public abstract class GsehenTreeTable implements GsehenEventListener<GsehenViewE
     return row;
   }
 
+  private void moveInFarmDataObjects(TreeItem<Drawable> moved, TreeItem<Drawable> target) {
+    Drawable movedDrawable = moved.getValue();
+    Drawable targetDrawable = target.getValue();
+    for (Iterator<Farm> farmIterator = farmsList.iterator(); farmIterator.hasNext(); ) {
+      Farm farm = farmIterator.next();
+      for (Iterator<Field> fieldIterator = farm.getFields().iterator(); fieldIterator.hasNext(); ) {
+        Field field = fieldIterator.next();
+        if (field.equals(movedDrawable)) {
+          fieldIterator.remove();
+          continue;
+        }
+        for (Iterator<Plot> plotIterator = field.getPlots().iterator(); plotIterator.hasNext(); ) {
+          Plot plot = plotIterator.next();
+          if (plot.equals(movedDrawable)) {
+            plotIterator.remove();
+            continue;
+          }
+        }
+      }
+    }
+    if (targetDrawable instanceof Farm && movedDrawable instanceof Field) {
+      ((Farm)targetDrawable).getFields().add((Field)movedDrawable);
+    } else {
+      if (targetDrawable instanceof Field && movedDrawable instanceof Plot) {
+        ((Field)targetDrawable).getPlots().add((Plot)movedDrawable);
+      }
+    }
+  }
+
   private String getItemType(TreeItem<Drawable> treeItem) {
     return treeItem.getValue().getClass().getSimpleName();
   }
 
-  private void updateObjects() {
-    for (TreeItem<Drawable> farmNode : farmTreeView.getRoot().getChildren()) {
-      List<Field> fields = ((Farm)farmNode.getValue()).getFields();
-      fields.clear();
-      for (TreeItem<Drawable> fieldNode : farmNode.getChildren()) {
-        Field field = (Field)fieldNode.getValue();
-        fields.add(field);
-        List<Plot> plots = field.getPlots();
-        plots.clear();
-        for (TreeItem<Drawable> plotNode : fieldNode.getChildren()) {
-          plots.add((Plot)plotNode.getValue());
-        }
-      }
-    }
-  }
-
-  private void purgeSpecialItems() {
-    Iterator<TreeItem<Drawable>> farmIterator = farmTreeView.getRoot().getChildren().iterator();
-    while (farmIterator.hasNext()) {
-      TreeItem<Drawable> farmNode = farmIterator.next();
-      Iterator<TreeItem<Drawable>> fieldIterator = farmNode.getChildren().iterator();
-      while (fieldIterator.hasNext()) {
-        TreeItem<Drawable> fieldNode = fieldIterator.next();
-        if (fieldNode.getValue().getName().equals(gsehenInstance.getNewPlotsFieldName())
-            && fieldNode.getChildren().isEmpty()) {
+  private void purgeSpecialDataObjects() {
+    String newPlotsFieldName = gsehenInstance.getNewPlotsFieldName();
+    String newFieldsFarmName = gsehenInstance.getNewFieldsFarmName();
+    for (Iterator<Farm> farmIterator = farmsList.iterator(); farmIterator.hasNext(); ) {
+      Farm farm = farmIterator.next();
+      for (Iterator<Field> fieldIterator = farm.getFields().iterator(); fieldIterator.hasNext(); ) {
+        Field field = fieldIterator.next();
+        if (field.getName().equals(newPlotsFieldName) && field.getPlots().isEmpty()) {
           fieldIterator.remove();
         }
       }
-      if (farmNode.getValue().getName().equals(gsehenInstance.getNewFieldsFarmName())
-          && farmNode.getChildren().isEmpty()) {
+      if (farm.getName().equals(newFieldsFarmName) && farm.getFields().isEmpty()) {
         farmIterator.remove();
       }
     }
-  }
-
-  private void moveTreeItem(DragEvent event, TreeTableRow<Drawable> row, TreeItem<Drawable> item) {
-    item.getParent().getChildren().remove(item);
-    getTarget(row).getChildren().add(item);
-    event.setDropCompleted(true);
-    farmTreeView.getSelectionModel().select(item);
-    event.consume();
-    logMessage(LOGGER, Level.INFO, "tree.table.item.dropped", item, getTarget(row));
   }
 
   @SuppressWarnings("rawtypes")
